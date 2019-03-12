@@ -1,0 +1,53 @@
+.nm-view {
+  .view-header {
+
+    border-bottom: 1px solid lightgray;
+    
+    .btn {
+      border-color: lightgray;
+      border-radius: 0.2rem;
+    }
+  }
+
+  .search-container {
+    .search-item{
+      padding-bottom: 5px;
+      margin-right: 2px;
+    }
+    .btn {
+      border-color: lightgray;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .dataTables_wrapper{
+    overflow: auto;
+
+    .view-table {
+      .btn {
+        border: none;
+        visibility: hidden;
+      }
+
+      .table-active {
+        .btn {
+          visibility: visible;
+        }      
+      }
+    
+      tr:hover {
+        .btn {
+          visibility: visible;
+        }      
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+}

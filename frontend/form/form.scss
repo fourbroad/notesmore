@@ -1,0 +1,37 @@
+@import '~jsoneditor/dist/jsoneditor.css';
+
+.nm-form {
+  height: calc(100vh - 250px);
+
+  .form-header {
+    border-bottom: 1px solid lightgray;
+    margin-bottom: 10px;
+    
+    h4 {
+      display: inline-block;
+    }
+
+    .btn {
+      border-color: lightgray;
+      border-radius: 0.2rem;
+    }
+  }
+
+  .domain {
+    display: block;
+    border-radius: 0.2rem;
+  }
+
+  .collection {
+    display: block;
+    border-radius: 0.2rem;
+  }
+
+  .form-toolbox {
+
+  }
+
+  .form-content {
+    height: calc(100vh - 180px);
+  }  
+}
