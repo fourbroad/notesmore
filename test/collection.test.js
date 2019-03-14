@@ -1,7 +1,7 @@
 const expect = require('chai').expect;
 
 describe('#rootDomain collection', function(){
-  var rootDomain, collection, testDomain, testCollection;
+  var rootDomain, collection, testDomain, testCollection, scrollId;
   
   before(function(done){
 	client.login("administrator","!QAZ)OKM", function(err, token){
@@ -68,7 +68,32 @@ describe('#rootDomain collection', function(){
 	  done();
 	});
   });
- 
+
+  it('Find documents with scroll.', function(done){
+  	collection.findDocuments({scroll:'200s', size:500},function (err, docs) {
+  	  if(err) return done(err)
+  	  scrollId = docs.scrollId;
+	  expect(docs).to.be.an('object');
+	  done();
+    });
+  });
+
+  it('Scroll document resutl set.', function(done){
+  	collection.scroll({scroll:'200s', scrollId: scrollId},function (err, docs) {
+  	  if(err) return done(err)
+	  expect(docs).to.be.an('object');
+	  done();
+    });
+  });
+
+  it('Clear scroll.', function(done){
+  	collection.clearScroll({scrollId: scrollId},function (err, result) {
+  	  if(err) return done(err)
+	  expect(result).to.be.an('object');
+	  done();
+    });
+  });
+
   it('Delete collection should return true', function(done){
 	collection.delete(function(err, result){
 	  if(err) return done(err);	
@@ -88,7 +113,7 @@ describe('#rootDomain collection', function(){
 });
 
 describe('#testDomain collection', function(){
-  var rootDomain, collection, testDomain, testCollection;
+  var rootDomain, collection, testDomain, testCollection, scrollId;
  
   before(function(done){
 	this.timeout(5000);
@@ -185,6 +210,32 @@ describe('#testDomain collection', function(){
 	  expect(c).to.be.an('object');
 	  done();
 	});
+  });
+
+  it('Find documents with scroll.', function(done){
+  	testCollection.findDocuments({scroll:'200s', size:500},function (err, docs) {
+  	  if(err) return done(err)
+
+  	  scrollId = docs.scrollId;
+	  expect(docs).to.be.an('object');
+	  done();
+    });
+  });
+
+  it('Scroll document resutl set.', function(done){
+  	testCollection.scroll({scroll:'200s', scrollId: scrollId},function (err, docs) {
+  	  if(err) return done(err)
+	  expect(docs).to.be.an('object');
+	  done();
+    });
+  });
+
+  it('Clear scroll.', function(done){
+  	testCollection.clearScroll({scrollId: scrollId},function (err, result) {
+  	  if(err) return done(err)
+	  expect(result).to.be.an('object');
+	  done();
+    });
   });
 	  
   it('Delete testCollection should return true', function(done){

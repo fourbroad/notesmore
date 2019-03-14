@@ -524,6 +524,13 @@ initSocket = function(socket, visitorId) {
     Document.clearScroll(params, callback);
   });
 
+  socket.on('getEvents', function(domainId, collectionId, documentId, callback){
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getEvents', function(err, document){
+      if(err) return callback && callback(err);
+      document.getEvents(callback);
+    });
+  });
+
   socket.on('getAcl', function(domainId, collectionId, documentId, callback){
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getAcl', function(err, document){
       if(err) return callback && callback(err);

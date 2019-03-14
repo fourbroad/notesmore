@@ -48,6 +48,14 @@ describe('#rootDomain', function(){
 	});
   });
 
+  it('Getting events of root domain.', function(done){
+	rootDomain.getEvents(function(err, events){
+	  if(err) return done(err);	
+      expect(events).to.be.an('object');
+      done();
+	});
+  });
+
   it('RootDomain refresh should return true', function(done){
     rootDomain.refresh(function(err, result){
 	  if(err) return done(err);	

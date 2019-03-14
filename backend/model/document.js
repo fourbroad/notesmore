@@ -3,7 +3,7 @@ module.exports = Document;
 const _ = require('lodash')
   , createError = require('http-errors')
   , jsonPatch = require('fast-json-patch')
-  , { uniqueId, documentIndex, buildMeta, recoverEntity, getEntity} = require('./utils');
+  , { uniqueId, documentIndex, eventIndex, buildMeta, recoverEntity, getEntity} = require('./utils');
 
 const DOC_TYPE = 'snapshot'
   , EVENT_TYPE = 'event';
@@ -210,6 +210,18 @@ _.assign(Document.prototype, {
       callback && callback(null, true);   
     });
     this._getCache().del(uniqueId(this.domainId, this.collectionId, this.id));
+  },
+
+  getEvents: function(callback){
+    this._getElasticSearch().search({
+      index: eventIndex(this.domainId, this.collectionId), 
+      type: EVENT_TYPE,
+      body: {
+        query:{
+          match:{id:this.id}
+        }
+      }
+    }, callback);
   },
 
   getAcl: function(callback) {

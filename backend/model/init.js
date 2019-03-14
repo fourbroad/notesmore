@@ -1881,6 +1881,7 @@ const rootEntities = [{
 },{
   "collectionId": ".users",
   "id": "administrator",
+  "title": "Administrator",
   "password": "3c3f601a1960b8d7b347d376d52b6e59",
   "_meta": {
     "acl": {
@@ -1903,6 +1904,7 @@ const rootEntities = [{
 },{
   "collectionId": ".users",  
   "id": "anonymous",
+  "title": "anonymous",
   "password": "a29b1ee7caefc17a3a73d6d137c8169b",
   "_meta": {
     "acl": {
