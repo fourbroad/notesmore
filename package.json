@@ -4,10 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "context": "webpack --config=webpack.context.js",
-    "build": "webpack --mode=production",
+    "build": "webpack --config=webpack.production.js",
     "watch": "webpack --watch",
-    "start": "webpack-dev-server --mode=development",
+    "start": "webpack-dev-server --config=webpack.development.js",
     "http-server": "http-server dist",
     "dashboard": "webpack-dashboard -t 'Project' -- webpack-dev-server",
     "preview": "webpack-dev-server --mode=production",
