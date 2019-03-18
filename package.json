@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "build": "webpack --config=webpack.production.js",
+    "context": "webpack --config=webpack.context.js",
     "watch": "webpack --watch",
     "start": "webpack-dev-server --config=webpack.development.js",
     "http-server": "http-server dist",

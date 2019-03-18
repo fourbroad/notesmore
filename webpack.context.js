@@ -40,7 +40,7 @@ module.exports = merge(common, {
           sourceMap: true,
           includePaths: [
             path.join(__dirname, 'node_modules'),
-            path.join(__dirname, 'frontend'),
+            path.join(__dirname, 'src'),
             path.join(__dirname, 'test')
           ]
         }
