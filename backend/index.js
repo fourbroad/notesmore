@@ -1,7 +1,8 @@
 
 const _ = require('lodash')
   ,  createError = require('http-errors')
-  , { Collection, Document, Domain, Form, Group, Meta, Page, Role, Profile, User, View, Utils} = require('./model')({elasticSearch: { host: 'es-cn-0pp11feta0014hcyr.elasticSearch.aliyuncs.com', httpAuth:"elastic:shoo4aiD", requestTimeout:60000}});
+  , { Collection, Document, Domain, Form, Group, Meta, Page, Role, Profile, User, View, Utils} = require('./model')({elasticSearch: { host: 'localhost:9200', requestTimeout:60000}});
+//   , { Collection, Document, Domain, Form, Group, Meta, Page, Role, Profile, User, View, Utils} = require('./model')({elasticSearch: { host: 'es-cn-0pp11feta0014hcyr.elasticSearch.aliyuncs.com', httpAuth:"elastic:shoo4aiD", requestTimeout:60000}});
 
 var io, initSocket;
 
