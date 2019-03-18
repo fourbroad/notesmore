@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentIndex, eventIndex, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, getEntity} = require('./utils');
 
 const
   PAGES = '.pages';
@@ -22,23 +22,21 @@ _.assign(Page, {
     return Page;
   },
 
-  create: function(authorId, domainId, pageId, pageData, callback){
+  create: function(authorId, domainId, pageId, pageData){
     if(!_.at(pageData, '_meta.metaId')[0]) _.set(pageData, '_meta.metaId', '.meta-page');
-    Document.create.call(this, authorId, domainId, PAGES, pageId, pageData, function(err, document){
-      if(err) return callback && callback(err);
-      Page.get(domainId, pageId, callback);
+    return Document.create.call(this, authorId, domainId, PAGES, pageId, pageData).then( document => {
+      return Page.get(domainId, pageId);
     });
   },
 
-  get: function(domainId, pageId, callback) {
-    getEntity(elasticsearch, cache, domainId, PAGES, pageId, function(err, source){
-      if(err) return callback && callback(err);
-      callback && callback(null, new Page(domainId, source));      
+  get: function(domainId, pageId) {
+    return getEntity(elasticsearch, cache, domainId, PAGES, pageId).then( source => {
+      return new Page(domainId, source);
     });
   },
 
-  find: function(domainId, query, callback){
-    Document.find.call(this, domainId, PAGES, query, callback);
+  find: function(domainId, query){
+    return Document.find.call(this, domainId, PAGES, query);
   }
 
 });
@@ -50,14 +48,6 @@ inherits(Page, Document,{
 
   _getCache: function() {
     return cache;
-  },
-
-  getIndex: function() {
-    return this.domainId + '~.pages~snapshots-1';
-  },
-
-  getEventIndex: function() {
-    return this.domainId + '~.pages~events-1';
   }
 
 });

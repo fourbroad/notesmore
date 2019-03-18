@@ -7,12 +7,20 @@ function uniqueId(domainId, collectionId, documentId){
   return domainId+'~'+collectionId+'~'+documentId;
 }
 
-function documentIndex(domainId, collectionId){
-  return domainId + '~' + collectionId + '~snapshots-1';
+function documentHotAlias(domainId, collectionId){
+  return domainId + '~' + collectionId + '~hot~snapshots';
 }
 
-function eventIndex(domainId, collectionId){
-  return domainId + '~' + collectionId + '~events-1';
+function documentAllAlias(domainId, collectionId){
+  return domainId + '~' + collectionId + '~all~snapshots';
+}
+
+function eventHotAlias(domainId, collectionId){
+  return domainId + '~' + collectionId + '~hot~events';
+}
+
+function eventAllAlias(domainId, collectionId){
+  return domainId + '~' + collectionId + '~all~events';
 }
 
 function inherits(Child, Parent, proto) {
@@ -25,37 +33,33 @@ function inherits(Child, Parent, proto) {
   return Child;
 }
 
-function getEntity(elasticsearch, cache, domainId, collectionId, documentId, callback){
+function getEntity(elasticsearch, cache, domainId, collectionId, documentId){
   var uid = uniqueId(domainId, collectionId, documentId), doc = cache.get(uid);
   if (!doc) {
-    elasticsearch.get({index: documentIndex(domainId, collectionId), type: Document.TYPE, id: documentId}, function(err, data){
-      if (err) return callback && callback(createError(400,err.toString()));
-
+    return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: Document.TYPE, id: documentId}).then( data => {
+      data._source._meta.index = data._index;
       data._source._meta.version = data._version;
       cache.set(uid, data._source);
-      callback && callback(null, data._source);
+      return data._source;
     });
   } else {
-    callback && callback(null, doc);
+    return Promise.resolve(doc);
   }
 }
 
-function buildMeta(domainId, doc, authorId, metaId, callback){
-  Meta.get(domainId, metaId, function(err, meta){
-    if(err) return callback && callback(err);
-
+function buildMeta(domainId, doc, authorId, metaId){
+  return Meta.get(domainId, metaId).then( meta => {
     var defaultAcl = _.cloneDeep(meta.acl), _meta = doc._meta || {}, timestamp = new Date().getTime();
     delete defaultAcl.create;
     _meta.acl = _.merge(defaultAcl, _.at(doc, '_meta.acl')[0]);
     _meta = _.merge(_meta, {created:timestamp, updated:timestamp, version:1});
     _meta.author = authorId;
     doc._meta = _meta;
-
-    callback && callback(null, doc);
+    return doc;
   });
 }
 
-function recoverEntity(elasticsearch, cache, authorId, document, callback){
+function recoverEntity(elasticsearch, cache, authorId, document){
   var batch = [], uid = uniqueId(document.domainId, document.collectionId, document.id);
 
   batch.push({index:{_index: document.getEventIndex(), _type: Document.EVENT_TYPE}});
@@ -70,17 +74,18 @@ function recoverEntity(elasticsearch, cache, authorId, document, callback){
   _.merge(document, {_meta:{updated: new Date().getTime(), version: document._meta.version + 1}});
   batch.push(document);
 
-  elasticsearch.bulk({body:batch}, function(err, result){
-    if(err) return callback && callback(createError(400,err));
+  return elasticsearch.bulk({body:batch}).then( result => {
     cache.set(uid, document);
-    callback && callback(null, document)              
+    return document;
   });
 }
 
 module.exports = {
   uniqueId : uniqueId,
-  documentIndex : documentIndex,
-  eventIndex : eventIndex,
+  documentHotAlias : documentHotAlias,
+  documentAllAlias: documentAllAlias,
+  eventHotAlias : eventHotAlias,
+  eventAllAlias: eventAllAlias,
   inherits : inherits,
   getEntity : getEntity,
   buildMeta : buildMeta,

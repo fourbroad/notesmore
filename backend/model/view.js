@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentIndex, eventIndex, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, getEntity} = require('./utils');
 
 const
   VIEWS = '.views';
@@ -29,23 +29,21 @@ _.assign(View, {
     return View;
   },
 
-  create: function(authorId, domainId, viewId, viewData, callback) {
+  create: function(authorId, domainId, viewId, viewData) {
     if(!_.at(viewData, '_meta.metaId')[0]) _.set(viewData, '_meta.metaId', '.meta-view');
-    Document.create.call(this, authorId, domainId, VIEWS, viewId, viewData, function(err, document){
-      if(err) return callback && callback(err);
-      View.get(domainId, viewId, callback);
+    return Document.create.call(this, authorId, domainId, VIEWS, viewId, viewData).then( document => {
+      return View.get(domainId, viewId);
     });
   },
 
-  get: function(domainId, viewId, callback) {
-    getEntity(elasticsearch, cache, domainId, VIEWS, viewId, function(err, source){
-      if(err) return callback && callback(err);
-      callback && callback(null, new View(domainId, source));      
+  get: function(domainId, viewId) {
+    return getEntity(elasticsearch, cache, domainId, VIEWS, viewId).then( source => {
+      return new View(domainId, source);
     });
   },
 
-  find: function(domainId, query, callback){
-    Document.find.call(this, domainId, VIEWS, query, callback);
+  find: function(domainId, query){
+    return Document.find.call(this, domainId, VIEWS, query);
   }
 
 });
@@ -59,25 +57,17 @@ inherits(View, Document,{
     return cache;
   },
 
-  getIndex: function() {
-    return this.domainId + '~.views~snapshots-1';
-  },
-
-  getEventIndex: function() {
-    return this.domainId + '~.views~events-1';
-  },
-
-  findDocuments: function(query, callback) {
+  findDocuments: function(query) {
     var indices = _joinIndices(this.domainId, this.collections),
         q = {
           index: indices, 
           type: Document.TYPE,
           body: query
     };
-  	this._getElasticSearch().search(q, callback);  	
+  	return this._getElasticSearch().search(q);
   },
 
-  distinctQuery: function(field, wildcard, callback) {
+  distinctQuery: function(field, wildcard) {
     var query = {
       collapse: { field: field + '.keyword' },
       aggs: {
@@ -92,11 +82,11 @@ inherits(View, Document,{
       query.query = { wildcard: {} };
       query.query.wildcard[field + ".keyword"] = wildcard;
     }
-    this.findDocuments(query, callback);
+    return this.findDocuments(query);
   },
 
-  refresh: function(callback) {
-    this._getElasticSearch().indices.refresh({ index: _joinIndices(this.domainId, this.collections) },callback);
+  refresh: function() {
+    return this._getElasticSearch().indices.refresh({ index: _joinIndices(this.domainId, this.collections) });
   }
 
 });

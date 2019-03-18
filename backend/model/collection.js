@@ -4,10 +4,63 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentIndex, eventIndex, inherits, getEntity, buildMeta} = require('./utils');
+  , {uniqueId, documentHotAlias, inherits, getEntity, buildMeta} = require('./utils');
 
 const
-  COLLECTIONS = '.collections';
+  COLLECTIONS = '.collections',
+  SNAPSHOT_TEMPLATE = {
+    "index_patterns": ["${domainId}~${collectionId}~snapshots-*"],
+    "aliases" : {
+      "${domainId}~${collectionId}~hot~snapshots" : {},
+      "${domainId}~${collectionId}~all~snapshots" : {}
+    },
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    }
+//     "mappings": {
+//       "snapshot": {
+//         "properties": {
+//           "_metadata":{
+//             "properties":{
+//               "created": {
+//                 "type": "date"
+//               },
+//               "updated": {
+//                 "type": "date"
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+  },
+  EVENT_TEMPLATE = {
+    "index_patterns": ["${domainId}~${collectionId}~events-*"],
+    "aliases" : {
+      "${domainId}~${collectionId}~hot~events" : {},
+      "${domainId}~${collectionId}~all~events" : {}
+    },      
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1
+    }
+//     "mappings": {
+//       "event": {
+//         "properties": {
+//           "_metadata":{
+//             "properties":{
+//               "created": {
+//                 "type": "date"
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+  },
+  snapshotsTemplate = _.template(JSON.stringify(SNAPSHOT_TEMPLATE)),
+  eventsTemplate = _.template(JSON.stringify(EVENT_TEMPLATE));
 
 var elasticsearch, cache;
 
@@ -23,23 +76,51 @@ _.assign(Collection, {
     return Collection;
   },
 
-  create: function(authorId, domainId, collectionId, collectionData, callback){
+  putTemplate: function(domainId, collectionId){
+    return Promise.all([
+      elasticsearch.indices.putTemplate({
+        name: domainId + '~' + collectionId + '~snapshots', 
+        body: snapshotsTemplate({domainId: domainId, collectionId: collectionId}),
+        order: 1
+      }),
+      elasticsearch.indices.putTemplate({
+        name: domainId + '~' + collectionId + '~events',
+        body:eventsTemplate({domainId: domainId, collectionId: collectionId}), 
+        order: 1
+      })
+    ]);
+  },
+
+  createIndex: function(domainId, collectionId){
+    return Promise.all([
+      elasticsearch.indices.create({index:domainId+`~`+collectionId+'~snapshots-1'}),
+      elasticsearch.indices.create({index:domainId+`~`+collectionId+'~events-1'})
+    ]);
+  },
+
+  create: function(authorId, domainId, collectionId, collectionData){
+    var self = this;
+
     if(!_.at(collectionData, '_meta.metaId')[0]) _.set(collectionData, '_meta.metaId', '.meta-collection');
-    Document.create.call(this, authorId, domainId, COLLECTIONS, collectionId, collectionData, function(err, document){
-      if(err) return callback && callback(err);
-      Collection.get(domainId, collectionId, callback);
+
+    return this.putTemplate(domainId, collectionId).then( result => {
+      self.createIndex(domainId, collectionId);
+    }).then(result =>{
+      return Document.create.call(self, authorId, domainId, COLLECTIONS, collectionId, collectionData);
+    }).then(result => {
+      return Collection.get(domainId, collectionId);
+    });
+
+  },
+
+  get: function(domainId, collectionId) {
+    return getEntity(elasticsearch, cache, domainId, COLLECTIONS, collectionId).then(source => {
+      return new Collection(domainId, source);
     });
   },
 
-  get: function(domainId, collectionId, callback) {
-    getEntity(elasticsearch, cache, domainId, COLLECTIONS, collectionId, function(err, source){
-      if(err) return callback && callback(err);
-      callback && callback(null, new Collection(domainId, source));      
-    });
-  },
-
-  find: function(domainId, query, callback){
-    Document.find.call(this, domainId, COLLECTIONS, query, callback);
+  find: function(domainId, query){
+    return Document.find.call(this, domainId, COLLECTIONS, query);
   }
 });
 
@@ -53,73 +134,48 @@ inherits(Collection, Document,{
     return cache;
   },
 
-  getIndex: function(){
-    return this.domainId + '~.collections~snapshots-1';
-  },
-
-  getEventIndex: function(){
-    return this.domainId + '~.collections~events-1';
-  },
-
-  delete: function(authorId, callback){
+  delete: function(authorId){
     var es = this._getElasticSearch(), self = this;
-    Collection.parent.delete.call(this, authorId, function(err, result){
-      if(err) return callback && callback(err);
-      es.indices.delete({ index: self.domainId + '~' + self.id + '~*' }, function(err, result){
-        if(err) return callback && callback(err);
-        callback && callback(null, true);
-      });
+    return Collection.parent.delete.call(this, authorId).then(result => {
+      return Promise.all([
+        es.indices.delete({ index: self.domainId + '~' + self.id + '~*' }),
+        es.indices.deleteTemplate({name:self.domainId + '~' + self.id +'~snapshots'}),
+        es.indices.deleteTemplate({name:self.domainId + '~' + self.id +'~events'})
+      ]);
+    }).then(result => {
+      return true;
     });
   },
 
-  create: function(authorId, domainId, collectionId, documentId, docData, callback){
-    var self = this, metaId = _.at(docData, '_meta.metaId')[0] || '.meta';
-    docData.id = documentId;
-    buildMeta(domainId, docData, authorId, metaId, function(err, docData){
-      elasticsearch.create({ index: documentIndex(domainId, collectionId), type: DOC_TYPE, id: documentId, body: docData }, function(err, result){
-        if (err) return callback && callback(createError(400,err));
-        Document.get(domainId, collectionId, documentId, function(err, document){
-          if(err) return callback && callback(err);
-          if(document._meta.version != 1){
-            recoverEntity(elasticsearch, cache, authorId, document, callback);
-          }else{
-            callback && callback(null, document);            
-          }
-        });
-        
-      });
-    });
-  },
-
-  bulk: function(authorId, docs, callback){
+  bulk: function(authorId, docs){
     var self = this, es = this._getElasticSearch(), batch = [], domainId = this.domainId, promises;
 
     if(docs.length > 1000){
       return callback && callback(createError(403, 'The number of documents submitted in batches must be less than or equal to 1000.'));
     }
 
-    promises = _.map(docs, function(doc, index){
+    return Promise.all(_.map(docs, function(doc, index){
       var metaId = _.at(doc, '_meta.metaId')[0] || '.meta';
-      return new Promise(function(resolve, reject){
-        buildMeta(domainId, doc, authorId, metaId, function(err, doc){
-          if(err) return resolve({index: index, error:err.toString()});
-          return resolve([{index:{_index: domainId + '~' + self.id + '~snapshots-1', _type: Document.TYPE, _id: doc.id || uuidv4()}}, doc]);
-        });
+      return buildMeta(domainId, doc, authorId, metaId).then( doc => {
+        return [{index:{_index: domainId + '~' + self.id + '~snapshots-1', _type: Document.TYPE, _id: doc.id || uuidv4()}}, doc];
       });
-    });
-    
-    Promise.all(promises).then(function(values) {
-      var errors = _.filter(values, function(v) { return v.error; });
-      if(errors.length > 0){
-        callback && callback(errors);
-      }else{
-        es.bulk({body: _.flatMap(values)}, callback);
-      }
+    })).then(function(values) {
+      return es.bulk({body: _.flatMap(values)});
     });
   },
 
-  refresh: function(callback){
-    this._getElasticSearch().indices.refresh({ index: this.domainId + '~' + this.id + '~*' },callback);
+  putTemplate: function(params){
+    params.name = this.domainId + '~' + this.id;
+    return this._getElasticSearch().indices.putTemplate(params);
+  },
+
+  rollover: function(params){
+    params.alias = this.domainId + '~' + this.id;
+    return this._getElasticSearch().indices.rollover(params);
+  },
+
+  refresh: function(){
+    return this._getElasticSearch().indices.refresh({ index: this.domainId + '~' + this.id + '~*' });
   }
 
 });

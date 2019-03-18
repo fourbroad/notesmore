@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentIndex, eventIndex, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, getEntity} = require('./utils');
 
 const
   PROFILES = '.profiles';
@@ -22,23 +22,21 @@ _.assign(Profile, {
     return Profile;
   },
 
-  create: function(authorId, domainId, profileId, profileData, callback) {
+  create: function(authorId, domainId, profileId, profileData) {
     if(!_.at(profileData, '_meta.metaId')[0]) _.set(profileData, '_meta.metaId', '.meta-profile');
-    Document.create.call(this, authorId, domainId, PROFILES, profileId, profileData, function(err, document){
-      if(err) return callback && callback(err);
-      Profile.get(domainId, profileId, callback);
+    return Document.create.call(this, authorId, domainId, PROFILES, profileId, profileData).then( document => {
+      return Profile.get(domainId, profileId);
     });
   },
 
-  get: function(domainId, profileId, callback) {
-    getEntity(elasticsearch, cache, domainId, PROFILES, profileId, function(err, source){
-      if(err) return callback && callback(err);
-      callback && callback(null, new Profile(domainId, source));      
+  get: function(domainId, profileId) {
+    return getEntity(elasticsearch, cache, domainId, PROFILES, profileId).then( source => {
+      return new Profile(domainId, source);
     });
   },
 
-  find: function(domainId, query, callback){
-    Document.find.call(this, domainId, PROFILES, query, callback);
+  find: function(domainId, query){
+    return Document.find.call(this, domainId, PROFILES, query);
   }
 
 });
@@ -50,14 +48,6 @@ inherits(Profile, Document,{
 
   _getCache: function() {
     return cache;
-  },
-
-  getIndex: function() {
-    return this.domainId + '~.profiles~snapshots-1';
-  },
-
-  getEventIndex: function() {
-    return this.domainId + '~.profiles~events-1';
   }
 
 });

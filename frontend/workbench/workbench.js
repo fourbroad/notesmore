@@ -70,7 +70,7 @@ $.widget('nm.workbench', {
     });
 
     // Sidebar links
-    $('.sidebar .sidebar-menu', this.element).on('click','li>a', function () {
+    $('.sidebar .sidebar-menu', this.element).on('click','li>a.document', function () {
       const $this = $(this), $parent = $this.parent(), id = $parent.attr('id');
       if ($parent.hasClass('open')) {
         $parent.children('.dropdown-menu').slideUp(200, () => {
@@ -88,13 +88,8 @@ $.widget('nm.workbench', {
       $('.sidebar').find('.sidebar-link').removeClass('active');
       $this.addClass('active');
 
-      if('.views' == id){
-        self.option('content', {col:'.views', doc: '.views'});
-      }else if($parent.hasClass('view')){
-        self.option('content', {col:'.views', doc: $parent.attr('id')});
-      }else if(id){
-        self.option('content', {col:'.pages', doc: id});
-      }
+      var paths = id.split('~');
+      self.option('content',{col: paths[0], doc: paths[1]});
     });
 
     // ٍSidebar Toggle
@@ -125,14 +120,14 @@ $.widget('nm.workbench', {
       domain.findViews({}, function(err, views){
         if(err) return console.log(err);
         _.each(views.views, function(view){
-          $(self._armViewListItem(view.id, view.title)).data('item', view).appendTo(self.$viewList);
+          $(self._armViewListItem(view.collectionId + '~' + view.id, view.title||view.id)).data('item', view).appendTo(self.$viewList);
         });
       });
     });
   },
 
   _armViewListItem: function(id, title){
-    var item = String() + '<li id="' + id + '" class="view nav-item"><a class="sidebar-link">' + title + '</a></li>'
+    var item = String() + '<li id="' + id + '" class="view nav-item"><a class="sidebar-link document">' + title + '</a></li>'
     return item;
   },
 

@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentIndex, eventIndex, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, getEntity} = require('./utils');
 
 const
   FORMS = '.forms';
@@ -22,23 +22,21 @@ _.assign(Form, {
     return Form;
   },
 
-  create: function(authorId, domainId, formId, formData, callback){
+  create: function(authorId, domainId, formId, formData){
     if(!_.at(formData, '_meta.metaId')[0]) _.set(formData, '_meta.metaId', '.meta-form');
-    Document.create.call(this, authorId, domainId, FORMS, formId, formData, function(err, document){
-      if(err) return callback && callback(err);
-      Form.get(domainId, formId, callback);
+    return Document.create.call(this, authorId, domainId, FORMS, formId, formData).then(document => {
+      return Form.get(domainId, formId);
     });
   },
 
-  get: function(domainId, formId, callback) {
-    getEntity(elasticsearch, cache, domainId, FORMS, formId, function(err, source){
-      if(err) return callback && callback(err);
-      callback && callback(null, new Form(domainId, source));      
+  get: function(domainId, formId) {
+    return getEntity(elasticsearch, cache, domainId, FORMS, formId).then( source => {
+      return new Form(domainId, source);
     });
   },
 
-  find: function(domainId, query, callback){
-    Document.find.call(this, domainId, FORMS, query, callback);
+  find: function(domainId, query){
+    return Document.find.call(this, domainId, FORMS, query);
   }
 
 });
@@ -50,14 +48,6 @@ inherits(Form, Document,{
 
   _getCache: function() {
     return cache;
-  },
-
-  getIndex: function() {
-    return this.domainId + '~.forms~snapshots-1';
-  },
-
-  getEventIndex: function() {
-    return this.domainId + '~.forms~events-1';
   }
 
 });

@@ -102,6 +102,15 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
       _doLoadDocument(client, element, domId, metaId, domain, actId, opts, callback);
     })
     break;
+  case '.collections':
+    Collection.get(domId, docId, function(err, col) {
+      if (err)
+        return callback && callback(err);
+      opts = $.extend(true, {view:col, document:col}, opts);
+      metaId = prepareMetaId(col, opts);
+      _doLoadDocument(client, element, domId, metaId, col, actId, opts, callback);
+    });
+    break;
   case '.views':
     View.get(domId, docId, function(err, view) {
       if (err)

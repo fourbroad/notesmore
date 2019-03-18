@@ -387,8 +387,10 @@ $.widget("nm.view", {
     }
 
     return {
-      query:mustArray.length > 0 ? {bool:{must:mustArray}} : {match_all:{}},
-      sort:sort,
+      body:{
+        query: mustArray.length > 0 ? {bool:{must:mustArray}} : {match_all:{}},
+        sort: sort
+      },
       from:kvMap['iDisplayStart'],
       size:kvMap['iDisplayLength']
     };

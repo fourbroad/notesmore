@@ -10,7 +10,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , SESSION_PREFIX = 'session-'
-  , {inherits, uniqueId, documentIndex, eventIndex, getEntity} = require('./utils');
+  , {inherits, uniqueId, getEntity} = require('./utils');
 
 const USERS = '.users';
 
@@ -29,89 +29,90 @@ _.assign(User, {
     return User;
   },
 
-  verify: function(token, callback) {
-    jwt.verify(token, secret, function(err, decoded){
-      var userId;
+  verify: function(token) {
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, secret, function(err, decoded){
+        var userId;
 
-      if (err){
-        return callback && callback(err);
+        if (err){
+          return reject(err);
+        }
+
+        userId = decoded.userId
+      
+        redis.get(SESSION_PREFIX + userId,function(err, data){
+          if(err || token != (data && data.token))
+            return reject(createError(406, 'Token is invalid!'));
+          return resolve(userId);
+        });
+      });  
+    });
+  },
+
+  login: function(userId, password) {
+    return new Promise((resolve, reject) => {
+      function createToken(userId){
+        var newToken = jwt.sign({ userId: userId}, secret, {expiresIn: 60*60});
+        redis.set(SESSION_PREFIX + userId, {token: newToken});
+        return resolve(newToken);
       }
 
-      userId = decoded.userId
-      
-      redis.get(SESSION_PREFIX + userId,function(err, data){
-        if(err || token != (data && data.token))
-          return callback && callback(createError(406, 'Token is invalid!'));
-
-        callback && callback(null, userId);
-      });
-    });  
+      if(userId == 'anonymous'){
+        redis.get(SESSION_PREFIX + userId, function(err, data){
+          if(err) return reject(err);
+          if(data && data.token){
+            jwt.verify(data.token, secret, function(err, decoded){
+              if(err){
+                return createToken(userId);
+              }else{
+                return resolve(data.token);
+              }
+            })
+          }else{
+            return createToken(userId);
+          }
+        })          
+      } else {
+        return User.get(userId).then( user => {
+          var md5 = crypto.createHash('md5');
+          if (md5.update(password + secret).digest('hex') == user.password) {
+            return createToken(userId);
+          } else {
+            return reject(createError(406, "Username or password is incorrect!"));
+          }
+        });
+      }
+     
+    });
   },
 
-  login: function(userId, password, callback) {
-
-    function createToken(userId, cb){
-      var newToken = jwt.sign({ userId: userId}, secret, {expiresIn: 60*60});
-      redis.set(SESSION_PREFIX + userId, {token: newToken});
-      cb && cb(null, newToken);
-    }
-
-    if(userId == 'anonymous'){
-      redis.get(SESSION_PREFIX + userId, function(err, data){
-        if(err) return callback && callback(err)
-        if(data && data.token){
-          jwt.verify(data.token, secret, function(err, decoded){
-            if(err){
-              createToken(userId, callback);
-            }else{
-              callback && callback(null, data.token);
-            }
-          })
-        }else{
-          createToken(userId, callback);
-        }
-      })          
-    } else {
-      User.get(userId, function(err, user){
-        if (err) return callback && callback(err);          
-
-        var md5 = crypto.createHash('md5');
-        if (md5.update(password + secret).digest('hex') == user.password) {
-          createToken(userId, callback);          
-        } else {
-          callback && callback(createError(406, "Username or password is incorrect!"));
-        }
-      });
-    }
-  },
-
-  logout: function(userId, callback) {
+  logout: function(userId) {
     redis.del(SESSION_PREFIX + userId);
-    callback && callback(null, true);
+    return Promise.resolve(true);
   },
 
-  create: function(authorId, userId, userData, callback) {
+  create: function(authorId, userId, userData) {
     var md5 = crypto.createHash('md5');
     if (!userId || !userData.password) {
-      return callback && callback(createError(400, "Username or password is empty!"));
+      return Promise.reject(createError(400, "Username or password is empty!"));
     }
+
     userData.password = md5.update(userData.password + secret).digest('hex');
     if(!_.at(userData, '_meta.metaId')[0]) _.set(userData, '_meta.metaId', '.meta-user');
-    Document.create.call(this, authorId, Domain.ROOT, USERS, userId, userData, function(err, document){
-      if(err) return callback && callback(err);
-      User.get(userId, callback);
+    
+    return Document.create.call(this, authorId, Domain.ROOT, USERS, userId, userData).then( document => {
+      return User.get(userId);
     });
   },
 
-  get: function(userId, callback) {
-    getEntity(elasticsearch, cache, Domain.ROOT, USERS, userId, function(err, source){
-      if(err) return callback && callback(err);
-      callback && callback(null, new User(source));
+  get: function(userId) {
+    return getEntity(elasticsearch, cache, Domain.ROOT, USERS, userId).then( source => {
+      return new User(source);
     });
   },
 
-  find: function(query, callback){
-    Document.find.call(this, Domain.ROOT, USERS, query, callback);
+  find: function(query){
+    return Document.find.call(this, Domain.ROOT, USERS, query);
   }
 
 });
@@ -125,25 +126,19 @@ inherits(User, Document,{
     return cache;
   },
 
-  getIndex: function() {
-    return 'root~.users~snapshots-1';
-  },
-
-  getEventIndex: function() {
-    return 'root~.users~events-1';
-  },
-
-  get: function(callback) {
+  get: function() {
     var userData = _.cloneDeep(this);
     delete userData.password;
-    callback && callback(null, userData);
+    return Promise.resolve(userData);
   },
 
-  resetPassword: function(authorId, newPassword, callback) {
-    var md5 = crypto.createHash('md5'), password = md5.update(newPassword + secret).digest('hex'),
+  resetPassword: function(authorId, newPassword) {
+    var self = this, md5 = crypto.createHash('md5'), password = md5.update(newPassword + secret).digest('hex'),
         patch = [{op: 'replace', path:'/password', value: password}];
-    this._doPatch({patch:patch, _meta:{author:authorId, created: new Date().getTime()}}, callback);
-    this._getCache().del(uniqueId(Domain.ROOT, USERS, this.id));      
+    return this._doPatch({patch:patch, _meta:{author:authorId, created: new Date().getTime()}}).then(result => {
+      self._getCache().del(uniqueId(Domain.ROOT, USERS, self.id));
+      return true;
+    });
   }
 
 });

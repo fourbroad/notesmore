@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentIndex, eventIndex, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, getEntity} = require('./utils');
 
 const
   ROLES = '.roles';
@@ -22,23 +22,21 @@ _.assign(Role, {
     return Role;
   },
 
-  create: function(authorId, domainId, roleId, roleData, metaId, callback) {
+  create: function(authorId, domainId, roleId, roleData, metaId) {
     if(!_.at(roleData, '_meta.metaId')[0]) _.set(roleData, '_meta.metaId', '.meta-role');
-    Document.create.call(this, authorId, domainId, ROLES, roleId, roleData, metaId, function(err, document){
-      if(err) return callback && callback(err);
-      Role.get(domainId, roleId, callback);
+    return Document.create.call(this, authorId, domainId, ROLES, roleId, roleData, metaId).then( document => {
+      return Role.get(domainId, roleId);
     });
   },
 
-  get: function(domainId, roleId, callback) {
-    getEntity(elasticsearch, cache, domainId, ROLES, roleId, function(err, source){
-      if(err) return callback && callback(err);
-      callback && callback(null, new Role(domainId, source));      
+  get: function(domainId, roleId) {
+    return getEntity(elasticsearch, cache, domainId, ROLES, roleId).then( source => {
+      return new Role(domainId, source);
     });
   },
 
-  find: function(domainId, query, callback){
-    Document.find.call(this, domainId, ROLES, query, callback);
+  find: function(domainId, query){
+    return Document.find.call(this, domainId, ROLES, query);
   }
   
 });
@@ -50,14 +48,6 @@ inherits(Role, Document,{
 
   _getCache: function() {
     return cache;
-  },
-
-  getIndex: function() {
-    return this.domainId + '~.roles~snapshots-1';
-  },
-
-  getEventIndex: function() {
-    return this.domainId + '~.roles~events-1';
   }
 
 });

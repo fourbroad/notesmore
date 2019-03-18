@@ -12,7 +12,6 @@ const _ = require('lodash')
   , Profile = require('./profile')
   , Document = require('./document')
   , Utils = require('./utils')
-  , initDomain = require('./init')
   , NodeCache = require("node-cache")
   , elasticSearch = require('elasticsearch');
 
@@ -43,12 +42,7 @@ module.exports = function (options) {
           del:function(){}
         }
 
-    esClient.get({index:'.root~.metas~snapshots-1', type:'snapshot', id: '.meta'}, function(err, metaData){
-      if(err){
-        initDomain(esClient, 'administrator');
-      }
-    });
-
+    module.Utils = Utils;
     module.User = User.init({elasticSearch: esClient, nodeCache: nodeCache, md5:{secret: secret}});
     module.Meta = Meta.init({elasticSearch: esClient, nodeCache: nodeCache});
     module.Form = Form.init({elasticSearch: esClient, nodeCache: nodeCache});
@@ -60,7 +54,11 @@ module.exports = function (options) {
     module.Profile = Profile.init({elasticSearch: esClient, nodeCache: nodeCache});
     module.Document = Document.init({elasticSearch: esClient, nodeCache: nodeCache});
     module.Collection = Collection.init({elasticSearch: esClient, nodeCache: nodeCache});
-    module.Utils = Utils;
+
+    Domain.get(Domain.ROOT).catch(()=>{
+      console.log("Root domain is initializing......!");
+      Domain.create('administrator', Domain.ROOT, {title: 'Root'}).then(result => console.log("Root domain is initialized!")).catch(err => console.log(err));
+    });
 
     return module;
 };
