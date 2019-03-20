@@ -9,8 +9,6 @@ const
 
 var io, initSocket;
 
-console.log(config.get('elasticSearch'));
-
 function filterQuery(visitorId, domainId, query){
   query = query || {body:{query:{}}};
   query.body = query.body || {};
