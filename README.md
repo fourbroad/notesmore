@@ -1,4 +1,4 @@
-# notesmore
+# Notesmore
 
 1. Notesmore Installation Guide
 
