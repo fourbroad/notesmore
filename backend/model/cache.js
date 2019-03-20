@@ -14,8 +14,8 @@
 'use strict';
 var
   redisDriver = require('redis'),
-//   redisClient = redisDriver.createClient({host:'172.16.0.30'}),
-  redisClient = redisDriver.createClient(),
+  config = require('config'),
+  redisClient = redisDriver.createClient(config.get('redis')),
   toString, del, get, set;
 // ------------- END MODULE SCOPE VARIABLES ---------------
 
