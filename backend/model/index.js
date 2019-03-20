@@ -35,7 +35,6 @@ module.exports = function (options) {
         },o.nodeCache),
         esClient = new elasticSearch.Client(o.elasticSearch),
         nodeCache = new NodeCache({stdTTL: 100, checkperiod: 120});
-
         nodeCache = {
           get:function(){return null},
           set:function(){},
@@ -55,7 +54,7 @@ module.exports = function (options) {
     module.Document = Document.init({elasticSearch: esClient, nodeCache: nodeCache});
     module.Collection = Collection.init({elasticSearch: esClient, nodeCache: nodeCache});
 
-    Domain.get(Domain.ROOT).catch(()=>{
+    Domain.get(Domain.ROOT).catch((e)=>{
       console.log("Root domain is initializing......!");
       Domain.create('administrator', Domain.ROOT, {title: 'Root'}).then(result => console.log("Root domain is initialized!")).catch(err => console.log(err));
     });

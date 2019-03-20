@@ -2,7 +2,7 @@
 const _ = require('lodash')
   , createError = require('http-errors')
   , config = require('config')
-  , model = require('./model')({elasticSearch: config.get('elasticSearch')});
+  , model = require('./model')({elasticSearch: JSON.parse(JSON.stringify(config.get('elasticSearch')))});
 
 const
   { Collection, Document, Domain, Form, Group, Meta, Page, Role, Profile, User, View, Utils} = model;
