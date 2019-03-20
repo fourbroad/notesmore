@@ -1,7 +1,10 @@
 const config = {
   elasticSearch: {
-    host: '[HOST]:[PORT]',
+    host: 'localhost:9200',
     requestTimeout: 60000
+  },
+  redis: {
+    host:'localhost'
   }
 };
 
