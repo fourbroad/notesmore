@@ -1,4 +1,7 @@
 
+const assert = require('assert');
+window.assert = assert;
+
 var client = require('../lib/client')();
 window.client = client;
 window.User = client.User;
@@ -12,6 +15,7 @@ window.Page = client.Page;
 window.Profile = client.Profile;
 window.Role = client.Role;
 window.View = client.View;
+
 
 
 var _ = require('lodash');

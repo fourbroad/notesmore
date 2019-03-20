@@ -1,31 +1,33 @@
-const 
-  expect = require('chai').expect;
-
-describe.only('#rootDomain', function(){
+const assert = require('assert');
+  
+describe('Root Domain', function(){
   var rootDomain, bulkCollection, policyCollection, document, scrollId;
+
+//    this.slow(300);
 
   before(function(done){
 	this.timeout(5000);
 	client.login("administrator","!QAZ)OKM", function(err, token){
 	  if(err) return done(err);	
-  	  expect(client).to.be.an('object');
+	  assert.deepEqual(typeof token, 'string');
 	  done();
 	});
   });
-  
-//   after(function(done){
-// 	client.logout(function(err, result){
-// 	  if(err) return done(err);	
-//   	  expect(result).to.be.ok;
-// 	  done();
-// 	});
-//   })
 
-  it('Getting rootDomain should return rootDomain', function(done){
+  beforeEach(function(done) {
     Domain.get('.root',function(err, d){
-	  if(err) return done(err);	
+      if(err) return done(err);	
       rootDomain = d
-  	  expect(rootDomain).to.be.an('object');
+      assert.deepEqual(typeof d, 'object');
+  	  done();
+  	});
+  }); 
+  
+  it('When the ID is equal to root, it returns the root domain.', function(done){
+    Domain.get('.root',function(err, d){
+      if(err) return done(err);	
+      rootDomain = d
+      assert.deepEqual(typeof d, 'object');
   	  done();
   	});
   });
@@ -34,7 +36,7 @@ describe.only('#rootDomain', function(){
   	rootDomain.hello2 = 'world2';
 	rootDomain.save(function(err, d){
 	  if(err) return done(err);	
-      expect(d).to.be.an('object');
+      assert.deepEqual(typeof d, 'object');
       done();
 	});
   });
@@ -43,7 +45,7 @@ describe.only('#rootDomain', function(){
   	delete rootDomain.hello2;
 	rootDomain.save(function(err, d){
 	  if(err) return done(err);	
-      expect(d).to.be.an('object');
+      assert.deepEqual(typeof d, 'object');
       done();
 	});
   });
@@ -51,7 +53,7 @@ describe.only('#rootDomain', function(){
   it('Getting events of root domain.', function(done){
 	rootDomain.getEvents(function(err, events){
 	  if(err) return done(err);	
-      expect(events).to.be.an('object');
+      assert.deepEqual(typeof events, 'object');
       done();
 	});
   });
@@ -60,7 +62,7 @@ describe.only('#rootDomain', function(){
   	this.timeout(10000);
 	rootDomain.createCollection("bulk", {hello:"world"}, function(err, c){
 	  if(err) return done(err);	
-   	  expect(c).to.be.an('object');
+      assert.deepEqual(typeof c, 'object');
       done();
 	});
   });
@@ -69,7 +71,7 @@ describe.only('#rootDomain', function(){
 	rootDomain.getCollection("bulk", function(err, c){
 	  if(err) return done(err);	
 	  bulkCollection = c
-   	  expect(bulkCollection).to.be.an('object');
+      assert.deepEqual(typeof c, 'object');
       done();
 	});
   });
@@ -78,7 +80,7 @@ describe.only('#rootDomain', function(){
 	bulkCollection.hello3 = "world3";
 	bulkCollection.save(function(err, c){
 	  if(err) return done(err);	
-	  expect(c).to.be.an('object');
+      assert.deepEqual(typeof c, 'object');
 	  done();
 	});
   });
@@ -87,7 +89,7 @@ describe.only('#rootDomain', function(){
   	delete bulkCollection.hello3;
 	bulkCollection.save(function(err, c){
 	  if(err) return done(err);	
-	  expect(c).to.be.an('object');
+      assert.deepEqual(typeof c, 'object');
 	  done();
 	});
   });
@@ -107,7 +109,7 @@ describe.only('#rootDomain', function(){
       }
     }), function(err, c){
 	  if(err) return done(err);	
-	  expect(c).to.be.an('object');
+      assert.deepEqual(typeof c, 'object');
 	  done();
 	});
   });
@@ -116,7 +118,7 @@ describe.only('#rootDomain', function(){
   	bulkCollection.findDocuments({scroll:'200s', size:500},function (err, docs) {
   	  if(err) return done(err)
   	  scrollId = docs.scrollId;
-	  expect(docs).to.be.an('object');
+      assert.deepEqual(typeof docs, 'object');
 	  done();
     });
   });
@@ -124,7 +126,7 @@ describe.only('#rootDomain', function(){
   it('Scroll document resutl set.', function(done){
   	bulkCollection.scroll({scroll:'200s', scrollId: scrollId},function (err, docs) {
   	  if(err) return done(err)
-	  expect(docs).to.be.an('object');
+      assert.deepEqual(typeof docs, 'object');
 	  done();
     });
   });
@@ -132,7 +134,7 @@ describe.only('#rootDomain', function(){
   it('Clear scroll.', function(done){
   	bulkCollection.clearScroll({scrollId: scrollId},function (err, result) {
   	  if(err) return done(err)
-	  expect(result).to.be.an('object');
+      assert.deepEqual(typeof result, 'object');
 	  done();
     });
   });
@@ -140,7 +142,7 @@ describe.only('#rootDomain', function(){
   it('Delete collection should return true', function(done){
 	bulkCollection.delete(function(err, result){
 	  if(err) return done(err);	
-	  expect(result).to.be.ok;
+      assert.ok(result);
 	  done();
 	});
   });  
@@ -149,27 +151,28 @@ describe.only('#rootDomain', function(){
   	this.timeout(10000);
 	rootDomain.createCollection("policies", {hello:"world"}, function(err, c){
 	  if(err) return done(err);	
-   	  expect(c).to.be.an('object');
+      assert.deepEqual(typeof c, 'object');
       done();
 	});
   });
 
   it('Getting collection should return the collection object', function(done){
-	rootDomain.getCollection("bulk", function(err, c){
+	rootDomain.getCollection("policies", function(err, c){
 	  if(err) return done(err);	
 	  policyCollection = c
-   	  expect(policyCollection).to.be.an('object');
-      done();
+      assert.deepEqual(typeof c, 'object');
+   	  done();
 	});
   });
 
-  it.only('Creating document with id should return the document object', function(done){
+  it('Creating document with id should return the document object', function(done){
+  	this.retries(3);
 	policyCollection.createDocument("helloWorld", {hello:"world"}, function(err, d){
 	  if(err) {
 	  	console.log(err);
 	  return done(err);		
 	  }
-   	  expect(d).to.be.an('object');
+      assert.deepEqual(typeof d, 'object');
       done();
 	});
   });
@@ -177,16 +180,16 @@ describe.only('#rootDomain', function(){
   it('Creating document with null id should return the document object', function(done){
 	policyCollection.createDocument({hello2:"world2"}, function(err, d){
 	  if(err) return done(err);	
-	  else expect(d).to.be.an('object');
+	  assert.deepEqual(typeof d, 'object');
       done();
 	});
   });
   
-  it.only('Getting document with id should return the document object', function(done){
+  it('Getting document with id should return the document object', function(done){
 	policyCollection.getDocument("helloWorld", function(err, d){
 	  if(err) return done(err);	
       document = d
-	  expect(document).to.be.an('object');
+      assert.deepEqual(typeof d, 'object');
       done();
 	});
   });
@@ -196,7 +199,7 @@ describe.only('#rootDomain', function(){
   	document.hello200 = 'world200';
 	document.save(function(err, d){
 	  if(err) return done(err);	
-	  expect(d).to.be.an('object');
+      assert.deepEqual(typeof d, 'object');
 	  done();
 	});
   });
@@ -206,16 +209,16 @@ describe.only('#rootDomain', function(){
   	delete document.hello200;
 	document.save(function(err, d){
 	  if(err) return done(err);	
-	  expect(d).to.be.an('object');
+      assert.deepEqual(typeof d, 'object');
 	  done();
 	});
   });
   
-  it.only('Removing document should return true', function(done){
+  it('Removing document should return true', function(done){
   	this.timeout(5000);
 	document.delete(function(err, result){
 	  if(err) return done(err);	
-	  expect(result).to.be.ok;
+	  assert.ok(result);
 	  done();
 	});
   });
@@ -223,7 +226,7 @@ describe.only('#rootDomain', function(){
   it('Delete collection should return true', function(done){
 	policyCollection.delete(function(err, result){
 	  if(err) return done(err);	
-	  expect(result).to.be.ok;
+	  assert.ok(result);
 	  done();
 	});
   });  
@@ -231,7 +234,7 @@ describe.only('#rootDomain', function(){
   it('RootDomain refresh should return true', function(done){
     rootDomain.refresh(function(err, result){
 	  if(err) return done(err);	
-      expect(result).to.be.ok;
+	  assert.ok(result);
 	  done();
 	});
   });

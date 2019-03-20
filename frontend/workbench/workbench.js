@@ -17,8 +17,6 @@ import * as jsonPatch from "fast-json-patch";
 import 'account/account';
 import Loader from 'core/loader';
 
-var client = require('../../lib/client')();
-
 import workbenchHtml from './workbench.html';
 
 $.widget('nm.workbench', {

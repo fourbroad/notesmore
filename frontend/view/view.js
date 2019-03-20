@@ -168,7 +168,18 @@ $.widget("nm.view", {
       fnServerData: function (sSource, aoData, fnCallback, oSettings ) {
         var kvMap = self._kvMap(aoData), query = self._buildSearch(kvMap);
         view.findDocuments(query, function(err, docs){
-          if(err) return console.log(err);
+          if(err) {
+            if(err.code == 401){
+              fnCallback({
+                "sEcho": kvMap['sEcho'],
+                "iTotalRecords": 0,
+                "iTotalDisplayRecords": 0,
+                "aaData": []
+              });
+            }
+            return console.log(err); 
+          }
+
           fnCallback({
             "sEcho": kvMap['sEcho'],
             "iTotalRecords": docs.total,

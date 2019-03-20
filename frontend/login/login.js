@@ -1,6 +1,8 @@
 import utils from 'core/utils';
 import validate from "validate.js";
 
+var client = require('../../lib/client')();
+
 import accountHtml from './account.html';
 
 $.widget("nm.account", {
@@ -93,7 +95,7 @@ $.widget("nm.account", {
     event.stopPropagation();
 
     o.client.logout(function(){
-      o.client.login(function(err, client){
+      Client.login(function(err, client){
         $.gevent.publish('clientChanged', client);
       });
     });
@@ -138,7 +140,7 @@ $.widget("nm.account", {
     } else {
       var loginData = validate.collectFormValues(this.$form, {trim: true});
       this._disableSubmit();
-      o.client.login(loginData.username, loginData.password, function(err, client) {
+      Client.login(loginData.username, loginData.password, function(err, client) {
         if (err) {
           self._showAlertMessage('alert-danger', err.message);
           self._enableSubmit();

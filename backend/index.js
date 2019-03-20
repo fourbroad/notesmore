@@ -1,8 +1,11 @@
 
 const _ = require('lodash')
-  ,  createError = require('http-errors')
-  , { Collection, Document, Domain, Form, Group, Meta, Page, Role, Profile, User, View, Utils} = require('./model')({elasticSearch: { host: 'localhost:9200', requestTimeout:60000}});
-//   , { Collection, Document, Domain, Form, Group, Meta, Page, Role, Profile, User, View, Utils} = require('./model')({elasticSearch: { host: 'es-cn-0pp11feta0014hcyr.elasticSearch.aliyuncs.com', httpAuth:"elastic:shoo4aiD", requestTimeout:60000}});
+  , createError = require('http-errors')
+  , config = require('config')
+  , model = require('./model')(config.get('elasticSearch'));
+
+const
+  { Collection, Document, Domain, Form, Group, Meta, Page, Role, Profile, User, View, Utils} = model;
 
 var io, initSocket;
 
@@ -20,6 +23,8 @@ function filterQuery(visitorId, domainId, query){
     should.push({bool:{must_not:{exists:{field: '_meta.acl.get'}}}});
 
     return query;
+  }).catch((err)=> {
+    return Promise.reject(createError(401, "Unauthorized access", {code:401}));
   });
 }
 
@@ -32,8 +37,10 @@ function checkPermission(visitorId, domainId, method, permissions){
     || (permissions.users && permissions.users.indexOf(visitorId) >= 0) ){
       return true;
     } else {
-      return Promise.reject(createError(401, 'Have no permission to access '+ method +'!'));
+      return Promise.reject(createError(401, "Unauthorized access", {code:401}));
     }
+  }).catch(()=> {
+    return Promise.reject(createError(401, "Unauthorized access", {code:401}));
   });
 }
 

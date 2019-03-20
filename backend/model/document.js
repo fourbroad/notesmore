@@ -3,7 +3,7 @@ module.exports = Document;
 const _ = require('lodash')
   , createError = require('http-errors')
   , jsonPatch = require('fast-json-patch')
-  , { uniqueId, documentHotAlias, documentAllAlias, eventAllAlias, buildMeta, recoverEntity, getEntity} = require('./utils');
+  , { uniqueId, documentHotAlias, documentAllAlias, eventAllAlias, buildMeta, getEntity} = require('./utils');
 
 const DOC_TYPE = 'snapshot'
   , EVENT_TYPE = 'event'
@@ -145,12 +145,12 @@ _.assign(Document.prototype, {
       return Promise.reject(e);
     }
 
-    if (this._meta.version == 1) {
+    if (this._meta.created == this._meta.updated) {
       batch.push({index:{_index: this.getEventHotAlias(), _type: EVENT_TYPE}});
       batch.push({
         id: this.id, 
         patch: [{ op: 'add', path: '', value: JSON.stringify(_.cloneDeep(this)) }],
-        version: 0,
+        version: this._meta.version - 1,
         _meta: patch._meta
       });
     }

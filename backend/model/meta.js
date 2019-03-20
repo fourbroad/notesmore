@@ -4,7 +4,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentHotAlias, inherits, getEntity, recoverEntity} = require('./utils');
+  , {uniqueId, documentHotAlias, inherits, getEntity} = require('./utils');
 
 const 
   METAS = '.metas',

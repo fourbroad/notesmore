@@ -7,6 +7,7 @@ module.exports = {
   resolve: {
     extensions: ['.webpack-loader.js', '.web-loader.js', '.loader.js', '.js'],
     alias: {
+//       config: path.resolve(__dirname, 'config'),
       frontend: path.resolve(__dirname, 'frontend'),
       test: path.resolve(__dirname, 'test')
     },    

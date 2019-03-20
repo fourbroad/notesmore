@@ -13,7 +13,7 @@ const _ = require('lodash')
   , Role = require('./role')
   , User = require('./user')
   , Document = require('./document')
-  , {uniqueId, documentHotAlias, inherits, buildMeta, getEntity, recoverEntity} = require('./utils');
+  , {uniqueId, documentHotAlias, inherits, buildMeta, getEntity} = require('./utils');
 
 const
   DOMAINS = '.domains',
@@ -417,28 +417,6 @@ _.assign(Domain, {
       return Domain.get(domainId)
     });
 
-//     var metaId = _.at(domainData, '_meta.metaId')[0] || '.meta-domain';
-//     buildMeta(Domain.ROOT, domainData, authorId, metaId, function(err, domainData){
-//       if (err) return callback && callback(err);
-//       domainData.id = domainId;
-//       elasticsearch.create({ index: documentHotAlias(ROOT, DOMAINS), type: Document.TYPE, id: domainId, body: domainData }, function(err, result){
-//         if (err) return callback && callback(err);
-//         User.get(authorId, function(err, user){
-//           if (err) return callback && callback(err);
-//           initDomain(elasticsearch, authorId, domainId, function(err, result){
-//             if (err) return callback && callback(err);
-//             Domain.get(domainId, function(err, domain){
-//               if(err) return callback && callback(err);
-//               if(domain._meta.version != 1){
-//                 recoverEntity(elasticsearch, cache, authorId, domain, callback);
-//               }else{
-//                 callback && callback(null, domain);
-//               }
-//             });
-//           })
-//         });
-//       });
-//     });
   },
 
   get: function(domainId) {

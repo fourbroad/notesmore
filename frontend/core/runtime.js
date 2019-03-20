@@ -1,5 +1,4 @@
 import Cookies from 'js-cookie';
-// import Client from 'client/client';
 import Loader from './loader';
 import jsonPatch from "fast-json-patch";
 
@@ -9,19 +8,6 @@ import 'jquery.urianchor';
 
 var client = require('../../lib/client')();
 
-window.client = client;
-window.User = client.User;
-window.Collection = client.Collection;
-window.Document = client.Document;
-window.Domain = client.Domain;
-window.Form = client.Form;
-window.Group = client.Group;
-window.Meta = client.Meta;
-window.Page = client.Page;
-window.Profile = client.Profile;
-window.Role = client.Role;
-window.View = client.View;
-      
 /**
  * NOTE: Register resize event for Masonry layout
  */
@@ -41,20 +27,13 @@ document.addEventListener('click', ()=>{
 
 $.widget('nm.runtime',{
   options:{
-    uriAnchor: {col:'.pages', doc:'.workbench'},
-    currentDomain:document.domain
+    currentDomain:document.domain,
+    uriAnchor: {col:'.pages', doc:'.workbench'}
   },
 
   _create: function(){
     var o = this.options, self = this, anchor = this._makeAnchorMap(),
-        token = Cookies.get('token') || localStorage.token,
-        userName = o.userName || Cookies.get('userName') || localStorage.userName,
-        password = o.password || Cookies.get('password') || localStorage.password,
-        anonymous = Cookies.get('anonymous') || localStorage.anonymous || true;
-
-    if(!!o.forceLogin){
-      token = null;
-    }
+        token = Cookies.get('token') || localStorage.token;
 
     function callback(err, result){
       if(err) return console.log(err);
@@ -70,14 +49,8 @@ $.widget('nm.runtime',{
 
     if(token){
       client.connect(token, callback);
-    } else if(userName && password) {
-      client.login(userName, password, callback);
-    } else if(anonymous){
-      client.login(callback);
     } else {
-      console.log("***************************************************************************************************************");
-      console.log("* Please setup userName and password using Cookies.set('userName','XXXX') and Cookies.set('password','XXXX'). *");
-      console.log("***************************************************************************************************************");
+      client.login(callback);
     }
 
     this._on({

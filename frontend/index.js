@@ -10,6 +10,20 @@ import 'calendar/calendar';
 import 'chat/chat';
 import 'email/email';
 
+const client = require('../lib/client')({host:'47.100.213.55', port:'3000'});
+
+window.client = client;
+window.User = client.User;
+window.Collection = client.Collection;
+window.Document = client.Document;
+window.Domain = client.Domain;
+window.Form = client.Form;
+window.Group = client.Group;
+window.Meta = client.Meta;
+window.Page = client.Page;
+window.Profile = client.Profile;
+window.Role = client.Role;
+window.View = client.View;
 
 var jsonPatch = require("fast-json-patch");
 var elasticsearch = require('elasticsearch-browser');
@@ -19,10 +33,17 @@ window.esc = new elasticsearch.Client({
 });
 window.jsonPatch = jsonPatch;
 
+var domain = document.domain, currentDomain = '.root', index;
+index = domain.indexOf('.notesmore.com');
+if(index >= 0){
+  currentDomain = domain.slice(0,index);
+}
+index = domain.indexOf('.notesmore.cn');
+if(index >= 0){
+  currentDomain = domain.slice(0,index);
+}
+
 $('body').runtime({
-  forceLogin:true,
-  uriAnchor: {col:'.pages', doc:'.workbench'},
-  currentDomain:'.root',
-  userName: 'administrator',
-  password: '!QAZ)OKM'
+  currentDomain:currentDomain,
+  uriAnchor: {col:'.pages', doc:'.workbench'}
 });

@@ -59,27 +59,6 @@ function buildMeta(domainId, doc, authorId, metaId){
   });
 }
 
-function recoverEntity(elasticsearch, cache, authorId, document){
-  var batch = [], uid = uniqueId(document.domainId, document.collectionId, document.id);
-
-  batch.push({index:{_index: document.getEventIndex(), _type: Document.EVENT_TYPE}});
-  batch.push({
-    id: document.id, 
-    patch: [{ op: 'replace', path: '', value: JSON.stringify(_.cloneDeep(document)) }],
-    version: document._meta.version,
-    _meta: { author:authorId, created:new Date().getTime()}
-  });
-
-  batch.push({index:{ _index: document.getIndex(), _type: Document.TYPE, _id: document.id, _version: document._meta.version }});
-  _.merge(document, {_meta:{updated: new Date().getTime(), version: document._meta.version + 1}});
-  batch.push(document);
-
-  return elasticsearch.bulk({body:batch}).then( result => {
-    cache.set(uid, document);
-    return document;
-  });
-}
-
 module.exports = {
   uniqueId : uniqueId,
   documentHotAlias : documentHotAlias,
@@ -88,6 +67,5 @@ module.exports = {
   eventAllAlias: eventAllAlias,
   inherits : inherits,
   getEntity : getEntity,
-  buildMeta : buildMeta,
-  recoverEntity : recoverEntity
+  buildMeta : buildMeta
 }
