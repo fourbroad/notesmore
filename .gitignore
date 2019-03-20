@@ -1,3 +1,4 @@
+config/local.js
 **/node_modules
 **/dist
 **/package-lock.json
