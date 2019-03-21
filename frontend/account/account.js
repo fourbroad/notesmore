@@ -1,7 +1,11 @@
 import utils from 'core/utils';
 import validate from "validate.js";
 
+var client = require('../../lib/client')();
+
 import accountHtml from './account.html';
+
+var {User} = client;
 
 $.widget("nm.account", {
   options:{
@@ -92,15 +96,15 @@ $.widget("nm.account", {
     event.preventDefault();
     event.stopPropagation();
 
-    o.client.logout(function(){
-      o.client.login(function(err, client){
+    client.logout(function(){
+     client.login(function(err, client){
         $.gevent.publish('clientChanged', client);
       });
     });
   },
 
   _refresh: function(){
-    var o = this.options, self = this, User = o.client.User;
+    var o = this.options, self = this;
     User.get(function(err, user){
       if(user.id == "anonymous"){
         self.$profileMenu.detach();
@@ -115,8 +119,6 @@ $.widget("nm.account", {
   },
 
   _onClientChanged: function(event, c){
-    var o = this.options;
-    o.client = c;
     this._refresh();
   },
 
@@ -138,7 +140,7 @@ $.widget("nm.account", {
     } else {
       var loginData = validate.collectFormValues(this.$form, {trim: true});
       this._disableSubmit();
-      o.client.login(loginData.username, loginData.password, function(err, client) {
+      client.login(loginData.username, loginData.password, function(err, client) {
         if (err) {
           self._showAlertMessage('alert-danger', err.message);
           self._enableSubmit();
