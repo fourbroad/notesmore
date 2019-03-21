@@ -21,7 +21,14 @@ npm install
 
 3) Start the webpack development environment:
 
+A) Compile context, run once at the beginning, if the Context changes, you need to run again.
+
+npm run context
+
+B) Start the development environment.
+
 npm start
+
 
 4) Open the Chrome browser and type http://localhost:8080
 

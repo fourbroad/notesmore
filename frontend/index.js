@@ -12,8 +12,8 @@ import 'email/email';
 import 'signup/signup';
 
 const client = require('../lib/client')({
-//   host:'47.100.213.55', 
-  host:'localhost', 
+  host:'47.100.213.55', 
+//   host:'localhost', 
   port:'3000'
 });
 
