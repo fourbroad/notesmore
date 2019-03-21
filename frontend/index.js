@@ -9,8 +9,13 @@ import 'dashboard/dashboard';
 import 'calendar/calendar';
 import 'chat/chat';
 import 'email/email';
+import 'signup/signup';
 
-const client = require('../lib/client')({host:'47.100.213.55', port:'3000'});
+const client = require('../lib/client')({
+//   host:'47.100.213.55', 
+  host:'localhost', 
+  port:'3000'
+});
 
 window.client = client;
 window.User = client.User;

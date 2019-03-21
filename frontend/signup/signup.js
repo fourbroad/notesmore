@@ -1,13 +1,23 @@
 import * as $ from 'jquery';
+import 'bootstrap';
+import moment from 'moment';
+
+import 'jquery-ui/ui/widget';
+import 'jquery-ui/ui/data';
+
 import signupHtml from './signup.html';
 
-var
-  init;
+$.widget('nm.signup', {
+  options: {
+    
+  },
 
-init = function () {
-  $('#mainContent').html(signupHtml);
-};
+  _create: function(){
+    var o = this.options, self = this, client = o.page.getClient();
 
-export default {
-  init: init
-}
+    this._addClass("nm-signup");
+    this.element.html(signupHtml);
+
+  }
+
+});

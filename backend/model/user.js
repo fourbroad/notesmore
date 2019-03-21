@@ -1,7 +1,7 @@
 module.exports = User;
 
 const _ = require('lodash')
-  ,  createError = require('http-errors')
+  , createError = require('http-errors')
   , Domain = require('./domain')
   , Document = require('./document')
   , crypto = require('crypto')
@@ -34,15 +34,13 @@ _.assign(User, {
       jwt.verify(token, secret, function(err, decoded){
         var userId;
 
-        if (err){
-          return reject(err);
-        }
+        if (err) return reject(err);
 
         userId = decoded.userId
       
         redis.get(SESSION_PREFIX + userId,function(err, data){
           if(err || token != (data && data.token))
-            return reject(createError(406, 'Token is invalid!'));
+            reject(createError(406, 'Token is invalid!',{code:406}));
           return resolve(userId);
         });
       });  

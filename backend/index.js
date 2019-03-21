@@ -506,9 +506,9 @@ module.exports = {
       if (token) {
         User.verify(token).then( visitorId  => {
           initSocket(socket, visitorId);
-        }).catch(()=>{
-//             socket.emit('error', err);
-            setTimeout(()=>{ socket.disconnect(); }, 3000);
+        }).catch((err)=>{
+            socket.emit('errors', err);
+//             setTimeout(()=>{ socket.disconnect(); }, 3000);
         });
       } else {
         initSocket(socket);

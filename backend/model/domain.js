@@ -196,6 +196,19 @@ const
     { id: ".meta-domain", title: "Meta-domain" },
   ],
   PAGES = [{ 
+    id: ".signup",
+    title: "Signup", 
+    _meta: {
+      actions: [{
+        label: "Signup",
+        plugin: {
+          name: "@notesabc/signup",
+          js: "@notesabc/signup/signup.bundle.js",
+          css: "@notesabc/signup/signup.bundle.css"
+        }
+      }]
+    }
+  },{
     id: ".workbench", 
     title: "Workbench", 
     _meta: {

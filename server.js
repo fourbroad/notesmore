@@ -67,6 +67,10 @@ server.on('error', function(error) {
   }
 });
 
+process.on('unhandledRejection', function (error, promise) {
+  console.error(error);
+});
+
 server.on('listening', function() {
   var addr = server.address();
   var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
