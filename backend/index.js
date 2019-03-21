@@ -5,7 +5,7 @@ const _ = require('lodash')
   , model = require('./model')({elasticSearch: JSON.parse(JSON.stringify(config.get('elasticSearch')))});
 
 const
-  { Collection, Document, Domain, Form, Group, Meta, Page, Role, Profile, User, View, Utils} = model;
+  { Collection, Document, Domain, Form, Group, Meta, Page, Action, Role, Profile, User, View, Utils} = model;
 
 var io, initSocket;
 
@@ -335,6 +335,31 @@ initSocket = function(socket, visitorId) {
   socket.on('deletePage', function(domainId, pageId, callback){
     checkAcl2(visitorId, Page, domainId, pageId, 'delete').then( page => {
       return page.delete(visitorId);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
+  socket.on('createAction', function(domainId, actionId, actionData, callback){
+    var metaId = _.at(actionData, '_meta.metaId')[0] || '.meta-action';
+    checkCreate(visitorId, domainId, metaId).then( result => {
+      return Action.create(visitorId, domainId, actionId, actionData);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
+  socket.on('getAction', function(domainId, actionId, callback){
+    checkAcl2(visitorId, Action, domainId, actionId, 'get').then( action => {
+      return action.get();
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
+  socket.on('patchAction', function(domainId, actionId, patch, callback){
+    checkAcl2(visitorId, Action, domainId, actionId, 'patch').then( action => {
+      return action.patch(visitorId, patch);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
+  socket.on('deleteAction', function(domainId, actionId, callback){
+    checkAcl2(visitorId, Action, domainId, actionId, 'delete').then( action => {
+      return action.delete(visitorId);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
 

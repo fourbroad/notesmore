@@ -17,23 +17,23 @@ const
     "settings": {
       "number_of_shards": 5,
       "number_of_replicas": 1
+    },
+    "mappings": {
+      "snapshot": {
+        "properties": {
+          "_metadata":{
+            "properties":{
+              "created": {
+                "type": "date"
+              },
+              "updated": {
+                "type": "date"
+              }
+            }
+          }
+        }
+      }
     }
-//     "mappings": {
-//       "snapshot": {
-//         "properties": {
-//           "_metadata":{
-//             "properties":{
-//               "created": {
-//                 "type": "date"
-//               },
-//               "updated": {
-//                 "type": "date"
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
   },
   EVENT_TEMPLATE = {
     "index_patterns": ["${domainId}~${collectionId}~events-*"],
@@ -44,20 +44,20 @@ const
     "settings": {
       "number_of_shards": 5,
       "number_of_replicas": 1
+    },
+    "mappings": {
+      "event": {
+        "properties": {
+          "_metadata":{
+            "properties":{
+              "created": {
+                "type": "date"
+              }
+            }
+          }
+        }
+      }
     }
-//     "mappings": {
-//       "event": {
-//         "properties": {
-//           "_metadata":{
-//             "properties":{
-//               "created": {
-//                 "type": "date"
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
   },
   snapshotsTemplate = _.template(JSON.stringify(SNAPSHOT_TEMPLATE)),
   eventsTemplate = _.template(JSON.stringify(EVENT_TEMPLATE));

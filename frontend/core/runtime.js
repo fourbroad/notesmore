@@ -100,8 +100,6 @@ $.widget('nm.runtime',{
         } 
         self._setAnchor();
       });
-    } else if(key === 'client'){
-      localStorage.setItem('token', client.getToken());
     }else if(key == 'currentDomain' && value != o.currentDomain){
       var anchor = o.uriAnchor, oldDomainId = o.currentDomain;
       Loader.loadDocument(client, this.element, value, anchor.col, anchor.doc, anchor.act, anchor._doc, function(err, doc){

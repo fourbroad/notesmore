@@ -1,3 +1,5 @@
+var {Action} = require('../../lib/client')();
+
 var identity, loadPlugin, _doLoadDocument, _armWidget, loadDocument;
 
 identity = function(name) {
@@ -23,7 +25,6 @@ loadPlugin = function(plugin, callback) {
 
 _armWidget = function(element, pluginName, opts){
   var plugin = element.data('plugin');
-
   function arm(){
     element[pluginName](opts);
     element.data('plugin', element[pluginName]('instance'))
@@ -48,26 +49,26 @@ _doLoadDocument = function(client, element, domId, metaId, doc, actId, opts, cal
     if (err)
       return console.log(err); callback && callback(err);
     
-    actions = _.unionBy(doc._meta.actions, meta.actions, 'id');
+    actions = _.union(doc._meta.actions, meta.actions);
     defaultAction = doc._meta.defaultAction || meta.defaultAction;
-    action = _.filter(actions, function(action){ return action.id==actId;})[0];
-    if(!action){
-      action = _.filter(actions, function(action){ return action.id == defaultAction;})[0];
-    }
 
-    action = action || actions[0];
-    plugin = action.plugin;
-    pluginName = plugin.name.split('/')[1];
+    actId = actId || defaultAction || actions[0];
 
-    if (!element[pluginName]) {
-      loadPlugin(plugin, function(){
+    Action.get(domId, actId, function(err, action){
+      if(err) return console.log(err); callback && callback(err);
+      plugin = action.plugin;
+      pluginName = plugin.name.split('/')[1];
+
+      if (!element[pluginName]) {
+        loadPlugin(plugin, function(){
+          _armWidget(element, pluginName,opts);
+          callback && callback(null, doc);
+        });
+      } else {
         _armWidget(element, pluginName,opts);
         callback && callback(null, doc);
-      });
-    } else {
-      _armWidget(element, pluginName,opts);
-      callback && callback(null, doc);
-    }
+      }
+    });
   });
 }
 
@@ -88,7 +89,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     Meta.get(domId, docId, function(err, meta) {
       if (err)
         return callback && callback(err);
-      opts = $.extend(true, {meta:meta}, opts);
+      opts = $.extend(true, {meta:meta, document:meta}, opts);
       metaId = prepareMetaId(meta, opts);
       _doLoadDocument(client, element, domId, metaId, meta, actId, opts, callback);
     });
@@ -97,7 +98,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     Domain.get(docId, function(err, domain) {
       if (err)
         return callback && callback(err);
-      opts = $.extend(true, {domain:domain}, opts);
+      opts = $.extend(true, {domain:domain, document:domain}, opts);
       metaId = prepareMetaId(domain, opts);
       _doLoadDocument(client, element, domId, metaId, domain, actId, opts, callback);
     })
@@ -124,7 +125,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     Page.get(domId, docId, function(err, page) {
       if (err)
         return callback && callback(err);
-      opts = $.extend(true, {page:page}, opts);
+      opts = $.extend(true, {page:page, document:page}, opts);
       metaId = prepareMetaId(page, opts);
       _doLoadDocument(client, element, domId, metaId, page, actId, opts, callback);
     });
@@ -133,7 +134,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     Form.get(domId, docId, function(err, form) {
       if (err)
         return callback && callback(err);
-      opts = $.extend(true, {form:form}, opts);
+      opts = $.extend(true, {form:form, document:form}, opts);
       metaId = prepareMetaId(form, opts);
       _doLoadDocument(client, element, domId, metaId, form, actId, opts, callback);
     });
@@ -142,7 +143,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     Role.get(domId, docId, function(err, role) {
       if (err)
         return callback && callback(err);
-      opts = $.extend(true, {role:role}, opts);
+      opts = $.extend(true, {role:role, document:role}, opts);
       metaId = prepareMetaId(role, opts);
       _doLoadDocument(client, element, domId, metaId, role, actId, opts, callback);
     });
@@ -151,7 +152,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     Group.get(domId, docId, function(err, group) {
       if (err)
         return callback && callback(err);
-      opts = $.extend(true, {group:group}, opts);
+      opts = $.extend(true, {group:group, document:group}, opts);
       metaId = prepareMetaId(group, opts);
       _doLoadDocument(client, element, domId, metaId, group, actId, opts, callback);
     });
@@ -160,7 +161,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     User.get(docId, function(err, user) {
       if (err)
         return callback && callback(err);
-      opts = $.extend(true, {user:user}, opts);
+      opts = $.extend(true, {user:user, document:user}, opts);
       metaId = prepareMetaId(user, opts);
       _doLoadDocument(client, element, domId, metaId, user, actId, opts, callback);
     });

@@ -51,11 +51,13 @@ $.widget('nm.workbench', {
       },
       'docclick': function(e, doc){
         var anchor = {col: doc.collectionId, doc: doc.id};
-        if(doc.domainId != currentDomain.id){
-          anchor.dom = doc.domainId;
+        if(anchor.col != '.pages' || anchor.doc != '.workbench'){
+          if(doc.domainId != currentDomain.id){
+            anchor.dom = doc.domainId;
+          }
+          self.option('content', anchor);
+          e.stopPropagation();
         }
-        self.option('content', anchor);
-        e.stopPropagation();
       },
       "docctrlclick": function(e, doc) {
         var anchor = {col:doc.collectionId, doc:doc.id, act:'edit'};
