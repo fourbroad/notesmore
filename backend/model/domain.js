@@ -201,44 +201,84 @@ const DOMAINS = '.domains'
   , METAS = [{
   id: ".meta",
   title: "Meta",
+  container:{
+    id: '.metas',
+    title: 'Metas'
+  },
   actions: ['edit']
 }, {
   id: ".meta-collection",
   title: "Collection",
+  container:{
+    id: '.collections',
+    title: 'Collections'
+  },
   defaultAction: 'gridView',
   actions: ['gridView', 'edit']
 }, {
   id: ".meta-page",
   title: "Page",
+  container:{
+    id: '.pages',
+    title: 'Pages'
+  },
   actions: ['edit']  
 }, {
   id: ".meta-view",
   title: "View",
+  container:{
+    id: '.views',
+    title: 'Views'
+  },
   defaultAction: "gridView",
   actions: ['gridView', 'edit']
 }, {
   id: ".meta-form",
   title: "Form",
+  container:{
+    id: '.forms',
+    title: 'Forms'
+  },
   actions: ['edit']  
 }, {
   id: ".meta-action",
   title: "Action",
+  container:{
+    id: '.actions',
+    title: 'Actions'
+  },
   actions: ['edit']  
 }, {
   id: ".meta-file",
   title: "File",
+  container:{
+    id: '.files',
+    title: 'Files'
+  },
   actions: ['edit']  
 }, {
   id: ".meta-role",
   title: "Role",
+  container:{
+    id: '.roles',
+    title: 'Roles'
+  },
   actions: ['edit']  
 }, {
   id: ".meta-group",
   title: "Group",
+  container:{
+    id: '.groups',
+    title: 'Groups'
+  },
   actions: ['edit']  
 }, {
   id: ".meta-profile",
   title: "Profile",
+  container:{
+    id: '.profiles',
+    title: 'Profiles'
+  },
   actions: ['edit']  
 }]
   , ROOT_METAS = [{

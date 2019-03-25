@@ -80,8 +80,8 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     metaId = _.at(doc, '_meta.metaId')[0];
     if (!metaId) {
       metaId = '.meta'
-      opts.document = doc;
     }
+    opts.document = doc;
     return metaId;
   }
 
@@ -209,7 +209,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
 }
 
 createDocument = function(element, meta, docData, callback){
-  var collectionId = meta.collection.id, { Action } = meta.getClient(),
+  var collectionId = meta.container.id, { Action } = meta.getClient(),
       doc, plugin, pluginName, opts = {};
   
   _.merge(docData, {_meta: {metaId: meta.id}}, _.cloneDeep(meta.defaultValue));

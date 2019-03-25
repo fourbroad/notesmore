@@ -75,6 +75,7 @@ $.widget('nm.runtime',{
         this.option('uriAnchor', anchor);
       },
       "history": function(event, history){
+        delete o.uriAnchor._doc;
         this.option('uriAnchor', $.extend(true, {}, o.uriAnchor, {_doc:history}));
       }
     });

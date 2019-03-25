@@ -140,7 +140,6 @@ $.widget('nm.workbench', {
     if(key === "content"){
       if(jsonPatch.compare(o.content, value).length > 0){
         this._loadDocument(value.dom||o.page.domainId, value.col, value.doc, value.act, value.opts, function(err, doc){
-//           self.ps.update();
           self.element.trigger("history", {content:value});
         });
         this._super(key, value);
