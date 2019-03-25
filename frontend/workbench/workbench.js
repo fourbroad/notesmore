@@ -62,11 +62,15 @@ $.widget('nm.workbench', {
       "docctrlclick": function(e, doc) {
         var anchor = {col:doc.collectionId, doc:doc.id, act:'edit'};
         if(doc.domainId != currentDomain.id){
-          anchor = doc.domainId;
+          anchor.dom = doc.domainId;
         }
         this.option('content', anchor);
         e.stopPropagation();
       },
+      "actionclick": function(e, anchor){
+        this.option('content', anchor);
+        e.stopPropagation();
+      }
     });
 
     // Sidebar links
@@ -158,7 +162,6 @@ $.widget('nm.workbench', {
     var self = this;
     import(/* webpackChunkName: "new-dialog" */ 'new-dialog/new-dialog').then(({default: nd}) => {
       $('<div/>').newdialog({
-        $container: self.$mainContent.empty(),
         domain: currentDomain
       }).newdialog('show');
     });

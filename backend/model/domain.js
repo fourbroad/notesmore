@@ -120,6 +120,7 @@ const DOMAINS = '.domains'
   title: "Edit(Json)",
   plugin: {
     name: "@notesabc/form",
+    mode: 'offline',
     js: "@notesabc/form/form.bundle.js",
     css: "@notesabc/form/form.bundle.css"
   }
@@ -128,6 +129,7 @@ const DOMAINS = '.domains'
   title: "Grid View",
   plugin: {
     name: "@notesabc/view",
+    mode: 'offline',
     js: "@notesabc/view/view.bundle.js",
     css: "@notesabc/view/view.bundle.css"
   }
@@ -136,6 +138,7 @@ const DOMAINS = '.domains'
   title: 'Signup',
   plugin: {
     name: "@notesabc/signup",
+    mode: 'offline',
     js: "@notesabc/signup/signup.bundle.js",
     css: "@notesabc/signup/signup.bundle.css"
   }
@@ -144,6 +147,7 @@ const DOMAINS = '.domains'
   title: "Workbench",
   plugin: {
     name: "@notesabc/workbench",
+    mode: 'offline',
     js: "@notesabc/workbench/workbench.bundle.js",
     css: "@notesabc/workbench/workbench.bundle.css"
   }
@@ -153,6 +157,7 @@ const DOMAINS = '.domains'
   title: 'Dashboard',
   plugin: {
     name: "@notesabc/dashboard",
+    mode: 'offline',
     js: "@notesabc/dashboard/dashboard.bundle.js",
     css: "@notesabc/dashboard/dashboard.bundle.css"
   }
@@ -161,6 +166,7 @@ const DOMAINS = '.domains'
   title: "Calendar",
   plugin: {
     name: "@notesabc/calendar",
+    mode: 'offline',
     js: "@notesabc/calendar/calendar.bundle.js",
     css: "@notesabc/calendar/calendar.bundle.css"
   }
@@ -169,6 +175,7 @@ const DOMAINS = '.domains'
   title: "Chat",
   plugin: {
     name: "@notesabc/chat",
+    mode: 'offline',
     js: "@notesabc/chat/chat.bundle.js",
     css: "@notesabc/chat/chat.bundle.css"
   }
@@ -177,6 +184,7 @@ const DOMAINS = '.domains'
   title: "Email",
   plugin: {
     name: "@notesabc/email",
+    mode: 'offline',
     js: "@notesabc/email/email.bundle.js",
     css: "@notesabc/email/email.bundle.css"
   }
@@ -185,6 +193,7 @@ const DOMAINS = '.domains'
   title: "Upload Files",
   plugin: {
     name: "@notesabc/uploadfiles",
+    mode: 'offline',
     js: "@notesabc/upload-files/upload-files.bundle.js",
     css: "@notesabc/upload-files/upload-files.bundle.css"
   }
@@ -195,50 +204,50 @@ const DOMAINS = '.domains'
   actions: ['edit']
 }, {
   id: ".meta-collection",
-  title: "Meta-collection",
+  title: "Collection",
   defaultAction: 'gridView',
   actions: ['gridView', 'edit']
 }, {
   id: ".meta-page",
-  title: "Meta-page",
+  title: "Page",
   actions: ['edit']  
 }, {
   id: ".meta-view",
-  title: "Meta-view",
+  title: "View",
   defaultAction: "gridView",
   actions: ['gridView', 'edit']
 }, {
   id: ".meta-form",
-  title: "Meta-form",
+  title: "Form",
   actions: ['edit']  
 }, {
   id: ".meta-action",
-  title: "Meta-Action",
+  title: "Action",
   actions: ['edit']  
 }, {
   id: ".meta-file",
-  title: "Meta-file",
+  title: "File",
   actions: ['edit']  
 }, {
   id: ".meta-role",
-  title: "Meta-role",
+  title: "Role",
   actions: ['edit']  
 }, {
   id: ".meta-group",
-  title: "Meta-group",
+  title: "Group",
   actions: ['edit']  
 }, {
   id: ".meta-profile",
-  title: "Meta-profile",
+  title: "Profile",
   actions: ['edit']  
 }]
   , ROOT_METAS = [{
   id: ".meta-user",
-  title: "Meta-user",
+  title: "User",
   actions: ['edit']  
 }, {
   id: ".meta-domain",
-  title: "Meta-domain",
+  title: "Domain",
   actions: ['edit']  
 }, ]
   , PAGES = [{

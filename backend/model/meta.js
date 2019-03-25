@@ -26,10 +26,10 @@ const
     delete: {
       roles: ["administrator"]
     },
-    getAcl: {
+    getMeta: {
       roles: ["administrator"]
     },
-    patchAcl: {
+    patchMeta: {
       roles: ["administrator"]
     },
     clearAclSubject: {

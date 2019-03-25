@@ -26,6 +26,10 @@ import 'full-text/full-text';
 import './view.scss';
 import viewHtml from './view.html';
 
+var client = require('../../lib/client')();
+
+const {Action} = client;
+
 $.widget("nm.view", {
 
   options:{
@@ -114,13 +118,11 @@ $.widget("nm.view", {
   _refresh: function(){
     var o = this.options, self = this, view = o.view;
     this.$viewTitle.html(view.title||view.id);
+
     view.columns = view.columns || [{title: "Id", name: "id", data: "id", className: "id"}];
     view.searchColumns = view.searchColumns || [{title: "Id", name: "id", type: "keywords"}];
 
-    $.each(view._meta.actions, $.proxy(function(i, action){
-      var $li = $('<li class="dropdown-item"></li>').html(action.label).appendTo(this.$actionMoreMenu).data('action', action);
-      this._on($li, {click:this._onLoadAction});
-    }, this));
+    Loader.armActions(client, view, this.$actionMoreMenu);
 
     this._refreshHeader();
     this._initSearchBar();
@@ -193,7 +195,7 @@ $.widget("nm.view", {
 
   _onLoadAction: function(e){
     var o = this.options, view = o.view, $li = $(e.target), action = $li.data('action');
-    this.element.trigger('actionclick', {dom: view.getDomainId(), col: view.getCollectionId(), doc: view.id, act:action.id});    
+    this.element.trigger('actionclick', {dom: view.domainId, col: view.collectionId, doc: view.id, act:action.id});    
   },
 
   _initSearchBar: function(){
@@ -396,7 +398,7 @@ $.widget("nm.view", {
       }
       sort = sort.reverse();
     }
-
+    
     return {
       body:{
         query: mustArray.length > 0 ? {bool:{must:mustArray}} : {match_all:{}},
@@ -410,6 +412,7 @@ $.widget("nm.view", {
   _showDocMenu: function($dropdownMenu, doc){
     $dropdownMenu.empty();
     $('<li class="dropdown-item delete"><span>Delete</span></li>').appendTo($dropdownMenu);
+    Loader.armActions(client, doc, $dropdownMenu);
   },
 
   _setRowActive: function($row){

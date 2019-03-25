@@ -1,7 +1,13 @@
+
 import Loader from 'core/loader';
 import Masonry from 'masonry-layout';
 
 import newDialogHtml from './new-dialog.html';
+
+const client = require('../../lib/client')()
+      , uuidv4 = require('uuid/v4');
+
+const { Meta } = client;
 
 $.widget('nm.newdialog', {
   options: {},
@@ -15,70 +21,51 @@ $.widget('nm.newdialog', {
     
     this.element.appendTo('body').modal({show:false});
 
-    this.$formGrid = $('.masonry', this.element);
+    this.$metaGrid = $('.masonry', this.element);
     this.$createBtn = $('button.create', this.element);
 
-    this.masonry = new Masonry(this.$formGrid.get(0), {
+    this.masonry = new Masonry(this.$metaGrid.get(0), {
       itemSelector: '.masonry-item',
       columnWidth: '.masonry-sizer',
       percentPosition: true,
     });
 
     this.element.on('shown.bs.modal', function (e) {
-      $('.masonry-item', self.$formGrid).remove();
-      o.domain.findForms({}, function(err, forms){
+      $('.masonry-item', self.$metaGrid).remove();
+      Meta.find(currentDomain.id, {size:1000}, function(err, result){
         if(err) return console.log(err);
-        var $items = _.reduce(forms.forms, function(items, form){
+        var $items = _.reduce(result.metas, function(items, meta){
           var item = $('<div class="masonry-item col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">'
-                      +'<div class="form p-10 bd">'
-                        +'<img class="form-img" alt="Form image">'
-                        +'<h6 class="c-grey-900">' + (form.title||form.id) +'</h6>'
+                      +'<div class="meta p-10 bd">'
+                        +'<img class="meta-img" alt="Form image">'
+                        +'<h6 class="c-grey-900">' + (meta.title||meta.id) +'</h6>'
                       +'</div>'
-                    +'</div>').data('item',form);
+                    +'</div>').data('item',meta);
           return items.add(item);
         },$());
 
-        self.$formGrid.append($items);
+        self.$metaGrid.append($items);
         self.masonry.appended($items);
         self.masonry.layout();
-
-//         $(window).trigger('hashchange');
       });
     });
 
-    this._on(this.$formGrid, {
-      'click .form': function(e){
-        var form = $(e.currentTarget).parent('.masonry-item').data('item');
-        Loader.load(form.plugin, function(module){
-          o.$container.jsonform({
-            client: o.client,
-            form: form,
-            document: {}
-          });
-        });
+    this._on(this.$metaGrid, {
+      'click .meta': function(e){
+        $('.masonry-item.selected', this.$metaGrid).removeClass('selected');
+        $(e.currentTarget).parent('.masonry-item').addClass('selected');
       }
     });
 
-    this._on(this.$createBtn, {utap: this._onCreate});
-  },
-
-  createDocument: function(form){
-    var o = this.options;
-    Loader.load(form.plugin, function(module){
-      o.$container.jsonform({
-        client: o.client,
-        form: form,
-        document: {}
-      });
-    });
+    this._on(this.$createBtn, {'click': this._onCreate});
   },
 
   getSelected: function(){
-    return $('.masonry-item.selected', $formGrid).data('item');
+    return $('.masonry-item.selected', this.$metaGrid).data('item');
   },
 
   _onCreate: function(e){
-    this.createDocument(getSelected());
+    this.element.trigger('createdocument', this.getSelected(), {id: uuidv4()});
   },
 
   show: function(){

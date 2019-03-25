@@ -1,6 +1,7 @@
 module.exports = Document;
 
 const _ = require('lodash')
+  , uuidv4 = require('uuid/v4')
   , createError = require('http-errors')
   , jsonPatch = require('fast-json-patch')
   , { uniqueId, documentHotAlias, documentAllAlias, eventAllAlias, buildMeta, getEntity} = require('./utils');
@@ -12,10 +13,10 @@ const DOC_TYPE = 'snapshot'
       roles: ["administrator"]
     },
     delete: {},
-    getAcl: {
+    getMeta: {
       roles: ["administrator"]
     },
-    patchAcl: {
+    patchMeta: {
       roles: ["administrator"]
     },
     clearAclSubject: {
@@ -54,7 +55,7 @@ function Document(domainId, collectionId, docData) {
       value: this._meta,
       writable: true,
       enumerable: true,
-      configurable: false
+      configurable: true
     }
   });
 }
@@ -212,18 +213,16 @@ _.assign(Document.prototype, {
     });
   },
 
-  getAcl: function() {
-    return Promise.resolve(this._meta.acl);
+  getMeta: function() {
+    return Promise.resolve(this._meta);
   },
 
-
-  patchAcl: function(authorId, aclPatch) {
+  patchMeta: function(authorId, metaPatch) {
     var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id);
-    _.each(aclPatch, function(p){ p.path = "/_meta/acl" + p.path; });
-    return this._doPatch({patch: aclPatch, _meta:{author: authorId, created: new Date().getTime()}}).then(result => {
-      return self._meta.acl;
-    }).finally(()=>{
+    _.each(metaPatch, function(p){ p.path = "/_meta" + p.path; });
+    return this._doPatch({patch: metaPatch, _meta:{author: authorId, created: new Date().getTime()}}).then(result => {
       self._getCache().del(uid);
+      return self._meta;
     });
   },
 
@@ -254,9 +253,8 @@ _.assign(Document.prototype, {
     patch = jsonPatch.compare({_meta:{acl:this._meta.acl}}, {_meta:{acl:acl}});
 
     return this._doPatch({patch: patch, _meta:{author: authorId, created: new Date().getTime()}}).then( result => {
-      return self._meta.acl;
-    }).finally(()=>{
       self._getCache().del(uid);
+      return self._meta.acl;
     });
   },
 

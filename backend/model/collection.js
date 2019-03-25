@@ -21,7 +21,7 @@ const
     "mappings": {
       "snapshot": {
         "properties": {
-          "_metadata":{
+          "_meta":{
             "properties":{
               "created": {
                 "type": "date"
@@ -48,7 +48,7 @@ const
     "mappings": {
       "event": {
         "properties": {
-          "_metadata":{
+          "_meta":{
             "properties":{
               "created": {
                 "type": "date"

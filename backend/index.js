@@ -102,7 +102,7 @@ initSocket = function(socket, visitorId) {
   socket.on('getMeta', function(domainId, metaId, callback){
     checkAcl2(visitorId, Meta, domainId, metaId, 'get').then( meta => {
       return meta.get();
-    }).then(result => callback(null, result)).catch(err => callback(err));
+    }).then(result => callback(null, result)).catch(err => { callback(err);});
   });
 
   socket.on('patchMeta', function(domainId, metaId, patch, callback){
@@ -116,6 +116,12 @@ initSocket = function(socket, visitorId) {
       return meta.delete(visitorId);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });  
+
+  socket.on('findMetas', function(domainId, query, callback){
+    filterQuery(visitorId, domainId, query).then( query => {
+      return Meta.find(domainId, query);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
 
   socket.on('createUser', function(userId, userData, callback){
     var metaId = _.at(userData, '_meta.metaId')[0] || '.meta-user';
@@ -154,6 +160,12 @@ initSocket = function(socket, visitorId) {
   socket.on('resetPassword', function(userId, newPassword, callback){
     checkAcl1(visitorId, User, userId, 'resetPassword').then( user => {
       return user.resetPassword(visitorId, newPassword);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
+  socket.on('findUsers', function(domainId, query, callback){
+    filterQuery(visitorId, domainId, query).then( query => {
+      return User.find(domainId, query);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
 
@@ -363,6 +375,12 @@ initSocket = function(socket, visitorId) {
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
 
+  socket.on('findActions', function(domainId, query, callback){
+    filterQuery(visitorId, domainId, query).then( query => {
+      return Action.find(domainId, query);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
   socket.on('createRole', function(domainId, roleId, roleData, callback){
     var metaId = _.at(roleData, '_meta.metaId')[0] || '.meta-role';
     checkCreate(visitorId, domainId, metaId).then( result => {
@@ -501,15 +519,15 @@ initSocket = function(socket, visitorId) {
     });
   });
 
-  socket.on('getAcl', function(domainId, collectionId, documentId, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getAcl').then( document => {
-      return document.getAcl();
+  socket.on('getDocumentMeta', function(domainId, collectionId, documentId, callback){
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getMeta').then( document => {
+      return document.getMeta();
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
 
-  socket.on('patchAcl', function(domainId, collectionId, documentId, aclPatch, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patchAcl').then( document => {
-      return document.patchAcl(visitorId, aclPatch);
+  socket.on('patchDocumentMeta', function(domainId, collectionId, documentId, aclPatch, callback){
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patchMeta').then( document => {
+      return document.patchMeta(visitorId, aclPatch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
 

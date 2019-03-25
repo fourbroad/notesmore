@@ -54,6 +54,9 @@ $.widget('nm.runtime',{
     }
 
     this._on({
+      "createdocument": function(event, meta, docData){
+        this.createDocument(meta, docData);
+      },
       "docclick": function(event, doc) {
         var anchor = {col:doc.collectionId, doc:doc.id};
         if(doc.domainId != o.currentDomain){
@@ -121,6 +124,10 @@ $.widget('nm.runtime',{
     if(actId) anchor.act = actId;
     if(!$.isEmptyObject(opts)) anchor._doc = opts;
     this.option('uriAnchor', anchor);
+  },
+
+  createDocument: function(meta, docData){
+    Loader.createDocument(this.element, meta, docData);
   },
 
   _setAnchor: function(){
