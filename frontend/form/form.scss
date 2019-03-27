@@ -5,7 +5,7 @@
 
   .form-header {
     border-bottom: 1px solid lightgray;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     
     h4 {
       display: inline-block;
@@ -14,6 +14,10 @@
     .btn {
       border-color: lightgray;
       border-radius: 0.2rem;
+    }
+
+    .btn.more {
+      z-index: 8;
     }
   }
 
@@ -32,6 +36,6 @@
   }
 
   .form-content {
-    height: calc(100vh - 180px);
-  }  
+    height: calc(100vh - 265px);
+  }
 }

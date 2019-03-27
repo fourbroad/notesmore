@@ -201,6 +201,9 @@ const DOMAINS = '.domains'
   , METAS = [{
   id: ".meta",
   title: "Meta",
+  defaultValue:{
+    title: "New Meta"
+  },
   container:{
     id: '.metas',
     title: 'Metas'
@@ -213,11 +216,23 @@ const DOMAINS = '.domains'
     id: '.collections',
     title: 'Collections'
   },
+  defaultValue:{
+    title: "New Collection",
+    columns: DEFAULT_COLUMNS,
+    searchColumns: DEFAULT_SEARCH_COLUMNS,
+    search: {
+      names: ["id.keyword", "title.keyword", "_meta.author.keyword"]
+    },
+    order: "[[5,\"desc\"],[4,\"desc\"]]"
+  },
   defaultAction: 'gridView',
   actions: ['gridView', 'edit']
 }, {
   id: ".meta-page",
   title: "Page",
+  defaultValue:{
+    title: "New Page"
+  },
   container:{
     id: '.pages',
     title: 'Pages'
@@ -226,15 +241,29 @@ const DOMAINS = '.domains'
 }, {
   id: ".meta-view",
   title: "View",
+  defaultValue:{
+    title: "New View"
+  },
   container:{
     id: '.views',
     title: 'Views'
+  },
+  defaultValue:{
+    columns: DEFAULT_COLUMNS,
+    searchColumns: DEFAULT_SEARCH_COLUMNS,
+    search: {
+      names: ["id.keyword", "title.keyword", "_meta.author.keyword"]
+    },
+    order: "[[5,\"desc\"],[4,\"desc\"]]"
   },
   defaultAction: "gridView",
   actions: ['gridView', 'edit']
 }, {
   id: ".meta-form",
   title: "Form",
+  defaultValue:{
+    title: "New Form"
+  },
   container:{
     id: '.forms',
     title: 'Forms'
@@ -243,6 +272,9 @@ const DOMAINS = '.domains'
 }, {
   id: ".meta-action",
   title: "Action",
+  defaultValue:{
+    title: "New Action"
+  },
   container:{
     id: '.actions',
     title: 'Actions'
@@ -251,6 +283,9 @@ const DOMAINS = '.domains'
 }, {
   id: ".meta-file",
   title: "File",
+  defaultValue:{
+    title: "New File"
+  },
   container:{
     id: '.files',
     title: 'Files'
@@ -259,6 +294,9 @@ const DOMAINS = '.domains'
 }, {
   id: ".meta-role",
   title: "Role",
+  defaultValue:{
+    title: "New Role"
+  },
   container:{
     id: '.roles',
     title: 'Roles'
@@ -267,6 +305,9 @@ const DOMAINS = '.domains'
 }, {
   id: ".meta-group",
   title: "Group",
+  defaultValue:{
+    title: "New Group"
+  },
   container:{
     id: '.groups',
     title: 'Groups'
@@ -275,6 +316,9 @@ const DOMAINS = '.domains'
 }, {
   id: ".meta-profile",
   title: "Profile",
+  defaultValue:{
+    title: "New Profile"
+  },
   container:{
     id: '.profiles',
     title: 'Profiles'
@@ -284,10 +328,24 @@ const DOMAINS = '.domains'
   , ROOT_METAS = [{
   id: ".meta-user",
   title: "User",
+  container:{
+    id: '.users',
+    title: 'Users'
+  },
+  defaultValue:{
+    title: "New User"
+  },
   actions: ['edit']  
 }, {
   id: ".meta-domain",
   title: "Domain",
+  container:{
+    id: '.domains',
+    title: 'Domains'
+  },
+  defaultValue:{
+    title: "New Domain"
+  },
   actions: ['edit']  
 }, ]
   , PAGES = [{
@@ -341,7 +399,7 @@ const DOMAINS = '.domains'
 }
   , ANONYMOUS = {
   id: "anonymous",
-  title: "anonymous",
+  title: "Anonymous",
   password: "a29b1ee7caefc17a3a73d6d137c8169b"
 };
 

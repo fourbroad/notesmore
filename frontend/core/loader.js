@@ -52,8 +52,8 @@ _doLoadDocument = function(client, element, domId, metaId, doc, actId, opts, cal
 
     actions = _.union(doc._meta.actions, meta.actions);
     defaultAction = doc._meta.defaultAction || meta.defaultAction;
-
     actId = actId || defaultAction || actions[0];
+    opts.actionId = actId;
 
     Action.get(domId, actId, function(err, action) {
       if (err) return callback && callback(err);
@@ -258,8 +258,9 @@ createDocument = function(element, meta, docData, callback){
     default:
       doc = new Document(meta.domainId, collectionId, docData);
   }
-  _.forOwn(doc.old,function(v,k){delete doc.old[k]});
+
   opts.document = doc;
+  opts.isNew = true;
 
   Action.get(meta.domainId, meta.defaultAction || meta.actions[0], function(err, action) {
     if (err) return callback && callback(err);
@@ -279,31 +280,32 @@ createDocument = function(element, meta, docData, callback){
   });
 }
 
-armActions = function(client, doc, container) {
+armActions = function(client, doc, container, currentActionId) {
   const { Action } = client;
   function armItems(domainId, actIds) {
     Action.mget(doc.domainId, actIds, function(err, result) {
       if (err)
         return console.log(err);
       $.each(result.actions, function(i, action) {
-        var $li = $('<li class="dropdown-item"></li>').html(action.title).appendTo(container).data('action', action)
-          , mode = action.plugin.mode || 'inline';
-        $li.on('click', function() {
-          if ('offline' == mode) {
-            $li.trigger('actionclick', {
-              dom: doc.domainId,
-              col: doc.collectionId,
-              doc: doc.id,
-              act: action.id
-            });
-          } else if ('inline' == mode) {
-            (function() {
-              eval(action.plugin.js);
-              action(doc);
+        if(action.id != currentActionId){
+          var $li = $('<li class="dropdown-item"></li>').html(action.title).appendTo(container).data('action', action)
+          ,   mode = action.plugin.mode || 'inline';
+          $li.on('click', function() {
+            if ('offline' == mode) {
+              $li.trigger('actionclick', {
+                dom: doc.domainId,
+                col: doc.collectionId,
+                doc: doc.id,
+                act: action.id
+              });
+            } else if ('inline' == mode) {
+              (function() {
+                eval(action.plugin.js);
+                action(doc);
+              })();
             }
-            )();
-          }
-        });
+          });
+        }
       });
     });
   }

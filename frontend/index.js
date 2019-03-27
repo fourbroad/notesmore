@@ -4,12 +4,12 @@ import 'font-awesome/scss/font-awesome.scss';
 import 'core/runtime';
 import 'workbench/workbench';
 import 'view/view';
-import 'form/form';
 import 'dashboard/dashboard';
 import 'calendar/calendar';
 import 'chat/chat';
 import 'email/email';
 import 'signup/signup';
+import 'form/form';
 
 const client = require('../lib/client')({
 //   host:'47.100.213.55', 

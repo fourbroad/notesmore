@@ -33,6 +33,7 @@ $.widget('nm.workbench', {
     this._addClass("nm-workbench");
     this.element.html(workbenchHtml);
 
+    this.$workbench = $(".workbench", this.element);
     this.$mainContent = $("#mainContent", this.element);
  
     this.ps = new PerfectScrollbar($('.scrollable', this.element)[0],{suppressScrollX:true, wheelPropagation: true});
@@ -43,7 +44,7 @@ $.widget('nm.workbench', {
     $('<li/>').appendTo($('.page-container .nav-right', this.element)).account({client: client});
 
     this._on(this.$newDocumentBtn, {click: this._loadNewDialog});
-    this._on(this.$mainContent, {
+    this._on(this.$workbench, {
       'click .search-toggle': function(e){
         $('.search-box, .search-input', self.element).toggleClass('active');
         $('.search-input input', self.element).focus();
@@ -69,6 +70,10 @@ $.widget('nm.workbench', {
       },
       "actionclick": function(e, anchor){
         this.option('content', anchor);
+        e.stopPropagation();
+      },
+      "createdocument li.new-document": function(e, meta, docData){
+        Loader.createDocument(this.$mainContent, meta, docData)
         e.stopPropagation();
       }
     });
@@ -161,6 +166,7 @@ $.widget('nm.workbench', {
     var self = this;
     import(/* webpackChunkName: "new-dialog" */ 'new-dialog/new-dialog').then(({default: nd}) => {
       $('<div/>').newdialog({
+        $anchor: this.$newDocumentBtn,
         domain: currentDomain
       }).newdialog('show');
     });

@@ -11,7 +11,6 @@ import 'jquery.urianchor';
 import 'datatables.net-bs4';
 import 'datatables.net-bs4/css/dataTables.bootstrap4.css';
 
-// import * as jsonPatch from 'fast-json-patch';
 var jsonPatch = require('fast-json-patch');
 import validate from "validate.js";
 
@@ -28,11 +27,12 @@ import viewHtml from './view.html';
 
 var client = require('../../lib/client')();
 
-const {Action} = client;
+const {Action, Collection} = client;
 
 $.widget("nm.view", {
 
   options:{
+    isNew: false,
     constraints: {
       title: {
         presence: true
@@ -46,11 +46,14 @@ $.widget("nm.view", {
     this._addClass('nm-view', 'container-fluid');
     this.element.html(viewHtml);
     
+    if(!o.isNew){
+      this.clone = _.cloneDeep(o.view);      
+    }
+    
     this.$viewContainer = $('.view-container', this.element);
     this.$viewHeader = $('.view-header', this.element);
     this.$actions = $('.actions', this.$viewHeader);
     this.$actionMoreMenu = $('.more>.dropdown-menu', this.$actions);
-    this.$itemSaveAs = $('.dropdown-item.save-as', this.$actionMoreMenu);
     this.$saveBtn =$('.save.btn', this.$actions);
     this.$cancelBtn = $('.cancel.btn', this.$actions);
 
@@ -84,9 +87,12 @@ $.widget("nm.view", {
     this.$viewContainer.on('click','table.view-table li.dropdown-item', function(evt){
       var $this = $(this), $tr = $this.parents('tr'), v = self.table.row($tr).data();
       v.delete(function(err, result){
-        setTimeout(function(){
-          self.table.draw(false);
-        }, 1000);
+        Collection.get(v.domainId, v.collectionId, function(err, collection){
+          if(err) return console.log(err);
+          collection.refresh(function(err, result){
+            self.table.draw(false);
+          });
+        })
       });
 
       evt.stopPropagation();
@@ -106,24 +112,26 @@ $.widget("nm.view", {
     this.$saveAsModel.on('shown.bs.modal', function () {
       self.$titleInput.val('');
       self.$titleInput.trigger('focus')
-    })    
+    }) 
 
+    this._on(this.$actionMoreMenu, {'click li.dropdown-item.save-as': this._onItemSaveAs});   
     this._on(this.$saveBtn, {click: this.save});
-    this._on(this.$itemSaveAs, {click: this._onItemSaveAs});
     this._on(this.$cancelBtn, {click: this._onCancel});
     this._on(this.$submitBtn, {click: this._onSubmit});
     this._on(this.$form, {submit: this._onSubmit});
   },
 
+  _armActionMoreMenu: function(){
+    var o = this.options;
+    this.$actionMoreMenu.empty();
+    $('<li class="dropdown-item save-as">Save as ...</li>').appendTo(this.$actionMoreMenu);
+    Loader.armActions(client, o.view, this.$actionMoreMenu, o.actionId);
+  },
+
   _refresh: function(){
     var o = this.options, self = this, view = o.view;
     this.$viewTitle.html(view.title||view.id);
-
-    view.columns = view.columns || [{title: "Id", name: "id", data: "id", className: "id"}];
-    view.searchColumns = view.searchColumns || [{title: "Id", name: "id", type: "keywords"}];
-
-    Loader.armActions(client, view, this.$actionMoreMenu);
-
+    this._armActionMoreMenu();
     this._refreshHeader();
     this._initSearchBar();
 
@@ -319,8 +327,12 @@ $.widget("nm.view", {
     }
   },
 
-  _isDirty: function(){    
-    return this.options.view.isDirty();
+  _getPatch: function(){
+    return jsonPatch.compare(this.clone,  this.options.view);
+  },
+
+  _isDirty: function(){
+    return this.options.isNew || this._getPatch().length > 0
   },
 
   _searchColumnType: function(name){
@@ -412,7 +424,7 @@ $.widget("nm.view", {
   _showDocMenu: function($dropdownMenu, doc){
     $dropdownMenu.empty();
     $('<li class="dropdown-item delete"><span>Delete</span></li>').appendTo($dropdownMenu);
-    Loader.armActions(client, doc, $dropdownMenu);
+    Loader.armActions(client, doc, $dropdownMenu, this.options.actionId);
   },
 
   _setRowActive: function($row){
@@ -461,22 +473,26 @@ $.widget("nm.view", {
   },
 
   save: function(){
-    var o = this.options, view = o.view, self = this;
-    view.save(function(err, view){
-      if(err) return console.log(err);
-      self._refreshHeader();
-    });
-  },
+    var o = this.options, self = this;
+    if(this._isDirty()){
+      o.view.patch(this._getPatch(), function(err, view){
+        if(err) return console.log(err);
+        o.view = view;
+        self.clone = _.cloneDeep(view);
+        self._refreshHeader();
+      });
+    }
+  },  
 
   _onCancel: function(){
-    var o = this.options, self = this, view = o.view;
+    var o = this.options, self = this;
 
-    view.cancel();
+    o.view = this.clone;
 
     this._refreshHeader();
     this._initSearchBar();
 
-    _.each(view.searchColumns, function(sc){
+    _.each(o.view.searchColumns, function(sc){
       switch(sc.type){
         case 'keywords':
           self.table.column(sc.name+':name')
@@ -503,6 +519,11 @@ $.widget("nm.view", {
       || value.collectionId != o.view.collectionId
       || value.id != o.view.id )){
       this._super(key, value);
+
+      if(!o.isNew){
+        this.clone = _.cloneDeep(o.view);      
+      }
+
       this._refresh();
       return;
     }

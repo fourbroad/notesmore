@@ -7,21 +7,7 @@ $.widget("nm.select", {
   options:{
     mode: 'single',
     classes: {},
-    selectedItems: [],
-    constraints: {
-      lowestValue: {
-        numericality: function(value, attributes, attributeName, options, constraints) {
-          if(!attributes.highestValue) return null;
-          return {lessThanOrEqualTo: Number(attributes.highestValue)};
-        }
-      },
-      highestValue: {
-        numericality: function(value, attributes, attributeName, options, constraints) {
-          if(!attributes.lowestValue) return null;
-          return {greaterThanOrEqualTo: Number(attributes.lowestValue)};
-        }
-      }
-    }
+    selectedItems: []
   },
 
   _create: function() {
@@ -63,29 +49,7 @@ $.widget("nm.select", {
       }
     });
 
-    this._on(this.$clearLink, {
-      'click': function(event){
-        if(!this.$clearLink.hasClass('disabled') && o.selectedItems.length > 0){
-          if(o.mode === 'multi'){
-            $('li>.fa-li.fa-check-square', this.$itemContainer).removeClass('fa-check-square').addClass('fa-square');
-          }else{
-            $('li>.fa-li.fa-check-circle', this.$itemContainer).removeClass('fa-check-circle').addClass('fa-circle');
-          }
-          o.selectedItems = [];
-          this._refresh();
-          this._fetchMenuItems();
-          this._trigger('valueChanged', event, {selectedItems: o.selectedItems});
-        }
-      }
-    });
-
-//     this._on({
-//       'show.bs.dropdown':function () {
-//         this.$input.val('');
-//         this._setSearchIcon();
-//         this._fetchMenuItems();
-//       }
-//     });
+    this._on(this.$clearLink, { 'click': this._onClear });
 
     this.element.on('show.bs.dropdown', function () {
       self.$input.val('');
@@ -130,6 +94,27 @@ $.widget("nm.select", {
         $(e.target).parent('li').click();
       }
     });
+  },
+
+  _onClear: function(e){
+    if(!this.$clearLink.hasClass('disabled')){
+      this.clear();
+    }    
+  },
+
+  clear: function(){
+    var o = this.options;
+    if(o.selectedItems.length > 0){
+      if(o.mode === 'multi'){
+        $('li>.fa-li.fa-check-square', this.$itemContainer).removeClass('fa-check-square').addClass('fa-square');
+      }else{
+        $('li>.fa-li.fa-check-circle', this.$itemContainer).removeClass('fa-check-circle').addClass('fa-circle');
+      }
+      o.selectedItems = [];
+      this._refresh();
+      this._fetchMenuItems();
+      this._trigger('valueChanged', event, {selectedItems: o.selectedItems});
+    }        
   },
 
   _onSearchInputChange: function(){
@@ -222,5 +207,14 @@ $.widget("nm.select", {
   _refresh: function(){
     this._refreshClearLink();
     this._refreshButton();
+  },
+
+  _setOption: function( key, value ) {
+    var o = this.options;
+    this._super( key, value );
+    if ( key == "selectedItems" ) {
+      this._refresh();      
+    }
   }
+    
 });

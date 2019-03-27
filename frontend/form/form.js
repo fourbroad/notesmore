@@ -1,25 +1,33 @@
-import * as $ from 'jquery';
+const $ = require('jquery')
+  , _ = require('lodash')
+  , moment = require('moment')
+  , validate = require("validate.js")
+  , jsonPatch = require("fast-json-patch")
+  , uuidv4 = require('uuid/v4')
+  , Loader = require('core/loader')
+  , formHtml = require('./form.html')
+  , ace = require('brace') ;
 
-import 'bootstrap';
-import _ from 'lodash';
-import moment from 'moment';
+require('select/select');
+require('./form.scss');
+require('bootstrap');
+require('jquery-ui/ui/widget');
+require('jquery-ui/ui/data');
 
-import 'jquery-ui/ui/widget';
-import 'jquery-ui/ui/data';
-import 'jquery.urianchor';
+require('brace/mode/json');
+require('brace/theme/iplastic');
+require('brace/ext/searchbox');
+// require('brace/ext/error_marker');
+// require('brace/ext/beautify');
+// require('brace/ext/keybinding_menu');
+// require('brace/ext/linking');
+// require('brace/ext/statusbar');
 
-import validate from "validate.js";
-import jsonPatch from "fast-json-patch";
-import uuidv4 from 'uuid/v4';
-import JSONEditor from 'jsoneditor/dist/jsoneditor';
-
-import 'select/select'
-
-import './form.scss';
-import formHtml from './form.html';
 
 $.widget("nm.form", {
+
   options:{
+    isNew: false,
     constraints:{}
   },
 
@@ -29,18 +37,17 @@ $.widget("nm.form", {
     this._addClass('nm-form', 'container-fluid');
     this.element.html(formHtml);
 
+    if(!o.isNew){
+      this.clone = _.cloneDeep(o.document);
+    }
+
     this.$formHeader = $('.form-header', this.element),
     this.$actions = $('.actions', this.$formHeader);
     this.$actionMoreMenu = $('.more>.dropdown-menu', this.$actions);
-    this.$itemSaveAs = $('.dropdown-item.save-as', this.$actionMoreMenu);
     this.$saveBtn =$('.save.btn', this.$actions);
     this.$cancelBtn = $('.cancel.btn', this.$actions);
-
     this.$formTitle = $('h4', this.$formHeader),
-    this.$formTitle.html(o.document.title||o.document.id);
-
     this.$formContent = $('.form-content', this.element),
-
     this.$saveAsModel = $('#save-as', this.$formHeader);
     this.$titleInput = $('input[name="title"]', this.$saveAsModel),
     this.$formTag = $('form.save-as', this.$saveAsModel),
@@ -51,94 +58,49 @@ $.widget("nm.form", {
     this.$submitBtn = $('.btn.submit', this.$saveAsModel),
     this.$toolbox = $('.form-toolbox', this.$form),
 
-    this.jsonEditor = new JSONEditor(this.$formContent.get(0), {
-      mode: 'code',
-      modes: ['code', 'form', 'text', 'tree', 'view'], // allowed modes
-      onEditable: function (node) {
-        switch (node.field) {
-          case 'id':
-            return false;
-          case 'title':
-            return {
-              field: false,
-              value: true
-            };
-          default:
-            return true;
-        }
-      },
-      onChangeText: function (jsonString) {
-        var json = null;
-        try {json = self.jsonEditor.get()}catch(e){}
+    this.jsonEditor = ace.edit(this.$formContent.get(0));
+    this.jsonEditor.$blockScrolling = Infinity
+    this.jsonEditor.setTheme('ace/theme/iplastic');
+    this.jsonEditor.getSession().setMode('ace/mode/json');
+    this.jsonEditor.getSession().setOptions({
+      tabSize:2
+    });
+
+    this.jsonEditor.setValue(JSON.stringify(o.document, null, 2), -1);
+    this.jsonEditor.clearSelection();
+    this.enableChange = true;
+    this.jsonEditor.getSession().on('change', function(delta) {
+      if(self.enableChange){
+        var json;
+        try { json =  JSON.parse(self.jsonEditor.getValue()); }catch(e){}
         if(json){
           o.document.replace(json);
           self._refreshHeader();
         }
-      },
-      onError: function (err) { console.log(err.toString());},
-      onModeChange: function (newMode, oldMode) {
-        console.log('Mode switched from', oldMode, 'to', newMode);
       }
-    }, o.document);
-
-    this._refreshHeader();
-
-    this.$saveAsModel.on('show.bs.modal', function () {
-      if(!self.$domain.data("nm-select")){
-        self.$domain.select({
-          title: 'domain',
-          mode: 'single',
-          menuItems: function(filter, callback){
-            client.Domain.find({}, function(err, domains){
-              if(err) return console.log(err);
-              var items = _.map(domains.domains, function(domain){
-                return {label:domain['title']||domain['id'], value:domain['id']};
-              });
-              callback(items);
-            });
-          },
-          onValueChanged: function(){
-            self.collectionSelect.reset();
-          }
-        });
-      }
-      
-      if(!self.$collection.data('nm-select')){
-        self.$collection.select({
-          title: 'collection',
-          mode: 'single',
-          menuItems: function(filter, callback){
-            var selectedDomains = self.$domain.select('option', 'selectedItems');
-            if(selectedDomains[0]){
-              client.Domain.get(selectedDomains[0].value, function(err, domain){
-                domain.findCollections({}, function(err, collections){
-                  if(err) return console.log(err);
-                  var items = _.map(collections.collections, function(collection){
-                    return {label:collection['title']||collection['id'], value:collection['id']};
-                  });
-                  callback(items);
-                });
-              });
-            }else{
-              callback([]);
-            }
-          }
-        });        
-      }
-
-      self.$id.val(uuidv4());
     });
 
+    this.$saveAsModel.on('show.bs.modal', $.proxy(this._onShowSaveAsModel, this));
     this.$saveAsModel.on('shown.bs.modal', function () {
       self.$titleInput.val('');
-      self.$titleInput.trigger('focus')
+      self.$titleInput.trigger('focus');
     });
 
-    this._on(this.$saveBtn, {click: this.save});
-    this._on(this.$itemSaveAs, {click: this._onItemSaveAs});
+    this._on(this.$actionMoreMenu, {'click li.dropdown-item.save-as': this._onSaveAs});
+    this._on(this.$saveBtn, {click: this._onSave});
     this._on(this.$cancelBtn, {click: this._onCancel});
     this._on(this.$submitBtn, {click: this._onSubmit});
     this._on(this.$formTag, {submit: this._onSubmit});
+
+    this._refresh();
+    this.jsonEditor.focus();
+  },
+
+  _refresh: function(){
+    var o = this.options;
+    this.$formTitle.html(o.document.title||o.document.id);
+    this._armActionMoreMenu();
+    this._refreshHeader();
   },
 
   _refreshHeader: function(){
@@ -146,6 +108,11 @@ $.widget("nm.form", {
     this.$formTitle.html(doc.title||doc.id);    
 
     if(this._isDirty()){
+      if(o.isNew){
+        this.$saveBtn.html("Save as...");
+      } else {
+        this.$saveBtn.html("Save");        
+      }
       this.$saveBtn.show();
       this.$cancelBtn.show();
     }else{
@@ -154,17 +121,31 @@ $.widget("nm.form", {
     }
   },
 
+  _getPatch: function(){
+    return jsonPatch.compare(this.clone,  this.options.document);
+  },
+
   _isDirty: function(){
+    return this.options.isNew || this._getPatch().length > 0
+  },
+
+  _onSave: function(e){
     var o = this.options;
-    return o.document.isDirty();
+    if(o.isNew){
+      this._onSaveAs();
+    }else{
+      this.save();
+    }
   },
 
   save: function(){
     var o = this.options, self = this;
     if(this._isDirty()){
-      o.document.save(function(err, result){
+      o.document.patch(this._getPatch(), function(err, document){
         if(err) return console.log(err);
-        self._refreshHeader();
+        o.document = document;
+        self.clone = _.cloneDeep(document);
+        self._refresh();
       });
     }
   },
@@ -179,34 +160,108 @@ $.widget("nm.form", {
           domainId = this.$domain.select('option','selectedItems')[0].value, 
           collectionId = this.$collection.select('option','selectedItems')[0].value;
       client.Domain.get(domainId, function(err1, domain){
+        if(err1) return console.log(err1);
         domain.getCollection(collectionId, function(err2, collection){
+          if(err2) return console.log(err2);
           delete docInfo.id;
           docInfo.title = values.title;
           collection.createDocument(values.id, docInfo, function(err3, doc){
             if(err3) return console.log(err3);
+            o.isNew = false;
+            o.document = doc;
+            self.clone = _.cloneDeep(doc);
+            self._setJsonEditorValue();
+            self._refresh();
             self.$saveAsModel.modal('toggle');
-            self.option('document', doc);
           });
         });
       });
     }
   },
 
-  _onItemSaveAs: function(evt){
+  _onShowSaveAsModel: function(e){
+    var o = this.options, self = this, client = o.document.getClient(), {Domain, Collection} = client;
+    if(!this.$domain.data("nm-select")){
+      this.$domain.select({
+        title: 'domain',
+        mode: 'single',
+        menuItems: function(filter, callback){
+          client.Domain.find({size:100}, function(err, domains){
+            if(err) return console.log(err);
+            var items = _.map(domains.domains, function(domain){
+              return {label:domain['title']||domain['id'], value:domain['id']};
+            });
+            callback(items);
+          });
+        },
+        valueChanged: function(){
+          self.collectionSelect.clear();
+        }
+      });
+    }
+      
+    if(!this.$collection.data('nm-select')){
+      this.$collection.select({
+        title: 'collection',
+        mode: 'single',
+        menuItems: function(filter, callback){
+          var selectedDomains = self.$domain.select('option', 'selectedItems');
+          if(selectedDomains[0]){
+            client.Domain.get(selectedDomains[0].value, function(err, domain){
+              domain.findCollections({size:100}, function(err, collections){
+                if(err) return console.log(err);
+                var items = _.map(collections.collections, function(collection){
+                  return {label:collection['title']||collection['id'], value:collection['id']};
+                });
+                callback(items);
+              });
+            });
+          }else{
+            callback([]);
+          }
+        },
+        create: function(){
+          self.collectionSelect = self.$collection.select('instance');           
+        }
+      });
+    }
+
+    this.$id.val(uuidv4());
+
+    Domain.get(o.document.domainId, function(err, domain){
+      if(err) return console.log(err);
+      Collection.get(domain.id, o.document.collectionId, function(err, collection){
+        if(err) return console.log(err);
+        self.$domain.select('option', 'selectedItems', [{label: domain.title||domain.id, value:domain.id}]);
+        self.$collection.select('option', 'selectedItems', [{label: collection.title||collection.id, value:collection.id}]);
+      });
+    });
+  },
+
+  _armActionMoreMenu: function(){
+    var o = this.options, client = o.document.getClient();
+    this.$actionMoreMenu.empty();
+    $('<li class="dropdown-item save-as">Save as ...</li>').appendTo(this.$actionMoreMenu);
+    Loader.armActions(client, o.document, this.$actionMoreMenu, o.actionId);
+  },
+
+  _onSaveAs: function(evt){
     this.$saveAsModel.modal('toggle');
   },
 
   _onCancel: function(){
     var o = this.options;
-    o.document.cancel();
-    this.jsonEditor.set(o.document);
-    this._refreshHeader();
+    if(o.isNew){
+      $(window).trigger('hashchange');
+    }else{
+      o.document = this.clone;
+      this._setJsonEditorValue();    
+    }
   },
 
   _onSubmit: function(evt){
     evt.preventDefault();
     evt.stopPropagation();
-
     this.saveAs();
   },
 
@@ -214,9 +269,19 @@ $.widget("nm.form", {
     var o = this.options;
     this._super( key, value );
     if ( key === "document" ) {
-      this.jsonEditor.set(o.document);
-      this._refreshHeader();
+      this.clone = _.cloneDeep(o.document);
+      this._setJsonEditorValue();
     }
+  },
+
+  _setJsonEditorValue(){
+    var o = this.options;
+    this.enableChange = false;
+    this.jsonEditor.setValue(JSON.stringify(o.document, null, 2), -1);
+    this.jsonEditor.clearSelection();
+    this.jsonEditor.focus();
+    this.enableChange = true;
+    this._refresh();
   },
 
   _destroy: function(){
