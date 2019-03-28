@@ -5,8 +5,6 @@ import moment from 'moment';
 
 import 'jquery-ui/ui/widget';
 import 'jquery-ui/ui/data';
-import 'jquery.event.gevent';
-import 'jquery.event.ue';
 import 'jquery.urianchor';
 
 import PerfectScrollbar from 'perfect-scrollbar';
@@ -21,14 +19,14 @@ import workbenchHtml from './workbench.html';
 
 $.widget('nm.workbench', {
   options: {
-    content:{
+    anchor:{
       col: '.pages',
       doc: '.dashboard'
     }
   },
 
   _create: function(){
-    var o = this.options, self = this, client = o.page.getClient(), c = o.content, Domain = client.Domain;
+    var o = this.options, self = this, client = o.page.getClient(), anchor = o.anchor, Domain = client.Domain;
 
     this._addClass("nm-workbench");
     this.element.html(workbenchHtml);
@@ -50,13 +48,32 @@ $.widget('nm.workbench', {
         $('.search-input input', self.element).focus();
         e.preventDefault();
       },
+      "createdocument": function(e, domainId, metaId){
+        var anchor = {col:'.metas', doc: metaId, act: 'new'}
+        if(domainId != o.page.domainId){
+          anchor.dom = domainId
+        }
+        self.option('anchor', anchor);
+        e.stopPropagation();
+      },
+      'documentcreated': function(e, doc, isNew){
+        var anchor = {col: doc.collectionId, doc: doc.id};
+        if(doc.domainId != o.page.domainId){
+          anchor.dom = doc.domainId;
+        }
+
+        this.options.anchor = anchor;
+        this.element.trigger("history", [{anchor:anchor}, isNew]);
+
+        e.stopPropagation();
+      },
       'docclick': function(e, doc){
         var anchor = {col: doc.collectionId, doc: doc.id};
         if(anchor.col != '.pages' || anchor.doc != '.workbench'){
-          if(doc.domainId != currentDomain.id){
+          if(doc.domainId != o.page.domainId){
             anchor.dom = doc.domainId;
           }
-          self.option('content', anchor);
+          self.option('anchor', anchor);
           e.stopPropagation();
         }
       },
@@ -65,15 +82,11 @@ $.widget('nm.workbench', {
         if(doc.domainId != currentDomain.id){
           anchor.dom = doc.domainId;
         }
-        this.option('content', anchor);
+        this.option('anchor', anchor);
         e.stopPropagation();
       },
       "actionclick": function(e, anchor){
-        this.option('content', anchor);
-        e.stopPropagation();
-      },
-      "createdocument li.new-document": function(e, meta, docData){
-        Loader.createDocument(this.$mainContent, meta, docData)
+        this.option('anchor', anchor);
         e.stopPropagation();
       }
     });
@@ -98,7 +111,7 @@ $.widget('nm.workbench', {
       $this.addClass('active');
 
       var paths = id.split('~');
-      self.option('content',{col: paths[0], doc: paths[1]});
+      self.option('anchor',{col: paths[0], doc: paths[1]});
     });
 
     // ٍSidebar Toggle
@@ -119,15 +132,19 @@ $.widget('nm.workbench', {
       }, 300);
     });
 
-    this._loadDocument(c.dom||o.page.domainId, c.col, c.doc, c.act, c.opts, function(err, doc){
-      self.element.trigger("history", {content:c});
-    });
-
-    $.gevent.subscribe(this.element, 'clientChanged',  $.proxy(this._onClientChanged, this));
+    function callback(err, doc){
+      if(err) return console.error(err);
+      self.element.trigger("history", {anchor: anchor});
+    }
+    if(anchor.col == '.metas' && anchor.act == 'new'){
+      this._createDocument(anchor.dom||o.page.domainId, anchor.doc, callback);
+    }else{
+      this._loadDocument(anchor.dom||o.page.domainId, anchor.col, anchor.doc, anchor.act, anchor.opts, callback);
+    }
 
     Domain.get(o.page.domainId, function(err, domain){
       domain.findViews({}, function(err, views){
-        if(err) return console.log(err);
+        if(err) return console.error(err);
         _.each(views.views, function(view){
           $(self._armViewListItem(view.collectionId + '~' + view.id, view.title||view.id)).data('item', view).appendTo(self.$viewList);
         });
@@ -142,14 +159,18 @@ $.widget('nm.workbench', {
 
   _setOption: function(key, value){
     var o = this.options, self = this;
-    if(key === "content"){
-      if(jsonPatch.compare(o.content, value).length > 0){
-        this._loadDocument(value.dom||o.page.domainId, value.col, value.doc, value.act, value.opts, function(err, doc){
-          self.element.trigger("history", {content:value});
-        });
-        this._super(key, value);
+    if(key === "anchor" && jsonPatch.compare(o.anchor, value).length > 0){
+      function callback(err, doc){
+        if(err) return console.error(err);
+        self.options.anchor = value;
+        self.element.trigger("history", {anchor:value});
       }
-      return;
+
+      if(value.col == '.metas' && value.act == 'new'){
+        this._createDocument(value.dom||o.page.domainId, value.doc, callback);
+      }else{
+        this._loadDocument(value.dom||o.page.domainId, value.col, value.doc, value.act, value.opts, callback);
+      }
     } else if(key === 'client'){
       localStorage.setItem('token', client.getToken());
     }
@@ -157,7 +178,12 @@ $.widget('nm.workbench', {
     this._super(key, value);
   },
 
-  _loadDocument: function(domainId,collectionId, documentId, actionId, opts, callback){
+  _createDocument: function(domainId, metaId, callback){
+    var o = this.options, client = o.page.getClient();
+    Loader.createDocument(client, this.$mainContent, domainId, metaId, callback);
+  },
+
+  _loadDocument: function(domainId, collectionId, documentId, actionId, opts, callback){
     var o = this.options, client = o.page.getClient(), opts = opts ||{};
     Loader.loadDocument(client, this.$mainContent, domainId, collectionId, documentId, actionId, opts, callback);
   },

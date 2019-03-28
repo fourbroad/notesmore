@@ -58,13 +58,10 @@ inherits(View, Document,{
   },
 
   findDocuments: function(query) {
-    var indices = _joinIndices(this.domainId, this.collections),
-        q = {
-          index: indices, 
-          type: Document.TYPE,
-          body: query
-    };
-  	return this._getElasticSearch().search(q);
+    var indices = _joinIndices(this.domainId, this.collections);
+    query.index = indices;
+    query.type = Document.TYPE;
+  	return this._getElasticSearch().search(query);
   },
 
   distinctQuery: function(field, wildcard) {

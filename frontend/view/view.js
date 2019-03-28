@@ -25,6 +25,8 @@ import 'full-text/full-text';
 import './view.scss';
 import viewHtml from './view.html';
 
+const uuidv4 = require('uuid/v4');
+
 var client = require('../../lib/client')();
 
 const {Action, Collection} = client;
@@ -84,12 +86,14 @@ $.widget("nm.view", {
       }
     });
 
-    this.$viewContainer.on('click','table.view-table li.dropdown-item', function(evt){
+    this.$viewContainer.on('click','table.view-table li.dropdown-item.delete', function(evt){
       var $this = $(this), $tr = $this.parents('tr'), v = self.table.row($tr).data();
       v.delete(function(err, result){
+        if(err) return console.error(err);
         Collection.get(v.domainId, v.collectionId, function(err, collection){
-          if(err) return console.log(err);
+          if(err) return console.error(err);
           collection.refresh(function(err, result){
+            if(err) return console.error(err);
             self.table.draw(false);
           });
         })
@@ -124,7 +128,12 @@ $.widget("nm.view", {
   _armActionMoreMenu: function(){
     var o = this.options;
     this.$actionMoreMenu.empty();
-    $('<li class="dropdown-item save-as">Save as ...</li>').appendTo(this.$actionMoreMenu);
+    if(o.view.collectionId == ".collections"){
+      $('<li class="dropdown-item save-as">Save as view...</li>').appendTo(this.$actionMoreMenu);
+    } else {
+      $('<li class="dropdown-item save-as">Save as...</li>').appendTo(this.$actionMoreMenu);
+    }
+    
     Loader.armActions(client, o.view, this.$actionMoreMenu, o.actionId);
   },
 
@@ -187,7 +196,7 @@ $.widget("nm.view", {
                 "aaData": []
               });
             }
-            return console.log(err); 
+            return console.error(err); 
           }
 
           fnCallback({
@@ -218,7 +227,7 @@ $.widget("nm.view", {
             mode: 'multi',
             selectedItems: sc.selectedItems,
             menuItems: function(filter, callback){
-              view.distinctQuery(sc.name, filter, function(err4, docs){
+              view.distinctQuery(sc.name, filter, {size:100}, function(err4, docs){
                 if(err4) return console.log(err4);
                 var items = _.map(docs.documents, function(doc){
                   return {label:doc['title']||_.at(doc, sc.name)[0], value:_.at(doc, sc.name)[0]};
@@ -423,7 +432,7 @@ $.widget("nm.view", {
 
   _showDocMenu: function($dropdownMenu, doc){
     $dropdownMenu.empty();
-    $('<li class="dropdown-item delete"><span>Delete</span></li>').appendTo($dropdownMenu);
+    $('<li class="dropdown-item delete">Delete</li>').appendTo($dropdownMenu);
     Loader.armActions(client, doc, $dropdownMenu, this.options.actionId);
   },
 
@@ -451,15 +460,15 @@ $.widget("nm.view", {
     } else {
       var values = validate.collectFormValues(this.$form, {trim: true}), title = values.title;
       this.saveAs(title, function(err, view){
-        if(err) return console.log(err);
+        if(err) return console.error(err);
         utils.clearErrors(self.$form);
+        var isNew = o.isNew;
+        o.isNew = false;
+        o.view = view;
+        self.clone = _.cloneDeep(view);
+        self._refresh();
         self.$saveAsModel.modal('toggle')
-        setTimeout(function(){
-          $.uriAnchor.setAnchor({
-            col: '.views',
-            doc: view.id
-          });
-        },500);
+        self.element.trigger('documentcreated', [view, isNew]);
       });
     }
   },
@@ -469,14 +478,20 @@ $.widget("nm.view", {
   },
 
   saveAs: function(title, callback){
-    this.options.view.saveAs(title, callback);
+    var o = this.options, {View} = o.view.getClient(), view = _.cloneDeep(o.view);
+    view.title = title;
+    if(o.view.collectionId == '.collections'){
+      view.collections = [o.view.id];
+      _.set(view, '_meta.acl.delete.roles', ['administrator']);
+    }
+    View.create(o.view.domainId, uuidv4(), view, callback);
   },
 
   save: function(){
     var o = this.options, self = this;
     if(this._isDirty()){
       o.view.patch(this._getPatch(), function(err, view){
-        if(err) return console.log(err);
+        if(err) return console.error(err);
         o.view = view;
         self.clone = _.cloneDeep(view);
         self._refreshHeader();

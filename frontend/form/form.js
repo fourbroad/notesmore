@@ -142,7 +142,7 @@ $.widget("nm.form", {
     var o = this.options, self = this;
     if(this._isDirty()){
       o.document.patch(this._getPatch(), function(err, document){
-        if(err) return console.log(err);
+        if(err) return console.error(err);
         o.document = document;
         self.clone = _.cloneDeep(document);
         self._refresh();
@@ -160,19 +160,22 @@ $.widget("nm.form", {
           domainId = this.$domain.select('option','selectedItems')[0].value, 
           collectionId = this.$collection.select('option','selectedItems')[0].value;
       client.Domain.get(domainId, function(err1, domain){
-        if(err1) return console.log(err1);
+        if(err1) return console.error(err1);
         domain.getCollection(collectionId, function(err2, collection){
-          if(err2) return console.log(err2);
+          if(err2) return console.error(err2);
           delete docInfo.id;
           docInfo.title = values.title;
           collection.createDocument(values.id, docInfo, function(err3, doc){
-            if(err3) return console.log(err3);
+            if(err3) return console.error(err3);
+            var isNew = o.isNew;
             o.isNew = false;
+            o.actionId = 'edit';
             o.document = doc;
             self.clone = _.cloneDeep(doc);
             self._setJsonEditorValue();
             self._refresh();
             self.$saveAsModel.modal('toggle');
+            self.element.trigger('documentcreated', [doc, isNew]);
           });
         });
       });
@@ -187,7 +190,7 @@ $.widget("nm.form", {
         mode: 'single',
         menuItems: function(filter, callback){
           client.Domain.find({size:100}, function(err, domains){
-            if(err) return console.log(err);
+            if(err) return console.error(err);
             var items = _.map(domains.domains, function(domain){
               return {label:domain['title']||domain['id'], value:domain['id']};
             });
@@ -209,7 +212,7 @@ $.widget("nm.form", {
           if(selectedDomains[0]){
             client.Domain.get(selectedDomains[0].value, function(err, domain){
               domain.findCollections({size:100}, function(err, collections){
-                if(err) return console.log(err);
+                if(err) return console.error(err);
                 var items = _.map(collections.collections, function(collection){
                   return {label:collection['title']||collection['id'], value:collection['id']};
                 });
@@ -229,9 +232,9 @@ $.widget("nm.form", {
     this.$id.val(uuidv4());
 
     Domain.get(o.document.domainId, function(err, domain){
-      if(err) return console.log(err);
+      if(err) return console.error(err);
       Collection.get(domain.id, o.document.collectionId, function(err, collection){
-        if(err) return console.log(err);
+        if(err) return console.error(err);
         self.$domain.select('option', 'selectedItems', [{label: domain.title||domain.id, value:domain.id}]);
         self.$collection.select('option', 'selectedItems', [{label: collection.title||collection.id, value:collection.id}]);
       });
@@ -242,7 +245,9 @@ $.widget("nm.form", {
     var o = this.options, client = o.document.getClient();
     this.$actionMoreMenu.empty();
     $('<li class="dropdown-item save-as">Save as ...</li>').appendTo(this.$actionMoreMenu);
-    Loader.armActions(client, o.document, this.$actionMoreMenu, o.actionId);
+    if(!o.isNew){
+      Loader.armActions(client, o.document, this.$actionMoreMenu, o.actionId);
+    }
   },
 
   _onSaveAs: function(evt){
@@ -252,7 +257,7 @@ $.widget("nm.form", {
   _onCancel: function(){
     var o = this.options;
     if(o.isNew){
-      $(window).trigger('hashchange');
+      this.element.trigger('cancelaction');
     }else{
       o.document = this.clone;
       this._setJsonEditorValue();    
@@ -265,12 +270,16 @@ $.widget("nm.form", {
     this.saveAs();
   },
 
-  _setOption: function( key, value ) {
-    var o = this.options;
-    this._super( key, value );
-    if ( key === "document" ) {
-      this.clone = _.cloneDeep(o.document);
-      this._setJsonEditorValue();
+  _setOptions: function( options ) {
+    var self = this, isNew = options.isNew, document = options.document;
+    this._super(options);
+    if(document){
+      if(isNew){
+        delete self.clone;
+      }else{
+        self.clone = _.cloneDeep(document);
+      }
+      self._setJsonEditorValue();
     }
   },
 

@@ -59,7 +59,7 @@ module.exports = function (options) {
 
     Domain.get(Domain.ROOT).catch((e)=>{
       console.log("Root domain is initializing......!");
-      Domain.create('administrator', Domain.ROOT, {title: 'Root'}).then(result => console.log("Root domain is initialized!")).catch(err => console.log(err));
+      Domain.create('administrator', Domain.ROOT, {title: 'Root'}).then(result => console.log("Root domain is initialized!")).catch(err => console.error(err));
     });
 
     return module;

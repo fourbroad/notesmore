@@ -41,7 +41,7 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId){
       data._source._meta.version = data._version;
       cache.set(uid, data._source);
       return data._source;
-    });
+    }).catch(e => Promise.reject(e.toString()));
   } else {
     return Promise.resolve(doc);
   }

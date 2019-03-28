@@ -186,7 +186,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     });
     break;
   case '.actions':
-    Action.get(docId, function(err, action) {
+    Action.get(domId, docId, function(err, action) {
       if (err)
         return callback && callback(err);
       opts = $.extend(true, {
@@ -208,75 +208,76 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
   }
 }
 
-createDocument = function(element, meta, docData, callback){
-  var collectionId = meta.container.id, { Action } = meta.getClient(),
-      doc, plugin, pluginName, opts = {};
-  
-  _.merge(docData, {_meta: {metaId: meta.id}}, _.cloneDeep(meta.defaultValue));
+createDocument = function(client, element, domainId, metaId, callback){
+  var { Meta, Action} = client;
+  Meta.get(domainId, metaId, function(err, meta){
+    var collectionId = meta.container.id, doc, plugin, pluginName, docData = {}, opts = {};
+ 
+    _.merge(docData, {_meta: {metaId: metaId}}, _.cloneDeep(meta.defaultValue));
+    switch(collectionId){
+      case '.metas':
+        doc = new Meta(domainId, docData);
+        opts.meta = doc;
+        break;
+      case '.domains':
+        doc = new Domain(docData);
+        opts.domain = doc;
+        break;
+      case '.collections':
+        doc = new Collection(domainId, docData);
+        opts.collection = doc;
+        break;
+      case '.views':
+        doc = new View(domainId, docData);
+        opts.view = doc;
+        break;
+      case '.pages':
+        doc = new Page(domainId, docData);
+        opts.page = doc;
+        break;
+      case '.forms':
+        doc = new Form(domainId, docData);
+        opts.form = doc;
+        break;
+      case '.roles':
+        doc = new Role(domainId, docData);
+        opts.role = doc;
+        break;
+      case '.groups':
+        doc = new Group(domainId, docData);
+        opts.group = doc;
+        break;
+      case '.users':
+        doc = new User(docData);
+        opts.user = doc;
+        break;
+      case '.actions':
+        doc = new Action(domainId, docData);
+        opts.action = doc;
+        break;
+      default:
+        doc = new Document(domainId, collectionId, docData);
+    }
 
-  switch(collectionId){
-    case '.metas':
-      doc = new Meta(meta.domainId, docData);
-      opts.meta = doc;
-      break;
-    case '.domains':
-      doc = new Domain(docData);
-      opts.domain = doc;
-      break;
-    case '.collections':
-      doc = new Collection(meta.domainId, docData);
-      opts.collection = doc;
-      break;
-    case '.views':
-      doc = new View(meta.domainId, docData);
-      opts.view = doc;
-      break;
-    case '.pages':
-      doc = new Page(meta.domainId, docData);
-      opts.page = doc;
-      break;
-    case '.forms':
-      doc = new Form(meta.domainId, docData);
-      opts.form = doc;
-      break;
-    case '.roles':
-      doc = new Role(meta.domainId, docData);
-      opts.role = doc;
-      break;
-    case '.groups':
-      doc = new Group(meta.domainId, docData);
-      opts.group = doc;
-      break;
-    case '.users':
-      doc = new User(docData);
-      opts.user = doc;
-      break;
-    case '.actions':
-      doc = new Action(meta.domainId, docData);
-      opts.action = doc;
-      break;
-    default:
-      doc = new Document(meta.domainId, collectionId, docData);
-  }
+    opts.document = doc;
+    opts.isNew = true;
 
-  opts.document = doc;
-  opts.isNew = true;
+    Action.get(domainId, 'new', function(err, action) {
+      if (err) return callback && callback(err);
 
-  Action.get(meta.domainId, meta.defaultAction || meta.actions[0], function(err, action) {
-    if (err) return callback && callback(err);
+      plugin = action.plugin;
+      pluginName = plugin.name.split('/')[1];
 
-    plugin = action.plugin;
-    pluginName = plugin.name.split('/')[1];
-
-    if (!element[pluginName]) {
-      loadPlugin(plugin, function() {
+      if (!element[pluginName]) {
+        loadPlugin(plugin, function() {
+          _armWidget(element, pluginName, opts);
+          callback && callback(null, doc);
+        });
+      } else {
         _armWidget(element, pluginName, opts);
         callback && callback(null, doc);
-      });
-    } else {
-      _armWidget(element, pluginName, opts);
-      callback && callback(null, doc);
-    }
+      }
+    });
   });
 }
 
@@ -285,12 +286,12 @@ armActions = function(client, doc, container, currentActionId) {
   function armItems(domainId, actIds) {
     Action.mget(doc.domainId, actIds, function(err, result) {
       if (err)
-        return console.log(err);
+        return console.error(err);
       $.each(result.actions, function(i, action) {
         if(action.id != currentActionId){
           var $li = $('<li class="dropdown-item"></li>').html(action.title).appendTo(container).data('action', action)
           ,   mode = action.plugin.mode || 'inline';
-          $li.on('click', function() {
+          $li.on('click', function(e) {
             if ('offline' == mode) {
               $li.trigger('actionclick', {
                 dom: doc.domainId,
@@ -304,6 +305,7 @@ armActions = function(client, doc, container, currentActionId) {
                 action(doc);
               })();
             }
+            
           });
         }
       });
@@ -315,7 +317,7 @@ armActions = function(client, doc, container, currentActionId) {
   } else {
     Meta.get(doc.domainId, doc._meta.metaId || '.meta', function(err, meta) {
       if (err)
-        return console.log(err);
+        return console.error(err);
       armItems(doc.domainId, meta.actions);
     });
   }

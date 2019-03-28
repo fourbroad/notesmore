@@ -36,7 +36,7 @@ $.widget('nm.runtime',{
         token = Cookies.get('token') || localStorage.token;
 
     function callback(err, result){
-      if(err) return console.log(err);
+      if(err) return console.error(err);
       self._setCurrentDomain(o.currentDomain);
       o.uriAnchor = anchor;
       Loader.loadDocument(client, self.element, anchor.dom||o.currentDomain, anchor.col, anchor.doc, anchor.act, anchor._doc, function(err, doc){
@@ -54,29 +54,29 @@ $.widget('nm.runtime',{
     }
 
     this._on({
-      "createdocument": function(event, meta, docData){
-        Loader.createDocument(this.element, meta, docData)
-      },
-      "docclick": function(event, doc) {
-        var anchor = {col:doc.collectionId, doc:doc.id};
-        if(doc.domainId != o.currentDomain){
-          anchor.domainId = doc.domainId;
+      "createdocument": function(event, meta){
+        var anchor = {col:meta.collectionId, doc: meta.id, act: 'new'}
+        if(meta.domainId != o.currentDomain){
+          anchor.dom = meta.domainId
         }
         this.option('uriAnchor', anchor);
       },
-      "docctrlclick": function(event, doc) {
-        var anchor = {col:doc.collectionId, doc:doc.id, act:'edit'};
-        if(doc.domainId != o.currentDomain){
-          anchor = doc.domainId;
-        }
-        this.option('uriAnchor', anchor);
-      },
+      "documentopened": this._setUriAnchor,
+      "docclick": this._setUriAnchor,
+      "docctrlclick": this._setUriAnchor,
       "actionclick": function(event, anchor){
         this.option('uriAnchor', anchor);
       },
-      "history": function(event, history){
-        delete o.uriAnchor._doc;
-        this.option('uriAnchor', $.extend(true, {}, o.uriAnchor, {_doc:history}));
+      "history": function(event, history, override){
+        var uriAnchor = _.cloneDeep(o.uriAnchor);
+        delete uriAnchor._doc;
+        this.options.uriAnchor = $.extend(true, uriAnchor, {_doc:history});
+        this._setAnchor(override);
+      },
+      "cancelaction": function(event){
+        if(this.oldAnchor){
+          $.uriAnchor.setAnchor(this._encodeAnchor(this.oldAnchor), null, true);
+        }
       }
     });
 
@@ -85,10 +85,18 @@ $.widget('nm.runtime',{
     this._on(window, {hashchange: this._onHashchange});
   },
 
+  _setUriAnchor(event, doc){
+    var o = this.options, anchor = {col:doc.collectionId, doc:doc.id};
+    if(doc.domainId != o.currentDomain){
+      anchor.dom = doc.domainId;
+    }
+    this.option('uriAnchor', anchor);
+  },
+
   _setCurrentDomain: function(domainId){
     var o = this.options;
     client.Domain.get(domainId, function(err, domain){
-      if(err) return console.log(err);
+      if(err) return console.error(err);
       window.currentDomain = domain;
     });
   },
@@ -97,13 +105,19 @@ $.widget('nm.runtime',{
     var o = this.options, self = this;
     if(key === "uriAnchor" && jsonPatch.compare(o.uriAnchor, value).length > 0){
       var oldAnchor = $.extend(true, {}, o.uriAnchor);
-      Loader.loadDocument(client, this.element, value.dom||o.currentDomain, value.col, value.doc, value.act, value._doc, function(err, doc){
+      function callback(err, doc){
         if(err){
           self._setOption('uriAnchor', oldAnchor);
-          return console.log($.extend(err,{domainId: value.dom||o.currentDomain, collectionId: value.col, documentId:value.doc, actionId:value.act, opts:value._doc}));
+          return console.error($.extend(err,{domainId: value.dom||o.currentDomain, collectionId: value.col, documentId:value.doc, actionId:value.act, opts:value._doc}));
         } 
         self._setAnchor();
-      });
+      }
+
+      if(value.col == '.metas' && value.act == 'new'){
+        Loader.createDocument(client, this.element, domainId, metaId, callback);
+      } else {
+        Loader.loadDocument(client, this.element, value.dom||o.currentDomain, value.col, value.doc, value.act, value._doc, callback);
+      }
     }else if(key == 'currentDomain' && value != o.currentDomain){
       var anchor = o.uriAnchor, oldDomainId = o.currentDomain;
       Loader.loadDocument(client, this.element, value, anchor.col, anchor.doc, anchor.act, anchor._doc, function(err, doc){
@@ -127,66 +141,63 @@ $.widget('nm.runtime',{
     this.option('uriAnchor', anchor);
   },
 
-  _setAnchor: function(){
-    var o = this.options, anchor, _doc = o.uriAnchor._doc;
-    
-    if(_doc){
-      _doc = _.reduce(_doc, function(result, value, key) {
+  _encodeAnchor: function(uriAnchor){
+    var anchor = _.cloneDeep(uriAnchor);
+    if(anchor._doc){
+      anchor._doc = _.reduce(anchor._doc, function(result, value, key) {
         result[key] = encodeURIComponent(JSON.stringify(value));
         return result;
       }, {});
     }
-
-    if($.isEmptyObject(_doc)){
-      anchor = $.extend(true,{}, o.uriAnchor);
-    }else{
-      anchor = $.extend(true,{}, o.uriAnchor, {_doc: _doc});
-    }
-
-    try {
-      $.uriAnchor.setAnchor(anchor);
-    } catch(error) {
-      $.uriAnchor.setAnchor(o.uriAnchor, null, true);
-    }
+    return anchor;
   },
 
-  _onHashchange: function(event){
-    var o = this.options, self = this, el = this.element, anchorProposed = this._makeAnchorMap();
-
-    if($.isEmptyObject(anchorProposed)){
-      anchorProposed = $.extend(true, {}, $.nm.runtime.prototype.options.uriAnchor);
+  _decodeAnchor: function(uriAnchor){
+    var anchor = _.cloneDeep(uriAnchor);
+    if(anchor._doc){
+      anchor._doc = _.reduce(anchor._doc, function(result, value, key) {
+        result[key] = JSON.parse(decodeURIComponent(value));
+        return result;
+      }, {});        
     }
-    
-    this.option('uriAnchor', anchorProposed);      
-    
-    return false;
-  },
-
-  _makeAnchorMap: function(){
-    var o = this.options, anchor;
-
-    try {
-      anchor = $.uriAnchor.makeAnchorMap();
-      if(anchor._doc){
-        anchor._doc = _.reduce(anchor._doc, function(result, value, key) {
-          result[key] = JSON.parse(decodeURIComponent(value));
-          return result;
-        }, {});        
-      }
-    } catch(error) {
-      $.uriAnchor.setAnchor(o.uriAnchor, null, true);
-    }
-
-    if($.isEmptyObject(anchor)){
-      anchor = $.extend(true, {}, o.uriAnchor);
-    }
-
     anchor = _.reduce(anchor, function(result, value, key) {
       if(!key.startsWith('_s')){
         result[key] = value;
       }
       return result;
     }, {});
+    return anchor;
+  },
+
+  _setAnchor: function(override){
+    var o = this.options;
+    this.oldAnchor = this._makeAnchorMap();
+    try {
+      $.uriAnchor.setAnchor(this._encodeAnchor(o.uriAnchor), null, override);
+    } catch(error) {
+      if(this.oldAnchor){
+        $.uriAnchor.setAnchor(this._encodeAnchor(this.oldAnchor), null, true);
+      }
+    }
+  },
+
+  _onHashchange: function(event){
+    this.option('uriAnchor', this._makeAnchorMap());      
+    return false;
+  },
+
+  _makeAnchorMap: function(){
+    var anchor;
+
+    try {
+      anchor = $.uriAnchor.makeAnchorMap();
+    } catch(error) {console.error(error);}
+
+    anchor = this._decodeAnchor(anchor);
+
+    if($.isEmptyObject(anchor)){
+      anchor = $.extend(true, {}, $.nm.runtime.prototype.options.uriAnchor);
+    }
 
     return anchor
   }

@@ -65,8 +65,8 @@ $.widget('nm.newdialog', {
   },
 
   _onCreate: function(e){
-    var o = this.options;
-    o.$anchor.trigger('createdocument', [this.getSelected(), {id: uuidv4()}]);
+    var o = this.options, meta = this.getSelected();
+    o.$anchor.trigger('createdocument', [meta.domainId, meta.id]);
     this.element.modal('toggle');
   },
 

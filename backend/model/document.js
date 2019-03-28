@@ -177,12 +177,7 @@ _.assign(Document.prototype, {
   },
 
   patch: function(authorId, patch) {
-    var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id), 
-        metas = _.filter(patch, function(p) { return p.path=="/_meta" || p.path.startsWith("/_meta/"); });
-    if(metas.length > 0){
-      return Promise.reject(createError(403, 'Modifying "/_meta" in the document is not allowed!'));
-    }
-
+    var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id);
     return this._doPatch({patch: patch, _meta:{author: authorId, created: new Date().getTime()}}).then(result => {
       cache.del(uid);
       return self;

@@ -116,6 +116,15 @@ const DOMAINS = '.domains'
   title: "Domains"
 }]
   , ACTIONS = [{
+  id: "new",
+  title: "New",
+  plugin: {
+    name: "@notesabc/form",
+    mode: 'offline',
+    js: "@notesabc/form/form.bundle.js",
+    css: "@notesabc/form/form.bundle.css"
+  }
+}, {
   id: "edit",
   title: "Edit(Json)",
   plugin: {
@@ -241,20 +250,22 @@ const DOMAINS = '.domains'
 }, {
   id: ".meta-view",
   title: "View",
-  defaultValue:{
-    title: "New View"
-  },
   container:{
     id: '.views',
     title: 'Views'
   },
   defaultValue:{
+    title: "New View",
+    collections:[],
     columns: DEFAULT_COLUMNS,
     searchColumns: DEFAULT_SEARCH_COLUMNS,
     search: {
       names: ["id.keyword", "title.keyword", "_meta.author.keyword"]
     },
-    order: "[[5,\"desc\"],[4,\"desc\"]]"
+    order: "[[5,\"desc\"],[4,\"desc\"]]",
+    _meta:{
+      metaId:'.meta-view'
+    }
   },
   defaultAction: "gridView",
   actions: ['gridView', 'edit']

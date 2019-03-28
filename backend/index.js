@@ -28,48 +28,74 @@ function filterQuery(visitorId, domainId, query){
   });
 }
 
-function checkPermission(visitorId, domainId, method, permissions){
-  if(!permissions) return Promise.resolve(true);
-  if(!visitorId) return Promise.reject(createError(401, 'Have no permission to access '+ method +'!'));
-  return Profile.get(domainId, visitorId).then( profile => {
-    if(_.intersection(profile.roles, permissions.roles).length > 0 
-    || _.intersection(profile.groups, permissions.groups).length > 0 
-    || (permissions.users && permissions.users.indexOf(visitorId) >= 0) ){
-      return true;
-    } else {
+function checkPermission(visitorId, domainId, obj, method, data){
+  var permissions;
+
+  if(method == 'create'){
+    permissions = _.at(obj,'acl.create')[0];
+  } else {
+    permissions = _.at(obj,'_meta.acl.'+method)[0];
+  }
+
+  function doCheckPermission(visitorId, domainId, permissions){
+    if(!permissions) return Promise.resolve(true);
+    if(!visitorId) return Promise.reject(createError(401, 'Have no permission to access '+ method +'!'));
+    return Profile.get(domainId, visitorId).then( profile => {
+      if(_.intersection(profile.roles, permissions.roles).length > 0 
+      || _.intersection(profile.groups, permissions.groups).length > 0 
+      || (permissions.users && permissions.users.indexOf(visitorId) >= 0) ){
+        return true;
+      } else {
+        return Promise.reject(createError(401, "Unauthorized access", {code:401}));
+      }
+    }).catch(()=> {
       return Promise.reject(createError(401, "Unauthorized access", {code:401}));
+    });
+  }
+
+  if(method == 'patch' && data.length > 0){
+    var metas = _.filter(data, function(p) { return p.path=="/_meta" || p.path.startsWith("/_meta/"); });
+    if(metas.length == 0){
+      return doCheckPermission(visitorId, domainId, permissions);
+    } else {
+      var metaPermissions = _.at(obj,'_meta.acl.patchMeta')[0];
+      if(metas.length == data.length){
+        return doCheckPermission(visitorId, domainId, metaPermissions);
+      } else {
+        return Promise.all([doCheckPermission(visitorId, domainId, metaPermissions), doCheckPermission(visitorId, domainId, permissions)]);
+      }
     }
-  }).catch(()=> {
-    return Promise.reject(createError(401, "Unauthorized access", {code:401}));
-  });
+  } else {
+    return doCheckPermission(visitorId, domainId, permissions);
+  }
 }
 
 function checkCreate(visitorId, domainId, metaId){
   metaId = metaId || '.meta';
   return Meta.get(domainId, metaId).then( meta => {
-    return checkPermission(visitorId, domainId, 'create', _.at(meta,'acl.create')[0]);
+    return checkPermission(visitorId, domainId, meta, 'create');
   });
 }
 
-function checkAcl1(visitorId, clsObj, objId, method){
+function checkAcl1(visitorId, clsObj, objId, method, data){
   return clsObj.get(objId).then( obj => {
-    return checkPermission(visitorId, Domain.ROOT, method, _.at(obj,'_meta.acl.'+method)[0]).then( result => {
+    return checkPermission(visitorId, Domain.ROOT, obj, method, data).then( result => {
       return obj;
     });
   });
 }
 
-function checkAcl2(visitorId, clsObj, domainId, objId, method){
+function checkAcl2(visitorId, clsObj, domainId, objId, method, data){
   return clsObj.get(domainId, objId).then( obj => {
-    return checkPermission(visitorId, domainId, method, _.at(obj,'_meta.acl.'+method)[0]).then( result => {
+    return checkPermission(visitorId, domainId, obj, method, data).then( result => {
       return obj;
     });
   });
 }
 
-function checkAcl3(visitorId, clsObj, domainId, collectionId, objId, method){
+function checkAcl3(visitorId, clsObj, domainId, collectionId, objId, method, data){
   return clsObj.get(domainId, collectionId, objId).then( obj => {
-    return checkPermission(visitorId, domainId, method, _.at(obj,'_meta.acl.'+method)[0]).then( result => {
+    return checkPermission(visitorId, domainId, obj, method, data).then( result => {
       return obj;
     });
   });
@@ -106,7 +132,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchMeta', function(domainId, metaId, patch, callback){
-    checkAcl2(visitorId, Meta, domainId, metaId, 'patch').then( meta => {
+    checkAcl2(visitorId, Meta, domainId, metaId, 'patch', patch).then( meta => {
       return meta.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -146,7 +172,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchUser', function(userId, patch, callback){
-    checkAcl1(visitorId, User, userId, 'patch').then( user => {
+    checkAcl1(visitorId, User, userId, 'patch', patch).then( user => {
       return user.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -189,7 +215,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchDomain', function(domainId, patch, callback){
-    checkAcl1(visitorId, Domain, domainId, 'patch').then( domain => {
+    checkAcl1(visitorId, Domain, domainId, 'patch', patch).then( domain => {
       return domain.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -226,7 +252,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchCollection', function(domainId, collectionId, patch, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'patch').then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'patch', patch).then( collection => {
       return collection.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -269,7 +295,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchView', function(domainId, viewId, patch, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'patch').then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'patch', patch).then( view => {
       return view.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -314,7 +340,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchForm', function(domainId, formId, patch, callback){
-    checkAcl2(visitorId, Form, domainId, formId, 'patch').then( form => {
+    checkAcl2(visitorId, Form, domainId, formId, 'patch', patch).then( form => {
       return form.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -339,7 +365,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchPage', function(domainId, pageId, patch, callback){
-    checkAcl2(visitorId, Page, domainId, pageId, 'patch').then( page => {
+    checkAcl2(visitorId, Page, domainId, pageId, 'patch', patch).then( page => {
       return page.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -364,7 +390,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchAction', function(domainId, actionId, patch, callback){
-    checkAcl2(visitorId, Action, domainId, actionId, 'patch').then( action => {
+    checkAcl2(visitorId, Action, domainId, actionId, 'patch', patch).then( action => {
       return action.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -401,7 +427,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchRole', function(domainId, roleId, patch, callback){
-    checkAcl2(visitorId, Role, domainId, roleId, 'patch').then( role => {
+    checkAcl2(visitorId, Role, domainId, roleId, 'patch', patch).then( role => {
       return role.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -426,7 +452,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchGroup', function(domainId, groupId, patch, callback){
-    checkAcl2(visitorId, Group, domainId, groupId, 'patch').then( group => {
+    checkAcl2(visitorId, Group, domainId, groupId, 'patch', patch).then( group => {
       return group.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -457,7 +483,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchProfile', function(domainId, profileId, patch, callback){
-    checkAcl2(visitorId, Profile, domainId, profileId, 'patch').then( profile => {
+    checkAcl2(visitorId, Profile, domainId, profileId, 'patch', patch).then( profile => {
       return profile.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -488,7 +514,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchDocument', function(domainId, collectionId, documentId, patch, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patch').then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patch', patch).then( document => {
       return document.patch(visitorId, patch);
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -537,7 +563,7 @@ initSocket = function(socket, visitorId) {
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
 
-  socket.on('disconnect', function() {
+  socket.on('disconnect', function(){
     console.log('%s disconnected.', visitorId);
   });
 };
