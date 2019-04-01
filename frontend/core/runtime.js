@@ -214,7 +214,18 @@ $.widget('nm.runtime',{
   },
 
   _onHashchange: function(event){
-    this.option({uriAnchor:this._makeAnchorMap(), override:false});
+    var o = this.options, self = this, anchor = this._makeAnchorMap(), override = false;
+    User.get(function(err, user){
+      if(user.id == "anonymous"){
+        if(anchor.col == '.pages' && anchor.doc == '.workbench'){
+          anchor = {col:'.pages', doc:'.login'};
+          override = true;
+        }
+        self.option({uriAnchor:anchor, override: override});
+      } else {
+        self.option({uriAnchor: anchor, override: override});
+      }
+    });
     return false;
   },
 
