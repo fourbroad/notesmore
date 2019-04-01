@@ -40,7 +40,7 @@ _.assign(User, {
       
         redis.get(SESSION_PREFIX + userId,function(err, data){
           if(err || token != (data && data.token))
-            reject(createError(406, 'Token is invalid!',{code:406}));
+            reject(createError(406, 'Token is invalid!',{name:'invalidToken', code:406}));
           return resolve(userId);
         });
       });  

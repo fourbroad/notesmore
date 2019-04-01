@@ -3,9 +3,9 @@ import validate from "validate.js";
 
 var client = require('../../lib/client')();
 
-import accountHtml from './account.html';
+import loginHtml from './login.html';
 
-$.widget("nm.account", {
+$.widget("nm.login", {
   options:{
     constraints: {
       // These are the constraints used to validate the form
@@ -39,8 +39,8 @@ $.widget("nm.account", {
   _create: function() {
     var o = this.options, self = this;
 
-    this._addClass('nm-account','dropdown');
-    this.element.html(accountHtml)
+    this._addClass('nm-login');
+    this.element.html(loginHtml)
 
     // Before using it we must add the parse and format functions
     // Here is a sample implementation using moment.js
@@ -57,76 +57,38 @@ $.widget("nm.account", {
       }
     });
 
-    this.$avatar = $('.avatar', this.element);
-    this.$nickname = $('.nickname', this.element);
-    this.$dropdownToggle = $('.dropdown-toggle', this.element);
-    this.$profileMenu = $('.profile-menu', this.element);
-    this.$signOff = $('.sign-off', this.$profileMenu);
+    this.$form = $('form', this.element);
+    this.$signup = $('.signup', this.element);
+    this.$loginButton = $('#login.btn', this.$form);
 
-    this.$loginMenu = $('.login-menu', this.element);
-    this.$form = $('form', this.$loginMenu);
-    this.$loginButton = $('#login.btn', this.$loginMenu);
-
-    this.$alert = $('.alert', this.$loginMenu);
+    this.$alert = $('.alert', this.element);
     this.$alertContent = $('.alert-content', this.$alert);
     this.$alertHideBtn = $('button.close', this.$alert);
 
     $("input, textarea, select", this.$form).each(function() {
-      $(this).bind("change", function(ev) {
+      $(this).bind("change", function(e) {
         var errors = validate(self.$form, o.constraints) || {};
         utils.showErrorsForInput($(this), errors[this.name]);
       });
     });
 
-    this._on(this.$loginButton, {utap: this._onSubmit});
+    this._on(this.$signup, {click: this._onSignup});
+    this._on(this.$loginButton, {click: this._onSubmit});
     this._on(this.$form, {submit: this._onSubmit});
     this._on(this.$alertHideBtn, {click : this._onHideAlert});
-
-    this._refresh();
-    
-    this._on(this.$signOff, {utap: this._onSignoff});
-    $.gevent.subscribe(this.element, 'clientChanged',  $.proxy(this._onClientChanged, this));
   },
 
-  _onSignoff: function(event){
-    var o = this.options;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    o.client.logout(function(){
-      Client.login(function(err, client){
-        $.gevent.publish('clientChanged', client);
-      });
-    });
+  _onSignup: function(e){
+    e.preventDefault();
+    e.stopImmediatePropagation();    
+    runtime.option({uriAnchor:{col:'.pages', doc:'.signup'}, override: false});
   },
 
-  _refresh: function(){
-    var o = this.options, self = this, User = o.client.User;
-    User.get(function(err, user){
-      if(user.id == "anonymous"){
-        self.$profileMenu.detach();
-        self.$loginMenu.appendTo(self.element);
-        self.$nickname.text('Please sign-in');
-      } else {
-        self.$loginMenu.detach();
-        self.$profileMenu.appendTo(self.element);
-        self.$nickname.text(user.id);
-      }
-    });
-  },
-
-  _onClientChanged: function(event, c){
-    var o = this.options;
-    o.client = c;
-    this._refresh();
-  },
-
-  _onSubmit: function(ev) {
+  _onSubmit: function(e) {
     var o = this.options, self = this;
 
-    ev.preventDefault();
-    ev.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
     // validate the form aginst the constraints
     var errors = validate(this.$form, o.constraints);
@@ -140,14 +102,13 @@ $.widget("nm.account", {
     } else {
       var loginData = validate.collectFormValues(this.$form, {trim: true});
       this._disableSubmit();
-      Client.login(loginData.username, loginData.password, function(err, client) {
+      client.login(loginData.username, loginData.password, function(err, user) {
         if (err) {
           self._showAlertMessage('alert-danger', err.message);
           self._enableSubmit();
         } else {
           self._enableSubmit();
           self._closeAlertMessage();
-          $.gevent.publish('clientChanged', client);
         }
       });
     }

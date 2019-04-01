@@ -188,6 +188,18 @@ const DOMAINS = '.domains'
     iconClass: "ti-control-play"
   }
 }, {
+  id: 'login',
+  title: 'Login',
+  plugin: {
+    name: "@notesabc/login",
+    mode: 'offline',
+    js: "@notesabc/login/login.bundle.js",
+    css: "@notesabc/login/login.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
+  }
+}, {
   id: 'signup',
   title: 'Signup',
   plugin: {
@@ -461,13 +473,18 @@ const DOMAINS = '.domains'
   }
 }, ]
   , PAGES = [{
+  id: ".login",
+  title: "Login",
+  _meta: {
+    iconClass: "ti-layout-width-default",
+    actions: ['login']
+  }
+}, {
   id: ".signup",
   title: "Signup",
   _meta: {
+    iconClass: "ti-layout-width-default",
     actions: ['signup']
-  },
-  _meta: {
-    iconClass: "ti-layout-width-default"
   }
 }, {
   id: ".workbench",

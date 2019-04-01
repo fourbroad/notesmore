@@ -29,54 +29,23 @@ document.addEventListener('click', ()=>{
 $.widget('nm.runtime',{
   options:{
     currentDomain:document.domain,
-    uriAnchor: {col:'.pages', doc:'.workbench'}
+    defaultAnchor:{col:'.pages', doc:'.workbench'}
   },
 
   _create: function(){
-    var o = this.options, self = this, anchor = this._makeAnchorMap(),
-        token = Cookies.get('token') || localStorage.getItem('token');
+    var o = this.options, self = this, token = Cookies.get('token') || localStorage.getItem('token');
 
-    function callback(err, result){
-      if(err) return console.error(err);
-      self._setCurrentDomain(o.currentDomain);
-      o.uriAnchor = anchor;
-      Loader.loadDocument(client, self.element, anchor.dom||o.currentDomain, anchor.col, anchor.doc, anchor.act, anchor._doc, function(err, doc){
-        if(err){
-          return console.log($.extend(err,{domainId: anchor.dom||o.currentDomain, collectionId: anchor.col, documentId:anchor.doc, actionId:anchor.act, opts:anchor._doc}));
-        } 
-        self._setAnchor();
-      });
-    }
+    this.connectedListener = $.proxy(this._gotoConnected, this);
+    this.loggedInListener = $.proxy(this._gotoConnected, this);
+    this.loggedOutListener = $.proxy(this._gotoLogin, this);
+    this.TokenExpiredErrorListener = $.proxy(this._gotoLogin, this);
+    this.invalidTokenListener = $.proxy(this._gotoLogin,this);
 
-    if(token){
-      var decodedToken = jwtDecode(token);
-      if(new Date().getTime()/1000 < decodedToken.exp){
-        client.connect(token, callback);        
-      } else {
-        localStorage.removeItem('token');
-        client.login(callback);        
-      }
-      
-    } else {
-      client.login(callback);
-    }
-
-    this.loggedInListener =function(user){
-      localStorage.setItem('token', client.token);
-    }
-
-    this.loggedOutListener = function(user){
-      client.login();
-    }
-
-    this.TokenExpiredErrorListener = function(err){
-      console.error(err);
-      localStorage.removeItem('token');
-    }
-
+    client.on("connected", this.connectedListener);
     client.on("loggedIn", this.loggedInListener);
     client.on("loggedOut", this.loggedOutListener);
     client.on("TokenExpiredError", this.TokenExpiredErrorListener);
+    client.on("invalidToken", this.invalidTokenListener);
 
     this._on({
       "createdocument": function(event, meta){
@@ -94,9 +63,12 @@ $.widget('nm.runtime',{
       },
       "history": function(event, history, override){
         var uriAnchor = _.cloneDeep(o.uriAnchor);
+        if(uriAnchor.col == '.pages' && uriAnchor.doc == '.workbench' && $.isEmptyObject(uriAnchor._doc)){
+          override = true;
+        }
         delete uriAnchor._doc;
-        this.options.uriAnchor = $.extend(true, uriAnchor, {_doc:history});
-        this._setAnchor(override);
+        o.uriAnchor = $.extend(true, uriAnchor, {_doc:history});
+        this._setAnchor(o.uriAnchor, override);
       },
       "cancelaction": function(event){
         if(this.oldAnchor){
@@ -105,9 +77,43 @@ $.widget('nm.runtime',{
       }
     });
 
+    if(token){
+      var decodedToken = jwtDecode(token);
+      if((new Date().getTime()/1000) < decodedToken.exp){
+        client.connect(token, function(){});
+      } else {
+        localStorage.removeItem('token');
+        client.login(function(){});
+      }
+    } else {
+      client.login(function(){});
+    }
+
     window.runtime = this;
 
     this._on(window, {hashchange: this._onHashchange});
+  },
+
+  _gotoConnected: function(user){
+    var o = this.options, anchor = this._makeAnchorMap();
+    localStorage.setItem('token', client.token);
+    this._setCurrentDomain(o.currentDomain);
+    if(user.id == "anonymous"){
+      if(anchor.col == '.pages' && anchor.doc == '.workbench'){
+        anchor = {col:'.pages', doc:'.login'};
+      }
+      this.option({'uriAnchor':anchor, override: false});
+    } else {
+      this.option({'uriAnchor': o.defaultAnchor, override: true});
+    }
+  },
+
+  _gotoLogin: function(){
+    var self = this;
+    localStorage.removeItem('token');
+    client.login(function(){
+      self.option({'uriAnchor': {col:'.pages', doc:'.login'}, override: true});
+    });
   },
 
   _setUriAnchor(event, doc){
@@ -115,7 +121,7 @@ $.widget('nm.runtime',{
     if(doc.domainId != o.currentDomain){
       anchor.dom = doc.domainId;
     }
-    this.option('uriAnchor', anchor);
+    this.option({uriAnchor:anchor, override: false});
   },
 
   _setCurrentDomain: function(domainId){
@@ -126,36 +132,37 @@ $.widget('nm.runtime',{
     });
   },
 
-  _setOption: function(key, value){
-    var o = this.options, self = this;
-    if(key === "uriAnchor" && jsonPatch.compare(o.uriAnchor, value).length > 0){
-      var oldAnchor = $.extend(true, {}, o.uriAnchor);
-      function callback(err, doc){
-        if(err){
-          self._setOption('uriAnchor', oldAnchor);
-          return console.error($.extend(err,{domainId: value.dom||o.currentDomain, collectionId: value.col, documentId:value.doc, actionId:value.act, opts:value._doc}));
-        } 
-        self._setAnchor();
-      }
-
-      if(value.col == '.metas' && value.act == 'new'){
-        Loader.createDocument(client, this.element, domainId, metaId, callback);
-      } else {
-        Loader.loadDocument(client, this.element, value.dom||o.currentDomain, value.col, value.doc, value.act, value._doc, callback);
-      }
-    }else if(key == 'currentDomain' && value != o.currentDomain){
-      var anchor = o.uriAnchor, oldDomainId = o.currentDomain;
-      Loader.loadDocument(client, this.element, value, anchor.col, anchor.doc, anchor.act, anchor._doc, function(err, doc){
-        if(err){
-          self._setOption('currentDomain', oldDomainId);
-          return console.log($.extend(err,{domainId: value, collectionId: anchor.col, documentId:anchor.doc, actionId:anchor.act, opts:anchor._doc}));
+  _setOptions: function( options) {
+    var self = this, o = this.options, override = options.override || o.override;
+    $.each(options, function(key, value) {
+      if(key === "uriAnchor" && jsonPatch.compare(o.uriAnchor||{}, value).length > 0){
+        var oldAnchor = $.extend(true, {}, o.uriAnchor);
+        function callback(err, doc){
+          if(err){
+            o.urlAnchor = oldAnchor;
+            return console.error($.extend(err,{domainId: value.dom||o.currentDomain, collectionId: value.col, documentId:value.doc, actionId:value.act, opts:value._doc}));
+          } 
+          self._setAnchor(o.uriAnchor, override);
         }
-        self._setCurrentDomain(value);
-        self._setAnchor();
-      });
-    }
 
-    this._super(key, value);
+        if(value.col == '.metas' && value.act == 'new'){
+          Loader.createDocument(client, self.element, domainId, metaId, callback);
+        } else {
+          Loader.loadDocument(client, self.element, value.dom||o.currentDomain, value.col, value.doc, value.act, value._doc, callback);
+        }
+      }else if(key == 'currentDomain' && value != o.currentDomain){
+        var anchor = o.uriAnchor, oldDomainId = o.currentDomain;
+        Loader.loadDocument(client, self.element, value, anchor.col, anchor.doc, anchor.act, anchor._doc, function(err, doc){
+          if(err){
+            self._setOption('currentDomain', oldDomainId);
+            return console.log($.extend(err,{domainId: value, collectionId: anchor.col, documentId:anchor.doc, actionId:anchor.act, opts:anchor._doc}));
+          }
+          self._setCurrentDomain(value);
+          self._setAnchor(o.uriAnchor);
+        });
+      }
+      self._setOption( key, value );
+    });
   },
 
   loadDocument: function(domId, colId, docId, actId, opts){
@@ -194,11 +201,11 @@ $.widget('nm.runtime',{
     return anchor;
   },
 
-  _setAnchor: function(override){
+  _setAnchor: function(uriAnchor, override){
     var o = this.options;
     this.oldAnchor = this._makeAnchorMap();
     try {
-      $.uriAnchor.setAnchor(this._encodeAnchor(o.uriAnchor), null, override);
+      $.uriAnchor.setAnchor(this._encodeAnchor(uriAnchor), null, override);
     } catch(error) {
       if(this.oldAnchor){
         $.uriAnchor.setAnchor(this._encodeAnchor(this.oldAnchor), null, true);
@@ -207,30 +214,25 @@ $.widget('nm.runtime',{
   },
 
   _onHashchange: function(event){
-    this.option('uriAnchor', this._makeAnchorMap());      
+    this.option({uriAnchor:this._makeAnchorMap(), override:false});
     return false;
   },
 
   _makeAnchorMap: function(){
-    var anchor;
+    var o = this.options, anchor;
 
     try {
       anchor = $.uriAnchor.makeAnchorMap();
     } catch(error) {console.error(error);}
 
-    anchor = this._decodeAnchor(anchor);
-
-    if($.isEmptyObject(anchor)){
-      anchor = $.extend(true, {}, $.nm.runtime.prototype.options.uriAnchor);
-    }
-
-    return anchor
+    return this._decodeAnchor(anchor);
   },
 
   _destroy: function(){
     client.off("loggedIn", this.loggedInListener);
     client.off("loggedOut", this.loggedOutListener);
     client.off("TokenExpiredError", this.TokenExpiredErrorListener);
+    client.off("invalidToken", this.invalidTokenListener);
   }
 
 });

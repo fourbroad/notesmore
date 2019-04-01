@@ -9,6 +9,7 @@ import 'calendar/calendar';
 import 'chat/chat';
 import 'email/email';
 import 'signup/signup';
+import 'login/login';
 import 'form/form';
 
 const client = require('../lib/client')({
@@ -50,6 +51,5 @@ if(index >= 0){
 }
 
 $('body').runtime({
-  currentDomain:currentDomain,
-  uriAnchor: {col:'.pages', doc:'.workbench'}
+  currentDomain:currentDomain
 });
