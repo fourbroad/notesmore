@@ -1,15 +1,13 @@
 .nm-newdialog {
-  .input-group {
-    width: 186px;
-  }
-
-  .messages{
-    p {
-      margin-bottom: 0px;
+  .meta {
+    text-align: center;
+    .icon-holder {
+      font-size: 64px;
+      text-align: center;
     }
   }
 
-  .btn-group{
-    margin-bottom: 0px;
+  .meta.selected {
+    color: #2196f3 !important;
   }
 }

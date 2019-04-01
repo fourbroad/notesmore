@@ -6,7 +6,8 @@ import 'jquery-ui/ui/widget';
 import 'jquery-ui/ui/data';
 import 'jquery.urianchor';
 
-var client = require('../../lib/client')();
+const client = require('../../lib/client')()
+  , jwtDecode = require('jwt-decode');
 
 /**
  * NOTE: Register resize event for Masonry layout
@@ -33,7 +34,7 @@ $.widget('nm.runtime',{
 
   _create: function(){
     var o = this.options, self = this, anchor = this._makeAnchorMap(),
-        token = Cookies.get('token') || localStorage.token;
+        token = Cookies.get('token') || localStorage.getItem('token');
 
     function callback(err, result){
       if(err) return console.error(err);
@@ -48,10 +49,34 @@ $.widget('nm.runtime',{
     }
 
     if(token){
-      client.connect(token, callback);
+      var decodedToken = jwtDecode(token);
+      if(new Date().getTime()/1000 < decodedToken.exp){
+        client.connect(token, callback);        
+      } else {
+        localStorage.removeItem('token');
+        client.login(callback);        
+      }
+      
     } else {
       client.login(callback);
     }
+
+    this.loggedInListener =function(user){
+      localStorage.setItem('token', client.token);
+    }
+
+    this.loggedOutListener = function(user){
+      client.login();
+    }
+
+    this.TokenExpiredErrorListener = function(err){
+      console.error(err);
+      localStorage.removeItem('token');
+    }
+
+    client.on("loggedIn", this.loggedInListener);
+    client.on("loggedOut", this.loggedOutListener);
+    client.on("TokenExpiredError", this.TokenExpiredErrorListener);
 
     this._on({
       "createdocument": function(event, meta){
@@ -200,6 +225,12 @@ $.widget('nm.runtime',{
     }
 
     return anchor
+  },
+
+  _destroy: function(){
+    client.off("loggedIn", this.loggedInListener);
+    client.off("loggedOut", this.loggedOutListener);
+    client.off("TokenExpiredError", this.TokenExpiredErrorListener);
   }
 
 });

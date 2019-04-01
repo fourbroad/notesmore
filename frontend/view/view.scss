@@ -2,6 +2,14 @@
   .view-header {
 
     border-bottom: 1px solid lightgray;
+
+    .icon-holder{
+      font-size: 26px;
+    }
+
+    h4 {
+      vertical-align: baseline;
+    }
     
     .btn {
       border-color: lightgray;

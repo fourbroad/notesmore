@@ -80,6 +80,18 @@ $.widget("nm.account", {
       });
     });
 
+    this.loggedInListener =function(user){
+      self._refresh();
+    }
+
+    this.loggedOutListener = function(user){
+      self._refresh();
+    }
+
+    client.on("loggedIn", this.loggedInListener);
+    client.on("loggedOut", this.loggedOutListener);
+
+
     this._on(this.$loginButton, {utap: this._onSubmit});
     this._on(this.$form, {submit: this._onSubmit});
     this._on(this.$alertHideBtn, {click : this._onHideAlert});
@@ -185,6 +197,8 @@ $.widget("nm.account", {
 
   _destroy: function() {
     this.element.empty();
+    client.off("loggedIn", this.loggedInListener);
+    client.off("loggedOut", this.loggedOutListener);
   }
 
 });

@@ -13,6 +13,7 @@
   "author": "zhusihong@ins24.com",
   "license": "MIT",
   "dependencies": {
+    "events": "^3.0.0",
     "fast-json-patch": "^2.0.7",
     "lodash": "^4.17.11",
     "node-cache": "^4.2.0",

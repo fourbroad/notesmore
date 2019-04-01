@@ -214,6 +214,28 @@ initSocket = function(socket, visitorId) {
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
 
+  socket.on('mgetDomainDocuments', function(domainId, ids, callback){
+    Domain.get(domainId).then(domain => {
+      return domain.mgetDocuments(ids);
+    }).then(data => {
+      return Profile.get(domainId, visitorId).then( profile => {
+        return _.reduce(data.docs, function(result, value, key){
+          if(value.found){
+            var doc = value._source, permissions = _.at(doc, '_meta.acl.get')[0];
+            if( !permissions 
+            ||_.intersection(profile.roles, permissions.roles).length > 0 
+            || _.intersection(profile.groups, permissions.groups).length > 0 
+            || (permissions.users && permissions.users.indexOf(visitorId) >= 0) ){
+              doc._meta.index = value._index;
+              result.push(doc);
+            }
+          }
+          return result;
+        },[]);
+      });
+    }).then(docs => callback(null, {docs:docs})).catch(err => callback(err));
+  });
+
   socket.on('patchDomain', function(domainId, patch, callback){
     checkAcl1(visitorId, Domain, domainId, 'patch', patch).then( domain => {
       return domain.patch(visitorId, patch);
@@ -576,8 +598,8 @@ module.exports = {
         User.verify(token).then( visitorId  => {
           initSocket(socket, visitorId);
         }).catch((err)=>{
-            socket.emit('errors', err);
-//             setTimeout(()=>{ socket.disconnect(); }, 3000);
+          socket.emit(err.name, err);
+          setTimeout(()=>{ socket.disconnect(); }, 5000);
         });
       } else {
         initSocket(socket);

@@ -54,6 +54,7 @@ $.widget("nm.view", {
     
     this.$viewContainer = $('.view-container', this.element);
     this.$viewHeader = $('.view-header', this.element);
+    this.$iconHolder = $('.icon-holder', this.$viewHeader);
     this.$actions = $('.actions', this.$viewHeader);
     this.$actionMoreMenu = $('.more>.dropdown-menu', this.$actions);
     this.$saveBtn =$('.save.btn', this.$actions);
@@ -140,6 +141,7 @@ $.widget("nm.view", {
   _refresh: function(){
     var o = this.options, self = this, view = o.view;
     this.$viewTitle.html(view.title||view.id);
+    $('i', this.$iconHolder).removeClass().addClass(o.view._meta.iconClass||'ti-file');
     this._armActionMoreMenu();
     this._refreshHeader();
     this._initSearchBar();
@@ -160,6 +162,13 @@ $.widget("nm.view", {
       searchCols: this._armSearchCol(),
       order: (view.order&&JSON.parse(view.order))||[],
       columnDefs : [{
+        targets: 0,
+        width: "10px",
+        data: null,
+        render: function(data, type, row, meta){
+          return '<span class="icon-holder"><i class="'+ (data._meta.iconClass||'ti-file')+'"></i></span>';
+        }
+      },{
         targets:'_all',
         render:function(data, type, row, meta){
           var column = meta.settings.aoColumns[meta.col], text = data;
@@ -176,7 +185,7 @@ $.widget("nm.view", {
               break;
           }
           return text;
-        }
+        },
       },{
         targets: -1,
         width: "30px",
@@ -480,6 +489,7 @@ $.widget("nm.view", {
   saveAs: function(title, callback){
     var o = this.options, {View} = o.view.getClient(), view = _.cloneDeep(o.view);
     view.title = title;
+    delete view._meta;
     if(o.view.collectionId == '.collections'){
       view.collections = [o.view.id];
       _.set(view, '_meta.acl.delete.roles', ['administrator']);

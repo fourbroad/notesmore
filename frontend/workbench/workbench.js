@@ -5,7 +5,6 @@ import moment from 'moment';
 
 import 'jquery-ui/ui/widget';
 import 'jquery-ui/ui/data';
-import 'jquery.urianchor';
 
 import PerfectScrollbar from 'perfect-scrollbar';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
@@ -26,7 +25,7 @@ $.widget('nm.workbench', {
   },
 
   _create: function(){
-    var o = this.options, self = this, client = o.page.getClient(), anchor = o.anchor, Domain = client.Domain;
+    var o = this.options, self = this, client = o.page.getClient(), anchor = o.anchor, { Domain } = client;
 
     this._addClass("nm-workbench");
     this.element.html(workbenchHtml);
@@ -36,10 +35,14 @@ $.widget('nm.workbench', {
  
     this.ps = new PerfectScrollbar($('.scrollable', this.element)[0],{suppressScrollX:true, wheelPropagation: true});
 
-    this.$viewList = $('.favorite-views', this.element);
+    this.$favorites = $('li.favorites', this.element);
+    this.$favoriteItems = $('.favorite-item-container', this.$favorites);
+
     this.$newDocumentBtn = $('li.new-document', this.element);
 
     $('<li/>').appendTo($('.page-container .nav-right', this.element)).account({client: client});
+
+    this._armSidebar();
 
     this._on(this.$newDocumentBtn, {click: this._loadNewDialog});
     this._on(this.$workbench, {
@@ -93,7 +96,7 @@ $.widget('nm.workbench', {
 
     // Sidebar links
     $('.sidebar .sidebar-menu', this.element).on('click','li>a.document', function () {
-      const $this = $(this), $parent = $this.parent(), id = $parent.attr('id');
+      const $this = $(this), $parent = $this.parent(), anchor = $parent.data('anchor');
       if ($parent.hasClass('open')) {
         $parent.children('.dropdown-menu').slideUp(200, () => {
           $parent.removeClass('open');
@@ -110,8 +113,7 @@ $.widget('nm.workbench', {
       $('.sidebar').find('.sidebar-link').removeClass('active');
       $this.addClass('active');
 
-      var paths = id.split('~');
-      self.option('anchor',{col: paths[0], doc: paths[1]});
+      self.option('anchor', anchor);
     });
 
     // ٍSidebar Toggle
@@ -132,6 +134,15 @@ $.widget('nm.workbench', {
       }, 300);
     });
 
+    Domain.get(o.page.domainId, function(err, domain){
+      domain.findViews({}, function(err, views){
+        if(err) return console.error(err);
+        _.each(views.views, function(view){
+          $(self._armViewListItem(view.collectionId + '~' + view.id, view.title||view.id)).data('item', view).appendTo(self.$favoriteItems);
+        });
+      });
+    });
+
     function callback(err, doc){
       if(err) return console.error(err);
       self.element.trigger("history", {anchor: anchor});
@@ -141,13 +152,31 @@ $.widget('nm.workbench', {
     }else{
       this._loadDocument(anchor.dom||o.page.domainId, anchor.col, anchor.doc, anchor.act, anchor.opts, callback);
     }
+        
+  },
 
-    Domain.get(o.page.domainId, function(err, domain){
-      domain.findViews({}, function(err, views){
-        if(err) return console.error(err);
-        _.each(views.views, function(view){
-          $(self._armViewListItem(view.collectionId + '~' + view.id, view.title||view.id)).data('item', view).appendTo(self.$viewList);
-        });
+  _armSidebarItem(item){
+    var $item = $('<li class="nav-item">\
+          <a class="sidebar-link document">\
+            <span class="icon-holder">\
+              <i></i>\
+            </span>\
+            <span class="title"></span>\
+          </a>\
+        </li>');
+    $('.icon-holder>i', $item).addClass(item.iconClass).addClass(item.iconColor);
+    $('.title', $item).html(item.title);    
+    $item.data('anchor', {col: item.collectionId, doc: item.id});
+    return $item;
+  },
+
+  _armSidebar: function(){
+    var o = this.options, self = this, items = _.cloneDeep(o.page.sidebarItems);
+    currentDomain.mgetDocuments(items, function(err, docs){
+      _.each(docs, function(doc){
+        var item = _.filter(items, function(i) { return i.collectionId == doc.collectionId && i.id == doc.id;});
+        self._armSidebarItem(_.merge(item[0], {iconClass: doc._meta.iconClass||'ti-file', title: doc.title}))
+            .insertBefore(self.$favorites);
       });
     });
   },

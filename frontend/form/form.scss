@@ -7,8 +7,13 @@
     border-bottom: 1px solid lightgray;
     margin-bottom: 8px;
     
+    .icon-holder{
+      font-size: 26px;
+    }
+        
     h4 {
       display: inline-block;
+      vertical-align: baseline;
     }
 
     .btn {

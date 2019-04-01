@@ -50,7 +50,7 @@ _.assign(User, {
   login: function(userId, password) {
     return new Promise((resolve, reject) => {
       function createToken(userId){
-        var newToken = jwt.sign({ userId: userId}, secret, {expiresIn: 60*60});
+        var newToken = jwt.sign({ userId: userId}, secret, {expiresIn: 60*60*1000+"ms"});
         redis.set(SESSION_PREFIX + userId, {token: newToken});
         return resolve(newToken);
       }

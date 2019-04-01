@@ -42,6 +42,7 @@ $.widget("nm.form", {
     }
 
     this.$formHeader = $('.form-header', this.element),
+    this.$iconHolder = $('.icon-holder', this.$formHeader);
     this.$actions = $('.actions', this.$formHeader);
     this.$actionMoreMenu = $('.more>.dropdown-menu', this.$actions);
     this.$saveBtn =$('.save.btn', this.$actions);
@@ -98,7 +99,6 @@ $.widget("nm.form", {
 
   _refresh: function(){
     var o = this.options;
-    this.$formTitle.html(o.document.title||o.document.id);
     this._armActionMoreMenu();
     this._refreshHeader();
   },
@@ -106,6 +106,7 @@ $.widget("nm.form", {
   _refreshHeader: function(){
     var o = this.options, doc = o.document;
     this.$formTitle.html(doc.title||doc.id);    
+    $('i', this.$iconHolder).removeClass().addClass(doc._meta.iconClass||'ti-file');
 
     if(this._isDirty()){
       if(o.isNew){
@@ -259,8 +260,9 @@ $.widget("nm.form", {
     if(o.isNew){
       this.element.trigger('cancelaction');
     }else{
-      o.document = this.clone;
-      this._setJsonEditorValue();    
+      o.document = _.cloneDeep(this.clone);
+      this._setJsonEditorValue();
+      this._refresh();
     }
   },
 
@@ -271,15 +273,17 @@ $.widget("nm.form", {
   },
 
   _setOptions: function( options ) {
-    var self = this, isNew = options.isNew, document = options.document;
+    var o = this.options, self = this, isNew = options.isNew, document = options.document;
     this._super(options);
     if(document){
       if(isNew){
         delete self.clone;
       }else{
+        o.isNew = false;
         self.clone = _.cloneDeep(document);
       }
       self._setJsonEditorValue();
+      self._refresh();
     }
   },
 
@@ -290,7 +294,6 @@ $.widget("nm.form", {
     this.jsonEditor.clearSelection();
     this.jsonEditor.focus();
     this.enableChange = true;
-    this._refresh();
   },
 
   _destroy: function(){

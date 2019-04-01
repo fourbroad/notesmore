@@ -2,6 +2,7 @@
 import Loader from 'core/loader';
 import Masonry from 'masonry-layout';
 
+import './new-dialog.scss';
 import newDialogHtml from './new-dialog.html';
 
 const client = require('../../lib/client')()
@@ -35,13 +36,14 @@ $.widget('nm.newdialog', {
       Meta.find(currentDomain.id, {size:1000}, function(err, result){
         if(err) return console.log(err);
         var $items = _.reduce(result.metas, function(items, meta){
-          var item = $('<div class="masonry-item col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">'
+          var $item = $('<div class="masonry-item col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">'
                       +'<div class="meta p-10 bd">'
-                        +'<img class="meta-img" alt="Form image">'
-                        +'<h6 class="c-grey-900">' + (meta.title||meta.id) +'</h6>'
+                        +'<span class="icon-holder"><i class="'+ meta._meta.iconClass+'"></i></span>'
+                        +'<h6>' + (meta.title||meta.id) +'</h6>'
                       +'</div>'
-                    +'</div>').data('item',meta);
-          return items.add(item);
+                    +'</div>');
+          $('.meta', $item).data('item',meta);
+          return items.add($item);
         },$());
 
         self.$metaGrid.append($items);
@@ -52,8 +54,8 @@ $.widget('nm.newdialog', {
 
     this._on(this.$metaGrid, {
       'click .meta': function(e){
-        $('.masonry-item.selected', this.$metaGrid).removeClass('selected');
-        $(e.currentTarget).parent('.masonry-item').addClass('selected');
+        $('.meta.selected', this.$metaGrid).removeClass('selected');
+        $(e.currentTarget).addClass('selected');
       }
     });
 
@@ -61,7 +63,7 @@ $.widget('nm.newdialog', {
   },
 
   getSelected: function(){
-    return $('.masonry-item.selected', this.$metaGrid).data('item');
+    return $('.meta.selected', this.$metaGrid).data('item');
   },
 
   _onCreate: function(e){

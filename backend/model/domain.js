@@ -14,11 +14,13 @@ const _ = require('lodash')
   , Role = require('./role')
   , User = require('./user')
   , Document = require('./document')
-  , {uniqueId, documentHotAlias, inherits, buildMeta, getEntity} = require('./utils');
+  , {uniqueId, documentHotAlias, documentAllAlias, inherits, buildMeta, getEntity} = require('./utils');
 
 const DOMAINS = '.domains'
   , ROOT = '.root'
   , DEFAULT_COLUMNS = [{
+  sortable: false
+},{
   title: "Id",
   name: "id",
   data: "id",
@@ -76,44 +78,78 @@ const DOMAINS = '.domains'
 }]
   , COLLECTIONS = [{
   id: ".collections",
-  title: "Collections"
+  title: "Collections",
+  _meta:{
+    iconClass: "ti-harddrives"    
+  }
 }, {
   id: ".metas",
-  title: "Metas"
+  title: "Metas",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".pages",
-  title: "Pages"
+  title: "Pages",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".views",
-  title: "Views"
+  title: "Views",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".forms",
-  title: "Forms"
+  title: "Forms",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".actions",
-  title: "Actions"
+  title: "Actions",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".files",
   title: "Files",
   _meta: {
+    iconClass: "ti-folder",
     actions: ['uploadFiles']
   }
 }, {
   id: ".roles",
-  title: "Roles"
+  title: "Roles",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".groups",
-  title: "Groups"
+  title: "Groups",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".profiles",
-  title: "Profiles"
+  title: "Profiles",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }]
   , ROOT_COLLECTIONS = [{
   id: ".users",
-  title: "Users"
+  title: "Users",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".domains",
-  title: "Domains"
+  title: "Domains",
+  _meta:{
+    iconClass: "ti-folder"
+  }
 }]
   , ACTIONS = [{
   id: "new",
@@ -123,6 +159,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/form/form.bundle.js",
     css: "@notesabc/form/form.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }, {
   id: "edit",
@@ -132,6 +171,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/form/form.bundle.js",
     css: "@notesabc/form/form.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }, {
   id: "gridView",
@@ -141,6 +183,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/view/view.bundle.js",
     css: "@notesabc/view/view.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }, {
   id: 'signup',
@@ -150,6 +195,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/signup/signup.bundle.js",
     css: "@notesabc/signup/signup.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }, {
   id: 'workbench',
@@ -159,8 +207,10 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/workbench/workbench.bundle.js",
     css: "@notesabc/workbench/workbench.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
-
 }, {
   id: 'dashboard',
   title: 'Dashboard',
@@ -169,6 +219,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/dashboard/dashboard.bundle.js",
     css: "@notesabc/dashboard/dashboard.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }, {
   id: 'calendar',
@@ -178,6 +231,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/calendar/calendar.bundle.js",
     css: "@notesabc/calendar/calendar.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }, {
   id: 'chat',
@@ -187,6 +243,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/chat/chat.bundle.js",
     css: "@notesabc/chat/chat.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }, {
   id: 'email',
@@ -196,6 +255,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/email/email.bundle.js",
     css: "@notesabc/email/email.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }, {
   id: "uploadFiles",
@@ -205,6 +267,9 @@ const DOMAINS = '.domains'
     mode: 'offline',
     js: "@notesabc/upload-files/upload-files.bundle.js",
     css: "@notesabc/upload-files/upload-files.bundle.css"
+  },
+  _meta: {
+    iconClass: "ti-control-play"
   }
 }]
   , METAS = [{
@@ -217,7 +282,10 @@ const DOMAINS = '.domains'
     id: '.metas',
     title: 'Metas'
   },
-  actions: ['edit']
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-wand"
+  }
 }, {
   id: ".meta-collection",
   title: "Collection",
@@ -235,7 +303,10 @@ const DOMAINS = '.domains'
     order: "[[5,\"desc\"],[4,\"desc\"]]"
   },
   defaultAction: 'gridView',
-  actions: ['gridView', 'edit']
+  actions: ['gridView', 'edit'],
+  _meta: {
+    iconClass: "ti-folder"
+  }
 }, {
   id: ".meta-page",
   title: "Page",
@@ -246,7 +317,10 @@ const DOMAINS = '.domains'
     id: '.pages',
     title: 'Pages'
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-layout-width-default"
+  }
 }, {
   id: ".meta-view",
   title: "View",
@@ -268,7 +342,10 @@ const DOMAINS = '.domains'
     }
   },
   defaultAction: "gridView",
-  actions: ['gridView', 'edit']
+  actions: ['gridView', 'edit'],
+  _meta: {
+    iconClass: "ti-view-list-alt"
+  }
 }, {
   id: ".meta-form",
   title: "Form",
@@ -279,7 +356,10 @@ const DOMAINS = '.domains'
     id: '.forms',
     title: 'Forms'
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-layout-cta-btn-right"
+  }
 }, {
   id: ".meta-action",
   title: "Action",
@@ -290,7 +370,10 @@ const DOMAINS = '.domains'
     id: '.actions',
     title: 'Actions'
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-control-play"
+  }
 }, {
   id: ".meta-file",
   title: "File",
@@ -301,7 +384,10 @@ const DOMAINS = '.domains'
     id: '.files',
     title: 'Files'
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-file"
+  }
 }, {
   id: ".meta-role",
   title: "Role",
@@ -312,7 +398,10 @@ const DOMAINS = '.domains'
     id: '.roles',
     title: 'Roles'
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-id-badge"
+  }
 }, {
   id: ".meta-group",
   title: "Group",
@@ -323,7 +412,10 @@ const DOMAINS = '.domains'
     id: '.groups',
     title: 'Groups'
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-view-grid"
+  }
 }, {
   id: ".meta-profile",
   title: "Profile",
@@ -334,7 +426,10 @@ const DOMAINS = '.domains'
     id: '.profiles',
     title: 'Profiles'
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-id-badge"
+  }
 }]
   , ROOT_METAS = [{
   id: ".meta-user",
@@ -346,7 +441,10 @@ const DOMAINS = '.domains'
   defaultValue:{
     title: "New User"
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-user"
+  }
 }, {
   id: ".meta-domain",
   title: "Domain",
@@ -357,61 +455,114 @@ const DOMAINS = '.domains'
   defaultValue:{
     title: "New Domain"
   },
-  actions: ['edit']  
+  actions: ['edit'],
+  _meta: {
+    iconClass: "ti-layout-width-full"
+  }
 }, ]
   , PAGES = [{
   id: ".signup",
   title: "Signup",
   _meta: {
     actions: ['signup']
+  },
+  _meta: {
+    iconClass: "ti-layout-width-default"
   }
 }, {
   id: ".workbench",
   title: "Workbench",
+  sidebarItems:[{
+    collectionId: ".pages",
+    id: ".dashboard",
+    iconColor: "c-blue-500"
+  },{
+    collectionId: ".pages",
+    id: ".calendar",
+    iconColor: "c-deep-orange-500"
+  },{
+    collectionId: ".pages",
+    id: ".chat",
+    iconColor: "c-deep-purple-500"
+  },{
+    collectionId: ".pages",
+    id: ".email",
+    iconColor: "c-brown-500"
+  },{
+    collectionId: ".collections",
+    id: ".collections",
+    label: "All Documents",
+    iconColor: "c-deep-purple-500"
+  }],
+  favorites:[],
+  tips:[{
+    collectionId: ".collections",
+    id: ".notifications",
+    iconClass: "ti-bell"
+  },{
+    collectionId: ".collections",
+    id: ".emails",
+    iconClass: "ti-email"
+  }],
   _meta: {
+    iconClass: "ti-blackboard",
     actions: ['workbench']
   }
 }, {
   id: ".dashboard",
   title: "Dashboard",
   _meta: {
+    iconClass: "ti-dashboard",
     actions: ['dashboard']
   }
 }, {
   id: ".calendar",
   title: "Calendar",
   _meta: {
+    iconClass: "ti-calendar",  
     actions: ['calendar']
   }
 }, {
   id: ".chat",
   title: "Chat",
   _meta: {
+    iconClass: "ti-comments",
     actions: ['chat']
   }
 }, {
   id: ".email",
   title: "Email",
   _meta: {
+    iconClass: "ti-email",
     actions: ['email']
   }
 }]
   , ROLES = [{
   id: "administrator",
-  title: "Administrator"
+  title: "Administrator",
+  iconClass: "ti-user"
 }, {
   id: "anonymous",
-  title: "Anonymous"
+  title: "Anonymous",
+  _meta:{
+    iconClass: "ti-user"  
+  }
 }]
   , ADMINISTRATOR = {
   id: "administrator",
   title: "Administrator",
-  password: "3c3f601a1960b8d7b347d376d52b6e59"
+  password: "3c3f601a1960b8d7b347d376d52b6e59",
+  _meta:{
+    iconClass: "ti-user",
+  }
 }
   , ANONYMOUS = {
   id: "anonymous",
   title: "Anonymous",
-  password: "a29b1ee7caefc17a3a73d6d137c8169b"
+  password: "a29b1ee7caefc17a3a73d6d137c8169b",
+  _meta:{
+    iconClass: "ti-user",
+  }
 };
 
 function indexName(domainId, collectionId) {
@@ -740,10 +891,20 @@ inherits(Domain, Document, {
     }
   },
 
-  refresh: function() {
-    return this._getElasticSearch().indices.refresh({
-      index: this.id + '~*'
+  mgetDocuments: function(ids){
+    var domainId = this.id;
+    return this._getElasticSearch().mget({
+      body: {
+        docs: _.reduce(ids, function(result, value, key){
+                result.push({_index:documentAllAlias(domainId, value.collectionId), _type: Document.TYPE, _id: value.id});
+                return result;
+              },[])
+      }
     });
+  },
+
+  refresh: function() {
+    return this._getElasticSearch().indices.refresh({ index: this.id + '~*' });
   },
 
 });

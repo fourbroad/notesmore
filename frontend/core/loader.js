@@ -213,7 +213,7 @@ createDocument = function(client, element, domainId, metaId, callback){
   Meta.get(domainId, metaId, function(err, meta){
     var collectionId = meta.container.id, doc, plugin, pluginName, docData = {}, opts = {};
  
-    _.merge(docData, {_meta: {metaId: metaId}}, _.cloneDeep(meta.defaultValue));
+    _.merge(docData, {_meta: {metaId: metaId, iconClass:meta._meta.iconClass}}, _.cloneDeep(meta.defaultValue));
     switch(collectionId){
       case '.metas':
         doc = new Meta(domainId, docData);
