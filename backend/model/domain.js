@@ -312,7 +312,7 @@ const DOMAINS = '.domains'
     search: {
       names: ["id.keyword", "title.keyword", "_meta.author.keyword"]
     },
-    order: "[[5,\"desc\"],[4,\"desc\"]]"
+    order: "[[6,\"desc\"],[5,\"desc\"]]"
   },
   defaultAction: 'gridView',
   actions: ['gridView', 'edit'],
@@ -348,7 +348,7 @@ const DOMAINS = '.domains'
     search: {
       names: ["id.keyword", "title.keyword", "_meta.author.keyword"]
     },
-    order: "[[5,\"desc\"],[4,\"desc\"]]",
+    order: "[[6,\"desc\"],[5,\"desc\"]]",
     _meta:{
       metaId:'.meta-view'
     }

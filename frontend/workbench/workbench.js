@@ -166,7 +166,7 @@ $.widget('nm.workbench', {
     this.$favoriteItems.empty();
     Profile.get(o.page.domainId, decodedToken.userId, function(err, profile){
       if(err) return console.error(err);
-      self.$badge.html(profile.favorites.length);
+      self.$badge.html(profile.favorites&&profile.favorites.length||0);
       _.each(profile.favorites, function(f){
         Document.get(f.domainId, f.collectionId, f.id, function(err, doc){
           if(err) return console.error(err);

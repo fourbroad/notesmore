@@ -23,6 +23,9 @@ const
         "properties": {
           "_meta":{
             "properties":{
+              "version":{
+                "type": "integer"
+              },
               "created": {
                 "type": "date"
               },
