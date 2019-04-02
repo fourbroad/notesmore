@@ -54,7 +54,8 @@ $.widget("nm.view", {
     
     this.$viewContainer = $('.view-container', this.element);
     this.$viewHeader = $('.view-header', this.element);
-    this.$iconHolder = $('.icon-holder', this.$viewHeader);
+    this.$icon = $('.icon', this.$viewHeader);
+    this.$favorite = $('.favorite', this.$viewHeader);
     this.$actions = $('.actions', this.$viewHeader);
     this.$actionMoreMenu = $('.more>.dropdown-menu', this.$actions);
     this.$saveBtn =$('.save.btn', this.$actions);
@@ -124,6 +125,7 @@ $.widget("nm.view", {
     this._on(this.$cancelBtn, {click: this._onCancel});
     this._on(this.$submitBtn, {click: this._onSubmit});
     this._on(this.$form, {submit: this._onSubmit});
+    this._on(this.$favorite, {click: this._onFavorite});
   },
 
   _armActionMoreMenu: function(){
@@ -141,7 +143,10 @@ $.widget("nm.view", {
   _refresh: function(){
     var o = this.options, self = this, view = o.view;
     this.$viewTitle.html(view.title||view.id);
-    $('i', this.$iconHolder).removeClass().addClass(o.view._meta.iconClass||'ti-file');
+
+    $('i', this.$icon).removeClass().addClass(o.view._meta.iconClass||'ti-file');
+
+    this._refreshFavorite()
     this._armActionMoreMenu();
     this._refreshHeader();
     this._initSearchBar();
@@ -216,6 +221,39 @@ $.widget("nm.view", {
           });
         });
       }
+    });
+  },
+
+  _onFavorite: function(e){
+    var o = this.options, view = o.view, self = this, { User, Profile } = client;
+    User.get(function(err, user){
+      if(err) return console.error(err);
+      Profile.get(view.domainId, user.id, function(err, profile){
+        if(err) return console.error(err);
+        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;}),
+            patch;
+        if(index >= 0){
+          patch = [{
+            op:'remove',
+            path: '/favorites/'+index            
+          }];
+        } else {
+          patch = [profile.favorites ? {
+            op:'add', 
+            path:'/favorites/-', 
+            value:{domainId:view.domainId, collectionId: view.collectionId, id: view.id}
+          } : {
+            op:'add', 
+            path:'/favorites', 
+            value:[{domainId:view.domainId, collectionId: view.collectionId, id: view.id}]
+          }];
+        }
+        profile.patch(patch, function(err, result){
+          if(err) return console.error(err);
+          self._refreshFavorite();
+          self.element.trigger('favoriteclick', view);
+        });
+      });
     });
   },
 
@@ -343,6 +381,22 @@ $.widget("nm.view", {
       this.$saveBtn.hide();
       this.$cancelBtn.hide();
     }
+  },
+
+  _refreshFavorite: function(){
+    var o = this.options, self = this, view = o.view,　{ User, Profile } = client;
+    User.get(function(err, user){
+      if(err) return console.error(err);
+      Profile.get(view.domainId, user.id, function(err, profile){
+        if(err) return console.error(err);
+        var $i = $('i', self.$favorite).removeClass();
+        if(_.find(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
+          $i.addClass('c-red-500 ti-star');
+        }else{
+          $i.addClass('ti-star');
+        }
+      });
+    });        
   },
 
   _getPatch: function(){

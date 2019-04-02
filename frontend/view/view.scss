@@ -3,12 +3,17 @@
 
     border-bottom: 1px solid lightgray;
 
-    .icon-holder{
-      font-size: 26px;
+    .icon {
+      font-size: 24px;
     }
 
     h4 {
       vertical-align: baseline;
+    }
+
+    .favorite{
+      font-size: 16px;
+      vertical-align: super;      
     }
     
     .btn {

@@ -92,6 +92,8 @@ $.widget('nm.runtime',{
     window.runtime = this;
 
     this._on(window, {hashchange: this._onHashchange});
+    $(window).trigger('hashchange');
+  
   },
 
   _gotoConnected: function(user){
@@ -104,7 +106,10 @@ $.widget('nm.runtime',{
       }
       this.option({'uriAnchor':anchor, override: false});
     } else {
-      this.option({'uriAnchor': o.defaultAnchor, override: true});
+      if(anchor.col == '.pages' && (anchor.doc == '.login' || anchor.doc == '.signup')){
+        anchor = {col: '.pages', doc: '.workbench'};
+      }
+      this.option({'uriAnchor': anchor, override: true});
     }
   },
 
@@ -223,6 +228,9 @@ $.widget('nm.runtime',{
         }
         self.option({uriAnchor:anchor, override: override});
       } else {
+        if($.isEmptyObject(anchor)){
+          anchor = {col:'.pages', doc:'.workbench'}
+        }
         self.option({uriAnchor: anchor, override: override});
       }
     });

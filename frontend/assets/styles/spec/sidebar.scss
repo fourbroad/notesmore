@@ -192,7 +192,7 @@
       background: $md-blue-500;
       border-radius: 50%;
       content: '';
-      display: block;
+      display: inline-block;
       height: 8px;
       left: -4px;
       position: absolute;
@@ -231,7 +231,7 @@
         }
 
         > .dropdown-menu {
-          display: block;
+          display: inline-block;
 
           .dropdown-menu {
             padding-left: 20px;
@@ -276,7 +276,7 @@
 
           > li {
             > a {
-              display: block;
+              display: inline-block;
               padding: 10px 15px;
 
               &:hover,

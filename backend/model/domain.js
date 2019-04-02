@@ -557,7 +557,9 @@ const DOMAINS = '.domains'
   , ROLES = [{
   id: "administrator",
   title: "Administrator",
-  iconClass: "ti-user"
+  _meta:{
+    iconClass: "ti-user"  
+  }
 }, {
   id: "anonymous",
   title: "Anonymous",

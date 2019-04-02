@@ -109,6 +109,7 @@ $.widget("nm.login", {
         } else {
           self._enableSubmit();
           self._closeAlertMessage();
+          runtime.option({uriAnchor:{col:'.pages', doc:'.workbench'}, override: true});
         }
       });
     }

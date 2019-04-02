@@ -6,7 +6,8 @@ const $ = require('jquery')
   , uuidv4 = require('uuid/v4')
   , Loader = require('core/loader')
   , formHtml = require('./form.html')
-  , ace = require('brace') ;
+  , ace = require('brace') 
+  , { checkPermission } = require('core/utils');
 
 require('select/select');
 require('./form.scss');
@@ -42,7 +43,8 @@ $.widget("nm.form", {
     }
 
     this.$formHeader = $('.form-header', this.element),
-    this.$iconHolder = $('.icon-holder', this.$formHeader);
+    this.$icon = $('.icon', this.$formHeader);
+    this.$favorite = $('.favorite', this.$viewHeader);
     this.$actions = $('.actions', this.$formHeader);
     this.$actionMoreMenu = $('.more>.dropdown-menu', this.$actions);
     this.$saveBtn =$('.save.btn', this.$actions);
@@ -92,21 +94,48 @@ $.widget("nm.form", {
     this._on(this.$cancelBtn, {click: this._onCancel});
     this._on(this.$submitBtn, {click: this._onSubmit});
     this._on(this.$formTag, {submit: this._onSubmit});
+    this._on(this.$favorite, {click: this._onFavorite});    
 
     this._refresh();
     this.jsonEditor.focus();
   },
 
   _refresh: function(){
-    var o = this.options;
+    var o = this.options, doc = o.document, self = this, {User} = doc.getClient();
+
+    User.get(function(err, user){
+      if(err) return console.error(err);
+      checkPermission(doc.domainId, user.id, 'patch', doc, function(err, result){
+        if(!result){
+          self.jsonEditor.setReadOnly(true);
+        }
+      });
+    });
+    this._refreshFavorite();
     this._armActionMoreMenu();
     this._refreshHeader();
+  },
+
+  _refreshFavorite: function(){
+    var o = this.options, self = this, doc = o.document,　{ User, Profile } = client;
+    User.get(function(err, user){
+      if(err) return console.error(err);
+      Profile.get(doc.domainId, user.id, function(err, profile){
+        if(err) return console.error(err);
+        var $i = $('i', self.$favorite).removeClass();
+        if(_.find(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;})){
+          $i.addClass('c-red-500 ti-star');
+        }else{
+          $i.addClass('ti-star');
+        }
+      });
+    });        
   },
 
   _refreshHeader: function(){
     var o = this.options, doc = o.document;
     this.$formTitle.html(doc.title||doc.id);    
-    $('i', this.$iconHolder).removeClass().addClass(doc._meta.iconClass||'ti-file');
+    $('i', this.$icon).removeClass().addClass(doc._meta.iconClass||'ti-file');
 
     if(this._isDirty()){
       if(o.isNew){
@@ -129,6 +158,39 @@ $.widget("nm.form", {
   _isDirty: function(){
     return this.options.isNew || this._getPatch().length > 0
   },
+
+  _onFavorite: function(e){
+    var o = this.options, doc = o.document, self = this, { User, Profile } = client;
+    User.get(function(err, user){
+      if(err) return console.error(err);
+      Profile.get(doc.domainId, user.id, function(err, profile){
+        if(err) return console.error(err);
+        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;}),
+            patch;
+        if(index >= 0){
+          patch = [{
+            op:'remove',
+            path: '/favorites/'+index            
+          }];
+        } else {
+          patch = [profile.favorites ? {
+            op:'add', 
+            path:'/favorites/-', 
+            value:{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}
+          } : {
+            op:'add', 
+            path:'/favorites', 
+            value:[{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}]
+          }];
+        }
+        profile.patch(patch, function(err, result){
+          if(err) return console.error(err);
+          self._refreshFavorite();
+          self.element.trigger('favoriteclick', doc);
+        });
+      });
+    });
+  },  
 
   _onSave: function(e){
     var o = this.options;

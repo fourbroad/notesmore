@@ -16,6 +16,8 @@ import Loader from 'core/loader';
 
 import workbenchHtml from './workbench.html';
 
+const jwtDecode = require('jwt-decode');
+
 $.widget('nm.workbench', {
   options: {
     anchor:{
@@ -25,7 +27,7 @@ $.widget('nm.workbench', {
   },
 
   _create: function(){
-    var o = this.options, self = this, client = o.page.getClient(), anchor = o.anchor, { Domain } = client;
+    var o = this.options, self = this, client = o.page.getClient(), anchor = o.anchor;
 
     this._addClass("nm-workbench");
     this.element.html(workbenchHtml);
@@ -36,6 +38,7 @@ $.widget('nm.workbench', {
     this.ps = new PerfectScrollbar($('.scrollable', this.element)[0],{suppressScrollX:true, wheelPropagation: true});
 
     this.$favorites = $('li.favorites', this.element);
+    this.$badge = $('.badge', this.favorites);
     this.$favoriteItems = $('.favorite-item-container', this.$favorites);
 
     this.$newDocumentBtn = $('li.new-document', this.element);
@@ -91,6 +94,9 @@ $.widget('nm.workbench', {
       "actionclick": function(e, anchor){
         this.option('anchor', anchor);
         e.stopPropagation();
+      },
+      "favoriteclick": function(e, doc){
+        self._refreshFavorites();
       }
     });
 
@@ -113,7 +119,9 @@ $.widget('nm.workbench', {
       $('.sidebar').find('.sidebar-link').removeClass('active');
       $this.addClass('active');
 
-      self.option('anchor', anchor);
+      if(anchor){
+        self.option('anchor', anchor);  
+      }
     });
 
     // ٍSidebar Toggle
@@ -134,15 +142,6 @@ $.widget('nm.workbench', {
       }, 300);
     });
 
-    Domain.get(o.page.domainId, function(err, domain){
-      domain.findViews({}, function(err, views){
-        if(err) return console.error(err);
-        _.each(views.views, function(view){
-          $(self._armViewListItem(view.collectionId + '~' + view.id, view.title||view.id)).data('item', view).appendTo(self.$favoriteItems);
-        });
-      });
-    });
-
     function callback(err, doc){
       if(err) return console.error(err);
       self.element.trigger("history", {anchor: anchor});
@@ -152,7 +151,29 @@ $.widget('nm.workbench', {
     }else{
       this._loadDocument(anchor.dom||o.page.domainId, anchor.col, anchor.doc, anchor.act, anchor.opts, callback);
     }
-        
+
+    this._refreshFavorites();
+  },
+
+  _armFavoriteItem: function(doc){
+    var item = String() + '<li class="view nav-item"><i class="'+doc._meta.iconClass+'"></i><a class="sidebar-link document">' + (doc.title || doc.id) + '</a></li>'
+    return item;
+  },
+
+  _refreshFavorites: function(){
+    var o = this.options, self = this, domainId = o.page.domainId, client = o.page.getClient(), 
+      { Profile, Document } = client,  decodedToken = jwtDecode(client.token);
+    this.$favoriteItems.empty();
+    Profile.get(o.page.domainId, decodedToken.userId, function(err, profile){
+      if(err) return console.error(err);
+      self.$badge.html(profile.favorites.length);
+      _.each(profile.favorites, function(f){
+        Document.get(f.domainId, f.collectionId, f.id, function(err, doc){
+          if(err) return console.error(err);
+          $(self._armFavoriteItem(doc)).data('anchor',  {col: doc.collectionId, doc: doc.id}).appendTo(self.$favoriteItems);
+        });
+      });
+    });
   },
 
   _armSidebarItem(item){
@@ -179,11 +200,6 @@ $.widget('nm.workbench', {
             .insertBefore(self.$favorites);
       });
     });
-  },
-
-  _armViewListItem: function(id, title){
-    var item = String() + '<li id="' + id + '" class="view nav-item"><a class="sidebar-link document">' + title + '</a></li>'
-    return item;
   },
 
   _setOption: function(key, value){
