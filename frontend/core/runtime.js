@@ -222,7 +222,7 @@ $.widget('nm.runtime',{
     var o = this.options, self = this, anchor = this._makeAnchorMap(), override = false;
     User.get(function(err, user){
       if(user.id == "anonymous"){
-        if(anchor.col == '.pages' && anchor.doc == '.workbench'){
+        if($.isEmptyObject(anchor) ||(anchor.col == '.pages' && anchor.doc == '.workbench')){
           anchor = {col:'.pages', doc:'.login'};
           override = true;
         }
@@ -230,6 +230,7 @@ $.widget('nm.runtime',{
       } else {
         if($.isEmptyObject(anchor)){
           anchor = {col:'.pages', doc:'.workbench'}
+          override = true;
         }
         self.option({uriAnchor: anchor, override: override});
       }

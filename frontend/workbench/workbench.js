@@ -54,10 +54,10 @@ $.widget('nm.workbench', {
         $('.search-input input', self.element).focus();
         e.preventDefault();
       },
-      "createdocument": function(e, domainId, metaId){
-        var anchor = {col:'.metas', doc: metaId, act: 'new'}
-        if(domainId != o.page.domainId){
-          anchor.dom = domainId
+      "createdocument": function(e, meta){
+        var anchor = {col:meta.collectionId, doc: meta.id, act: 'new'}
+        if(meta.domainId != o.page.domainId){
+          anchor.dom = meta.domainId
         }
         self.option('anchor', anchor);
         e.stopPropagation();

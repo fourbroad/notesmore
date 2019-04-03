@@ -51,5 +51,5 @@ if(index >= 0){
 }
 
 $('body').runtime({
-  currentDomain:currentDomain
+  currentDomain: currentDomain
 });
