@@ -221,27 +221,39 @@ $.widget("nm.form", {
       var values = validate.collectFormValues(this.$formTag, {trim: true}), 
           docInfo = _.cloneDeep(o.document),
           domainId = this.$domain.select('option','selectedItems')[0].value, 
-          collectionId = this.$collection.select('option','selectedItems')[0].value;
-      client.Domain.get(domainId, function(err1, domain){
-        if(err1) return console.error(err1);
-        domain.getCollection(collectionId, function(err2, collection){
-          if(err2) return console.error(err2);
-          delete docInfo.id;
-          docInfo.title = values.title;
-          collection.createDocument(values.id, docInfo, function(err3, doc){
-            if(err3) return console.error(err3);
-            var isNew = o.isNew;
-            o.isNew = false;
-            o.actionId = 'edit';
-            o.document = doc;
-            self.clone = _.cloneDeep(doc);
-            self._setJsonEditorValue();
-            self._refresh();
-            self.$saveAsModel.modal('toggle');
-            self.element.trigger('documentcreated', [doc, isNew]);
-          });
-        });
+          collectionId = this.$collection.select('option','selectedItems')[0].value,
+          params = [];
+      switch(collectionId){
+        case '.domains':
+        case '.users':
+          params = [values.id, docInfo];
+          break;
+        case '.collections':
+        case '.actions':
+        case '.forms':
+        case '.groups':
+        case '.metas':
+        case '.pages':
+        case '.profiles':
+        case '.roles':
+        case '.views':
+          params = [domainId, values.id, docInfo];
+          break;
+      }
+      params.push(function(err, doc){
+        if(err) return console.error(err);
+        var isNew = o.isNew;
+        o.isNew = false;
+        o.actionId = 'edit';
+        o.document = doc;
+        self.clone = _.cloneDeep(doc);
+        self._setJsonEditorValue();
+        self._refresh();
+        self.$saveAsModel.modal('toggle');
+        self.element.trigger('documentcreated', [doc, isNew]);
       });
+      
+      o.document.constructor.create.apply(o.document.constructor, params);
     }
   },
 
