@@ -11,6 +11,7 @@ const _ = require('lodash')
   , User = require('./user')
   , Action = require('./action')
   , Profile = require('./profile')
+  , File = require('./file')
   , Document = require('./document')
   , Utils = require('./utils')
   , NodeCache = require("node-cache")
@@ -28,6 +29,7 @@ module.exports = function (options) {
           Page:       {stdTTL: 100, checkperiod: 120}, 
           Role:       {stdTTL: 100, checkperiod: 120}, 
           View:       {stdTTL: 100, checkperiod: 120},
+          File:       {stdTTL: 100, checkperiod: 120}, 
           Group:      {stdTTL: 100, checkperiod: 120}, 
           Action:     {stdTTL: 100, checkperiod: 120}, 
           Domain:     {stdTTL: 100, checkperiod: 120}, 
@@ -47,6 +49,7 @@ module.exports = function (options) {
     module.User = User.init({elasticSearch: esClient, nodeCache: nodeCache, md5:{secret: secret}});
     module.Meta = Meta.init({elasticSearch: esClient, nodeCache: nodeCache});
     module.Form = Form.init({elasticSearch: esClient, nodeCache: nodeCache});
+    module.File = File.init({elasticSearch: esClient, nodeCache: nodeCache});
     module.Page = Page.init({elasticSearch: esClient, nodeCache: nodeCache});
     module.Role = Role.init({elasticSearch: esClient, nodeCache: nodeCache});
     module.View = View.init({elasticSearch: esClient, nodeCache: nodeCache});

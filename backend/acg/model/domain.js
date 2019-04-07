@@ -11,6 +11,7 @@ const _ = require('lodash')
   , Page = require('./page')
   , Action = require('./action')
   , Profile = require('./profile')
+  , File = require('./file')
   , Role = require('./role')
   , User = require('./user')
   , Document = require('./document')
@@ -117,7 +118,7 @@ const DOMAINS = '.domains'
   title: "Files",
   _meta: {
     iconClass: "ti-folder",
-    actions: ['uploadFiles']
+    actions: ['uploadFiles','edit']
   }
 }, {
   id: ".roles",
@@ -884,25 +885,27 @@ inherits(Domain, Document, {
   getDocument: function(collectionId, documentId) {
     switch (collectionId) {
     case '.metas':
-      return Meta.get(documentId);
+      return Meta.get(this.id, documentId);
     case '.domains':
       return Domain.get(documentId);
     case '.collections':
-      return Collection.get(documentId);
+      return Collection.get(this.id, documentId);
     case '.views':
-      return View.get(documentId);
+      return View.get(this.id, documentId);
     case '.pages':
-      return Page.get(documentId);
+      return Page.get(this.id, documentId);
     case '.actions':
-      return Action.get(documentId);
+      return Action.get(this.id, documentId);
     case '.forms':
-      return Form.get(documentId);
+      return Form.get(this.id, documentId);
     case '.roles':
-      return Role.get(documentId);
+      return Role.get(this.id, documentId);
     case '.groups':
-      return Group.get(documentId);
+      return Group.get(this.id, documentId);
     case '.profiles':
-      return Profile.get(documentId);
+      return Profile.get(this.id, documentId);
+    case '.files':
+      return File.get(this.id, documentId);
     case '.users':
       return User.get(documentId);
     default:

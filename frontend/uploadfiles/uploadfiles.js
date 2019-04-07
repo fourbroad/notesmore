@@ -7,7 +7,6 @@ import 'jquery-ui/ui/data';
 import 'bootstrap';
 import _ from 'lodash';
 import moment from 'moment';
-import Cookies from 'js-cookie';
 
 import 'blueimp-gallery/css/blueimp-gallery.css';
 import 'blueimp-file-upload/css/jquery.fileupload.css';
@@ -27,23 +26,17 @@ import 'blueimp-file-upload/js/jquery.fileupload-video.js';
 import 'blueimp-file-upload/js/jquery.fileupload-validate.js';
 import 'blueimp-file-upload/js/jquery.fileupload-ui.js';
 
-import './upload-files.scss';
-import uploadFilesHtml from './upload-files.html';
+import './uploadfiles.scss';
+import uploadFilesHtml from './uploadfiles.html';
 
 $.widget("nm.uploadfiles", {
   options:{
-    url: "upload-files/",
     forceIframeTransport: false
   },
 
   _create: function() {
-    var o = this.options;
-
-    if(o.token){
-      $.ajaxSetup({headers:{token: o.token}});
-      Cookies.set('token', o.token);
-    }
-    
+    var o = this.options, doc = o.document;
+   
     this.$uploadFiles = $(uploadFilesHtml);
     this.$uploadFilesHeader = $('.upload-files-header', this.$uploadFiles);
     this.$uploadForm = $('form.file-upload', this.$uploadFiles)
@@ -52,8 +45,8 @@ $.widget("nm.uploadfiles", {
     // Initialize the jQuery File Upload widget:
     this.$uploadForm.fileupload({
       // Uncomment the following to send cross-domain cookies:
-      //xhrFields: {withCredentials: true},
-      url: o.url,
+      xhrFields: {withCredentials: true},
+      url: 'http://localhost:3000/'+doc.domainId + '/.files',
       forceIframeTransport: o.forceIframeTransport
     });
 

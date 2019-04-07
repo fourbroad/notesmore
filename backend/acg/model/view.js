@@ -61,7 +61,23 @@ inherits(View, Document,{
     var indices = _joinIndices(this.domainId, this.collections);
     query.index = indices;
     query.type = Document.TYPE;
-  	return this._getElasticSearch().search(query);
+  	return this._getElasticSearch().search(query).then(function(data){
+  	  var result = {
+  	    total:data.hits.total,
+  	    offset: query.from || 0,
+  	    documents: _.reduce(data.hits.hits, function(r, v, k){
+  	      var doc = _.cloneDeep(v._source);
+  	      doc.id = doc.id || v._id;
+  	      doc._meta.index = v._index;
+  	      r.push(doc);
+  	      return r;  	        	      
+  	    },[])
+  	  };
+  	  
+  	  if(data._scroll_id) result.scrollId = data._scroll_id;
+  	  
+  	  return result;
+  	});
   },
 
   distinctQuery: function(field, wildcard) {

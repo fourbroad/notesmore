@@ -7,6 +7,7 @@ const $ = require('jquery')
   , Loader = require('core/loader')
   , formHtml = require('./form.html')
   , ace = require('brace') 
+  , utils = require('core/utils')  
   , { checkPermission } = require('core/utils');
 
 require('select/select');
@@ -89,7 +90,10 @@ $.widget("nm.form", {
       self.$titleInput.trigger('focus');
     });
 
-    this._on(this.$actionMoreMenu, {'click li.dropdown-item.save-as': this._onSaveAs});
+    this._on(this.$actionMoreMenu, {
+      'click li.dropdown-item.save-as': this._onSaveAs,
+      'click li.dropdown-item.delete' : this._onDeleteSelf      
+    });
     this._on(this.$saveBtn, {click: this._onSave});
     this._on(this.$cancelBtn, {click: this._onCancel});
     this._on(this.$submitBtn, {click: this._onSubmit});
@@ -98,6 +102,16 @@ $.widget("nm.form", {
 
     this._refresh();
     this.jsonEditor.focus();
+  },
+
+  _onDeleteSelf: function(e){
+    var doc = this.options.document, self = this;
+    doc.delete(function(err, result){
+      if(err) return console.error(err);
+      self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', doc);
+    });
+
+    evt.stopPropagation();
   },
 
   _refresh: function(){
@@ -317,9 +331,16 @@ $.widget("nm.form", {
   },
 
   _armActionMoreMenu: function(){
-    var o = this.options, client = o.document.getClient();
+    var o = this.options, self = this, doc = o.document, currentUser = doc.getClient().currentUser;
     this.$actionMoreMenu.empty();
     $('<li class="dropdown-item save-as">Save as ...</li>').appendTo(this.$actionMoreMenu);
+
+    utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, function(err, result){
+      if(result){
+        $('<li class="dropdown-item delete">Delete</li>').appendTo(self.$actionMoreMenu);
+      }
+    });
+
     if(!o.isNew){
       Loader.armActions(client, o.document, this.$actionMoreMenu, o.actionId);
     }

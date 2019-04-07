@@ -4,9 +4,6 @@ import 'bootstrap';
 import 'jquery-ui/ui/widget';
 import 'jquery-ui/ui/data';
 
-import 'jquery.event.gevent';
-import 'jquery.event.ue';
-
 import 'jquery-sparkline';
 import { debounce } from 'lodash';
 import Masonry from 'masonry-layout';

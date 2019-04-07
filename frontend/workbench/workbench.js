@@ -143,7 +143,10 @@ $.widget('nm.workbench', {
     });
 
     function callback(err, doc){
-      if(err) return console.error(err);
+      if(err) {
+        self.element.trigger('documenterror');
+        return console.error(err); 
+      }
       self.element.trigger("history", {anchor: anchor});
     }
     if(anchor.col == '.metas' && anchor.act == 'new'){
@@ -206,7 +209,10 @@ $.widget('nm.workbench', {
     var o = this.options, self = this;
     if(key === "anchor" && jsonPatch.compare(o.anchor, value).length > 0){
       function callback(err, doc){
-        if(err) return console.error(err);
+        if(err) {
+//           self.element.trigger('documenterror');
+          return console.error(err); 
+        }  
         self.options.anchor = value;
         self.element.trigger("history", {anchor:value});
       }

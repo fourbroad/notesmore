@@ -13,8 +13,8 @@ const client = require('../../lib/client')()
  * NOTE: Register resize event for Masonry layout
  */
 const EVENT = document.createEvent('UIEvents');
-window.EVENT = EVENT;
 EVENT.initUIEvent('resize', true, false, window, 0);
+window.EVENT = EVENT;
 
 // Trigger window resize event after page load for recalculation of masonry layout.
 window.addEventListener('load', ()=>{
@@ -23,6 +23,7 @@ window.addEventListener('load', ()=>{
 
 // Trigger resize on any element click
 document.addEventListener('click', ()=>{
+  console.log(arguments);
   window.dispatchEvent(window.EVENT);
 });
 
@@ -74,6 +75,12 @@ $.widget('nm.runtime',{
         if(this.oldAnchor){
           $.uriAnchor.setAnchor(this._encodeAnchor(this.oldAnchor), null, true);
         }
+      },
+      "documentdeleted": function(event, doc){
+        window.history.back();
+      },
+      "documenterror": function(event, doc){
+        window.history.back();
       }
     });
 
@@ -98,6 +105,9 @@ $.widget('nm.runtime',{
 
   _gotoConnected: function(user){
     var o = this.options, anchor = this._makeAnchorMap();
+    $.ajaxSetup({headers:{authorization: 'Bearer ' + client.token}});
+    Cookies.set('token', client.token);
+//     Cookies.remove('token');
     localStorage.setItem('token', client.token);
     this._setCurrentDomain(o.currentDomain);
     if(user.id == "anonymous"){

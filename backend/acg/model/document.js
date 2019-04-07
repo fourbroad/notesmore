@@ -93,14 +93,43 @@ _.assign(Document, {
   find: function(domainId, collectionId, query) {
     query.index = documentAllAlias(domainId, collectionId || '*');
     query.type = DOC_TYPE;
-  	return elasticsearch.search(query);
+  	return elasticsearch.search(query).then(function(data){
+  	  var result = {
+  	    total:data.hits.total,
+  	    offset: query.from || 0,
+  	    documents: _.reduce(data.hits.hits, function(r, v, k){
+  	      var doc = _.cloneDeep(v._source);
+  	      doc.id = doc.id || v._id;
+  	      doc._meta.index = v._index;
+  	      r.push(doc);
+  	      return r;  	        	      
+  	    },[])
+  	  };
+  	  
+  	  if(data._scroll_id) result.scrollId = data._scroll_id;
+
+  	  return result;
+  	});
   },
 
   scroll: function(params){
   　if(arguments.length < 1 || (arguments.length == 2 && typeof arguments[1] != 'function')){
   　  return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!')); 
   　}
-  　return elasticsearch.scroll(params);
+  　return elasticsearch.scroll(params).then(function(data){
+  	  return {
+  	    total:data.hits.total,
+  	    offset: query.from || 0,
+  	    scrollId: data._scroll_id,
+  	    documents: _.reduce(data.hits.hits, function(r, v, k){
+  	      var doc = _.cloneDeep(v._source);
+  	      doc.id = doc.id || v._id;
+  	      doc._meta.index = v._index;
+  	      r.push(doc);
+  	      return r;  	        	      
+  	    },[])
+  	  };
+  　});
   },
 
   clearScroll: function(params){
@@ -205,6 +234,18 @@ _.assign(Document.prototype, {
           match:{id:this.id}
         }
       }
+    }).then(function(data){
+      return {
+  	    total:data.hits.total,
+  	    offset: 0,
+  	    events: _.reduce(data.hits.hits, function(r, v, k){
+  	      var event = _.cloneDeep(v._source);
+  	      event.id = event.id || v._id;
+  	      event._meta.index = v._index;
+  	      r.push(event);
+  	      return r;  	        	      
+  	    },[])
+      }      
     });
   },
 

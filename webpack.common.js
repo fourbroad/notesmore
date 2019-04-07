@@ -9,7 +9,13 @@ module.exports = {
     alias: {
 //       config: path.resolve(__dirname, 'config'),
       frontend: path.resolve(__dirname, 'frontend'),
-      test: path.resolve(__dirname, 'test')
+      test: path.resolve(__dirname, 'test'),
+      'jquery-ui/ui/widget': 'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
+      'canvas-to-blob': 'blueimp-canvas-to-blob/js/canvas-to-blob.js',
+      'load-image': 'blueimp-load-image/js/load-image.js',
+      'load-image-exif': 'blueimp-load-image/js/load-image-exif.js',
+      'load-image-meta': 'blueimp-load-image/js/load-image-meta.js',
+      'load-image-scale': 'blueimp-load-image/js/load-image-scale.js'
     },    
     modules: [
       path.join(__dirname, 'frontend'), 

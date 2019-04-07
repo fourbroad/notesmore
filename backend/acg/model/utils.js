@@ -1,7 +1,6 @@
 const _ = require('lodash')
   , createError = require('http-errors')
-  , Meta = require('./meta')
-  , Document = require('./document');
+  , Meta = require('./meta');
 
 function uniqueId(domainId, collectionId, documentId){
   return domainId+'~'+collectionId+'~'+documentId;
@@ -36,7 +35,8 @@ function inherits(Child, Parent, proto) {
 function getEntity(elasticsearch, cache, domainId, collectionId, documentId){
   var uid = uniqueId(domainId, collectionId, documentId), doc = cache.get(uid);
   if (!doc) {
-    return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: Document.TYPE, id: documentId}).then( data => {
+    return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId}).then( data => {
+      data._source.id = data._source.id || data._id;
       data._source._meta.index = data._index;
       data._source._meta.version = data._version;
       cache.set(uid, data._source);
@@ -59,6 +59,17 @@ function buildMeta(domainId, doc, authorId, metaId){
   });
 }
 
+function checkPermission(profile, permissions){
+  if(!permissions) return Promise.resolve(true);
+  if(_.intersection(profile.roles, permissions.roles).length > 0 
+  || _.intersection(profile.groups, permissions.groups).length > 0 
+  || (permissions.users && permissions.users.indexOf(profile.id) >= 0) ){
+    return true;
+  } else {
+    return Promise.reject(createError(401, "Unauthorized access", {code:401}));
+  }
+}
+
 module.exports = {
   uniqueId : uniqueId,
   documentHotAlias : documentHotAlias,
@@ -67,5 +78,6 @@ module.exports = {
   eventAllAlias: eventAllAlias,
   inherits : inherits,
   getEntity : getEntity,
-  buildMeta : buildMeta
+  buildMeta : buildMeta,
+  checkPermission: checkPermission
 }

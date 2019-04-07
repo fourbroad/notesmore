@@ -120,7 +120,10 @@ $.widget("nm.view", {
       self.$titleInput.trigger('focus')
     }) 
 
-    this._on(this.$actionMoreMenu, {'click li.dropdown-item.save-as': this._onItemSaveAs});   
+    this._on(this.$actionMoreMenu, {
+      'click li.dropdown-item.save-as': this._onItemSaveAs,
+      'click li.dropdown-item.delete' : this._onDeleteSelf
+    });   
     this._on(this.$saveBtn, {click: this.save});
     this._on(this.$cancelBtn, {click: this._onCancel});
     this._on(this.$submitBtn, {click: this._onSubmit});
@@ -128,15 +131,32 @@ $.widget("nm.view", {
     this._on(this.$favorite, {click: this._onFavorite});
   },
 
+  _onDeleteSelf: function(e){
+    var view = this.options.view, self = this;
+    view.delete(function(err, result){
+      if(err) return console.error(err);
+      self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', view);
+    });
+
+    evt.stopPropagation();
+  },
+
   _armActionMoreMenu: function(){
-    var o = this.options;
+    var o = this.options, self = this, view = o.view, currentUser = view.getClient().currentUser;
     this.$actionMoreMenu.empty();
+
     if(o.view.collectionId == ".collections"){
       $('<li class="dropdown-item save-as">Save as view...</li>').appendTo(this.$actionMoreMenu);
     } else {
       $('<li class="dropdown-item save-as">Save as...</li>').appendTo(this.$actionMoreMenu);
     }
     
+    utils.checkPermission(view.domainId, currentUser.id, 'delete', view, function(err, result){
+      if(result){
+        $('<li class="dropdown-item delete">Delete</li>').appendTo(self.$actionMoreMenu);
+      }
+    });
+
     Loader.armActions(client, o.view, this.$actionMoreMenu, o.actionId);
   },
 
@@ -494,8 +514,15 @@ $.widget("nm.view", {
   },
 
   _showDocMenu: function($dropdownMenu, doc){
+    var client = doc.getClient(), currentUser = client.currentUser;
     $dropdownMenu.empty();
-    $('<li class="dropdown-item delete">Delete</li>').appendTo($dropdownMenu);
+    
+    utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, function(err, result){
+      if(result){
+        $('<li class="dropdown-item delete">Delete</li>').appendTo($dropdownMenu);        
+      }
+    });
+
     Loader.armActions(client, doc, $dropdownMenu, this.options.actionId);
   },
 

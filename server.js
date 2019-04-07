@@ -1,15 +1,20 @@
-#!/usr/bin/env node
-
-var app = require('./app');
-var debug = require('debug')('notesmore:server');
-var http = require('http');
-var socketIO = require('socket.io');
-var backend = require('./backend');
-// var chat = require('./chat');
-
-/**
- * Normalize a port into a number, string, or false.
- */
+const
+  createError = require('http-errors'),
+  http = require('http'),
+  express = require('express'),
+  cookieParser = require('cookie-parser'),
+  logger = require('morgan'),
+  path = require('path'),
+  cors = require('cors'),
+  debug = require('debug')('notesmore:server'),
+  socketIO = require('socket.io'),
+  acg = require('./backend/acg'),
+  jwt = require('./backend/lib/jwt'),
+// chat = require('./chat'),
+  routes = require( './routes' ),
+  app     = express(),
+  server = http.createServer(app),
+  io = socketIO.listen(server);
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
@@ -24,25 +29,48 @@ function normalizePort(val) {
   return false;
 }
 
-/**
- * Get port from environment and store in Express.
- */
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-var server = http.createServer(app);
-var io = socketIO.listen(server);
+app.use(cors({credentials: true, origin: 'http://localhost:8080'}));
 
-io.use((socket,next)=>{
-  let token = socket.handshake.query.token;
-  return next();
-  if (isValid(token)) {
-    return next();
-  }
-  return next(new Error('authentication error'));
+// app.use(cors());
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use('/dist', express.static(path.join(__dirname,'dist')));
+// app.use('/test', express.static(path.join(__dirname,'test')));
+
+app.use(cookieParser());
+app.use(jwt());
+// app.use(jwt().unless({
+//   path: [
+//     '/index.html',
+//     { url: '/', methods: ['GET', 'PUT']}
+//   ]
+// }))
+app.use("/", routes);
+
+// catch 404 and forward to error handler
+app.use(function(req,res,next){
+ next(createError(404));
 });
 
-backend.connect(io);
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  var code = err.status || 500
+  res.status(code);
+  res.json({code:code, message:err.message});
+});
+
+
+acg.connect(io);
 // chat.connect(io);
 
 server.on('error', function(error) {

@@ -5,7 +5,7 @@ const _ = require('lodash')
   , model = require('./model')({elasticSearch: JSON.parse(JSON.stringify(config.get('elasticSearch')))});
 
 const
-  { Collection, Document, Domain, Form, Group, Meta, Page, Action, Role, Profile, User, View, Utils} = model;
+  { Collection, Document, Domain, Form, Group, Meta, Page, Action, Role, Profile, File, User, View, Utils} = model;
 
 var io, initSocket;
 
@@ -21,7 +21,6 @@ function filterQuery(visitorId, domainId, query){
     _.each(profile.groups, function(group) { should.push({term:{"_meta.acl.get.groups.keyword":group}}); });
     should.push({term:{"_meta.acl.get.users.keyword":visitorId}});
     should.push({bool:{must_not:{exists:{field: '_meta.acl.get'}}}});
-
     return query;
   }).catch((err)=> {
     return Promise.reject(createError(401, "Unauthorized access", {code:401}));
@@ -516,6 +515,37 @@ initSocket = function(socket, visitorId) {
     }).then(result => callback(null, result)).catch(err => callback(err));
   });
 
+  socket.on('createFile', function(domainId, fileId, fileData, callback){
+    var metaId = _.at(fileData, '_meta.metaId')[0] || '.meta-file';
+    checkCreate(visitorId, domainId, metaId).then( result => {
+      return File.create(visitorId, domainId, fileId, fileData);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
+  socket.on('getFile', function(domainId, fileId, callback){
+    checkAcl2(visitorId, File, domainId, fileId, 'get').then( file => {
+      return file.get();
+     }).then(result => callback(null, result)).catch(err => callback(err));
+ });
+
+  socket.on('findFiles', function(domainId, query, callback){
+    filterQuery(visitorId, domainId, query).then( query => {
+      return File.find(domainId, query)
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
+  socket.on('patchFile', function(domainId, fileId, patch, callback){
+    checkAcl2(visitorId, File, domainId, fileId, 'patch', patch).then( file => {
+      return file.patch(visitorId, patch);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
+  socket.on('deleteFile', function(domainId, fileId, callback){
+    checkAcl2(visitorId, File, domainId, fileId, 'delete').then( file => {
+      return file.delete(visitorId);
+    }).then(result => callback(null, result)).catch(err => callback(err));
+  });
+
   socket.on('createDocument', function(domainId, collectionId, documentId, docData, callback){
     var metaId = _.at(docData, '_meta.metaId')[0] || '.meta';
     checkCreate(visitorId, domainId, metaId).then( result => {
@@ -532,7 +562,10 @@ initSocket = function(socket, visitorId) {
   socket.on('findDocuments', function(domainId, collectionId, query, callback){
     filterQuery(visitorId, domainId, query).then( query => {
       return Document.find(domainId, collectionId, query);
-    }).then(result => callback(null, result)).catch(err => callback(err));
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
   });
 
   socket.on('patchDocument', function(domainId, collectionId, documentId, patch, callback){
@@ -592,7 +625,7 @@ initSocket = function(socket, visitorId) {
 
 module.exports = {
   connect: function(io) {
-    io.of('/domains').on('connection', function(socket) {
+    io.of('/domains').on('connection', function(socket){
       const token = socket.handshake.query.token;
       if (token) {
         User.verify(token).then( visitorId  => {
@@ -605,5 +638,6 @@ module.exports = {
         initSocket(socket);
       }
     });
-  }
+  },
+  model: model
 };

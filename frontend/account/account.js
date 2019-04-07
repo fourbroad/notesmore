@@ -95,6 +95,9 @@ $.widget("nm.account", {
   _refresh: function(){
     var o = this.options, self = this;
     User.get(function(err, user){
+      if(user.avatar){
+        self.$avatar.attr('src', user.avatar);
+      }
       self.$nickname.text(user.title || user.id);        
     });
   },

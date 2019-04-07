@@ -1,6 +1,9 @@
 var 
   unless = require('express-unless'),
+  acg = require('../acg'),
   utils = require('./utils');
+
+const {User} = acg.model;
   
 function UnauthorizedError(code, error) {
 	this.name = "UnauthorizedError";
@@ -22,8 +25,9 @@ module.exports = function(options) {
     middleware = function(req, res, next) {
     var 
       hostName = utils.getHostName(req),
-      domain, token;
-    
+      token = req.cookies['token'],
+      domain;
+   
     if (req.method === 'OPTIONS' && req.headers.hasOwnProperty('access-control-request-headers')) {
       var hasAuthInAccessControl = !!~req.headers['access-control-request-headers']
                                     .split(',').map(function (header) {
@@ -65,19 +69,16 @@ module.exports = function(options) {
       if (credentialsRequired) {
           return next(new UnauthorizedError('credentials_required', { message: 'No authorization token was found!' }));
       } else {
+        req.visitorId = 'anonymous';
         return next();
       }
     }
 
-    domain = new Domain(hostName,token);
-    domain.isValidToken(function(err, result){
-        if (err) { return next(err); }
-        if(result){
-        	req["domain"] = domain;
-        	next();
-        }else{
-        	next(new UnauthorizedError('invalid_token', {message:'Token is invalid!'}));
-        }
+    User.verify(token).then( visitorId  => {
+   	  req.visitorId = visitorId;
+   	  next();
+    }).catch((err)=>{
+      next(new UnauthorizedError('invalid_token', {message:'Token is invalid!'}));
     });
 
   };

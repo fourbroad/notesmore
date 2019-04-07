@@ -11,6 +11,7 @@ import 'email/email';
 import 'signup/signup';
 import 'login/login';
 import 'form/form';
+import 'uploadfiles/uploadfiles.js';
 
 const client = require('../lib/client')({
 //   host:'47.100.213.55', 
@@ -51,5 +52,5 @@ if(index >= 0){
 }
 
 $('body').runtime({
-  currentDomain: currentDomain
+  currentDomain: '.root'
 });

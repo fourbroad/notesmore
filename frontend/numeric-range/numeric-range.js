@@ -1,7 +1,5 @@
 import './numeric-range.scss';
 
-import 'jquery.event.ue';
-
 import utils from 'core/utils';
 import validate from "validate.js";
 import numericRangeHtml from './numeric-range.html';
@@ -80,9 +78,9 @@ $.widget("nm.numericrange", {
       }
     });
   
-    this._on(this.$updateBtn, {utap: this._onSubmit});
-    this._on(this.$resetBtn, {utap: this._onReset});
-    this._on(this.$cancelBtn, {utap: this._onCancel});
+    this._on(this.$updateBtn, {click: this._onSubmit});
+    this._on(this.$resetBtn, {click: this._onReset});
+    this._on(this.$cancelBtn, {click: this._onCancel});
     this._on(this.$form, {submit: this._onSubmit});
   },
 
