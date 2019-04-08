@@ -98,7 +98,7 @@ $.widget('nm.workbench', {
         this.option('anchor', anchor);
         e.stopPropagation();
       },
-      "favoriteclick": function(e, doc){
+      "favoritechanged": function(e, doc){
         self._refreshFavorites();
       }
     });

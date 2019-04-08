@@ -9,6 +9,9 @@ const
   uuidv4 = require('uuid/v4'),
   client = require('../../lib/client')();
 
+// const PerfectScrollbar = require('perfect-scrollbar');
+// require('perfect-scrollbar/css/perfect-scrollbar.css');
+
 require('jquery-ui/ui/widget');
 require('jquery-ui/ui/data');
 require('jquery.urianchor');
@@ -126,14 +129,63 @@ $.widget("nm.view", {
     this._on(this.$favorite, {click: this._onFavorite});
   },
 
+  _onFavorite: function(e){
+    var o = this.options, view = o.view, self = this, { User, Profile } = client;
+    User.get(function(err, user){
+      if(err) return console.error(err);
+      Profile.get(view.domainId, user.id, function(err, profile){
+        if(err) return console.error(err);
+        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;}),
+            patch;
+        if(index >= 0){
+          patch = [{
+            op:'remove',
+            path: '/favorites/'+index            
+          }];
+        } else {
+          patch = [profile.favorites ? {
+            op:'add', 
+            path:'/favorites/-', 
+            value:{domainId:view.domainId, collectionId: view.collectionId, id: view.id}
+          } : {
+            op:'add', 
+            path:'/favorites', 
+            value:[{domainId:view.domainId, collectionId: view.collectionId, id: view.id}]
+          }];
+        }
+        profile.patch(patch, function(err, result){
+          if(err) return console.error(err);
+          self._refreshFavorite();
+          self.element.trigger('favoritechanged', view);
+        });
+      });
+    });
+  },
+
   _onDeleteSelf: function(e){
     var view = this.options.view, self = this;
     view.delete(function(err, result){
       if(err) return console.error(err);
+      User.get(function(err, user){
+        if(err) return console.error(err);
+        Profile.get(view.domainId, user.id, function(err, profile){
+          if(err) return console.error(err);
+          var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;});
+          if(index >= 0){
+            profile.patch([{
+              op:'remove',
+              path: '/favorites/'+index            
+            }], function(err, result){
+              if(err) return console.error(err);
+              self.element.trigger('favoritechanged', view);              
+            });
+          }
+        });
+      });
       self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', view);
     });
 
-    evt.stopPropagation();
+    e.stopPropagation();
   },
 
   _armActionMoreMenu: function(){
@@ -175,7 +227,7 @@ $.widget("nm.view", {
     this.$viewTable = $('<table class="table view-table table-striped table-hover" cellspacing="0" width="100%"></table>').insertAfter(this.$searchContainer);
     this.table = this.$viewTable.DataTable({
       dom: '<"top"i>rt<"bottom"lp><"clear">',
-      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],      
+      lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],      
       processing: true,
       serverSide: true,
       columns: _.cloneDeep(view.columns),
@@ -238,39 +290,8 @@ $.widget("nm.view", {
         });
       }
     });
-  },
 
-  _onFavorite: function(e){
-    var o = this.options, view = o.view, self = this, { User, Profile } = client;
-    User.get(function(err, user){
-      if(err) return console.error(err);
-      Profile.get(view.domainId, user.id, function(err, profile){
-        if(err) return console.error(err);
-        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;}),
-            patch;
-        if(index >= 0){
-          patch = [{
-            op:'remove',
-            path: '/favorites/'+index            
-          }];
-        } else {
-          patch = [profile.favorites ? {
-            op:'add', 
-            path:'/favorites/-', 
-            value:{domainId:view.domainId, collectionId: view.collectionId, id: view.id}
-          } : {
-            op:'add', 
-            path:'/favorites', 
-            value:[{domainId:view.domainId, collectionId: view.collectionId, id: view.id}]
-          }];
-        }
-        profile.patch(patch, function(err, result){
-          if(err) return console.error(err);
-          self._refreshFavorite();
-          self.element.trigger('favoriteclick', view);
-        });
-      });
-    });
+//     new PerfectScrollbar('.dataTables_wrapper',{suppressScrollY:true, wheelPropagation: false});
   },
 
   _onLoadAction: function(e){
@@ -400,19 +421,25 @@ $.widget("nm.view", {
   },
 
   _refreshFavorite: function(){
-    var o = this.options, self = this, view = o.view,　{ User, Profile } = client;
-    User.get(function(err, user){
-      if(err) return console.error(err);
-      Profile.get(view.domainId, user.id, function(err, profile){
+    var o = this.options;
+    if(o.isNew){
+      this.$favorite.hide();
+    }else{
+      var self = this, view = o.view,　{ User, Profile } = client;
+      this.$favorite.show();
+      User.get(function(err, user){
         if(err) return console.error(err);
-        var $i = $('i', self.$favorite).removeClass();
-        if(_.find(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
-          $i.addClass('c-red-500 ti-star');
-        }else{
-          $i.addClass('ti-star');
-        }
-      });
-    });        
+        Profile.get(view.domainId, user.id, function(err, profile){
+          if(err) return console.error(err);
+          var $i = $('i', self.$favorite).removeClass();
+          if(_.find(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
+            $i.addClass('c-red-500 ti-star');
+          }else{
+            $i.addClass('ti-star');
+          }
+        });
+      });        
+    }
   },
 
   _getPatch: function(){
@@ -579,7 +606,8 @@ $.widget("nm.view", {
     if(this._isDirty()){
       o.view.patch(this._getPatch(), function(err, view){
         if(err) return console.error(err);
-        o.view = view;
+  	    _.forOwn(o.view,function(v,k){delete o.view[k]});
+        _.merge(o.view, view);
         self.clone = _.cloneDeep(view);
         self._refreshHeader();
       });

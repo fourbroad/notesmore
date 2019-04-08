@@ -104,14 +104,63 @@ $.widget("nm.form", {
     this.jsonEditor.focus();
   },
 
+  _onFavorite: function(e){
+    var o = this.options, doc = o.document, self = this, { User, Profile } = client;
+    User.get(function(err, user){
+      if(err) return console.error(err);
+      Profile.get(doc.domainId, user.id, function(err, profile){
+        if(err) return console.error(err);
+        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;}),
+            patch;
+        if(index >= 0){
+          patch = [{
+            op:'remove',
+            path: '/favorites/'+index            
+          }];
+        } else {
+          patch = [profile.favorites ? {
+            op:'add', 
+            path:'/favorites/-', 
+            value:{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}
+          } : {
+            op:'add', 
+            path:'/favorites', 
+            value:[{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}]
+          }];
+        }
+        profile.patch(patch, function(err, result){
+          if(err) return console.error(err);
+          self._refreshFavorite();
+          self.element.trigger('favoritechanged', doc);
+        });
+      });
+    });
+  },  
+
   _onDeleteSelf: function(e){
     var doc = this.options.document, self = this;
     doc.delete(function(err, result){
       if(err) return console.error(err);
+      User.get(function(err, user){
+        if(err) return console.error(err);
+        Profile.get(doc.domainId, user.id, function(err, profile){
+          if(err) return console.error(err);
+          var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;});
+          if(index >= 0){
+            profile.patch([{
+              op:'remove',
+              path: '/favorites/'+index            
+            }], function(err, result){
+              if(err) return console.error(err);
+              self.element.trigger('favoritechanged', doc);              
+            });
+          }
+        });
+      });      
       self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', doc);
     });
 
-    evt.stopPropagation();
+    e.stopPropagation();
   },
 
   _refresh: function(){
@@ -131,19 +180,25 @@ $.widget("nm.form", {
   },
 
   _refreshFavorite: function(){
-    var o = this.options, self = this, doc = o.document,　{ User, Profile } = client;
-    User.get(function(err, user){
-      if(err) return console.error(err);
-      Profile.get(doc.domainId, user.id, function(err, profile){
+    var o = this.options;
+    if(o.isNew){
+      this.$favorite.hide();
+    } else {
+      var self = this, doc = o.document,　{ User, Profile } = client;
+      this.$favorite.show();
+      User.get(function(err, user){
         if(err) return console.error(err);
-        var $i = $('i', self.$favorite).removeClass();
-        if(_.find(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;})){
-          $i.addClass('c-red-500 ti-star');
-        }else{
-          $i.addClass('ti-star');
-        }
-      });
-    });        
+        Profile.get(doc.domainId, user.id, function(err, profile){
+          if(err) return console.error(err);
+          var $i = $('i', self.$favorite).removeClass();
+          if(_.find(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;})){
+            $i.addClass('c-red-500 ti-star');
+          }else{
+            $i.addClass('ti-star');
+          }
+        });
+      });        
+    }
   },
 
   _refreshHeader: function(){
@@ -173,39 +228,6 @@ $.widget("nm.form", {
     return this.options.isNew || this._getPatch().length > 0
   },
 
-  _onFavorite: function(e){
-    var o = this.options, doc = o.document, self = this, { User, Profile } = client;
-    User.get(function(err, user){
-      if(err) return console.error(err);
-      Profile.get(doc.domainId, user.id, function(err, profile){
-        if(err) return console.error(err);
-        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;}),
-            patch;
-        if(index >= 0){
-          patch = [{
-            op:'remove',
-            path: '/favorites/'+index            
-          }];
-        } else {
-          patch = [profile.favorites ? {
-            op:'add', 
-            path:'/favorites/-', 
-            value:{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}
-          } : {
-            op:'add', 
-            path:'/favorites', 
-            value:[{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}]
-          }];
-        }
-        profile.patch(patch, function(err, result){
-          if(err) return console.error(err);
-          self._refreshFavorite();
-          self.element.trigger('favoriteclick', doc);
-        });
-      });
-    });
-  },  
-
   _onSave: function(e){
     var o = this.options;
     if(o.isNew){
@@ -220,7 +242,10 @@ $.widget("nm.form", {
     if(this._isDirty()){
       o.document.patch(this._getPatch(), function(err, document){
         if(err) return console.error(err);
-        o.document = document;
+
+  	    _.forOwn(o.document,function(v,k){delete o.document[k]});
+        _.merge(o.document, document);
+
         self.clone = _.cloneDeep(document);
         self._refresh();
       });

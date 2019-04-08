@@ -37,7 +37,8 @@
   }
 
   .dataTables_wrapper{
-    overflow: auto;
+    position: relative;
+//     overflow: auto;
 
     .view-table {
       .btn {
