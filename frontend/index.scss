@@ -1,7 +1,12 @@
-@import 'assets/styles/spec/settings/index';
-@import 'assets/styles/spec/tools/mixins/index';
+@import 'context/scss/settings/index';
+@import 'context/scss/tools/mixins/index';
 
 @import '~bootstrap/scss/bootstrap';
 // @import '~font-awesome/scss/font-awesome';
 
-@import 'assets/styles/spec/index';
+.progress {
+  height: 4px;
+  background-color: #eaeef3;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}

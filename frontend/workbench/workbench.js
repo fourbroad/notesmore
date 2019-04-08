@@ -14,6 +14,8 @@ import * as jsonPatch from "fast-json-patch";
 import 'account/account';
 import Loader from 'core/loader';
 
+require('context/index.scss');
+require('./workbench.scss');
 import workbenchHtml from './workbench.html';
 
 const jwtDecode = require('jwt-decode');

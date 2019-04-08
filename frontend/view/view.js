@@ -215,6 +215,7 @@ $.widget("nm.view", {
       sAjaxSource: "view",
       fnServerData: function (sSource, aoData, fnCallback, oSettings ) {
         var kvMap = self._kvMap(aoData), query = self._buildSearch(kvMap);
+        query.size = query.size >= 0 ? query.size : 10000;
         view.findDocuments(query, function(err, docs){
           if(err) {
             if(err.code == 401){

@@ -512,7 +512,6 @@ const DOMAINS = '.domains'
     label: "All Documents",
     iconColor: "c-deep-purple-500"
   }],
-  favorites:[],
   tips:[{
     collectionId: ".collections",
     id: ".notifications",
