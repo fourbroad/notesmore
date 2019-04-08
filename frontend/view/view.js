@@ -175,7 +175,7 @@ $.widget("nm.view", {
     this.$viewTable = $('<table class="table view-table table-striped table-hover" cellspacing="0" width="100%"></table>').insertAfter(this.$searchContainer);
     this.table = this.$viewTable.DataTable({
       dom: '<"top"i>rt<"bottom"lp><"clear">',
-      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],      
+      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],      
       processing: true,
       serverSide: true,
       columns: _.cloneDeep(view.columns),
@@ -290,8 +290,8 @@ $.widget("nm.view", {
             mode: 'multi',
             selectedItems: sc.selectedItems,
             menuItems: function(filter, callback){
-              view.distinctQuery(sc.name, filter, {size:100}, function(err4, docs){
-                if(err4) return console.log(err4);
+              view.distinctQuery(sc.name, filter, {size:100}, function(err, docs){
+                if(err) return console.error(err);
                 var items = _.map(docs.documents, function(doc){
                   return {label:doc['title']||_.at(doc, sc.name)[0], value:_.at(doc, sc.name)[0]};
                 });
@@ -587,9 +587,10 @@ $.widget("nm.view", {
   },  
 
   _onCancel: function(){
-    var o = this.options, self = this;
+    var o = this.options, self = this, view = o.view;
 
-    o.view = this.clone;
+  	 _.forOwn(view,function(v,k){delete view[k]});
+    _.merge(view, this.clone);
 
     this._refreshHeader();
     this._refreshSearchBar();

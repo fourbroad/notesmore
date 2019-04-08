@@ -1,5 +1,8 @@
 import 'jquery-ui/ui/widget';
 
+import PerfectScrollbar from 'perfect-scrollbar';
+import 'perfect-scrollbar/css/perfect-scrollbar.css';
+
 import './select.scss';
 import selectHtml from './select.html';
 
@@ -19,9 +22,12 @@ $.widget("nm.select", {
     this.$selectBtn = this.element.children('button');
     this.$dropdownMenu = $('.dropdown-menu', this.element);
     this.$clearLink = $('.clear-selected-items', this.element);
-    this.$itemContainer = $('.item-container', this.element);
+    this.$itemContainerWrapper = $('.item-container-wrapper', this.element);
+    this.$itemContainer = $('.item-container', this.$itemContainerWrapper);
     this.$input = $('input', this.element);
     this.$inputIcon = $('.input-group-text>i', this.element);
+
+    this.ps = new PerfectScrollbar(this.$itemContainerWrapper[0],{suppressScrollX:true, wheelPropagation: false});
 
     if(o.class){
       this._addClass(null, o.class);
@@ -157,6 +163,7 @@ $.widget("nm.select", {
     o.menuItems(filter, function(items){
       self._refreshClearLink();
       self._armItems(items);
+      self.$itemContainerWrapper.scrollTop(0);
     });
   },
 

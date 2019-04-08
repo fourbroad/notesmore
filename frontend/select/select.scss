@@ -15,4 +15,10 @@
     border-left-width: 0px;
     background-color: white;
   }
+
+  .item-container-wrapper {
+    position: relative;
+    max-height: 400px;
+    overflow-y: auto;
+  }
 }

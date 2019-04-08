@@ -78,7 +78,7 @@ $.widget("nm.account", {
 
     this._refresh();
     
-    this._on(this.$signOff, {utap: this._onSignoff});
+    this._on(this.$signOff, {click: this._onSignoff});
   },
 
   _onSignoff: function(event){

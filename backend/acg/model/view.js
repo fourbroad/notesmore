@@ -87,7 +87,7 @@ inherits(View, Document,{
   	    documents: _.reduce(data.hits.hits, function(r, v, k){
   	      var doc = _.cloneDeep(v._source);
   	      doc.id = doc.id || v._id;
-  	      doc._meta.index = v._index;
+  	      _.set(doc, '_meta.index', v._index);
   	      r.push(doc);
   	      return r;  	        	      
   	    },[])
