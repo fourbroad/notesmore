@@ -8,9 +8,9 @@ import 'jquery-sparkline';
 import { debounce } from 'lodash';
 import Masonry from 'masonry-layout';
 import { COLORS } from './constants/colors';
-import 'jvectormap';
-import 'jvectormap/jquery-jvectormap.css';
-import './jquery-jvectormap-world-mill.js';
+import 'jqvmap/dist/jquery.vmap.js';
+import 'jqvmap/dist/jqvmap.css';
+import 'jqvmap/dist/maps/jquery.vmap.world.js';
 import 'easy-pie-chart/dist/jquery.easypiechart.min.js';
 import SkyconsInit from 'skycons';
 import Chart from 'chart.js';
@@ -292,66 +292,29 @@ $.widget('nm.dashboard', {
         </div>`);
 
         $('#vmap').vectorMap({
-          map: 'world_mill',
-          backgroundColor: '#fff',
-          borderColor: '#fff',
-          borderOpacity: 0.25,
-          borderWidth: 0,
-          color: '#e6e6e6',
-          regionStyle : {
-            initial : {
-              fill : '#e4ecef',
-            },
-          },
+    map: 'world_en',
+    backgroundColor: '#a5bfdd',
+    borderColor: '#818181',
+    borderOpacity: 0.25,
+    borderWidth: 1,
+    color: '#f4f3f0',
+    enableZoom: true,
+    hoverColor: '#c9dfaf',
+    hoverOpacity: null,
+    normalizeFunction: 'linear',
+    scaleColors: ['#b6d6ff', '#005ace'],
+    selectedColor: '#c9dfaf',
+    selectedRegions: null,
+    showTooltip: true,
+    onRegionClick: function(element, code, region)
+    {
+        var message = 'You clicked "'
+            + region
+            + '" which has the code: '
+            + code.toUpperCase();
 
-          markerStyle: {
-            initial: {
-              r: 7,
-              'fill': '#fff',
-              'fill-opacity':1,
-              'stroke': '#000',
-              'stroke-width' : 2,
-              'stroke-opacity': 0.4,
-            },
-          },
-
-          markers : [{
-            latLng : [21.00, 78.00],
-            name : 'INDIA : 350',
-          }, {
-            latLng : [-33.00, 151.00],
-            name : 'Australia : 250',
-          }, {
-            latLng : [36.77, -119.41],
-            name : 'USA : 250',
-          }, {
-            latLng : [55.37, -3.41],
-            name : 'UK   : 250',
-          }, {
-            latLng : [25.20, 55.27],
-            name : 'UAE : 250',
-          }],
-          series: {
-            regions: [{
-              values: {
-                'US': 298,
-                'SA': 200,
-                'AU': 760,
-                'IN': 200,
-                'GB': 120,
-              },
-              scale: ['#03a9f3', '#02a7f1'],
-              normalizeFunction: 'polynomial',
-            }],
-          },
-          hoverOpacity: null,
-          normalizeFunction: 'linear',
-          zoomOnScroll: false,
-          scaleColors: ['#b6d6ff', '#005ace'],
-          selectedColor: '#c9dfaf',
-          selectedRegions: [],
-          enableZoom: false,
-          hoverColor: '#fff',
+        console.log(message);
+    }
         });
       }
     };
@@ -540,6 +503,9 @@ $.widget('nm.dashboard', {
         }],
       },
     });
-  }    
+  }
+      setTimeout(() => {
+        window.dispatchEvent(window.EVENT);
+      }, 1000)
   }
 });

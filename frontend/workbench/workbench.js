@@ -33,25 +33,26 @@ $.widget('nm.workbench', {
     this.element.html(workbenchHtml);
 
     this.$workbench = $(".workbench", this.element);
-    this.$mainContent = $("#mainContent", this.element);
+    this.$mainContainer = $('.main-container', this.$workbench);
+    this.$mainContent = $("#mainContent", this.$mainContainer);
  
-    this.ps = new PerfectScrollbar($('.scrollable', this.element)[0],{suppressScrollX:true, wheelPropagation: true});
+    this.ps = new PerfectScrollbar(this.$mainContainer[0],{suppressScrollX:true, wheelPropagation: true});
 
-    this.$favorites = $('li.favorites', this.element);
+    this.$favorites = $('li.favorites', this.$workbench);
     this.$badge = $('.badge', this.favorites);
     this.$favoriteItems = $('.favorite-item-container', this.$favorites);
 
-    this.$newDocumentBtn = $('li.new-document', this.element);
+    this.$newDocumentBtn = $('li.new-document', this.$workbench);
 
-    $('<li/>').appendTo($('.page-container .nav-right', this.element)).account({client: client});
+    $('<li/>').appendTo($('.page-container .nav-right', this.$workbench)).account({client: client});
 
     this._armSidebar();
 
     this._on(this.$newDocumentBtn, {click: this._loadNewDialog});
     this._on(this.$workbench, {
       'click .search-toggle': function(e){
-        $('.search-box, .search-input', self.element).toggleClass('active');
-        $('.search-input input', self.element).focus();
+        $('.search-box, .search-input', self.$workbench).toggleClass('active');
+        $('.search-input input', self.$workbench).focus();
         e.preventDefault();
       },
       "createdocument": function(e, meta){
@@ -69,7 +70,7 @@ $.widget('nm.workbench', {
         }
 
         this.options.anchor = anchor;
-        this.element.trigger("history", [{anchor:anchor}, isNew]);
+        this.$workbench.trigger("history", [{anchor:anchor}, isNew]);
 
         e.stopPropagation();
       },
@@ -101,7 +102,7 @@ $.widget('nm.workbench', {
     });
 
     // Sidebar links
-    $('.sidebar .sidebar-menu', this.element).on('click','li>a.document', function () {
+    $('.sidebar .sidebar-menu', this.$workbench).on('click','li>a.document', function () {
       const $this = $(this), $parent = $this.parent(), anchor = $parent.data('anchor');
       if ($parent.hasClass('open')) {
         $parent.children('.dropdown-menu').slideUp(200, () => {
@@ -124,22 +125,17 @@ $.widget('nm.workbench', {
       }
     });
 
-    // ٍSidebar Toggle
-    $('.sidebar-toggle', this.element).on('click', e => {
-      self.element.toggleClass('is-collapsed');
-      e.preventDefault();
-    });
-
     /**
      * Wait untill sidebar fully toggled (animated in/out)
      * then trigger window resize event in order to recalculate
      * masonry layout widths and gutters.
      */
-    $('#sidebar-toggle', this.element).click(e => {
-      e.preventDefault();
+    $('.sidebar-toggle', this.$workbench).on('click', e => {
+      self.element.toggleClass('is-collapsed');
       setTimeout(() => {
         window.dispatchEvent(window.EVENT);
       }, 300);
+      e.preventDefault();
     });
 
     function callback(err, doc){
@@ -214,6 +210,7 @@ $.widget('nm.workbench', {
           return console.error(err); 
         }  
         self.options.anchor = value;
+        self.ps.update();
         self.element.trigger("history", {anchor:value});
       }
 
@@ -222,8 +219,6 @@ $.widget('nm.workbench', {
       }else{
         this._loadDocument(value.dom||o.page.domainId, value.col, value.doc, value.act, value.opts, callback);
       }
-    } else if(key === 'client'){
-      localStorage.setItem('token', client.getToken());
     }
 
     this._super(key, value);
@@ -270,10 +265,6 @@ $.widget('nm.workbench', {
         });
       }
     });
-  },
-
-  _onClientChanged: function(event, client){
-    this.option('client', client);
   }
     
 });

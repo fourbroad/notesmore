@@ -15,10 +15,30 @@ function View(domainId, viewData) {
 }
 
 function _joinIndices(domainId, collections){
-  return _.reduce(collections, function(result, value, key) {
-      result.push(domainId+'~'+value+'~*');
+  if(_.isEmpty(collections)){
+    return domainId + '~*~all~snapshots';
+  } else {
+    return _.reduce(collections, function(result, value, key) {
+      result.push(domainId+'~'+value+'~all~snapshots');
       return result;
     }, []).join(',');
+  }
+}
+
+function _buildMQuery(domainId, collections, query){
+  var mQuery = [], q = _.cloneDeep(query);
+  _.merge(q, q.body);
+  delete q.body;
+  if(_.isEmpty(collections)){
+    mQuery.push({index: domainId + '~*~all~snapshots', type: Document.TYPE});
+    mQuery.push(q);
+  }else{
+    _.each(collections, function(value, key) {
+      mQuery.push({index: domainId + '~' + value + '~all~snapshots'});
+      mQuery.push(q);
+    });
+  }
+  return mQuery;
 }
 
 _.assign(View, {
@@ -58,8 +78,7 @@ inherits(View, Document,{
   },
 
   findDocuments: function(query) {
-    var indices = _joinIndices(this.domainId, this.collections);
-    query.index = indices;
+    query.index = _joinIndices(this.domainId, this.collections);
     query.type = Document.TYPE;
   	return this._getElasticSearch().search(query).then(function(data){
   	  var result = {

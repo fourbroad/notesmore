@@ -1,33 +1,28 @@
-import * as $ from 'jquery';
+const
+  $ = require('jquery'),
+  _ = require('lodash'),
+  moment = require('moment'),
+  jsonPatch = require('fast-json-patch'),
+  validate = require("validate.js"),
+  utils = require('core/utils'),
+  Loader = require('core/loader'),
+  uuidv4 = require('uuid/v4'),
+  client = require('../../lib/client')();
 
-import 'bootstrap';
-import _ from 'lodash';
-import moment from 'moment';
+require('jquery-ui/ui/widget');
+require('jquery-ui/ui/data');
+require('jquery.urianchor');
+require('bootstrap'),
+require('datatables.net-bs4');
+require('datatables.net-bs4/css/dataTables.bootstrap4.css');
 
-import 'jquery-ui/ui/widget';
-import 'jquery-ui/ui/data';
-import 'jquery.urianchor';
+require('select/select');
+require('numeric-range/numeric-range');
+require('datetime-range/datetime-range');
+require('full-text/full-text');
 
-import 'datatables.net-bs4';
-import 'datatables.net-bs4/css/dataTables.bootstrap4.css';
-
-var jsonPatch = require('fast-json-patch');
-import validate from "validate.js";
-
-import utils from 'core/utils';
-import Loader from 'core/loader';
-
-import 'select/select';
-import 'numeric-range/numeric-range';
-import 'datetime-range/datetime-range';
-import 'full-text/full-text';
-
-import './view.scss';
-import viewHtml from './view.html';
-
-const uuidv4 = require('uuid/v4');
-
-var client = require('../../lib/client')();
+require('./view.scss');
+const viewHtml = require('./view.html');
 
 const {Action, Collection} = client;
 
@@ -169,7 +164,7 @@ $.widget("nm.view", {
     this._refreshFavorite()
     this._armActionMoreMenu();
     this._refreshHeader();
-    this._initSearchBar();
+    this._refreshSearchBar();
 
     if(this.table){
       this.table.destroy();
@@ -282,7 +277,7 @@ $.widget("nm.view", {
     this.element.trigger('actionclick', {dom: view.domainId, col: view.collectionId, doc: view.id, act:action.id});    
   },
 
-  _initSearchBar: function(){
+  _refreshSearchBar: function(){
     var o = this.options, self = this, view = o.view;
     this.$searchContainer.empty();
     _.each(view.searchColumns, function(sc){
@@ -596,7 +591,7 @@ $.widget("nm.view", {
     o.view = this.clone;
 
     this._refreshHeader();
-    this._initSearchBar();
+    this._refreshSearchBar();
 
     _.each(o.view.searchColumns, function(sc){
       switch(sc.type){

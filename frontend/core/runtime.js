@@ -16,16 +16,15 @@ const EVENT = document.createEvent('UIEvents');
 EVENT.initUIEvent('resize', true, false, window, 0);
 window.EVENT = EVENT;
 
-// Trigger window resize event after page load for recalculation of masonry layout.
-window.addEventListener('load', ()=>{
-  window.dispatchEvent(EVENT);
-});
+// // Trigger window resize event after page load for recalculation of masonry layout.
+// window.addEventListener('load', ()=>{
+//   window.dispatchEvent(EVENT);
+// });
 
-// Trigger resize on any element click
-document.addEventListener('click', ()=>{
-  console.log(arguments);
-  window.dispatchEvent(window.EVENT);
-});
+// // Trigger resize on any element click
+// document.addEventListener('click', ()=>{
+//   window.dispatchEvent(window.EVENT);
+// });
 
 $.widget('nm.runtime',{
   options:{
