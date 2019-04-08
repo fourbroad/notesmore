@@ -58,6 +58,9 @@
             .arrow {
               opacity: 0;
             }
+            .badge {
+              opacity: 0;
+            }
 
             &.open {
               ul.dropdown-menu {
@@ -92,6 +95,9 @@
               .arrow {
                 opacity: 1;
               }
+              .badge {
+                opacity: 1;
+              }              
             }
 
             &.open {
@@ -214,6 +220,16 @@
 
         @include to($breakpoint-md) {
           right: 25px;
+        }
+      }
+      .badge {
+        font-size: 10px;
+        position: absolute;
+        right: 50px;
+        transition: all 0.05s ease-in;
+
+        @include to($breakpoint-md) {
+          right: 40px;
         }
       }
 
@@ -352,6 +368,9 @@
               .arrow {
                 opacity: 0;
               }
+              .badge {
+                opacity: 0;
+              }
 
               &.open {
                 ul.dropdown-menu {
@@ -386,6 +405,9 @@
                 .arrow {
                   opacity: 1;
                 }
+                .badge {
+                  opacity: 1;
+                }                
               }
 
               &.open {
@@ -427,6 +449,9 @@
           li {
             &.dropdown {
               .arrow {
+                opacity: 1;
+              }
+              .badge {
                 opacity: 1;
               }
             }
