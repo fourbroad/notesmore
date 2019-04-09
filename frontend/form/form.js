@@ -278,6 +278,8 @@ $.widget("nm.form", {
         case '.views':
           params = [domainId, values.id, docInfo];
           break;
+        default:
+          params = [domainId, collectionId, values.id, docInfo];
       }
       params.push(function(err, doc){
         if(err) return console.error(err);

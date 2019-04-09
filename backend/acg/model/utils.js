@@ -49,7 +49,7 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId){
 
 function buildMeta(domainId, doc, authorId, metaId){
   return Meta.get(domainId, metaId).then( meta => {
-    var defaultAcl = _.cloneDeep(meta.acl), _meta = doc._meta || {}, timestamp = new Date().getTime();
+    var defaultAcl = _.cloneDeep(meta.acl||{}), _meta = doc._meta || {}, timestamp = new Date().getTime();
     delete defaultAcl.create;
     _meta.acl = _.merge(defaultAcl, _.at(doc, '_meta.acl')[0]);
     _meta = _.merge(_meta, {iconClass: meta._meta.iconClass, created:timestamp, updated:timestamp, version:1});

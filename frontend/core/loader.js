@@ -243,6 +243,10 @@ createDocument = function(client, element, domainId, metaId, callback){
         doc = new Role(domainId, docData);
         opts.role = doc;
         break;
+      case '.profiles':
+        doc = new Profile(domainId, docData);
+        opts.profile = doc;
+        break;
       case '.groups':
         doc = new Group(domainId, docData);
         opts.group = doc;

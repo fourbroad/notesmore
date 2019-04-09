@@ -58,7 +58,7 @@ inherits(File, Document,{
   },
 
   delete: function(authorId){
-    var path = '/'+this.domainId+'/'+this.id + Path.extname(this.name);
+    var path = '/'+this.domainId+'/'+this.id + Path.extname(this.name||'');
     return File.parent.delete.call(this, authorId).then(result => {
       hdfs.unlink(path, function(err, result){if(err) console.error(err)});
       return true;

@@ -31,7 +31,7 @@ _.assign(Group, {
 
   get: function(domainId, groupId) {
     return getEntity(elasticsearch, cache, domainId, GROUPS, groupId).then( source => {
-      return new Form(domainId, source);
+      return new Group(domainId, source);
     });
   },
 

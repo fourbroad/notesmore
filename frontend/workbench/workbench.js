@@ -208,7 +208,7 @@ $.widget('nm.workbench', {
     if(key === "anchor" && jsonPatch.compare(o.anchor, value).length > 0){
       function callback(err, doc){
         if(err) {
-//           self.element.trigger('documenterror');
+          self.element.trigger('documenterror');
           return console.error(err); 
         }  
         self.options.anchor = value;
