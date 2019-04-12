@@ -1,24 +1,19 @@
 const _ = require('lodash')
   , client = require('../../lib/client')();
 
-var showErrorsForInput, showErrors, clearErrors, checkPermission;
+var showErrorsForInput, showErrors, clearErrors, clearInputError, checkPermission;
 
 showErrorsForInput = function($input, errors) {
-  var $formGroup = $input.closest(".form-group")
-    , $messages = $formGroup.find(".messages");
+  var $parent = $input.parent();
 
   $input.removeClass("is-valid is-invalid");
-  $messages.removeClass("invalid-feedback valid-feedback").empty();
 
   if (errors) {
+    var $feedback = $parent.find('.invalid-feedback, .valid-feedback').empty();
     $input.addClass("is-invalid");
-    $messages.addClass("invalid-feedback");
     _.each(errors, function(error) {
-      $("<p/>").text(error).appendTo($messages);
+      $('<p/>').text(error).appendTo($feedback);
     });
-  } else {
-    $input.addClass("is-valid");
-    $messages.addClass("valid-feedback");
   }
 }
 
@@ -29,8 +24,14 @@ showErrors = function($form, errors) {
 }
 
 clearErrors = function($form) {
-  $('.messages', $form).removeClass("invalid-feedback valid-feedback").empty();
+  $form.find('.is-invalid').val('');
+  $form.find('.invalid-feedback, .valid-feedback').empty();
   $('input', $form).removeClass("is-valid is-invalid");
+}
+
+clearInputError = function($input){
+  $input.removeClass("is-valid is-invalid");
+  $input.parent().find('.invalid-feedback, .valid-feedback').empty();
 }
 
 checkPermission = function(domainId, userId, method, doc, callback) {
@@ -55,5 +56,6 @@ module.exports = {
   showErrorsForInput: showErrorsForInput,
   showErrors: showErrors,
   clearErrors: clearErrors,
+  clearInputError: clearInputError,
   checkPermission: checkPermission
 }

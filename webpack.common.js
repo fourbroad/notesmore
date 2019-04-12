@@ -1,6 +1,7 @@
 const 
   path = require('path'),
   webpack  = require('webpack'),
+  MomentLocalesPlugin = require('moment-locales-webpack-plugin'),  
   MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
@@ -48,6 +49,11 @@ module.exports = {
     }]
   },
   plugins: [
+    // To strip all locales except “en”, “es-us” and “ru”
+    // (“en” is built into Moment and can’t be removed)
+    new MomentLocalesPlugin({
+      localesToKeep: ['es-us', 'zh-cn'],
+    }),  
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output both options are optional
 //       filename: "[name].[chunkhash].css",

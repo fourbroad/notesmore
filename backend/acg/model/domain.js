@@ -452,6 +452,8 @@ const DOMAINS = '.domains'
     title: 'Users'
   },
   defaultValue:{
+    username: 'newuser',
+    password: 'password',
     title: "New User"
   },
   actions: ['edit'],

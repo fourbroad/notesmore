@@ -11,7 +11,7 @@ module.exports = merge(common, {
   mode: 'production',
   devtool: 'source-map',
   entry: {
-    context: ['jquery', 'jquery-ui/ui/widget', 'jquery-ui/ui/data', 'bootstrap', 'lodash', 'moment', 'jquery.urianchor', 'context/index.scss']
+    context: ['jquery', 'jquery-ui/ui/widget', 'jquery-ui/ui/data', 'bootstrap', 'popper.js', 'lodash', 'moment', 'jquery.urianchor', 'context/index.scss']
   },
   output: {
     filename: '[name].bundle.js',

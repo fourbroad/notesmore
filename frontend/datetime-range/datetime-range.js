@@ -8,26 +8,48 @@ import utils from 'core/utils';
 import './datetime-range.scss';
 import datetimeRangeHtml from './datetime-range.html';
 
+const isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/,
+      isoMessage = "^Date range must comply with ISO 8609 specifications";
+
+
 $.widget("nm.datetimerange", {
 
   options:{
+    mode: 'between', // latest, before, between, range
+    unit: 'minutes', // minutes, hours, days, weeks, months
     constraints: {
-      earliest: {
-        datetime: function(value, attributes, attributeName, options, constraints) {
-          if(!attributes.latest) return null;
-          return {
-            latest: moment.utc(attributes.latest),
-            message:'must be no later than ' + attributes.latest
-          };
+      lEarliest:{
+        presence: false,
+        numericality: {
+          onlyInteger: true,
+          greaterThan: 0
         }
       },
-      latest: {
-        datetime: function(value, attributes, attributeName, options, constraints) {
-          if(!attributes.earliest) return null;
-          return {
-            earliest: moment.utc(attributes.earliest),
-            message:'must be no earlier than '+ attributes.earliest
-          };
+      bfLatest:{
+        presence: false,
+        numericality: {
+          onlyInteger: true,
+          greaterThan: 0
+        }
+      },
+      btEarliest: {
+        datetime: true
+      },
+      btLatest: {
+        datetime: true
+      },
+      rEarliest: {
+        presence: false,
+        format: {
+          pattern: isoRegex,
+          message: isoMessage
+        }
+      },
+      rLatest: {
+        presence: false,
+        format: {
+          pattern: isoRegex,
+          message: isoMessage
         }
       }
     }
@@ -39,15 +61,19 @@ $.widget("nm.datetimerange", {
     this._addClass('nm-datetimerange', 'dropdown btn-group');
     this.element.html(datetimeRangeHtml);
 
-    this.$earliestPicker = $('[name="earliest"]', this.element);
-    this.$latestPicker = $('[name="latest"]', this.element);
+    this.$btEarliest = $('input[name="btEarliest"]', this.element);
+    this.$btLatest = $('input[name="btLatest"]', this.element);
+    this.$btLatestIcon = $('.btLatest-icon', this.$form);
+    this.$btEarliestIcon = $('.btEarliest-icon', this.$form);
+    this.$lEarliest = $('input[name="lEarliest"]', this.element);
+    this.$lUnit = $('select.l-unit', this.element);
+    this.$bfLatest = $('input[name="bfLatest"]', this.element);
+    this.$bfUnit = $('select.bf-unit', this.element);
+    this.$rEarliest = $('input[name="rEarliest"]', this.element);
+    this.$rLatest = $('input[name="rLatest"]', this.element);
     this.$datetimeRangeBtn = this.element.children('button');
     this.$dropdownMenu = $('.dropdown-menu', this.element);
     this.$form = $('form', this.$dropdownMenu);
-    this.$latestInput = $('input[name=earliest]', this.$form);
-    this.$earliestInput = $('input[name=latest]', this.$form);
-    this.$latestIcon = $('.latest-icon', this.$form);
-    this.$earliestIcon = $('.earliest-icon', this.$form);
     this.$updateBtn = $('#update', this.$form)
     this.$resetBtn = $('#reset', this.$form)
     this.$cancelBtn = $('#cancel', this.$form)
@@ -61,29 +87,35 @@ $.widget("nm.datetimerange", {
 
     validate.extend(validate.validators.datetime, {
       parse: function(value, options) {
-        return +moment.utc(value);
+        return +moment(value);
       },
 
       format: function(value, options) {
         var format = options.dateOnly ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm:ss";
-        return moment.utc(value).format(format);
+        return moment(value).format(format);
       }
     });
 
+    this._initRadio();
     this._refreshButton();
 
     $.datetimepicker.setDateFormatter('moment');
 
-    this.$earliestPicker.datetimepicker({
-      format:'YYYY-MM-DD HH:mm:ss'
+    this.$btEarliest.datetimepicker({
+      format:'YYYY-MM-DD HH:mm:ss',
+      onShow:function(ct){
+        this.setOptions({
+          maxDate:self.$btLatest.val() ? self.$btLatest.val() : false
+        })
+      },
     });
-    this.$latestPicker.datetimepicker({
-      format:'YYYY-MM-DD HH:mm:ss'
-    });
-
-    this.element.on('show.bs.dropdown', function () {
-      if(o.earliest) self.$latestInput.val(moment.utc(o.earliest).format('YYYY-MM-DD HH:mm:ss'));
-      if(o.latest) self.$earliestInput.val(moment.utc(o.latest).format('YYYY-MM-DD HH:mm:ss'));
+    this.$btLatest.datetimepicker({
+      format:'YYYY-MM-DD HH:mm:ss',
+      onShow:function(ct){
+       this.setOptions({
+        minDate: self.$btEarliest.val() ? self.$btEarliest.val() : false
+       })
+      }
     });
 
     this._on(this.$dropdownMenu, {
@@ -92,35 +124,17 @@ $.widget("nm.datetimerange", {
       }
     });
 
-    this._on(this.$earliestInput, {
-      change: function(evt){
-        var errors = validate(this.$form, o.constraints) || {};
-        utils.showErrorsForInput(this.$earliestInput, errors[evt.target.name]);
-        if(this.$latestInput.val()!=''){
-          utils.showErrorsForInput(this.$latestInput, errors[this.$latestInput.attr('name')]);
-        }
-      }
-    });
+    this._on({ 'change input[type="text"]': this._onInputChange });
 
-    this._on(this.$latestInput, {
-      change: function(evt){
-        var errors = validate(this.$form, o.constraints) || {};
-        utils.showErrorsForInput(this.$latestInput, errors[evt.target.name]);
-        if(this.$earliestInput.val()!=''){
-          utils.showErrorsForInput(this.$earliestInput, errors[this.$earliestInput.attr('name')]);
-        }
-      }
-    });
-
-    this._on(this.$latestIcon, {
+    this._on(this.$btLatestIcon, {
       click: function(evt){
-        this.$latestPicker.datetimepicker('toggle');
+        this.$btLatest.focus();
       }
     });
 
-    this._on(this.$earliestIcon, {
+    this._on(this.$btEarliestIcon, {
       click: function(evt){
-        this.$earliestPicker.datetimepicker('toggle');
+        this.$btEarliest.focus();
       }
     });
   
@@ -130,16 +144,122 @@ $.widget("nm.datetimerange", {
     this._on(this.$form, {submit: this._onSubmit});
   },
 
-  _refreshButton: function(){
-    var o = this.options, label = '';
-    if(o.earliest && o.latest){
-      label = o.title+':'+moment.utc(o.earliest).format('YYYY-MM-DD') + '~' + moment.utc(o.latest).format('YYYY-MM-DD');
-    }else if(o.earliest){
-      label = o.title+'>='+moment.utc(o.earliest).format('YYYY-MM-DD');
-    } else if(o.latest){
-      label = o.title+'<='+moment.utc(o.latest).format('YYYY-MM-DD');
+  _initRadio: function() {
+    var o = this.options, $mode = $('input[type="radio"][value="'+o.mode+'"]', this.$form);
+    $('.custom-radio', this.$form).each(function(index){
+      $(this).children('input').attr("id", o.name+index);
+      $(this).children('label').attr("for", o.name+index);
+    })
+    this._on({'change input[type="radio"]': this._onRadioChanged});
+    $mode.prop('checked', true);
+    $mode.closest('.form-row').find('input[type!="radio"], select').prop('disabled', false);
+    $(':not(:checked)[type="radio"]', this.$form).closest('.form-row').css('color','gray');
+
+    this.$form.on('click', '.form-row>.col-auto', function(e){
+      $(this).closest('.form-row').find('input[type="radio"]').prop('checked', true).trigger('change', e.target);
+    });
+
+    switch(o.mode){
+      case 'latest':
+        if(o.earliest){
+          this.$lEarliest.val(o.earliest);
+        }
+        this.$lUnit.val(o.unit);
+        break;
+      case 'before':
+        if(o.latest){
+          this.$bfLatest.val(o.latest);
+        }
+        this.$bfUnit.val(o.unit);
+        break;
+      case 'between':
+        if(o.earliest) this.$btEarliest.val(moment(o.earliest).format('YYYY-MM-DD HH:mm:ss'));
+        if(o.latest) this.$btLatest.val(moment(o.latest).format('YYYY-MM-DD HH:mm:ss'));
+        break;
+      case 'range':
+        if(o.earliest) this.$rEarliest.val(o.earliest);
+        if(o.latest) this.$rLatest.val(o.latest);
+        break;
+      default:
+        console.error(o.mode);
+    }
+  },
+
+  _onInputChange: function(e){
+    var o = this.options, $target = $(e.target), c = o.constraints,
+      name = $target.attr('name'), value = $target.val();
+
+    value = $.isEmptyObject(value) ? null: value;
+
+    if(c[name]){
+      var errors = validate.single(value, c[name]);
+      if(!$.isEmptyObject(errors)){
+        utils.showErrorsForInput($target, errors);
+      }else{
+        utils.clearInputError($target);
+      }
+    }
+  },
+
+  _onRadioChanged: function(e, orginal) {
+    var o = this.options, $target = $(e.target), $targetParent = $target.closest('.form-row');
+    
+    if($target.val() == o.mode) return;
+
+    $(':not(:checked)[type="radio"]', this.$form).closest('.form-row').css('color','gray')
+      .find('input[type!="radio"], select').prop('disabled', true);
+    $target.closest('.form-row').find('input[type!="radio"], select').prop('disabled', false);
+    $targetParent.css('color', '');
+
+    if($(orginal).is('input[type=text]')){
+      $(orginal).focus();
     }else{
-      label = o.title+':all'
+      $targetParent.find('input').eq(1).focus();      
+    }
+
+    utils.clearErrors(this.$form);
+    this.option({ mode: $target.val(), earliest: null, latest:null, unit: null});
+  },
+
+  _refreshButton: function(){
+    var o = this.options, label = o.title+':all';
+    switch(o.mode){
+      case 'latest':
+        if(o.earliest){
+          label = o.title + " within the last " + o.earliest + " " + o.unit;
+        }
+      break;
+      case 'before':
+        if(o.latest){
+          label = o.title + " more than " + o.latest + " " + o.unit + " ago";
+        }
+      break;
+      case 'between':
+        if(o.earliest && o.latest){
+          label = o.title+':'+moment(o.earliest).format('YYYY-MM-DD') + '~' + moment(o.latest).format('YYYY-MM-DD');
+        }else if(o.earliest){
+          label = o.title+'>='+moment(o.earliest).format('YYYY-MM-DD');
+        } else if(o.latest){
+          label = o.title+'<='+moment(o.latest).format('YYYY-MM-DD');
+        }else{
+          label = o.title+':all'
+        }
+      break;
+      case 'range':{
+        var now = moment(), earliest, latest;
+        if(o.earliest && o.latest){
+          earliest = now.clone().add(moment.duration(o.earliest)).format('YYYY-MM-DD');
+          latest = now.clone().add(moment.duration(o.latest)).format('YYYY-MM-DD');
+          label = o.title+':'+earliest+'~'+latest;
+        }else if(o.earliest){
+          label = o.title + '>=' + now.clone().add(moment.duration(o.earliest)).format('YYYY-MM-DD');
+        }else if(o.latest){
+          label = o.title + '<=' + now.clone().add(moment.duration(o.latest)).format('YYYY-MM-DD');
+        }
+      }
+      break;
+      default:      
+      break;
     }
 
     this.$datetimeRangeBtn.html(label);
@@ -150,16 +270,40 @@ $.widget("nm.datetimerange", {
     if (errors) {
       utils.showErrors(this.$form, errors);
     } else {
-      var ep = this.$earliestPicker.val() ? + moment.utc(this.$earliestPicker.val()) : null, 
-          lp = this.$latestPicker.val() ? +moment.utc(this.$latestPicker.val()) : null;
-      if(o.earliest != ep || o.latest != lp){
-        o.earliest = ep;
-        o.latest = lp;
-        this._refreshButton();
-
-        this._trigger('valueChanged', null, {earliest:o.earliest, latest:o.latest});
+      var value = {mode: o.mode};
+      switch(o.mode){
+        case 'latest':{
+          var ev = this.$lEarliest.val(), unit = this.$lUnit.val();
+          o.earliest = value.earliest = ev;
+          o.unit = value.unit = unit;
+        }                
+        break;
+        case 'before':{
+          var lv = this.$bfLatest.val(), unit = this.$bfUnit.val();
+          o.latest = value.latest = lv;
+          o.unit = value.unit = unit;
+        }
+        break;
+        case 'between':{
+          var ev = this.$btEarliest.val() ? + moment(this.$btEarliest.val()) : null, 
+            lv = this.$btLatest.val() ? + moment(this.$btLatest.val()) : null;
+          o.earliest = value.earliest = ev;
+          o.latest = value.latest = lv;
+        }
+        break;
+        case 'range':{
+          var ev = this.$rEarliest.val(), lv = this.$rLatest.val();
+          o.earliest = value.earliest = ev;
+          o.latest = value.latest = lv;
+        }
+        break;
+        default:
+          console.error(o.mode);
       }
-      utils.clearErrors(this.$form);
+
+      this._refreshButton();
+      this._trigger('valueChanged', null, value);
+
       if(!dropdown) this.element.trigger('click');
     }
   },
@@ -171,8 +315,13 @@ $.widget("nm.datetimerange", {
   },
 
   _onReset: function(ev){
-    this.$earliestInput.val('');
-    this.$latestInput.val('');
+    this.$lEarliest.val('');
+    this.$bfLatest.val('');
+    this.$btEarliest.val('');
+    this.$btLatest.val('');
+    this.$rEarliest.val('');
+    this.$rLatest.val('');
+    utils.clearErrors(this.$form);
     this._doSubmit(true);
   },
 

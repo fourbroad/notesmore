@@ -84,21 +84,21 @@ module.exports = merge(common, {
     }]
   },
   plugins: [
-    new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery',
-      'window.jQuery': 'jquery',
-      'window.$': 'jquery',
-      moment: 'moment',
-      'window.moment': 'moment',
-      _: 'lodash',
-      'window._':'lodash',
-      Popper: ['popper.js', 'default']
-    }),  
+//     new webpack.ProvidePlugin({
+//       $: 'jquery',
+//       jQuery: 'jquery',
+//       'window.$': 'jquery',
+//       'window.jQuery': 'jquery',
+//       moment: 'moment',
+//       'window.moment': 'moment',
+//       _: 'lodash',
+//       'window._':'lodash',
+//       Popper: ['popper.js', 'default']
+//     }),  
     new webpack.DllReferencePlugin({
       context: __dirname,
       manifest: require('./manifest.json'),
-    }),  
+    }),
     new HtmlWebpackPlugin({title:'Notesmore Workbench'}),
     new HtmlWebpackIncludeAssetsPlugin({
       assets: ['dist/context.bundle.js'],

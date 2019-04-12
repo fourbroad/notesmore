@@ -13,12 +13,14 @@ import 'login/login';
 import 'form/form';
 import 'uploadfiles/uploadfiles.js';
 
+const moment = require('moment');
 const client = require('../lib/client')({
 //   host:'47.100.213.55', 
   host:'localhost',
   port:'3000'
 });
 
+window.moment = moment;
 window.client = client;
 window.User = client.User;
 window.Collection = client.Collection;

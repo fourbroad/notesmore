@@ -207,7 +207,7 @@ $.widget("nm.view", {
     Loader.armActions(client, o.view, this.$actionMoreMenu, o.actionId);
   },
 
-  _refresh: function(){
+  _refresh: function() {
     var o = this.options, self = this, view = o.view;
     this.$viewTitle.html(view.title||view.id);
 
@@ -218,7 +218,7 @@ $.widget("nm.view", {
     this._refreshHeader();
     this._refreshSearchBar();
 
-    if(this.table){
+    if(this.table) {
       this.table.destroy();
       this.$viewTable.remove();
       delete this.table;
@@ -237,12 +237,12 @@ $.widget("nm.view", {
         targets: 0,
         width: "10px",
         data: null,
-        render: function(data, type, row, meta){
+        render: function(data, type, row, meta) {
           return '<span class="icon-holder"><i class="'+ (data._meta.iconClass||'ti-file')+'"></i></span>';
         }
-      },{
+      }, {
         targets:'_all',
-        render:function(data, type, row, meta){
+        render:function(data, type, row, meta) {
           var column = meta.settings.aoColumns[meta.col], text = data;
           switch(column.className){
             case 'id':
@@ -258,7 +258,7 @@ $.widget("nm.view", {
           }
           return text;
         },
-      },{
+      }, {
         targets: -1,
         width: "30px",
         data: null,
@@ -306,6 +306,7 @@ $.widget("nm.view", {
       switch(sc.type){
         case 'keywords':
           $("<div/>").appendTo(self.$searchContainer).select({
+            name: sc.name,
             class:'search-item',
             btnClass:'btn-sm',
             mode: 'multi',
@@ -341,6 +342,7 @@ $.widget("nm.view", {
           break;
         case 'numericRange':
           $("<div/>").appendTo(self.$searchContainer).numericrange({
+            name: sc.name,
             class:'search-item',
             btnClass:'btn-sm',
             title: sc.title,
@@ -359,17 +361,57 @@ $.widget("nm.view", {
           break;
         case 'datetimeRange':
           $("<div/>").appendTo(self.$searchContainer).datetimerange({
+            name: sc.name,
             class:'search-item',
             btnClass:'btn-sm',
             title: sc.title,
-            earliest: sc.earliest,
-            latest: sc.latest,
+            mode: sc.mode,
+            unit: sc.unit,
+            earliest: sc.mode == "range" ? sc.sEarliest: sc.earliest,
+            latest: sc.mode == "range" ? sc.sLatest: sc.latest,
             valueChanged: function(event, range){
               var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
-              sc2.earliest = range.earliest;
-              sc2.latest = range.latest;
+              sc2.mode = range.mode;
+              delete sc2.earliest;
+              delete sc2.latest;
+              delete sc2.unit;
+              delete sc2.sEarliest;
+              delete sc2.sLatest;
+              
+              switch(sc2.mode){
+                case 'latest':
+                  sc2.earliest = range.earliest;
+                  sc2.unit = range.unit;
+                break;
+                case 'before':
+                  sc2.latest = range.latest;
+                  sc2.unit = range.unit;
+                break;
+                case 'between':{
+                  if(range.earliest){
+                    sc2.earliest = range.earliest;                    
+                  }
+
+                  if(range.latest){
+                    sc2.latest = range.latest;                    
+                  }                  
+                }
+                break;
+                case 'range':{
+                  if(range.earliest){
+                    sc2.sEarliest = range.earliest;                    
+                  }
+                  if(range.latest){
+                    sc2.sLatest = range.latest;                                        
+                  }
+                }
+                break;
+                default:
+                console.error(o.mode);
+              }
+                    
               self.table.column(sc2.name+':name')
-                .search(sc2.earliest||sc2.latest ? [sc2.earliest, sc2.latest].join(','):'')
+                .search(self._buildDatetimeRangeSearch(sc2))
                 .draw();
               self._refreshHeader();
             }
@@ -386,6 +428,43 @@ $.widget("nm.view", {
     });
   },
 
+  _buildDatetimeRangeSearch: function(searchColumn){
+    var earliest, latest;
+    switch(searchColumn.mode){
+      case 'latest':
+        if(searchColumn.earliest && searchColumn.unit){
+          var now = moment();
+          latest = + now;
+          earliest = + now.clone().subtract(searchColumn.earliest, searchColumn.unit);
+        }
+      break;
+      case 'before':
+        if(searchColumn.latest && searchColumn.unit){
+          latest = +moment().subtract(searchColumn.latest, searchColumn.unit);
+        }
+      break;
+      case 'between':{
+        earliest = searchColumn.earliest
+        latest = searchColumn.latest;
+      }
+      break;
+      case 'range':{
+        var now = moment();
+        if(searchColumn.sEarliest){
+          earliest = +now.clone().add(moment.duration(searchColumn.sEarliest));
+        }
+        if(searchColumn.sLatest){
+          latest = +now.clone().add(moment.duration(searchColumn.sLatest));
+        }
+      }
+      break;
+      default:
+        console.error(searchColumn.mode);
+    }
+
+    return earliest||latest ? [earliest, latest].join(','):'';
+  },
+
   _armSearchCol: function(){
     var o = this.options, self = this, view = o.view;
     return _.reduce(view.columns, function(searchCols, col){
@@ -399,7 +478,7 @@ $.widget("nm.view", {
             searchCols.push({search: sc.lowestValue||sc.highestValue ? [sc.lowestValue, sc.highestValue].join(','):''});
             break;
           case 'datetimeRange':
-            searchCols.push({search: sc.earliest||sc.latest ? [sc.earliest, sc.latest].join(','):''});
+            searchCols.push({search: self._buildDatetimeRangeSearch(sc)});
             break;
         }
       }else{
@@ -663,49 +742,3 @@ $.widget("nm.view", {
   }
   
 });
-
-//   var table = $('#dataTable').DataTable({
-//     "bProcessing": true,
-//     "bServerSide": true,
-//     "sAjaxSource": "view",
-//     "fnServerData": function ( sSource, aoData, fnCallback, oSettings ) {
-//       console.log(arguments);
-//       oSettings.jqXHR = $.ajax( {
-//         "dataType": 'json',
-//         "type": "POST",
-//         "url": sSource,
-//         "data": aoData,
-//         "success": fnCallback
-//       } );
-//     },
-//     initComplete: function () {
-//       var api = this.api();
-//       api.columns().indexes().flatten().each( function ( i ) {
-//         var column = api.column( i );
-//         var select = $('<select><option value=""></option></select>')
-//           .appendTo( $(column.footer()).empty() )
-//           .on( 'change', function () {
-//             var val = $.fn.dataTable.util.escapeRegex($(this).val());
-//             column.search( val ? '^'+val+'$' : '', true, false ).draw();
-//           });
-//         column.data().unique().sort().each( function ( d, j ) {
-//           select.append( '<option value="'+d+'">'+d+'</option>' )
-//         });
-//       });
-//     }    
-//   });
-
-//   var data = table.rows().data();
-//   console.log(JSON.stringify(data));
-  
-//   table.columns().flatten().each( function ( colIdx ) {
-//     // Create the select list and search operation
-//     var select = $('<select />').appendTo(table.column(colIdx).footer())
-//         .on('change', function(){
-//           table.column( colIdx ).search($(this).val()).draw();
-//          });
-//     // Get the search data for the first column and add to the select list
-//     table.column(colIdx).cache('search').sort().unique().each(function(d){
-//       select.append($('<option value="'+d+'">'+d+'</option>'));
-//     });
-//   });
