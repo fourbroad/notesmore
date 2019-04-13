@@ -177,6 +177,37 @@ inherits(Collection, Document,{
     return this._getElasticSearch().indices.rollover(params);
   },
 
+  distinctQuery: function(field, opts) {
+    const query = {
+      aggs: {
+        values: {
+          terms: {
+            field: field + ".keyword",
+            include: ".*.*",
+            order: {
+              _key: "asc"
+            },
+            size: 10000
+          }
+        }
+      }
+    };
+
+    _.merge(query.aggs.values.terms, opts);
+
+    return this._getElasticSearch().search({
+      index: this.domainId + '~' + this.collections + '~all~snapshots',
+      type: Document.TYPE,
+      body: query, 
+      size:0
+    }).then(function(data){
+      return {values:_.reduce(data.aggregations.values.buckets, function(r,v,k){
+        r.push(v['key']);
+        return r;
+      },[])};
+    });
+  },
+
   refresh: function(){
     return this._getElasticSearch().indices.refresh({ index: this.domainId + '~' + this.id + '~*' });
   }

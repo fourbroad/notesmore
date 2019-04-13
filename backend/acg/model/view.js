@@ -99,22 +99,35 @@ inherits(View, Document,{
   	});
   },
 
-  distinctQuery: function(field, wildcard) {
-    var query = {
-      collapse: { field: field + '.keyword' },
+  distinctQuery: function(field, opts) {
+    const query = {
       aggs: {
-        itemCount: {
-          cardinality: { field: field + '.keyword' }
+        values: {
+          terms: {
+            field: field + ".keyword",
+            include: ".*",
+            order: {
+              _key: "asc"
+            },
+            size: 10000
+          }
         }
-      },
-      _source: [field]
+      }
     };
 
-    if (wildcard) {
-      query.query = { wildcard: {} };
-      query.query.wildcard[field + ".keyword"] = wildcard;
-    }
-    return this.findDocuments(query);
+    _.merge(query.aggs.values.terms, opts);
+
+    return this._getElasticSearch().search({
+      index: _joinIndices(this.domainId, this.collections),
+      type: Document.TYPE,
+      body: query, 
+      size:0
+    }).then(function(data){
+      return {values:_.reduce(data.aggregations.values.buckets, function(r,v,k){
+        r.push(v['key']);
+        return r;
+      },[])};
+    });
   },
 
   refresh: function() {

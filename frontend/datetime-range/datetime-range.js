@@ -188,11 +188,8 @@ $.widget("nm.datetimerange", {
   _onInputChange: function(e){
     var o = this.options, $target = $(e.target), c = o.constraints,
       name = $target.attr('name'), value = $target.val();
-
-    value = $.isEmptyObject(value) ? null: value;
-
     if(c[name]){
-      var errors = validate.single(value, c[name]);
+      var errors = validate.single($.isEmptyObject(value) ? null: value, c[name]);
       if(!$.isEmptyObject(errors)){
         utils.showErrorsForInput($target, errors);
       }else{

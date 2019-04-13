@@ -243,21 +243,22 @@ $.widget("nm.view", {
       }, {
         targets:'_all',
         render:function(data, type, row, meta) {
-          var column = meta.settings.aoColumns[meta.col], text = data;
+          var column = meta.settings.aoColumns[meta.col], d = utils.get(row, column.data);
           switch(column.className){
             case 'id':
             case 'title':
-              text = '<a href="#">'+ data||"" + '</a>';
+              d = '<a href="#">'+ d||"" + '</a>';
               break;
             case 'datetime':
-              var date = moment.utc(data);
-              text = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
+              var date = moment(d);
+              d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
               break;
             default:
               break;
           }
-          return text;
+          return d;
         },
+        defaultContent:''
       }, {
         targets: -1,
         width: "30px",
@@ -312,10 +313,10 @@ $.widget("nm.view", {
             mode: 'multi',
             selectedItems: sc.selectedItems,
             menuItems: function(filter, callback){
-              view.distinctQuery(sc.name, filter, {size:100}, function(err, docs){
+              view.distinctQuery(sc.name, {include:filter, size:10000}, function(err, data){
                 if(err) return console.error(err);
-                var items = _.map(docs.documents, function(doc){
-                  return {label:doc['title']||_.at(doc, sc.name)[0], value:_.at(doc, sc.name)[0]};
+                var items = _.map(data.values, function(item){
+                  return {label:item, value:item};
                 });
                 callback(items);
               });

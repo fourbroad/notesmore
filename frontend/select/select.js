@@ -159,7 +159,7 @@ $.widget("nm.select", {
 
   _fetchMenuItems: function(){
     var o = this.options, self = this, filter = this.$input.val().trim();
-    filter = filter == "" ? '*' : '*'+filter+'*';
+    filter = filter == "" ? '.*' : '.*'+filter+'.*';
     o.menuItems(filter, function(items){
       self._refreshClearLink();
       self._armItems(items);

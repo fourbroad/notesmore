@@ -1,7 +1,7 @@
 const _ = require('lodash')
   , client = require('../../lib/client')();
 
-var showErrorsForInput, showErrors, clearErrors, clearInputError, checkPermission;
+var showErrorsForInput, showErrors, clearErrors, clearInputError, checkPermission, get;
 
 showErrorsForInput = function($input, errors) {
   var $parent = $input.parent();
@@ -52,10 +52,35 @@ checkPermission = function(domainId, userId, method, doc, callback) {
   });
 }
 
+get = function(object, path){
+  if(!object || !path) return;
+  if(_.isString(path)) path = path.split('.');
+  if(_.isArray(object)){
+    if(path.length == 1){
+      return _.reduce(object, function(r,v,k){
+        if(v[path[0]]) r.push(v[path[0]]);
+        return r;
+      },[]);
+    }else{
+      return get(_.reduce(object, function(r,v,k){
+        if(v[path[0]]) r.push(v[path[0]]);
+        return r;
+      },[]), _drop[path]);
+    }
+  } else {
+    if(path.length == 1){
+      return object[path[0]];
+    } else{
+      return get(object[path[0]], _.drop(path));
+    }
+  }
+}
+
 module.exports = {
   showErrorsForInput: showErrorsForInput,
   showErrors: showErrors,
   clearErrors: clearErrors,
   clearInputError: clearInputError,
-  checkPermission: checkPermission
+  checkPermission: checkPermission,
+  get: get
 }

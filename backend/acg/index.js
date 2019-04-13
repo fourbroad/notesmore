@@ -368,6 +368,15 @@ initSocket = function(socket, visitorId) {
     });
   });
 
+  socket.on('distinctQueryCollection', function(domainId, collectionId, field, opts, callback){
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'distinctQuery').then( collection => {
+      return collection.distinctQuery(field, opts);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
   socket.on('refreshCollection', function(domainId, collectionId, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'refresh').then( collection => {
       return collection.refresh();
@@ -433,6 +442,15 @@ initSocket = function(socket, visitorId) {
       callback(err);
     });
   });
+
+  socket.on('distinctQueryView', function(domainId, viewId, field, opts, callback){
+    checkAcl2(visitorId, View, domainId, viewId, 'distinctQuery').then( view => {
+      return view.distinctQuery(field, opts);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });  
 
   socket.on('refreshView', function(domainId, viewId, callback){
     checkAcl2(visitorId, View, domainId, viewId, 'refresh').then( view => {
