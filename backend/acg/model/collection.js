@@ -196,7 +196,7 @@ inherits(Collection, Document,{
     _.merge(query.aggs.values.terms, opts);
 
     return this._getElasticSearch().search({
-      index: this.domainId + '~' + this.collections + '~all~snapshots',
+      index: this.domainId + '~' + this.id + '~all~snapshots',
       type: Document.TYPE,
       body: query, 
       size:0
