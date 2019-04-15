@@ -460,7 +460,6 @@ $.widget("nm.view", {
       }
       break;
       default:
-        console.error(searchColumn.mode);
     }
 
     return earliest||latest ? [earliest, latest].join(','):'';

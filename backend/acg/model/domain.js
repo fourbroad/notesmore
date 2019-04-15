@@ -81,75 +81,87 @@ const DOMAINS = '.domains'
   id: ".collections",
   title: "Collections",
   _meta:{
-    iconClass: "ti-harddrives"    
+    iconClass: "ti-harddrives",
+    roadmap: 1
   }
 }, {
   id: ".metas",
   title: "Metas",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".pages",
   title: "Pages",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".views",
   title: "Views",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".forms",
   title: "Forms",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".actions",
   title: "Actions",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".files",
   title: "Files",
   _meta: {
     iconClass: "ti-folder",
-    actions: ['uploadFiles','edit']
+    actions: ['uploadFiles','edit'],
+    roadmap: 1
   }
 }, {
   id: ".roles",
   title: "Roles",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".groups",
   title: "Groups",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".profiles",
   title: "Profiles",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }]
   , ROOT_COLLECTIONS = [{
   id: ".users",
   title: "Users",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".domains",
   title: "Domains",
   _meta:{
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }]
   , ACTIONS = [{
@@ -162,7 +174,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/form/form.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: "edit",
@@ -174,7 +187,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/form/form.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: "gridView",
@@ -186,7 +200,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/view/view.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: 'login',
@@ -198,7 +213,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/login/login.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: 'signup',
@@ -210,7 +226,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/signup/signup.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: 'workbench',
@@ -222,7 +239,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/workbench/workbench.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: 'dashboard',
@@ -234,7 +252,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/dashboard/dashboard.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: 'calendar',
@@ -246,7 +265,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/calendar/calendar.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: 'chat',
@@ -258,7 +278,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/chat/chat.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: 'email',
@@ -270,7 +291,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/email/email.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: "uploadFiles",
@@ -282,7 +304,8 @@ const DOMAINS = '.domains'
     css: "@notesabc/upload-files/upload-files.bundle.css"
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }]
   , METAS = [{
@@ -297,7 +320,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-wand"
+    iconClass: "ti-wand",
+    roadmap: 1
   }
 }, {
   id: ".meta-collection",
@@ -318,7 +342,8 @@ const DOMAINS = '.domains'
   defaultAction: 'gridView',
   actions: ['gridView', 'edit'],
   _meta: {
-    iconClass: "ti-folder"
+    iconClass: "ti-folder",
+    roadmap: 1
   }
 }, {
   id: ".meta-page",
@@ -332,7 +357,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-layout-width-default"
+    iconClass: "ti-layout-width-default",
+    roadmap: 1
   }
 }, {
   id: ".meta-view",
@@ -357,7 +383,8 @@ const DOMAINS = '.domains'
   defaultAction: "gridView",
   actions: ['gridView', 'edit'],
   _meta: {
-    iconClass: "ti-view-list-alt"
+    iconClass: "ti-view-list-alt",
+    roadmap: 1
   }
 }, {
   id: ".meta-form",
@@ -371,7 +398,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-layout-cta-btn-right"
+    iconClass: "ti-layout-cta-btn-right",
+    roadmap: 1
   }
 }, {
   id: ".meta-action",
@@ -385,7 +413,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: "ti-control-play",
+    roadmap: 1
   }
 }, {
   id: ".meta-file",
@@ -399,7 +428,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-file"
+    iconClass: "ti-file",
+    roadmap: 1
   }
 }, {
   id: ".meta-role",
@@ -413,7 +443,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-id-badge"
+    iconClass: "ti-id-badge",
+    roadmap: 1
   }
 }, {
   id: ".meta-group",
@@ -427,7 +458,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-view-grid"
+    iconClass: "ti-view-grid",
+    roadmap: 1
   }
 }, {
   id: ".meta-profile",
@@ -441,7 +473,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-id-badge"
+    iconClass: "ti-id-badge",
+    roadmap: 1
   }
 }]
   , ROOT_METAS = [{
@@ -458,7 +491,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-user"
+    iconClass: "ti-user",
+    roadmap: 1
   }
 }, {
   id: ".meta-domain",
@@ -472,7 +506,8 @@ const DOMAINS = '.domains'
   },
   actions: ['edit'],
   _meta: {
-    iconClass: "ti-layout-width-full"
+    iconClass: "ti-layout-width-full",
+    roadmap: 1
   }
 }, ]
   , PAGES = [{
@@ -480,14 +515,16 @@ const DOMAINS = '.domains'
   title: "Login",
   _meta: {
     iconClass: "ti-layout-width-default",
-    actions: ['login']
+    actions: ['login'],
+    roadmap: 1
   }
 }, {
   id: ".signup",
   title: "Signup",
   _meta: {
     iconClass: "ti-layout-width-default",
-    actions: ['signup']
+    actions: ['signup'],
+    roadmap: 1
   }
 }, {
   id: ".workbench",
@@ -525,48 +562,55 @@ const DOMAINS = '.domains'
   }],
   _meta: {
     iconClass: "ti-blackboard",
-    actions: ['workbench']
+    actions: ['workbench'],
+    roadmap: 1
   }
 }, {
   id: ".dashboard",
   title: "Dashboard",
   _meta: {
     iconClass: "ti-dashboard",
-    actions: ['dashboard']
+    actions: ['dashboard'],
+    roadmap: 1
   }
 }, {
   id: ".calendar",
   title: "Calendar",
   _meta: {
     iconClass: "ti-calendar",  
-    actions: ['calendar']
+    actions: ['calendar'],
+    roadmap: 1
   }
 }, {
   id: ".chat",
   title: "Chat",
   _meta: {
     iconClass: "ti-comments",
-    actions: ['chat']
+    actions: ['chat'],
+    roadmap: 1
   }
 }, {
   id: ".email",
   title: "Email",
   _meta: {
     iconClass: "ti-email",
-    actions: ['email']
+    actions: ['email'],
+    roadmap: 1
   }
 }]
   , ROLES = [{
   id: "administrator",
   title: "Administrator",
   _meta:{
-    iconClass: "ti-user"  
+    iconClass: "ti-user",
+    roadmap: 1
   }
 }, {
   id: "anonymous",
   title: "Anonymous",
   _meta:{
-    iconClass: "ti-user"  
+    iconClass: "ti-user",
+    roadmap: 1
   }
 }]
   , ADMINISTRATOR = {
@@ -575,6 +619,7 @@ const DOMAINS = '.domains'
   password: "3c3f601a1960b8d7b347d376d52b6e59",
   _meta:{
     iconClass: "ti-user",
+    roadmap: 1
   }
 }
   , ANONYMOUS = {
@@ -583,6 +628,7 @@ const DOMAINS = '.domains'
   password: "a29b1ee7caefc17a3a73d6d137c8169b",
   _meta:{
     iconClass: "ti-user",
+    roadmap: 1
   }
 };
 

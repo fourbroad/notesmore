@@ -117,9 +117,9 @@ initSocket = function(socket, visitorId) {
     });
   });
 
-  socket.on('createMeta', function(domainId, metaId, metaData, callback){
+  socket.on('createMeta', function(domainId, metaId, metaData, options, callback){
     if(metaId == '.meta'){
-      Meta.create(visitorId, domainId, metaId, metaData).then(result => callback(null, result)).catch(err => {
+      Meta.create(visitorId, domainId, metaId, metaData, options).then(result => callback(null, result)).catch(err => {
         console.error(err);
         callback(err);
       });
@@ -133,139 +133,130 @@ initSocket = function(socket, visitorId) {
     }
   });
 
-  socket.on('getMeta', function(domainId, metaId, callback){
+  socket.on('getMeta', function(domainId, metaId, options, callback){
     checkAcl2(visitorId, Meta, domainId, metaId, 'get').then( meta => {
-      return meta.get();
+      return meta.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchMeta', function(domainId, metaId, patch, callback){
+  socket.on('patchMeta', function(domainId, metaId, patch, options, callback){
     checkAcl2(visitorId, Meta, domainId, metaId, 'patch', patch).then( meta => {
-      return meta.patch(visitorId, patch);
+      return meta.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteMeta', function(domainId, metaId, callback){
+  socket.on('deleteMeta', function(domainId, metaId, options, callback){
     checkAcl2(visitorId, Meta, domainId, metaId, 'delete').then( meta =>{
-      return meta.delete(visitorId);
+      return meta.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });  
 
-  socket.on('findMetas', function(domainId, query, callback){
+  socket.on('findMetas', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return Meta.find(domainId, query);
+      return Meta.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createUser', function(userId, userData, callback){
+  socket.on('createUser', function(userId, userData, options, callback){
     var metaId = _.at(userData, '_meta.metaId')[0] || '.meta-user';
     checkCreate(visitorId, Domain.ROOT, metaId).then( result => {
-      return User.create(visitorId, userId, userData);
+      return User.create(visitorId, userId, userData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getUser', function(userId, callback){
-    var args = _.values(arguments);
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = userId
-      userId = visitorId;
-      args = [userId, callback];
-    }else if(arguments.length != 2 || typeof arguments[1] != 'function'){
-      console.log(arguments);
-    }
-
-    checkAcl1(visitorId, User, userId, 'get').then( user => {
-      return user.get();
+  socket.on('getUser', function(userId, options, callback){
+    checkAcl1(visitorId, User, userId || visitorId, 'get').then( user => {
+      return user.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchUser', function(userId, patch, callback){
+  socket.on('patchUser', function(userId, patch, options, callback){
     checkAcl1(visitorId, User, userId, 'patch', patch).then( user => {
-      return user.patch(visitorId, patch);
+      return user.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteUser', function(userId, callback){
+  socket.on('deleteUser', function(userId, options, callback){
     checkAcl1(visitorId, User, userId, 'delete').then( user => {
-      return user.delete(visitorId);
+      return user.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('resetPassword', function(userId, newPassword, callback){
+  socket.on('resetPassword', function(userId, newPassword, options, callback){
     checkAcl1(visitorId, User, userId, 'resetPassword').then( user => {
-      return user.resetPassword(visitorId, newPassword);
+      return user.resetPassword(visitorId, newPassword, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findUsers', function(domainId, query, callback){
+  socket.on('findUsers', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return User.find(domainId, query);
+      return User.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findDomains', function(query, callback){
+  socket.on('findDomains', function(query, options, callback){
     filterQuery(visitorId, Domain.ROOT, query).then( query => {
-      return Domain.find(query);
+      return Domain.find(query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createDomain', function(domainId, domainData, callback){
+  socket.on('createDomain', function(domainId, domainData, options, callback){
     var metaId = _.at(domainData, '_meta.metaId')[0] || '.meta-domain';
     checkCreate(visitorId, Domain.ROOT, metaId).then( result => {
-      return Domain.create(visitorId, domainId, domainData);
+      return Domain.create(visitorId, domainId, domainData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getDomain', function(domainId, callback){
+  socket.on('getDomain', function(domainId, options, callback){
     checkAcl1(visitorId, Domain, domainId, 'get').then( domain => {
-      return domain.get();
+      return domain.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('mgetDomainDocuments', function(domainId, ids, callback){
-    Domain.get(domainId).then(domain => {
-      return domain.mgetDocuments(ids);
+  socket.on('mgetDomainDocuments', function(domainId, ids, options, callback){
+    Domain.get(domainId, options).then(domain => {
+      return domain.mgetDocuments(ids, options);
     }).then(data => {
-      return Profile.get(domainId, visitorId).then( profile => {
+      return Profile.get(domainId, visitorId, options).then( profile => {
         return _.reduce(data.docs, function(result, value, key){
           if(value.found){
             var doc = value._source, permissions = _.at(doc, '_meta.acl.get')[0];
@@ -286,575 +277,575 @@ initSocket = function(socket, visitorId) {
     });
   });
 
-  socket.on('patchDomain', function(domainId, patch, callback){
+  socket.on('patchDomain', function(domainId, patch, options, callback){
     checkAcl1(visitorId, Domain, domainId, 'patch', patch).then( domain => {
-      return domain.patch(visitorId, patch);
+      return domain.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('refreshDomain', function(domainId, callback){
+  socket.on('refreshDomain', function(domainId, options, callback){
     checkAcl1(visitorId, Domain, domainId, 'refresh').then( domain => {
-      return domain.refresh();
+      return domain.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteDomain', function(domainId, callback){
+  socket.on('deleteDomain', function(domainId, options, callback){
     checkAcl1(visitorId, Domain, domainId, 'delete').then( domain => {
-      return domain.delete(visitorId);
+      return domain.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createCollection', function(domainId, collectionId, collectionData, callback){
+  socket.on('createCollection', function(domainId, collectionId, collectionData, options, callback){
     var metaId = _.at(collectionData, '_meta.metaId')[0] || '.meta-collection';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return Collection.create(visitorId, domainId, collectionId, collectionData);
+      return Collection.create(visitorId, domainId, collectionId, collectionData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getCollection', function(domainId, collectionId, callback){
+  socket.on('getCollection', function(domainId, collectionId, options, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'get').then( collection => {
-      return collection.get();
+      return collection.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findCollections', function(domainId, query, callback){
+  socket.on('findCollections', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return Collection.find(domainId, query);
+      return Collection.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchCollection', function(domainId, collectionId, patch, callback){
+  socket.on('patchCollection', function(domainId, collectionId, patch, options, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'patch', patch).then( collection => {
-      return collection.patch(visitorId, patch);
+      return collection.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteCollection', function(domainId, collectionId, callback){
+  socket.on('deleteCollection', function(domainId, collectionId, options, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'delete').then( collection => {
-      return collection.delete(visitorId);
+      return collection.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('bulk', function(domainId, collectionId, docs, callback){
+  socket.on('bulk', function(domainId, collectionId, docs, options, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'bulk').then( collection => {
-      return collection.bulk(visitorId, docs);
+      return collection.bulk(visitorId, docs, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('distinctQueryCollection', function(domainId, collectionId, field, opts, callback){
+  socket.on('distinctQueryCollection', function(domainId, collectionId, field, options, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'distinctQuery').then( collection => {
-      return collection.distinctQuery(field, opts);
+      return collection.distinctQuery(field, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('refreshCollection', function(domainId, collectionId, callback){
+  socket.on('refreshCollection', function(domainId, collectionId, options, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'refresh').then( collection => {
-      return collection.refresh();
+      return collection.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createView', function(domainId, viewId, viewData, callback){
+  socket.on('createView', function(domainId, viewId, viewData, options, callback){
     var metaId = _.at(viewData, '_meta.metaId')[0] || '.meta-view';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return View.create(visitorId, domainId, viewId, viewData);
+      return View.create(visitorId, domainId, viewId, viewData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getView', function(domainId, viewId, callback){
+  socket.on('getView', function(domainId, viewId, options, callback){
     checkAcl2(visitorId, View, domainId, viewId, 'get').then( view => {
-      return view.get();
+      return view.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findViews', function(domainId, query, callback){
+  socket.on('findViews', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return View.find(domainId, query);
+      return View.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchView', function(domainId, viewId, patch, callback){
+  socket.on('patchView', function(domainId, viewId, patch, options, callback){
     checkAcl2(visitorId, View, domainId, viewId, 'patch', patch).then( view => {
-      return view.patch(visitorId, patch);
+      return view.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteView', function(domainId, viewId, callback){
+  socket.on('deleteView', function(domainId, viewId, options, callback){
     checkAcl2(visitorId, View, domainId, viewId, 'delete').then( view => {
-      return view.delete(visitorId);
+      return view.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findViewDocuments', function(domainId, viewId, query, callback){
+  socket.on('findViewDocuments', function(domainId, viewId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return View.get(domainId, viewId);
+      return View.get(domainId, viewId, options);
     }).then(view => {
-      return view.findDocuments(query);
+      return view.findDocuments(query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('distinctQueryView', function(domainId, viewId, field, opts, callback){
+  socket.on('distinctQueryView', function(domainId, viewId, field, options, callback){
     checkAcl2(visitorId, View, domainId, viewId, 'distinctQuery').then( view => {
-      return view.distinctQuery(field, opts);
+      return view.distinctQuery(field, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });  
 
-  socket.on('refreshView', function(domainId, viewId, callback){
+  socket.on('refreshView', function(domainId, viewId, options, callback){
     checkAcl2(visitorId, View, domainId, viewId, 'refresh').then( view => {
-      return view.refresh();
+      return view.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createForm', function(domainId, formId, formData, callback){
+  socket.on('createForm', function(domainId, formId, formData, options, callback){
     var metaId = _.at(formData, '_meta.metaId')[0] || '.meta-form';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return Form.create(visitorId, domainId, formId, formData);
+      return Form.create(visitorId, domainId, formId, formData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getForm', function(domainId, formId, callback){
+  socket.on('getForm', function(domainId, formId, options, callback){
     checkAcl2(visitorId, Form, domainId, formId, 'get').then( form => {
-      return form.get();
+      return form.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findForms', function(domainId, query, callback){
+  socket.on('findForms', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return Form.find(domainId, query);
+      return Form.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchForm', function(domainId, formId, patch, callback){
+  socket.on('patchForm', function(domainId, formId, patch, options, callback){
     checkAcl2(visitorId, Form, domainId, formId, 'patch', patch).then( form => {
-      return form.patch(visitorId, patch);
+      return form.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteForm', function(domainId, formId, callback){
+  socket.on('deleteForm', function(domainId, formId, options, callback){
     checkAcl2(visitorId, Form, domainId, formId, 'delete').then( form => {
-      return form.delete(visitorId);
+      return form.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createPage', function(domainId, pageId, pageData, callback){
+  socket.on('createPage', function(domainId, pageId, pageData, options, callback){
     var metaId = _.at(pageData, '_meta.metaId')[0] || '.meta-page';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return Page.create(visitorId, domainId, pageId, pageData);
+      return Page.create(visitorId, domainId, pageId, pageData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getPage', function(domainId, pageId, callback){
+  socket.on('getPage', function(domainId, pageId, options, callback){
     checkAcl2(visitorId, Page, domainId, pageId, 'get').then( page => {
-      return page.get();
+      return page.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchPage', function(domainId, pageId, patch, callback){
+  socket.on('patchPage', function(domainId, pageId, patch, options, callback){
     checkAcl2(visitorId, Page, domainId, pageId, 'patch', patch).then( page => {
-      return page.patch(visitorId, patch);
+      return page.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deletePage', function(domainId, pageId, callback){
+  socket.on('deletePage', function(domainId, pageId, options, callback){
     checkAcl2(visitorId, Page, domainId, pageId, 'delete').then( page => {
-      return page.delete(visitorId);
+      return page.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createAction', function(domainId, actionId, actionData, callback){
+  socket.on('createAction', function(domainId, actionId, actionData, options, callback){
     var metaId = _.at(actionData, '_meta.metaId')[0] || '.meta-action';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return Action.create(visitorId, domainId, actionId, actionData);
+      return Action.create(visitorId, domainId, actionId, actionData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getAction', function(domainId, actionId, callback){
+  socket.on('getAction', function(domainId, actionId, options, callback){
     checkAcl2(visitorId, Action, domainId, actionId, 'get').then( action => {
-      return action.get();
+      return action.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchAction', function(domainId, actionId, patch, callback){
+  socket.on('patchAction', function(domainId, actionId, patch, options, callback){
     checkAcl2(visitorId, Action, domainId, actionId, 'patch', patch).then( action => {
-      return action.patch(visitorId, patch);
+      return action.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteAction', function(domainId, actionId, callback){
+  socket.on('deleteAction', function(domainId, actionId, options, callback){
     checkAcl2(visitorId, Action, domainId, actionId, 'delete').then( action => {
-      return action.delete(visitorId);
+      return action.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findActions', function(domainId, query, callback){
+  socket.on('findActions', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return Action.find(domainId, query);
+      return Action.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createRole', function(domainId, roleId, roleData, callback){
+  socket.on('createRole', function(domainId, roleId, roleData, options, callback){
     var metaId = _.at(roleData, '_meta.metaId')[0] || '.meta-role';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return Role.create(visitorId, domainId, roleId, roleData);
+      return Role.create(visitorId, domainId, roleId, roleData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getRole', function(domainId, roleId, callback){
+  socket.on('getRole', function(domainId, roleId, options, callback){
     checkAcl2(visitorId, Role, domainId, roleId, 'get').then( role => {
-      return role.get();
+      return role.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findRoles', function(domainId, query, callback){
+  socket.on('findRoles', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return Role.find(domainId, query);
+      return Role.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchRole', function(domainId, roleId, patch, callback){
+  socket.on('patchRole', function(domainId, roleId, patch, options, callback){
     checkAcl2(visitorId, Role, domainId, roleId, 'patch', patch).then( role => {
-      return role.patch(visitorId, patch);
+      return role.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteRole', function(domainId, roleId, callback){
+  socket.on('deleteRole', function(domainId, roleId, options, callback){
     checkAcl2(visitorId, Role, domainId, roleId, 'delete').then( role => {
-      return role.delete(visitorId);
+      return role.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createGroup', function(domainId, groupId, groupData, callback){
+  socket.on('createGroup', function(domainId, groupId, groupData, options, callback){
     var metaId = _.at(groupData, '_meta.metaId')[0] || '.meta-group';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return Group.create(visitorId, domainId, groupId, groupData);
+      return Group.create(visitorId, domainId, groupId, groupData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getGroup', function(domainId, groupId, callback){
+  socket.on('getGroup', function(domainId, groupId, options, callback){
     checkAcl2(visitorId, Group, domainId, groupId, 'get').then( group => {
-      return group.get();
+      return group.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchGroup', function(domainId, groupId, patch, callback){
+  socket.on('patchGroup', function(domainId, groupId, patch, options, callback){
     checkAcl2(visitorId, Group, domainId, groupId, 'patch', patch).then( group => {
-      return group.patch(visitorId, patch);
+      return group.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteGroup', function(domainId, groupId, callback){
+  socket.on('deleteGroup', function(domainId, groupId, options, callback){
     checkAcl2(visitorId, Group, domainId, groupId, 'delete').then( group => {
-      return group.delete(visitorId);
+      return group.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createProfile', function(domainId, profileId, profileData, callback){
+  socket.on('createProfile', function(domainId, profileId, profileData, options, callback){
     var metaId = _.at(profileData, '_meta.metaId')[0] || '.meta-profile';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return Profile.create(visitorId, domainId, profileId, profileData);
+      return Profile.create(visitorId, domainId, profileId, profileData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getProfile', function(domainId, profileId, callback){
+  socket.on('getProfile', function(domainId, profileId, options, callback){
     checkAcl2(visitorId, Profile, domainId, profileId, 'get').then( profile => {
-      return profile.get();
+      return profile.get(options);
      }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
  });
 
-  socket.on('findProfiles', function(domainId, query, callback){
+  socket.on('findProfiles', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return Profile.find(domainId, query)
+      return Profile.find(domainId, query, options)
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchProfile', function(domainId, profileId, patch, callback){
+  socket.on('patchProfile', function(domainId, profileId, patch, options, callback){
     checkAcl2(visitorId, Profile, domainId, profileId, 'patch', patch).then( profile => {
-      return profile.patch(visitorId, patch);
+      return profile.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteProfile', function(domainId, profileId, callback){
+  socket.on('deleteProfile', function(domainId, profileId, options, callback){
     checkAcl2(visitorId, Profile, domainId, profileId, 'delete').then( profile => {
-      return profile.delete(visitorId);
+      return profile.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createFile', function(domainId, fileId, fileData, callback){
+  socket.on('createFile', function(domainId, fileId, fileData, options, callback){
     var metaId = _.at(fileData, '_meta.metaId')[0] || '.meta-file';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return File.create(visitorId, domainId, fileId, fileData);
+      return File.create(visitorId, domainId, fileId, fileData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getFile', function(domainId, fileId, callback){
+  socket.on('getFile', function(domainId, fileId, options, callback){
     checkAcl2(visitorId, File, domainId, fileId, 'get').then( file => {
-      return file.get();
+      return file.get(options);
      }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
  });
 
-  socket.on('findFiles', function(domainId, query, callback){
+  socket.on('findFiles', function(domainId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return File.find(domainId, query)
+      return File.find(domainId, query, options)
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchFile', function(domainId, fileId, patch, callback){
+  socket.on('patchFile', function(domainId, fileId, patch, options, callback){
     checkAcl2(visitorId, File, domainId, fileId, 'patch', patch).then( file => {
-      return file.patch(visitorId, patch);
+      return file.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteFile', function(domainId, fileId, callback){
+  socket.on('deleteFile', function(domainId, fileId, options, callback){
     checkAcl2(visitorId, File, domainId, fileId, 'delete').then( file => {
-      return file.delete(visitorId);
+      return file.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('createDocument', function(domainId, collectionId, documentId, docData, callback){
+  socket.on('createDocument', function(domainId, collectionId, documentId, docData, options, callback){
     var metaId = _.at(docData, '_meta.metaId')[0] || '.meta';
     checkCreate(visitorId, domainId, metaId).then( result => {
-      return Document.create(visitorId, domainId, collectionId, documentId, docData);
+      return Document.create(visitorId, domainId, collectionId, documentId, docData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getDocument', function(domainId, collectionId, documentId, callback){
+  socket.on('getDocument', function(domainId, collectionId, documentId, options, callback){
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'get').then( document => {
-      return document.get();
+      return document.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('findDocuments', function(domainId, collectionId, query, callback){
+  socket.on('findDocuments', function(domainId, collectionId, query, options, callback){
     filterQuery(visitorId, domainId, query).then( query => {
-      return Document.find(domainId, collectionId, query);
+      return Document.find(domainId, collectionId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchDocument', function(domainId, collectionId, documentId, patch, callback){
+  socket.on('patchDocument', function(domainId, collectionId, documentId, patch, options, callback){
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patch', patch).then( document => {
-      return document.patch(visitorId, patch);
+      return document.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('deleteDocument', function(domainId, collectionId, documentId, callback){
+  socket.on('deleteDocument', function(domainId, collectionId, documentId, options, callback){
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'delete').then( document => {
-      return document.delete(visitorId);
+      return document.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('scroll', function(params, callback){
-    Document.scroll(params).then(result => callback(null, result)).catch(err => {
+  socket.on('scroll', function(options, callback){
+    Document.scroll(options).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('clearScroll', function(params, callback){
-    Document.clearScroll(params).then(result => callback(null, result)).catch(err => {
+  socket.on('clearScroll', function(options, callback){
+    Document.clearScroll(options).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('getEvents', function(domainId, collectionId, documentId, callback){
+  socket.on('getEvents', function(domainId, collectionId, documentId, options, callback){
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getEvents').then( document => {
-      return document.getEvents();
+      return document.getEvents(options);
     }).then(result => callback(null, result)).catch(err => {
       console.log(err);
       callback(err)
     });
   });
 
-  socket.on('getDocumentMeta', function(domainId, collectionId, documentId, callback){
+  socket.on('getDocumentMeta', function(domainId, collectionId, documentId, options, callback){
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getMeta').then( document => {
-      return document.getMeta();
+      return document.getMeta(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('patchDocumentMeta', function(domainId, collectionId, documentId, aclPatch, callback){
+  socket.on('patchDocumentMeta', function(domainId, collectionId, documentId, aclPatch, options, callback){
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patchMeta').then( document => {
-      return document.patchMeta(visitorId, aclPatch);
+      return document.patchMeta(visitorId, aclPatch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });
   });
 
-  socket.on('clearAclSubject', function(domainId, collectionId, documentId, method, rgu, subjectId, callback){
+  socket.on('clearAclSubject', function(domainId, collectionId, documentId, method, rgu, subjectId, options, callback){
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'clearAclSubject').then( document => {
-      return document.clearAclSubject(visitorId, method, rgu, subjectId);
+      return document.clearAclSubject(visitorId, method, rgu, subjectId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
