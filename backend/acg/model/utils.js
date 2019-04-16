@@ -32,8 +32,8 @@ function inherits(Child, Parent, proto) {
   return Child;
 }
 
-function getEntity(elasticsearch, cache, domainId, collectionId, documentId){
-  var uid = uniqueId(domainId, collectionId, documentId), doc = cache.get(uid);
+function getEntity(elasticsearch, cache, domainId, collectionId, documentId, options){
+  var uid = uniqueId(domainId, collectionId, documentId), version = options && options.version, doc = cache.get(uid);
   if (!doc) {
     return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId}).then( data => {
       data._source.id = data._source.id || data._id;

@@ -52,20 +52,20 @@ _.assign(Meta, {
     return Meta;
   },
 
-  create: function(authorId, domainId, metaId, metaData){
-    return Document.create.call(this, authorId, domainId, METAS, metaId, metaData).then( document =>{
-      return Meta.get(domainId, metaId);
+  create: function(authorId, domainId, metaId, metaData, options){
+    return Document.create.call(this, authorId, domainId, METAS, metaId, metaData, options).then( document =>{
+      return Meta.get(domainId, metaId, options);
     });      
   },
 
-  get: function(domainId, metaId) {
-    return getEntity(elasticsearch, cache, domainId, METAS, metaId).then( source => {
+  get: function(domainId, metaId, options) {
+    return getEntity(elasticsearch, cache, domainId, METAS, metaId, options).then( source => {
       return new Meta(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, METAS, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, METAS, query, options);
   }
 
 });

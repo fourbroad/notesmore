@@ -49,21 +49,21 @@ _.assign(View, {
     return View;
   },
 
-  create: function(authorId, domainId, viewId, viewData) {
+  create: function(authorId, domainId, viewId, viewData, options) {
     if(!_.at(viewData, '_meta.metaId')[0]) _.set(viewData, '_meta.metaId', '.meta-view');
-    return Document.create.call(this, authorId, domainId, VIEWS, viewId, viewData).then( document => {
-      return View.get(domainId, viewId);
+    return Document.create.call(this, authorId, domainId, VIEWS, viewId, viewData, options).then( document => {
+      return View.get(domainId, viewId, options);
     });
   },
 
-  get: function(domainId, viewId) {
-    return getEntity(elasticsearch, cache, domainId, VIEWS, viewId).then( source => {
+  get: function(domainId, viewId, options) {
+    return getEntity(elasticsearch, cache, domainId, VIEWS, viewId, options).then( source => {
       return new View(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, VIEWS, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, VIEWS, query, options);
   }
 
 });
@@ -77,7 +77,7 @@ inherits(View, Document,{
     return cache;
   },
 
-  findDocuments: function(query) {
+  findDocuments: function(query, options) {
     query.index = _joinIndices(this.domainId, this.collections);
     query.type = Document.TYPE;
   	return this._getElasticSearch().search(query).then(function(data){
@@ -99,7 +99,7 @@ inherits(View, Document,{
   	});
   },
 
-  distinctQuery: function(field, opts) {
+  distinctQuery: function(field, options) {
     const query = {
       aggs: {
         values: {
@@ -115,7 +115,7 @@ inherits(View, Document,{
       }
     };
 
-    _.merge(query.aggs.values.terms, opts);
+    _.merge(query.aggs.values.terms, options);
 
     return this._getElasticSearch().search({
       index: _joinIndices(this.domainId, this.collections),
@@ -130,7 +130,7 @@ inherits(View, Document,{
     });
   },
 
-  refresh: function() {
+  refresh: function(options) {
     return this._getElasticSearch().indices.refresh({ index: _joinIndices(this.domainId, this.collections) });
   }
 

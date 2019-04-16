@@ -843,37 +843,37 @@ _.assign(Domain, {
     return Domain;
   },
 
-  create: function(authorId, domainId, domainData) {
+  create: function(authorId, domainId, domainData, options) {
     var self = this, promise;
 
     if (domainId == ROOT) {
       promise = initDomain(authorId, 'Administrator', domainId);
     } else {
-      promise = User.get(authorId).then(user=>initDomain(authorId, user.title, domainId));
+      promise = User.get(authorId, options).then(user=>initDomain(authorId, user.title, domainId));
     }
 
     if (!_.at(domainData, '_meta.metaId')[0])
       _.set(domainData, '_meta.metaId', '.meta-domain');
 
     return promise.then(result=>{
-      return Document.create.call(self, authorId, ROOT, DOMAINS, domainId, domainData);
+      return Document.create.call(self, authorId, ROOT, DOMAINS, domainId, domainData, options);
     }
     ).then(()=>{
-      return Domain.get(domainId)
+      return Domain.get(domainId, options)
     }
     );
 
   },
 
-  get: function(domainId) {
-    return getEntity(elasticsearch, cache, ROOT, DOMAINS, domainId).then(source=>{
+  get: function(domainId, options) {
+    return getEntity(elasticsearch, cache, ROOT, DOMAINS, domainId, options).then(source=>{
       return new Domain(source);
     }
     );
   },
 
-  find: function(query) {
-    return Document.find.call(this, ROOT, DOMAINS, query);
+  find: function(query, options) {
+    return Document.find.call(this, ROOT, DOMAINS, query, options);
   }
 
 });
@@ -887,10 +887,9 @@ inherits(Domain, Document, {
     return cache;
   },
 
-  delete: function(authorId) {
-    var es = this._getElasticSearch()
-      , self = this;
-    return Domain.parent.delete.call(this, authorId).then(result=>{
+  delete: function(authorId, options) {
+    var es = this._getElasticSearch(), self = this;
+    return Domain.parent.delete.call(this, authorId, options).then(result=>{
       return es.indices.delete({
         index: self.id + '~*'
       });
@@ -901,11 +900,11 @@ inherits(Domain, Document, {
     );
   },
 
-  findCollections: function(query) {
-    return Collection.find(this.id, query);
+  findCollections: function(query, options) {
+    return Collection.find(this.id, query, options);
   },
 
-  distinctQueryCollections: function(field, wildcard) {
+  distinctQueryCollections: function(field, wildcard, options) {
     var query = {
       collapse: {
         field: field + '.keyword'
@@ -929,38 +928,38 @@ inherits(Domain, Document, {
     return this.findCollections(query);
   },
 
-  getDocument: function(collectionId, documentId) {
+  getDocument: function(collectionId, documentId, options) {
     switch (collectionId) {
     case '.metas':
-      return Meta.get(this.id, documentId);
+      return Meta.get(this.id, documentId, options);
     case '.domains':
-      return Domain.get(documentId);
+      return Domain.get(documentId, options);
     case '.collections':
-      return Collection.get(this.id, documentId);
+      return Collection.get(this.id, documentId, options);
     case '.views':
-      return View.get(this.id, documentId);
+      return View.get(this.id, documentId, options);
     case '.pages':
-      return Page.get(this.id, documentId);
+      return Page.get(this.id, documentId, options);
     case '.actions':
-      return Action.get(this.id, documentId);
+      return Action.get(this.id, documentId, options);
     case '.forms':
-      return Form.get(this.id, documentId);
+      return Form.get(this.id, documentId, options);
     case '.roles':
-      return Role.get(this.id, documentId);
+      return Role.get(this.id, documentId, options);
     case '.groups':
-      return Group.get(this.id, documentId);
+      return Group.get(this.id, documentId, options);
     case '.profiles':
-      return Profile.get(this.id, documentId);
+      return Profile.get(this.id, documentId, options);
     case '.files':
-      return File.get(this.id, documentId);
+      return File.get(this.id, documentId, options);
     case '.users':
-      return User.get(documentId);
+      return User.get(documentId, options);
     default:
-      return Document.get(this.id, collectionId, documentId);
+      return Document.get(this.id, collectionId, documentId, options);
     }
   },
 
-  mgetDocuments: function(ids){
+  mgetDocuments: function(ids, options){
     var domainId = this.id;
     return this._getElasticSearch().mget({
       body: {
@@ -972,7 +971,7 @@ inherits(Domain, Document, {
     });
   },
 
-  refresh: function() {
+  refresh: function(options) {
     return this._getElasticSearch().indices.refresh({ index: this.id + '~*' });
   },
 

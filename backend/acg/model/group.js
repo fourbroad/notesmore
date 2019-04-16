@@ -22,21 +22,21 @@ _.assign(Group, {
     return Group;
   },
 
-  create: function(authorId, domainId, groupId, groupData){
+  create: function(authorId, domainId, groupId, groupData, options){
     if(!_.at(groupData, '_meta.metaId')[0]) _.set(groupData, '_meta.metaId', '.meta-group');
-    return Document.create.call(this, authorId, domainId, GROUPS, groupId, groupData).then( document => {
-      return Group.get(domainId, groupId);
+    return Document.create.call(this, authorId, domainId, GROUPS, groupId, groupData, options).then( document => {
+      return Group.get(domainId, groupId, options);
     });
   },
 
-  get: function(domainId, groupId) {
-    return getEntity(elasticsearch, cache, domainId, GROUPS, groupId).then( source => {
+  get: function(domainId, groupId, options) {
+    return getEntity(elasticsearch, cache, domainId, GROUPS, groupId, options).then( source => {
       return new Group(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, GROUPS, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, GROUPS, query, options);
   }
 
 });

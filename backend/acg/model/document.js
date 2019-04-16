@@ -74,23 +74,23 @@ _.assign(Document, {
     return Document;
   },
 
-  create: function(authorId, domainId, collectionId, documentId, docData){
+  create: function(authorId, domainId, collectionId, documentId, docData, options){
     var self = this, metaId = _.at(docData, '_meta.metaId')[0] || '.meta';
     docData.id = documentId;
     return buildMeta(domainId, docData, authorId, metaId).then( docData => {
       return elasticsearch.create({ index: documentHotAlias(domainId, collectionId), type: DOC_TYPE, id: documentId, body: docData });
     }).then( result => {
-      return Document.get(domainId, collectionId, documentId);
+      return Document.get(domainId, collectionId, documentId, options);
     });
   },
 
-  get: function(domainId, collectionId, documentId){
-    return getEntity(elasticsearch, cache, domainId, collectionId, documentId).then(source => {
+  get: function(domainId, collectionId, documentId, options){
+    return getEntity(elasticsearch, cache, domainId, collectionId, documentId, options).then(source => {
       return new Document(domainId, collectionId, source);
     });
   },
 
-  find: function(domainId, collectionId, query) {
+  find: function(domainId, collectionId, query, options) {
     query.index = documentAllAlias(domainId, collectionId || '*');
     query.type = DOC_TYPE;
   	return elasticsearch.search(query).then(function(data){
@@ -112,11 +112,11 @@ _.assign(Document, {
   	});
   },
 
-  scroll: function(params){
+  scroll: function(options){
   　if(arguments.length < 1 || (arguments.length == 2 && typeof arguments[1] != 'function')){
   　  return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!')); 
   　}
-  　return elasticsearch.scroll(params).then(function(data){
+  　return elasticsearch.scroll(options).then(function(data){
   	  return {
   	    total:data.hits.total,
   	    offset: query.from || 0,
@@ -132,11 +132,11 @@ _.assign(Document, {
   　});
   },
 
-  clearScroll: function(params){
+  clearScroll: function(options){
   　if(arguments.length < 1 || (arguments.length == 2 && typeof arguments[1] != 'function')){
   　  return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!')); 
   　}
-  　return elasticsearch.clearScroll(params);
+  　return elasticsearch.clearScroll(options);
   }
 
 });
@@ -158,7 +158,7 @@ _.assign(Document.prototype, {
     return Promise.resolve(this);
   },
 
-  _doPatch: function(patch) {
+  _doPatch: function(patch, options) {
     var esc = this._getElasticSearch(), cache = this._getCache(), batch = [], p = patch.patch, errors = jsonPatch.validate(p, this);
 
     if(errors && errors.length > 0){
@@ -205,15 +205,15 @@ _.assign(Document.prototype, {
     return esc.bulk({body:batch});
   },
 
-  patch: function(authorId, patch) {
+  patch: function(authorId, patch, options) {
     var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id);
-    return this._doPatch({patch: patch, _meta:{author: authorId, created: new Date().getTime()}}).then(result => {
+    return this._doPatch({patch: patch, _meta:{author: authorId, created: new Date().getTime()}}, options).then(result => {
       cache.del(uid);
       return self;
     });
   },
 
-  delete: function(authorId) {
+  delete: function(authorId, options) {
     var self = this, docData = JSON.stringify(this), meta = {author: authorId, created: new Date().getTime()};
     return this._getElasticSearch().bulk({ body:[
       {delete:{_index: this._meta.index, _type: DOC_TYPE, _id: this.id}},
@@ -225,7 +225,7 @@ _.assign(Document.prototype, {
     });
   },
 
-  getEvents: function(){
+  getEvents: function(options){
     return this._getElasticSearch().search({
       index: eventAllAlias(this.domainId, this.collectionId), 
       type: EVENT_TYPE,
@@ -253,7 +253,7 @@ _.assign(Document.prototype, {
     return Promise.resolve(this._meta);
   },
 
-  patchMeta: function(authorId, metaPatch) {
+  patchMeta: function(authorId, metaPatch, options) {
     var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id);
     _.each(metaPatch, function(p){ p.path = "/_meta" + p.path; });
     return this._doPatch({patch: metaPatch, _meta:{author: authorId, created: new Date().getTime()}}).then(result => {
@@ -262,7 +262,7 @@ _.assign(Document.prototype, {
     });
   },
 
-  clearAclSubject: function(visitorId, method, rgu, subjectId) {
+  clearAclSubject: function(visitorId, method, rgu, subjectId, options) {
     var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id), acl = _.cloneDeep(this._meta.acl), patch;
     if(method == '*'){
       _.each(acl,function(v1,k1){

@@ -138,7 +138,7 @@ $.widget("nm.form", {
   },  
 
   _onDeleteSelf: function(e){
-    var doc = this.options.document, self = this;
+    var doc = this.options.document, self = this, {User, Profile, Collection} = doc.getClient();
     doc.delete(function(err, result){
       if(err) return console.error(err);
       User.get(function(err, user){
@@ -156,8 +156,15 @@ $.widget("nm.form", {
             });
           }
         });
-      });      
-      self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', doc);
+      });
+
+      Collection.get(doc.domainId, doc.collectionId, function(err, collection){
+        if(err) return console.error(err);
+        collection.refresh(function(err, result){
+          if(err) console.error(err);
+          self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', doc);
+        });
+      })
     });
 
     e.stopPropagation();

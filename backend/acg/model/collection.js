@@ -101,7 +101,7 @@ _.assign(Collection, {
     ]);
   },
 
-  create: function(authorId, domainId, collectionId, collectionData){
+  create: function(authorId, domainId, collectionId, collectionData, options){
     var self = this;
 
     if(!_.at(collectionData, '_meta.metaId')[0]) _.set(collectionData, '_meta.metaId', '.meta-collection');
@@ -109,21 +109,21 @@ _.assign(Collection, {
     return this.putTemplate(domainId, collectionId).then( result => {
       self.createIndex(domainId, collectionId);
     }).then(result =>{
-      return Document.create.call(self, authorId, domainId, COLLECTIONS, collectionId, collectionData);
+      return Document.create.call(self, authorId, domainId, COLLECTIONS, collectionId, collectionData, options);
     }).then(result => {
-      return Collection.get(domainId, collectionId);
+      return Collection.get(domainId, collectionId, options);
     });
 
   },
 
-  get: function(domainId, collectionId) {
-    return getEntity(elasticsearch, cache, domainId, COLLECTIONS, collectionId).then(source => {
+  get: function(domainId, collectionId, options) {
+    return getEntity(elasticsearch, cache, domainId, COLLECTIONS, collectionId, options).then(source => {
       return new Collection(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, COLLECTIONS, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, COLLECTIONS, query, options);
   }
 });
 
@@ -137,7 +137,7 @@ inherits(Collection, Document,{
     return cache;
   },
 
-  delete: function(authorId){
+  delete: function(authorId, options){
     var es = this._getElasticSearch(), self = this;
     return Collection.parent.delete.call(this, authorId).then(result => {
       return Promise.all([
@@ -150,7 +150,7 @@ inherits(Collection, Document,{
     });
   },
 
-  bulk: function(authorId, docs){
+  bulk: function(authorId, docs, options){
     var self = this, es = this._getElasticSearch(), batch = [], domainId = this.domainId, promises;
 
     if(docs.length > 1000){
@@ -177,7 +177,7 @@ inherits(Collection, Document,{
     return this._getElasticSearch().indices.rollover(params);
   },
 
-  distinctQuery: function(field, opts) {
+  distinctQuery: function(field, options) {
     const query = {
       aggs: {
         values: {
@@ -193,7 +193,7 @@ inherits(Collection, Document,{
       }
     };
 
-    _.merge(query.aggs.values.terms, opts);
+    _.merge(query.aggs.values.terms, options);
 
     return this._getElasticSearch().search({
       index: this.domainId + '~' + this.id + '~all~snapshots',
@@ -208,7 +208,7 @@ inherits(Collection, Document,{
     });
   },
 
-  refresh: function(){
+  refresh: function(options){
     return this._getElasticSearch().indices.refresh({ index: this.domainId + '~' + this.id + '~*' });
   }
 

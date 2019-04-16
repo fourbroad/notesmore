@@ -22,21 +22,21 @@ _.assign(Profile, {
     return Profile;
   },
 
-  create: function(authorId, domainId, profileId, profileData) {
+  create: function(authorId, domainId, profileId, profileData, options) {
     if(!_.at(profileData, '_meta.metaId')[0]) _.set(profileData, '_meta.metaId', '.meta-profile');
-    return Document.create.call(this, authorId, domainId, PROFILES, profileId, profileData).then( document => {
-      return Profile.get(domainId, profileId);
+    return Document.create.call(this, authorId, domainId, PROFILES, profileId, profileData, options).then( document => {
+      return Profile.get(domainId, profileId, options);
     });
   },
 
-  get: function(domainId, profileId) {
-    return getEntity(elasticsearch, cache, domainId, PROFILES, profileId).then( source => {
+  get: function(domainId, profileId, options) {
+    return getEntity(elasticsearch, cache, domainId, PROFILES, profileId, options).then( source => {
       return new Profile(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, PROFILES, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, PROFILES, query, options);
   }
 
 });

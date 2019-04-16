@@ -89,7 +89,7 @@ _.assign(User, {
     return Promise.resolve(true);
   },
 
-  create: function(authorId, userId, userData) {
+  create: function(authorId, userId, userData, options) {
     var md5 = crypto.createHash('md5');
     if (!userId || !userData.password) {
       return Promise.reject(createError(400, "Username or password is empty!"));
@@ -98,19 +98,19 @@ _.assign(User, {
     userData.password = md5.update(userData.password + secret).digest('hex');
     if(!_.at(userData, '_meta.metaId')[0]) _.set(userData, '_meta.metaId', '.meta-user');
     
-    return Document.create.call(this, authorId, Domain.ROOT, USERS, userId, userData).then( document => {
-      return User.get(userId);
+    return Document.create.call(this, authorId, Domain.ROOT, USERS, userId, userData, options).then( document => {
+      return User.get(userId, options);
     });
   },
 
-  get: function(userId) {
-    return getEntity(elasticsearch, cache, Domain.ROOT, USERS, userId).then( source => {
+  get: function(userId, options) {
+    return getEntity(elasticsearch, cache, Domain.ROOT, USERS, userId, options).then( source => {
       return new User(source);
     });
   },
 
-  find: function(query){
-    return Document.find.call(this, Domain.ROOT, USERS, query);
+  find: function(query, options){
+    return Document.find.call(this, Domain.ROOT, USERS, query, options);
   }
 
 });
@@ -130,10 +130,10 @@ inherits(User, Document,{
     return Promise.resolve(userData);
   },
 
-  resetPassword: function(authorId, newPassword) {
+  resetPassword: function(authorId, newPassword, options) {
     var self = this, md5 = crypto.createHash('md5'), password = md5.update(newPassword + secret).digest('hex'),
         patch = [{op: 'replace', path:'/password', value: password}];
-    return this._doPatch({patch:patch, _meta:{author:authorId, created: new Date().getTime()}}).then(result => {
+    return this._doPatch({patch:patch, _meta:{author:authorId, created: new Date().getTime()}}, options).then(result => {
       self._getCache().del(uniqueId(Domain.ROOT, USERS, self.id));
       return true;
     });

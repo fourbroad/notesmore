@@ -22,21 +22,21 @@ _.assign(Form, {
     return Form;
   },
 
-  create: function(authorId, domainId, formId, formData){
+  create: function(authorId, domainId, formId, formData, options){
     if(!_.at(formData, '_meta.metaId')[0]) _.set(formData, '_meta.metaId', '.meta-form');
-    return Document.create.call(this, authorId, domainId, FORMS, formId, formData).then(document => {
-      return Form.get(domainId, formId);
+    return Document.create.call(this, authorId, domainId, FORMS, formId, formData, options).then(document => {
+      return Form.get(domainId, formId, options);
     });
   },
 
-  get: function(domainId, formId) {
-    return getEntity(elasticsearch, cache, domainId, FORMS, formId).then( source => {
+  get: function(domainId, formId, options) {
+    return getEntity(elasticsearch, cache, domainId, FORMS, formId, options).then( source => {
       return new Form(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, FORMS, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, FORMS, query, options);
   }
 
 });

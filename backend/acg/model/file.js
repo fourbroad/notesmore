@@ -29,21 +29,21 @@ _.assign(File, {
     return File;
   },
 
-  create: function(authorId, domainId, fileId, fileData) {
+  create: function(authorId, domainId, fileId, fileData, options) {
     if(!_.at(fileData, '_meta.metaId')[0]) _.set(fileData, '_meta.metaId', '.meta-file');
-    return Document.create.call(this, authorId, domainId, FILES, fileId, fileData).then( document => {
-      return File.get(domainId, fileId);
+    return Document.create.call(this, authorId, domainId, FILES, fileId, fileData, options).then( document => {
+      return File.get(domainId, fileId, options);
     });
   },
 
-  get: function(domainId, fileId) {
-    return getEntity(elasticsearch, cache, domainId, FILES, fileId).then( source => {
+  get: function(domainId, fileId, options) {
+    return getEntity(elasticsearch, cache, domainId, FILES, fileId, options).then( source => {
       return new File(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, FILES, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, FILES, query, options);
   }
 
 });
@@ -57,9 +57,9 @@ inherits(File, Document,{
     return cache;
   },
 
-  delete: function(authorId){
+  delete: function(authorId, options){
     var path = '/'+this.domainId+'/'+this.id + Path.extname(this.name||'');
-    return File.parent.delete.call(this, authorId).then(result => {
+    return File.parent.delete.call(this, authorId, options).then(result => {
       hdfs.unlink(path, function(err, result){if(err) console.error(err)});
       return true;
     }).then(result => {

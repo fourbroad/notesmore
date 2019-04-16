@@ -9,10 +9,10 @@ const
 
 var io, initSocket;
 
-function filterQuery(visitorId, domainId, query){
+function filterQuery(visitorId, domainId, query, options){
   query = query || {body:{query:{}}};
   query.body = query.body || {};
-  return Profile.get(domainId, visitorId).then( profile => {
+  return Profile.get(domainId, visitorId, options).then( profile => {
     var body = query.body, q = body.query, should;
     if(_.isEmpty(q)) q = {match_all:{}};
     body.query = { bool:{ filter:{ bool:{ should:[] } }, must:[q]}};
@@ -27,7 +27,7 @@ function filterQuery(visitorId, domainId, query){
   });
 }
 
-function checkPermission(visitorId, domainId, obj, method, data){
+function checkPermission(visitorId, domainId, obj, method, data, options){
   var permissions;
 
   if(method == 'create'){
@@ -36,10 +36,10 @@ function checkPermission(visitorId, domainId, obj, method, data){
     permissions = _.at(obj,'_meta.acl.'+method)[0];
   }
 
-  function doCheckPermission(visitorId, domainId, permissions){
+  function doCheckPermission(visitorId, domainId, permissions, options){
     if(!permissions) return Promise.resolve(true);
     if(!visitorId) return Promise.reject(createError(401, 'Have no permission to access '+ method +'!'));
-    return Profile.get(domainId, visitorId).then( profile => {
+    return Profile.get(domainId, visitorId, options).then( profile => {
       if(_.intersection(profile.roles, permissions.roles).length > 0 
       || _.intersection(profile.groups, permissions.groups).length > 0 
       || (permissions.users && permissions.users.indexOf(visitorId) >= 0) ){
@@ -55,46 +55,46 @@ function checkPermission(visitorId, domainId, obj, method, data){
   if(method == 'patch' && data.length > 0){
     var metas = _.filter(data, function(p) { return p.path=="/_meta" || p.path.startsWith("/_meta/"); });
     if(metas.length == 0){
-      return doCheckPermission(visitorId, domainId, permissions);
+      return doCheckPermission(visitorId, domainId, permissions, options);
     } else {
       var metaPermissions = _.at(obj,'_meta.acl.patchMeta')[0];
       if(metas.length == data.length){
-        return doCheckPermission(visitorId, domainId, metaPermissions);
+        return doCheckPermission(visitorId, domainId, metaPermissions, options);
       } else {
         return Promise.all([doCheckPermission(visitorId, domainId, metaPermissions), doCheckPermission(visitorId, domainId, permissions)]);
       }
     }
   } else {
-    return doCheckPermission(visitorId, domainId, permissions);
+    return doCheckPermission(visitorId, domainId, permissions, options);
   }
 }
 
-function checkCreate(visitorId, domainId, metaId){
+function checkCreate(visitorId, domainId, metaId, options){
   metaId = metaId || '.meta';
-  return Meta.get(domainId, metaId).then( meta => {
-    return checkPermission(visitorId, domainId, meta, 'create');
+  return Meta.get(domainId, metaId, options).then( meta => {
+    return checkPermission(visitorId, domainId, meta, 'create', options);
   });
 }
 
-function checkAcl1(visitorId, clsObj, objId, method, data){
-  return clsObj.get(objId).then( obj => {
-    return checkPermission(visitorId, Domain.ROOT, obj, method, data).then( result => {
+function checkAcl1(visitorId, clsObj, objId, method, data, options){
+  return clsObj.get(objId, options).then( obj => {
+    return checkPermission(visitorId, Domain.ROOT, obj, method, data, options).then( result => {
       return obj;
     });
   });
 }
 
-function checkAcl2(visitorId, clsObj, domainId, objId, method, data){
-  return clsObj.get(domainId, objId).then( obj => {
-    return checkPermission(visitorId, domainId, obj, method, data).then( result => {
+function checkAcl2(visitorId, clsObj, domainId, objId, method, data, options){
+  return clsObj.get(domainId, objId, options).then( obj => {
+    return checkPermission(visitorId, domainId, obj, method, data, options).then( result => {
       return obj;
     });
   });
 }
 
-function checkAcl3(visitorId, clsObj, domainId, collectionId, objId, method, data){
-  return clsObj.get(domainId, collectionId, objId).then( obj => {
-    return checkPermission(visitorId, domainId, obj, method, data).then( result => {
+function checkAcl3(visitorId, clsObj, domainId, collectionId, objId, method, data, options){
+  return clsObj.get(domainId, collectionId, objId, options).then( obj => {
+    return checkPermission(visitorId, domainId, obj, method, data, options).then( result => {
       return obj;
     });
   });
@@ -124,8 +124,8 @@ initSocket = function(socket, visitorId) {
         callback(err);
       });
     }else{
-      checkCreate(visitorId, domainId, '.meta').then(result =>{
-        return Meta.create(visitorId, domainId, metaId, metaData);
+      checkCreate(visitorId, domainId, '.meta', options).then(result =>{
+        return Meta.create(visitorId, domainId, metaId, metaData, options);
       }).then(result => callback(null, result)).catch(err => {
         console.error(err);
         callback(err);
@@ -134,7 +134,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getMeta', function(domainId, metaId, options, callback){
-    checkAcl2(visitorId, Meta, domainId, metaId, 'get').then( meta => {
+    checkAcl2(visitorId, Meta, domainId, metaId, 'get', options).then( meta => {
       return meta.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -143,7 +143,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchMeta', function(domainId, metaId, patch, options, callback){
-    checkAcl2(visitorId, Meta, domainId, metaId, 'patch', patch).then( meta => {
+    checkAcl2(visitorId, Meta, domainId, metaId, 'patch', patch, options).then( meta => {
       return meta.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -152,7 +152,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteMeta', function(domainId, metaId, options, callback){
-    checkAcl2(visitorId, Meta, domainId, metaId, 'delete').then( meta =>{
+    checkAcl2(visitorId, Meta, domainId, metaId, 'delete', options).then( meta =>{
       return meta.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -161,7 +161,7 @@ initSocket = function(socket, visitorId) {
   });  
 
   socket.on('findMetas', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return Meta.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -171,7 +171,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createUser', function(userId, userData, options, callback){
     var metaId = _.at(userData, '_meta.metaId')[0] || '.meta-user';
-    checkCreate(visitorId, Domain.ROOT, metaId).then( result => {
+    checkCreate(visitorId, Domain.ROOT, metaId, options).then( result => {
       return User.create(visitorId, userId, userData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -180,7 +180,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getUser', function(userId, options, callback){
-    checkAcl1(visitorId, User, userId || visitorId, 'get').then( user => {
+    checkAcl1(visitorId, User, userId || visitorId, 'get', options).then( user => {
       return user.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -189,7 +189,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchUser', function(userId, patch, options, callback){
-    checkAcl1(visitorId, User, userId, 'patch', patch).then( user => {
+    checkAcl1(visitorId, User, userId, 'patch', patch, options).then( user => {
       return user.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -198,7 +198,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteUser', function(userId, options, callback){
-    checkAcl1(visitorId, User, userId, 'delete').then( user => {
+    checkAcl1(visitorId, User, userId, 'delete', options).then( user => {
       return user.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -207,7 +207,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('resetPassword', function(userId, newPassword, options, callback){
-    checkAcl1(visitorId, User, userId, 'resetPassword').then( user => {
+    checkAcl1(visitorId, User, userId, 'resetPassword', options).then( user => {
       return user.resetPassword(visitorId, newPassword, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -216,7 +216,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findUsers', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return User.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -225,7 +225,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findDomains', function(query, options, callback){
-    filterQuery(visitorId, Domain.ROOT, query).then( query => {
+    filterQuery(visitorId, Domain.ROOT, query, options).then( query => {
       return Domain.find(query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -235,7 +235,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createDomain', function(domainId, domainData, options, callback){
     var metaId = _.at(domainData, '_meta.metaId')[0] || '.meta-domain';
-    checkCreate(visitorId, Domain.ROOT, metaId).then( result => {
+    checkCreate(visitorId, Domain.ROOT, metaId, options).then( result => {
       return Domain.create(visitorId, domainId, domainData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -244,7 +244,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getDomain', function(domainId, options, callback){
-    checkAcl1(visitorId, Domain, domainId, 'get').then( domain => {
+    checkAcl1(visitorId, Domain, domainId, 'get', options).then( domain => {
       return domain.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -278,7 +278,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchDomain', function(domainId, patch, options, callback){
-    checkAcl1(visitorId, Domain, domainId, 'patch', patch).then( domain => {
+    checkAcl1(visitorId, Domain, domainId, 'patch', patch, options).then( domain => {
       return domain.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -287,7 +287,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('refreshDomain', function(domainId, options, callback){
-    checkAcl1(visitorId, Domain, domainId, 'refresh').then( domain => {
+    checkAcl1(visitorId, Domain, domainId, 'refresh', options).then( domain => {
       return domain.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -296,7 +296,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteDomain', function(domainId, options, callback){
-    checkAcl1(visitorId, Domain, domainId, 'delete').then( domain => {
+    checkAcl1(visitorId, Domain, domainId, 'delete', options).then( domain => {
       return domain.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -306,7 +306,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createCollection', function(domainId, collectionId, collectionData, options, callback){
     var metaId = _.at(collectionData, '_meta.metaId')[0] || '.meta-collection';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return Collection.create(visitorId, domainId, collectionId, collectionData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -315,7 +315,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getCollection', function(domainId, collectionId, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'get').then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'get', options).then( collection => {
       return collection.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -324,7 +324,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findCollections', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return Collection.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -333,7 +333,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchCollection', function(domainId, collectionId, patch, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'patch', patch).then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'patch', patch, options).then( collection => {
       return collection.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -342,7 +342,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteCollection', function(domainId, collectionId, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'delete').then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'delete', options).then( collection => {
       return collection.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -351,7 +351,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('bulk', function(domainId, collectionId, docs, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'bulk').then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'bulk', options).then( collection => {
       return collection.bulk(visitorId, docs, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -360,7 +360,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('distinctQueryCollection', function(domainId, collectionId, field, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'distinctQuery').then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'distinctQuery', options).then( collection => {
       return collection.distinctQuery(field, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -369,7 +369,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('refreshCollection', function(domainId, collectionId, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'refresh').then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'refresh', options).then( collection => {
       return collection.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -379,7 +379,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createView', function(domainId, viewId, viewData, options, callback){
     var metaId = _.at(viewData, '_meta.metaId')[0] || '.meta-view';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return View.create(visitorId, domainId, viewId, viewData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -388,7 +388,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getView', function(domainId, viewId, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'get').then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'get', options).then( view => {
       return view.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -397,7 +397,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findViews', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return View.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -406,7 +406,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchView', function(domainId, viewId, patch, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'patch', patch).then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'patch', patch, options).then( view => {
       return view.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -415,7 +415,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteView', function(domainId, viewId, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'delete').then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'delete', options).then( view => {
       return view.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -424,7 +424,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findViewDocuments', function(domainId, viewId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return View.get(domainId, viewId, options);
     }).then(view => {
       return view.findDocuments(query, options);
@@ -435,7 +435,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('distinctQueryView', function(domainId, viewId, field, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'distinctQuery').then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'distinctQuery', options).then( view => {
       return view.distinctQuery(field, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -444,7 +444,7 @@ initSocket = function(socket, visitorId) {
   });  
 
   socket.on('refreshView', function(domainId, viewId, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'refresh').then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'refresh', options).then( view => {
       return view.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -454,7 +454,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createForm', function(domainId, formId, formData, options, callback){
     var metaId = _.at(formData, '_meta.metaId')[0] || '.meta-form';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return Form.create(visitorId, domainId, formId, formData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -463,7 +463,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getForm', function(domainId, formId, options, callback){
-    checkAcl2(visitorId, Form, domainId, formId, 'get').then( form => {
+    checkAcl2(visitorId, Form, domainId, formId, 'get', options).then( form => {
       return form.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -472,7 +472,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findForms', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return Form.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -481,7 +481,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchForm', function(domainId, formId, patch, options, callback){
-    checkAcl2(visitorId, Form, domainId, formId, 'patch', patch).then( form => {
+    checkAcl2(visitorId, Form, domainId, formId, 'patch', patch, options).then( form => {
       return form.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -490,7 +490,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteForm', function(domainId, formId, options, callback){
-    checkAcl2(visitorId, Form, domainId, formId, 'delete').then( form => {
+    checkAcl2(visitorId, Form, domainId, formId, 'delete', options).then( form => {
       return form.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -500,7 +500,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createPage', function(domainId, pageId, pageData, options, callback){
     var metaId = _.at(pageData, '_meta.metaId')[0] || '.meta-page';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return Page.create(visitorId, domainId, pageId, pageData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -509,7 +509,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getPage', function(domainId, pageId, options, callback){
-    checkAcl2(visitorId, Page, domainId, pageId, 'get').then( page => {
+    checkAcl2(visitorId, Page, domainId, pageId, 'get', options).then( page => {
       return page.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -518,7 +518,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchPage', function(domainId, pageId, patch, options, callback){
-    checkAcl2(visitorId, Page, domainId, pageId, 'patch', patch).then( page => {
+    checkAcl2(visitorId, Page, domainId, pageId, 'patch', patch, options).then( page => {
       return page.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -527,7 +527,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deletePage', function(domainId, pageId, options, callback){
-    checkAcl2(visitorId, Page, domainId, pageId, 'delete').then( page => {
+    checkAcl2(visitorId, Page, domainId, pageId, 'delete', options).then( page => {
       return page.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -537,7 +537,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createAction', function(domainId, actionId, actionData, options, callback){
     var metaId = _.at(actionData, '_meta.metaId')[0] || '.meta-action';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return Action.create(visitorId, domainId, actionId, actionData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -546,7 +546,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getAction', function(domainId, actionId, options, callback){
-    checkAcl2(visitorId, Action, domainId, actionId, 'get').then( action => {
+    checkAcl2(visitorId, Action, domainId, actionId, 'get', options).then( action => {
       return action.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -555,7 +555,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchAction', function(domainId, actionId, patch, options, callback){
-    checkAcl2(visitorId, Action, domainId, actionId, 'patch', patch).then( action => {
+    checkAcl2(visitorId, Action, domainId, actionId, 'patch', patch, options).then( action => {
       return action.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -564,7 +564,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteAction', function(domainId, actionId, options, callback){
-    checkAcl2(visitorId, Action, domainId, actionId, 'delete').then( action => {
+    checkAcl2(visitorId, Action, domainId, actionId, 'delete', options).then( action => {
       return action.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -573,7 +573,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findActions', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return Action.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -583,7 +583,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createRole', function(domainId, roleId, roleData, options, callback){
     var metaId = _.at(roleData, '_meta.metaId')[0] || '.meta-role';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return Role.create(visitorId, domainId, roleId, roleData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -592,7 +592,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getRole', function(domainId, roleId, options, callback){
-    checkAcl2(visitorId, Role, domainId, roleId, 'get').then( role => {
+    checkAcl2(visitorId, Role, domainId, roleId, 'get', options).then( role => {
       return role.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -601,7 +601,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findRoles', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return Role.find(domainId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -610,7 +610,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchRole', function(domainId, roleId, patch, options, callback){
-    checkAcl2(visitorId, Role, domainId, roleId, 'patch', patch).then( role => {
+    checkAcl2(visitorId, Role, domainId, roleId, 'patch', patch, options).then( role => {
       return role.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -619,7 +619,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteRole', function(domainId, roleId, options, callback){
-    checkAcl2(visitorId, Role, domainId, roleId, 'delete').then( role => {
+    checkAcl2(visitorId, Role, domainId, roleId, 'delete', options).then( role => {
       return role.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -629,7 +629,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createGroup', function(domainId, groupId, groupData, options, callback){
     var metaId = _.at(groupData, '_meta.metaId')[0] || '.meta-group';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return Group.create(visitorId, domainId, groupId, groupData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -638,7 +638,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getGroup', function(domainId, groupId, options, callback){
-    checkAcl2(visitorId, Group, domainId, groupId, 'get').then( group => {
+    checkAcl2(visitorId, Group, domainId, groupId, 'get', options).then( group => {
       return group.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -647,7 +647,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchGroup', function(domainId, groupId, patch, options, callback){
-    checkAcl2(visitorId, Group, domainId, groupId, 'patch', patch).then( group => {
+    checkAcl2(visitorId, Group, domainId, groupId, 'patch', patch, options).then( group => {
       return group.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -656,7 +656,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteGroup', function(domainId, groupId, options, callback){
-    checkAcl2(visitorId, Group, domainId, groupId, 'delete').then( group => {
+    checkAcl2(visitorId, Group, domainId, groupId, 'delete', options).then( group => {
       return group.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -666,7 +666,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createProfile', function(domainId, profileId, profileData, options, callback){
     var metaId = _.at(profileData, '_meta.metaId')[0] || '.meta-profile';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return Profile.create(visitorId, domainId, profileId, profileData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -675,7 +675,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getProfile', function(domainId, profileId, options, callback){
-    checkAcl2(visitorId, Profile, domainId, profileId, 'get').then( profile => {
+    checkAcl2(visitorId, Profile, domainId, profileId, 'get', options).then( profile => {
       return profile.get(options);
      }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -684,7 +684,7 @@ initSocket = function(socket, visitorId) {
  });
 
   socket.on('findProfiles', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return Profile.find(domainId, query, options)
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -693,7 +693,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchProfile', function(domainId, profileId, patch, options, callback){
-    checkAcl2(visitorId, Profile, domainId, profileId, 'patch', patch).then( profile => {
+    checkAcl2(visitorId, Profile, domainId, profileId, 'patch', patch, options).then( profile => {
       return profile.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -702,7 +702,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteProfile', function(domainId, profileId, options, callback){
-    checkAcl2(visitorId, Profile, domainId, profileId, 'delete').then( profile => {
+    checkAcl2(visitorId, Profile, domainId, profileId, 'delete', options).then( profile => {
       return profile.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -712,7 +712,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createFile', function(domainId, fileId, fileData, options, callback){
     var metaId = _.at(fileData, '_meta.metaId')[0] || '.meta-file';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return File.create(visitorId, domainId, fileId, fileData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -721,7 +721,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getFile', function(domainId, fileId, options, callback){
-    checkAcl2(visitorId, File, domainId, fileId, 'get').then( file => {
+    checkAcl2(visitorId, File, domainId, fileId, 'get', options).then( file => {
       return file.get(options);
      }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -730,7 +730,7 @@ initSocket = function(socket, visitorId) {
  });
 
   socket.on('findFiles', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return File.find(domainId, query, options)
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -739,7 +739,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchFile', function(domainId, fileId, patch, options, callback){
-    checkAcl2(visitorId, File, domainId, fileId, 'patch', patch).then( file => {
+    checkAcl2(visitorId, File, domainId, fileId, 'patch', patch, options).then( file => {
       return file.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -748,7 +748,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteFile', function(domainId, fileId, options, callback){
-    checkAcl2(visitorId, File, domainId, fileId, 'delete').then( file => {
+    checkAcl2(visitorId, File, domainId, fileId, 'delete', options).then( file => {
       return file.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -758,7 +758,7 @@ initSocket = function(socket, visitorId) {
 
   socket.on('createDocument', function(domainId, collectionId, documentId, docData, options, callback){
     var metaId = _.at(docData, '_meta.metaId')[0] || '.meta';
-    checkCreate(visitorId, domainId, metaId).then( result => {
+    checkCreate(visitorId, domainId, metaId, options).then( result => {
       return Document.create(visitorId, domainId, collectionId, documentId, docData, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -767,7 +767,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getDocument', function(domainId, collectionId, documentId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'get').then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'get', options).then( document => {
       return document.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -776,7 +776,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('findDocuments', function(domainId, collectionId, query, options, callback){
-    filterQuery(visitorId, domainId, query).then( query => {
+    filterQuery(visitorId, domainId, query, options).then( query => {
       return Document.find(domainId, collectionId, query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -785,7 +785,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchDocument', function(domainId, collectionId, documentId, patch, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patch', patch).then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patch', patch, options).then( document => {
       return document.patch(visitorId, patch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -794,7 +794,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteDocument', function(domainId, collectionId, documentId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'delete').then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'delete', options).then( document => {
       return document.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -817,7 +817,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getEvents', function(domainId, collectionId, documentId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getEvents').then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getEvents', options).then( document => {
       return document.getEvents(options);
     }).then(result => callback(null, result)).catch(err => {
       console.log(err);
@@ -835,7 +835,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchDocumentMeta', function(domainId, collectionId, documentId, aclPatch, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patchMeta').then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patchMeta', options).then( document => {
       return document.patchMeta(visitorId, aclPatch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -844,7 +844,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('clearAclSubject', function(domainId, collectionId, documentId, method, rgu, subjectId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'clearAclSubject').then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'clearAclSubject', options).then( document => {
       return document.clearAclSubject(visitorId, method, rgu, subjectId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);

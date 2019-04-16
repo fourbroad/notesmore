@@ -22,21 +22,21 @@ _.assign(Page, {
     return Page;
   },
 
-  create: function(authorId, domainId, pageId, pageData){
+  create: function(authorId, domainId, pageId, pageData, options){
     if(!_.at(pageData, '_meta.metaId')[0]) _.set(pageData, '_meta.metaId', '.meta-page');
-    return Document.create.call(this, authorId, domainId, PAGES, pageId, pageData).then( document => {
-      return Page.get(domainId, pageId);
+    return Document.create.call(this, authorId, domainId, PAGES, pageId, pageData, options).then( document => {
+      return Page.get(domainId, pageId, options);
     });
   },
 
-  get: function(domainId, pageId) {
-    return getEntity(elasticsearch, cache, domainId, PAGES, pageId).then( source => {
+  get: function(domainId, pageId, options) {
+    return getEntity(elasticsearch, cache, domainId, PAGES, pageId, options).then( source => {
       return new Page(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, PAGES, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, PAGES, query, options);
   }
 
 });

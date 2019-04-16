@@ -70,20 +70,21 @@ $.widget("nm.view", {
 
     this._refresh();
 
-    this.$viewContainer.on('click show.bs.dropdown', 'table.view-table tbody>tr', function(evt){
+    this.$viewContainer.on('click', 'table.view-table tbody>tr', function(evt){
       var $this = $(this);
-      if(evt.type == 'show'){
-        if(!self._isRowActive($this)){
-          self._setRowActive($this);
-        }
-        self._showDocMenu($(evt.target).find('.dropdown-menu'), self.table.row(this).data());
+      if(self._isRowActive($this)){
+        self._clearRowActive($this);
       } else {
-        if(self._isRowActive($this)){
-          self._clearRowActive($this);
-        } else {
-          self._setRowActive($this);
-        }
+        self._setRowActive($this);
       }
+    });
+
+    this.$viewContainer.on('show.bs.dropdown', 'table.view-table tbody>tr', function(evt){
+      var $this = $(this);
+      if(!self._isRowActive($this)){
+        self._setRowActive($this);
+      }
+      self._showDocMenu($(evt.target).find('.dropdown-menu'), self.table.row(this).data());
     });
 
     this.$viewContainer.on('click','table.view-table li.dropdown-item.delete', function(evt){
@@ -241,6 +242,11 @@ $.widget("nm.view", {
           return '<span class="icon-holder"><i class="'+ (data._meta.iconClass||'ti-file')+'"></i></span>';
         }
       }, {
+        targets: -1,
+        width: "30px",
+        data: null,
+        defaultContent: '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="fa fa-ellipsis-h"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>'
+      }, {
         targets:'_all',
         render:function(data, type, row, meta) {
           var column = meta.settings.aoColumns[meta.col], d = utils.get(row, column.data);
@@ -259,11 +265,6 @@ $.widget("nm.view", {
           return d;
         },
         defaultContent:''
-      }, {
-        targets: -1,
-        width: "30px",
-        data: null,
-        defaultContent: '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="fa fa-ellipsis-h"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>'
       }],
       sAjaxSource: "view",
       fnServerData: function (sSource, aoData, fnCallback, oSettings ) {
@@ -725,20 +726,15 @@ $.widget("nm.view", {
   _setOption: function(key, value){
     var o = this.options, self = this;
 
-    if((key === "view") && (value.domainId != o.view.domainId
-      || value.collectionId != o.view.collectionId
-      || value.id != o.view.id )){
-      this._super(key, value);
+    this._super(key, value);
 
+    if(key === "view") {
       if(!o.isNew){
         this.clone = _.cloneDeep(o.view);      
       }
-
       this._refresh();
-      return;
     }
 
-    this._super(key, value);
   }
   
 });

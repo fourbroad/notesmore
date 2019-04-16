@@ -22,21 +22,21 @@ _.assign(Role, {
     return Role;
   },
 
-  create: function(authorId, domainId, roleId, roleData, metaId) {
+  create: function(authorId, domainId, roleId, roleData, metaId, options) {
     if(!_.at(roleData, '_meta.metaId')[0]) _.set(roleData, '_meta.metaId', '.meta-role');
-    return Document.create.call(this, authorId, domainId, ROLES, roleId, roleData, metaId).then( document => {
-      return Role.get(domainId, roleId);
+    return Document.create.call(this, authorId, domainId, ROLES, roleId, roleData, metaId, options).then( document => {
+      return Role.get(domainId, roleId, options);
     });
   },
 
-  get: function(domainId, roleId) {
-    return getEntity(elasticsearch, cache, domainId, ROLES, roleId).then( source => {
+  get: function(domainId, roleId, options) {
+    return getEntity(elasticsearch, cache, domainId, ROLES, roleId, options).then( source => {
       return new Role(domainId, source);
     });
   },
 
-  find: function(domainId, query){
-    return Document.find.call(this, domainId, ROLES, query);
+  find: function(domainId, query, options){
+    return Document.find.call(this, domainId, ROLES, query, options);
   }
   
 });
