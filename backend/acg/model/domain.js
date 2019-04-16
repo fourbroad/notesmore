@@ -79,7 +79,7 @@ const DOMAINS = '.domains'
 }]
   , COLLECTIONS = [{
   id: ".collections",
-  title: "Collections",
+  title: "Data Warehouse",
   _meta:{
     iconClass: "ti-harddrives",
     roadmap: 1
