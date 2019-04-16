@@ -72,7 +72,7 @@ function checkPermission(visitorId, domainId, obj, method, data, options){
 function checkCreate(visitorId, domainId, metaId, options){
   metaId = metaId || '.meta';
   return Meta.get(domainId, metaId, options).then( meta => {
-    return checkPermission(visitorId, domainId, meta, 'create', options);
+    return checkPermission(visitorId, domainId, meta, 'create', null, options);
   });
 }
 
@@ -134,7 +134,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getMeta', function(domainId, metaId, options, callback){
-    checkAcl2(visitorId, Meta, domainId, metaId, 'get', options).then( meta => {
+    checkAcl2(visitorId, Meta, domainId, metaId, 'get', null, options).then( meta => {
       return meta.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -152,7 +152,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteMeta', function(domainId, metaId, options, callback){
-    checkAcl2(visitorId, Meta, domainId, metaId, 'delete', options).then( meta =>{
+    checkAcl2(visitorId, Meta, domainId, metaId, 'delete', null, options).then( meta =>{
       return meta.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -180,7 +180,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getUser', function(userId, options, callback){
-    checkAcl1(visitorId, User, userId || visitorId, 'get', options).then( user => {
+    checkAcl1(visitorId, User, userId || visitorId, 'get', null, options).then( user => {
       return user.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -198,7 +198,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteUser', function(userId, options, callback){
-    checkAcl1(visitorId, User, userId, 'delete', options).then( user => {
+    checkAcl1(visitorId, User, userId, 'delete', null, options).then( user => {
       return user.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -207,7 +207,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('resetPassword', function(userId, newPassword, options, callback){
-    checkAcl1(visitorId, User, userId, 'resetPassword', options).then( user => {
+    checkAcl1(visitorId, User, userId, 'resetPassword', null, options).then( user => {
       return user.resetPassword(visitorId, newPassword, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -244,7 +244,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getDomain', function(domainId, options, callback){
-    checkAcl1(visitorId, Domain, domainId, 'get', options).then( domain => {
+    checkAcl1(visitorId, Domain, domainId, 'get', null, options).then( domain => {
       return domain.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -287,7 +287,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('refreshDomain', function(domainId, options, callback){
-    checkAcl1(visitorId, Domain, domainId, 'refresh', options).then( domain => {
+    checkAcl1(visitorId, Domain, domainId, 'refresh', null, options).then( domain => {
       return domain.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -296,7 +296,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteDomain', function(domainId, options, callback){
-    checkAcl1(visitorId, Domain, domainId, 'delete', options).then( domain => {
+    checkAcl1(visitorId, Domain, domainId, 'delete', null, options).then( domain => {
       return domain.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -315,7 +315,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getCollection', function(domainId, collectionId, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'get', options).then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'get', null, options).then( collection => {
       return collection.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -342,7 +342,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteCollection', function(domainId, collectionId, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'delete', options).then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'delete', null, options).then( collection => {
       return collection.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -351,7 +351,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('bulk', function(domainId, collectionId, docs, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'bulk', options).then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'bulk', null, options).then( collection => {
       return collection.bulk(visitorId, docs, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -360,7 +360,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('distinctQueryCollection', function(domainId, collectionId, field, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'distinctQuery', options).then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'distinctQuery', null, options).then( collection => {
       return collection.distinctQuery(field, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -369,7 +369,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('refreshCollection', function(domainId, collectionId, options, callback){
-    checkAcl2(visitorId, Collection, domainId, collectionId, 'refresh', options).then( collection => {
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'refresh', null, options).then( collection => {
       return collection.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -388,7 +388,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getView', function(domainId, viewId, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'get', options).then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'get', null, options).then( view => {
       return view.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -415,7 +415,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteView', function(domainId, viewId, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'delete', options).then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'delete', null, options).then( view => {
       return view.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -435,7 +435,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('distinctQueryView', function(domainId, viewId, field, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'distinctQuery', options).then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'distinctQuery', null, options).then( view => {
       return view.distinctQuery(field, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -444,7 +444,7 @@ initSocket = function(socket, visitorId) {
   });  
 
   socket.on('refreshView', function(domainId, viewId, options, callback){
-    checkAcl2(visitorId, View, domainId, viewId, 'refresh', options).then( view => {
+    checkAcl2(visitorId, View, domainId, viewId, 'refresh', null, options).then( view => {
       return view.refresh(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -463,7 +463,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getForm', function(domainId, formId, options, callback){
-    checkAcl2(visitorId, Form, domainId, formId, 'get', options).then( form => {
+    checkAcl2(visitorId, Form, domainId, formId, 'get', null, options).then( form => {
       return form.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -490,7 +490,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteForm', function(domainId, formId, options, callback){
-    checkAcl2(visitorId, Form, domainId, formId, 'delete', options).then( form => {
+    checkAcl2(visitorId, Form, domainId, formId, 'delete', null, options).then( form => {
       return form.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -509,7 +509,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getPage', function(domainId, pageId, options, callback){
-    checkAcl2(visitorId, Page, domainId, pageId, 'get', options).then( page => {
+    checkAcl2(visitorId, Page, domainId, pageId, 'get', null, options).then( page => {
       return page.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -527,7 +527,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deletePage', function(domainId, pageId, options, callback){
-    checkAcl2(visitorId, Page, domainId, pageId, 'delete', options).then( page => {
+    checkAcl2(visitorId, Page, domainId, pageId, 'delete', null, options).then( page => {
       return page.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -546,7 +546,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getAction', function(domainId, actionId, options, callback){
-    checkAcl2(visitorId, Action, domainId, actionId, 'get', options).then( action => {
+    checkAcl2(visitorId, Action, domainId, actionId, 'get', null, options).then( action => {
       return action.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -564,7 +564,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteAction', function(domainId, actionId, options, callback){
-    checkAcl2(visitorId, Action, domainId, actionId, 'delete', options).then( action => {
+    checkAcl2(visitorId, Action, domainId, actionId, 'delete', null, options).then( action => {
       return action.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -592,7 +592,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getRole', function(domainId, roleId, options, callback){
-    checkAcl2(visitorId, Role, domainId, roleId, 'get', options).then( role => {
+    checkAcl2(visitorId, Role, domainId, roleId, 'get', null, options).then( role => {
       return role.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -619,7 +619,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteRole', function(domainId, roleId, options, callback){
-    checkAcl2(visitorId, Role, domainId, roleId, 'delete', options).then( role => {
+    checkAcl2(visitorId, Role, domainId, roleId, 'delete', null, options).then( role => {
       return role.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -638,7 +638,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getGroup', function(domainId, groupId, options, callback){
-    checkAcl2(visitorId, Group, domainId, groupId, 'get', options).then( group => {
+    checkAcl2(visitorId, Group, domainId, groupId, 'get', null, options).then( group => {
       return group.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -656,7 +656,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteGroup', function(domainId, groupId, options, callback){
-    checkAcl2(visitorId, Group, domainId, groupId, 'delete', options).then( group => {
+    checkAcl2(visitorId, Group, domainId, groupId, 'delete', null, options).then( group => {
       return group.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -675,7 +675,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getProfile', function(domainId, profileId, options, callback){
-    checkAcl2(visitorId, Profile, domainId, profileId, 'get', options).then( profile => {
+    checkAcl2(visitorId, Profile, domainId, profileId, 'get', null, options).then( profile => {
       return profile.get(options);
      }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -702,7 +702,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteProfile', function(domainId, profileId, options, callback){
-    checkAcl2(visitorId, Profile, domainId, profileId, 'delete', options).then( profile => {
+    checkAcl2(visitorId, Profile, domainId, profileId, 'delete', null, options).then( profile => {
       return profile.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -721,7 +721,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getFile', function(domainId, fileId, options, callback){
-    checkAcl2(visitorId, File, domainId, fileId, 'get', options).then( file => {
+    checkAcl2(visitorId, File, domainId, fileId, 'get', null, options).then( file => {
       return file.get(options);
      }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -748,7 +748,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteFile', function(domainId, fileId, options, callback){
-    checkAcl2(visitorId, File, domainId, fileId, 'delete', options).then( file => {
+    checkAcl2(visitorId, File, domainId, fileId, 'delete', null, options).then( file => {
       return file.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -767,7 +767,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getDocument', function(domainId, collectionId, documentId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'get', options).then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'get', null, options).then( document => {
       return document.get(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -794,7 +794,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('deleteDocument', function(domainId, collectionId, documentId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'delete', options).then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'delete', null, options).then( document => {
       return document.delete(visitorId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -817,7 +817,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getEvents', function(domainId, collectionId, documentId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getEvents', options).then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getEvents', null, options).then( document => {
       return document.getEvents(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -826,7 +826,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('getDocumentMeta', function(domainId, collectionId, documentId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getMeta').then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getMeta', null, options).then( document => {
       return document.getMeta(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -835,7 +835,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('patchDocumentMeta', function(domainId, collectionId, documentId, aclPatch, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patchMeta', options).then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'patchMeta', null, options).then( document => {
       return document.patchMeta(visitorId, aclPatch, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
@@ -844,7 +844,7 @@ initSocket = function(socket, visitorId) {
   });
 
   socket.on('clearAclSubject', function(domainId, collectionId, documentId, method, rgu, subjectId, options, callback){
-    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'clearAclSubject', options).then( document => {
+    checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'clearAclSubject', null, options).then( document => {
       return document.clearAclSubject(visitorId, method, rgu, subjectId, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);

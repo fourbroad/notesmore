@@ -37,8 +37,9 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId, opt
   var uid = uniqueId(domainId, collectionId, documentId), version = options && options.version, doc = cache.get(uid);
   if (!doc) {
     return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId}).then( data => {
-      if(version && version < data._meta.version){
-        elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body: {
+      var source = data._source;
+      if(version && version < source._meta.version){
+        return elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body: {
           query:{ term:{'id.keyword': documentId} },
           sort: [{
             '_meta.created': {order : "desc"}
@@ -46,44 +47,57 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId, opt
             version: {order: "desc"}
           }]
         }}).then(result => {
-          var patch = [], version, created, updated, author;
+          var patch = [], ver, updated;
           _.each(result.hits.hits, (v,k)=>{
             var evt = v._source;
-            if(k == 0){
-              version = evt.version + 1;
+
+            if(evt.version > version - 1) return;
+
+            if(evt.version == version - 1){
+              ver = evt.version + 1;
               updated = evt._meta.created;              
             }
+
             if(evt.patch[0].op=="add" && evt.patch[0].path==""){
               evt.patch = _.reduce(evt.patch, (r,v,k)=>{
                 if(v.value) v.value = JSON.parse(v.value);
                 r.push(v);
+                return r;
               },[]);
-              patch = patch.concat(evt.patch);
-              author = evt._meta.author;
-              created = evt._meta.created;
+              patch = evt.patch.concat(patch);
               return false;
             }else{
-              patch = patch.concat(v._source);
+              evt.patch = _.reduce(evt.patch, (r,v,k)=>{
+                if(v.value) v.value = JSON.parse(v.value);
+                r.push(v);
+                return r;
+              },[]);
+              patch = evt.patch.concat(patch);
               return true;
             }
           });
 
-          return _.merge(jsonPatch.applyPatch({}, patch).newDocument,{_meta:{
-            author: author,
-            version: version,
-            created: created,
-            updated: updated
-          }});
+          if(!_.isEmpty(patch)){
+            source = _.merge(jsonPatch.applyPatch({}, patch).newDocument,{_meta:{
+              version: ver,
+              updated: updated
+            }});
+
+            cache.set(uid, source);
+            return source;
+          } else {
+            return Promise.reject("Version is not exists!");
+          }
         });
-      }else{
-
+      } else if((version && version > source._meta.version) || version == 0 ){
+        return Promise.reject("Version is not exists!");
+      }else if(!version || version == source._meta.version){
+        source.id = source.id || data._id;
+        source._meta.index = data._index;
+        source._meta.version = data._version;
+        cache.set(uid, source);
+        return source;
       }
-
-      data._source.id = data._source.id || data._id;
-      data._source._meta.index = data._index;
-      data._source._meta.version = data._version;
-      cache.set(uid, data._source);
-      return data._source;
     }).catch(e => Promise.reject(e.toString()));
   } else {
     return Promise.resolve(doc);

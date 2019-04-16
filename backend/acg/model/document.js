@@ -159,7 +159,8 @@ _.assign(Document.prototype, {
   },
 
   _doPatch: function(patch, options) {
-    var esc = this._getElasticSearch(), cache = this._getCache(), batch = [], p = patch.patch, errors = jsonPatch.validate(p, this);
+    var esc = this._getElasticSearch(), cache = this._getCache(), batch = [], p = patch.patch, 
+      oldValue = JSON.stringify(_.cloneDeep(this)), errors = jsonPatch.validate(p, this);
 
     if(errors && errors.length > 0){
       return Promise.reject(errors);
@@ -179,7 +180,7 @@ _.assign(Document.prototype, {
       batch.push({index:{_index: this.getEventHotAlias(), _type: EVENT_TYPE}});
       batch.push({
         id: this.id, 
-        patch: [{ op: 'add', path: '', value: JSON.stringify(_.cloneDeep(this)) }],
+        patch: [{ op: 'add', path: '', value: oldValue }],
         version: this._meta.version - 1,
         _meta: patch._meta
       });
