@@ -36,6 +36,12 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId, opt
   var uid = uniqueId(domainId, collectionId, documentId), version = options && options.version, doc = cache.get(uid);
   if (!doc) {
     return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId}).then( data => {
+      if(version && version < data._meta.version){
+        elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body:{}});
+      }else{
+
+      }
+
       data._source.id = data._source.id || data._id;
       data._source._meta.index = data._index;
       data._source._meta.version = data._version;
