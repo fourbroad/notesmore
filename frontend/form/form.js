@@ -55,10 +55,7 @@ $.widget("nm.form", {
     this.$saveAsModel = $('#save-as', this.$formHeader);
     this.$titleInput = $('input[name="title"]', this.$saveAsModel),
     this.$formTag = $('form.save-as', this.$saveAsModel),
-    this.$domain = $('div.domain', this.$saveAsModel),
-    this.$collection = $('div.collection', this.$saveAsModel),
     this.$id = $('input[name="id"]', this.$saveAsModel),
-    this.$title = $('input[name="title"]', this.$saveAsModel),
     this.$submitBtn = $('.btn.submit', this.$saveAsModel),
     this.$toolbox = $('.form-toolbox', this.$form),
 
@@ -86,7 +83,6 @@ $.widget("nm.form", {
 
     this.$saveAsModel.on('show.bs.modal', $.proxy(this._onShowSaveAsModel, this));
     this.$saveAsModel.on('shown.bs.modal', function () {
-      self.$titleInput.val('');
       self.$titleInput.trigger('focus');
     });
 
@@ -264,10 +260,8 @@ $.widget("nm.form", {
     if (errors) {
       console.log(errors);
     } else {
-      var values = validate.collectFormValues(this.$formTag, {trim: true}), 
-          docInfo = _.cloneDeep(o.document),
-          domainId = this.$domain.select('option','selectedItems')[0].value, 
-          collectionId = this.$collection.select('option','selectedItems')[0].value,
+      var values = validate.collectFormValues(this.$formTag, {trim: true}), doc = o.document,
+          docInfo = _.cloneDeep(doc), domainId = doc.domainId, collectionId = doc.collectionId,
           params = [];
       switch(collectionId){
         case '.domains':
@@ -306,62 +300,9 @@ $.widget("nm.form", {
   },
 
   _onShowSaveAsModel: function(e){
-    var o = this.options, self = this, client = o.document.getClient(), {Domain, Collection} = client;
-    if(!this.$domain.data("nm-select")){
-      this.$domain.select({
-        title: 'domain',
-        mode: 'single',
-        menuItems: function(filter, callback){
-          client.Domain.find({size:100}, function(err, domains){
-            if(err) return console.error(err);
-            var items = _.map(domains.domains, function(domain){
-              return {label:domain['title']||domain['id'], value:domain['id']};
-            });
-            callback(items);
-          });
-        },
-        valueChanged: function(){
-          self.collectionSelect.clear();
-        }
-      });
-    }
-      
-    if(!this.$collection.data('nm-select')){
-      this.$collection.select({
-        title: 'collection',
-        mode: 'single',
-        menuItems: function(filter, callback){
-          var selectedDomains = self.$domain.select('option', 'selectedItems');
-          if(selectedDomains[0]){
-            client.Domain.get(selectedDomains[0].value, function(err, domain){
-              domain.findCollections({size:100}, function(err, collections){
-                if(err) return console.error(err);
-                var items = _.map(collections.collections, function(collection){
-                  return {label:collection['title']||collection['id'], value:collection['id']};
-                });
-                callback(items);
-              });
-            });
-          }else{
-            callback([]);
-          }
-        },
-        create: function(){
-          self.collectionSelect = self.$collection.select('instance');           
-        }
-      });
-    }
-
-    this.$id.val(uuidv4());
-
-    Domain.get(o.document.domainId, function(err, domain){
-      if(err) return console.error(err);
-      Collection.get(domain.id, o.document.collectionId, function(err, collection){
-        if(err) return console.error(err);
-        self.$domain.select('option', 'selectedItems', [{label: domain.title||domain.id, value:domain.id}]);
-        self.$collection.select('option', 'selectedItems', [{label: collection.title||collection.id, value:collection.id}]);
-      });
-    });
+    var o = this.options, doc = o.document;
+    this.$id.val(doc.id || uuidv4());
+    this.$titleInput.val(doc.title||'');
   },
 
   _armActionMoreMenu: function(){

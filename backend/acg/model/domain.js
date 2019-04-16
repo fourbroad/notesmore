@@ -485,7 +485,7 @@ const DOMAINS = '.domains'
     title: 'Users'
   },
   defaultValue:{
-    username: 'newuser',
+    id: 'newuser',
     password: 'password',
     title: "New User"
   },
