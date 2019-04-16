@@ -74,7 +74,7 @@ _.assign(Document, {
     return Document;
   },
 
-  create: function(authorId, domainId, collectionId, documentId, docData, options){
+  create: function(authorId, domainId, collectionId, documentId, docData, options) {
     var self = this, metaId = _.at(docData, '_meta.metaId')[0] || '.meta';
     docData.id = documentId;
     return buildMeta(domainId, docData, authorId, metaId).then( docData => {
@@ -226,15 +226,20 @@ _.assign(Document.prototype, {
   },
 
   getEvents: function(options){
-    return this._getElasticSearch().search({
+    return this._getElasticSearch().search(_.merge({
       index: eventAllAlias(this.domainId, this.collectionId), 
       type: EVENT_TYPE,
       body: {
         query:{
-          match:{id:this.id}
-        }
+          term:{'id.keyword':this.id}
+        },
+        sort: [{ 
+          '_meta.created': {order : "desc"}
+        },{
+          version: {order: "desc"}
+        }]
       }
-    }).then(function(data){
+    }, options)).then(function(data){
       return {
   	    total:data.hits.total,
   	    offset: 0,

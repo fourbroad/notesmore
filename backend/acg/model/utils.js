@@ -1,4 +1,5 @@
 const _ = require('lodash')
+  , jsonPatch = require('fast-json-patch')
   , createError = require('http-errors')
   , Meta = require('./meta');
 
@@ -37,7 +38,43 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId, opt
   if (!doc) {
     return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId}).then( data => {
       if(version && version < data._meta.version){
-        elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body:{}});
+        elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body: {
+          query:{ term:{'id.keyword': documentId} },
+          sort: [{
+            '_meta.created': {order : "desc"}
+          },{
+            version: {order: "desc"}
+          }]
+        }}).then(result => {
+          var patch = [], version, created, updated, author;
+          _.each(result.hits.hits, (v,k)=>{
+            var evt = v._source;
+            if(k == 0){
+              version = evt.version + 1;
+              updated = evt._meta.created;              
+            }
+            if(evt.patch[0].op=="add" && evt.patch[0].path==""){
+              evt.patch = _.reduce(evt.patch, (r,v,k)=>{
+                if(v.value) v.value = JSON.parse(v.value);
+                r.push(v);
+              },[]);
+              patch = patch.concat(evt.patch);
+              author = evt._meta.author;
+              created = evt._meta.created;
+              return false;
+            }else{
+              patch = patch.concat(v._source);
+              return true;
+            }
+          });
+
+          return _.merge(jsonPatch.applyPatch({}, patch).newDocument,{_meta:{
+            author: author,
+            version: version,
+            created: created,
+            updated: updated
+          }});
+        });
       }else{
 
       }

@@ -820,7 +820,7 @@ initSocket = function(socket, visitorId) {
     checkAcl3(visitorId, Document, domainId, collectionId, documentId, 'getEvents', options).then( document => {
       return document.getEvents(options);
     }).then(result => callback(null, result)).catch(err => {
-      console.log(err);
+      console.error(err);
       callback(err)
     });
   });
