@@ -113,9 +113,6 @@ _.assign(Document, {
   },
 
   scroll: function(options){
-  　if(arguments.length < 1 || (arguments.length == 2 && typeof arguments[1] != 'function')){
-  　  return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!')); 
-  　}
   　return elasticsearch.scroll(options).then(function(data){
   	  return {
   	    total:data.hits.total,
@@ -133,9 +130,6 @@ _.assign(Document, {
   },
 
   clearScroll: function(options){
-  　if(arguments.length < 1 || (arguments.length == 2 && typeof arguments[1] != 'function')){
-  　  return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!')); 
-  　}
   　return elasticsearch.clearScroll(options);
   }
 

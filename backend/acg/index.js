@@ -252,6 +252,16 @@ initSocket = function(socket, visitorId) {
     });
   });
 
+// 'copyDomainTo', sourceId, targetId, targetTitle, options  
+  socket.on('copyDomain', function(sourceId, targetId, targetTitle, options, callback){
+    checkAcl1(visitorId, Domain, sourceId, 'copy', null, options).then( domain => {
+      return domain.copy(visitorId, targetId, targetTitle, options);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
   socket.on('mgetDomainDocuments', function(domainId, ids, options, callback){
     Domain.get(domainId, options).then(domain => {
       return domain.mgetDocuments(ids, options);

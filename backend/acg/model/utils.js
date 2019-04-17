@@ -109,7 +109,8 @@ function buildMeta(domainId, doc, authorId, metaId){
     var defaultAcl = _.cloneDeep(meta.acl||{}), _meta = doc._meta || {}, timestamp = new Date().getTime();
     delete defaultAcl.create;
     _meta.acl = _.merge(defaultAcl, _.at(doc, '_meta.acl')[0]);
-    _meta = _.merge(_meta, {iconClass: meta._meta.iconClass, created:timestamp, updated:timestamp, version:1});
+    _meta.iconClass = _meta.iconClass || meta._meta.iconClass;
+    _meta = _.merge(_meta, {created:timestamp, updated:timestamp, version:1});
     _meta.author = authorId;
     doc._meta = _meta;
     return doc;

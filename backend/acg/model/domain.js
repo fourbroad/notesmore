@@ -606,14 +606,14 @@ function createMeta(authorId, doc) {
 function initTempates(domainId) {
   var cols = domainId == ROOT ? COLLECTIONS.concat(ROOT_COLLECTIONS) : COLLECTIONS;
   return Promise.all(_.map(cols, function(col) {
-    return Collection.putTemplate(domainId, col.id);
+    return Collection.putTemplates(domainId, col.id);
   }));
 }
 
 function createIndices(domainId) {
   var cols = domainId == ROOT ? COLLECTIONS.concat(ROOT_COLLECTIONS) : COLLECTIONS;
   return Promise.all(_.map(cols, function(col) {
-    return Collection.createIndex(domainId, col.id);
+    return Collection.createIndices(domainId, col.id);
   }));
 }
 
@@ -811,11 +811,9 @@ _.assign(Domain, {
 
     return promise.then(result=>{
       return Document.create.call(self, authorId, ROOT, DOMAINS, domainId, domainData, options);
-    }
-    ).then(()=>{
+    }).then(()=>{
       return Domain.get(domainId, options)
-    }
-    );
+    });
 
   },
 
@@ -839,6 +837,91 @@ inherits(Domain, Document, {
 
   _getCache: function() {
     return cache;
+  },
+
+  copy: function(authorId, targetId, targetTitle, options){
+    var self = this, es = this._getElasticSearch(), includeData = options && options.includeData;
+
+    function copyIndex(collection, targetDomainId){
+      return Promise.all([
+        collection.getSnapshotTemplate().then(template => {
+          var temp = {aliases:{}, index_patterns:[targetDomainId+'~'+collection.id+'~snapshots-*']};
+          temp.aliases[targetDomainId+'~'+collection.id+'~all~snapshots'] = {};
+          temp.aliases[targetDomainId+'~'+collection.id+'~hot~snapshots'] = {};
+          return Collection.putSnapshotTemplate(targetDomainId, collection.id, _.merge(template[targetDomainId+'~'+collection.id+'~snapshots'],temp));
+        }),
+        collection.getEventTemplate().then(template => {
+          var temp = {aliases:{}, index_patterns:[targetDomainId+'~'+collection.id+'~events-*']};
+          temp.aliases[targetDomainId+'~'+collection.id+'~all~events'] = {};
+          temp.aliases[targetDomainId+'~'+collection.id+'~hot~events'] = {};
+          return Collection.putEventTemplate(targetDomainId, collection.id, _.merge(template[targetDomainId+'~'+collection.id+'~events'],temp));
+        })
+      ]).then(()=>{
+        return Collection.createIndices(targetDomainId, collection.id);
+      });
+    }
+
+    function batch(documents) {
+      return _.reduce(documents, (r, v, i) => {
+        switch(v.id){
+          case '.users':
+          case '.domains':
+          break;
+          case '.metas':
+          case '.collections':
+          case '.actions':
+          case '.forms':
+          case '.groups':
+          case '.pages':
+          case '.profiles':
+          case '.roles':
+          case '.views':
+            r.push(copyIndex(v, targetId).then( () => {
+              return Collection.reindex(v.domainId, v.id, targetId, v.id);
+            }));
+          break;
+          case '.files':
+          default:
+            if(includeData){
+              r.push(copyIndex(v, targetId).then( () => {
+                return Collection.reindex(v.domainId, v.id, targetId, v.id);
+              }));
+            } else {
+              r.push(copyIndex(v, targetId));
+            }
+        }
+        return r;
+      }, []);
+    }
+
+    function doCopy(opts){
+      return self.scroll(opts).then(result => {
+        return Promise.all(batch(result.documents)).then(() => {
+          if(result.offset + result.documents.length < result.total){
+            return doCopy({scroll: '1m', scroll_id: result.scrollId});
+          } else {
+            return Domain.get(targetId);
+          }        
+        });      
+      });
+    }
+
+    return Document.create(authorId, ROOT, '.domains', targetId, {
+      title: targetTitle,
+      _meta: {
+        iconClass: "ti-layout-width-full"
+      }
+    }).then(()=>{
+      return self.findCollections({scroll:'1m'});
+    }).then(result => {
+      return Promise.all(batch(result.documents)).then(() => {
+        if(result.offset + result.documents.length < result.total){
+          return doCopy({scroll: '1m', scroll_id: result.scrollId});
+        } else {
+          return Domain.get(targetId);
+        }
+      });
+    });
   },
 
   delete: function(authorId, options) {
