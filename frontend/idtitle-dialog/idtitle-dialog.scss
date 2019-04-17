@@ -1,0 +1,13 @@
+.nm-newdialog {
+  .meta {
+    text-align: center;
+    .icon-holder {
+      font-size: 64px;
+      text-align: center;
+    }
+  }
+
+  .meta.selected {
+    color: #2196f3 !important;
+  }
+}

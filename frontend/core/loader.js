@@ -285,12 +285,11 @@ createDocument = function(client, element, domainId, metaId, callback){
   });
 }
 
-armActions = function(client, doc, container, currentActionId) {
+armActions = function(client, pluginInstance, doc, container, currentActionId) {
   const { Action } = client;
   function armItems(domainId, actIds) {
     Action.mget(doc.domainId, actIds, function(err, result) {
-      if (err)
-        return console.error(err);
+      if (err) return console.error(err);
       $.each(result.actions, function(i, action) {
         if(action.id != currentActionId){
           var $li = $('<li class="dropdown-item"></li>').html(action.title).appendTo(container).data('action', action)
@@ -306,7 +305,9 @@ armActions = function(client, doc, container, currentActionId) {
             } else if ('inline' == mode) {
               (function() {
                 eval(action.plugin.js);
-                action(doc);
+                action(pluginInstance, doc, function(err, result){
+                  if (err) return console.error(err);                                    
+                });
               })();
             }
             

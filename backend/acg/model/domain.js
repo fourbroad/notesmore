@@ -814,7 +814,6 @@ _.assign(Domain, {
     }).then(()=>{
       return Domain.get(domainId, options)
     });
-
   },
 
   get: function(domainId, options) {

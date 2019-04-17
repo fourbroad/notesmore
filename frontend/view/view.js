@@ -68,7 +68,7 @@ $.widget("nm.view", {
     this.$submitBtn = $('.btn.submit', this.$saveAsModel);
     this.$searchContainer = $('.search-container', this.$view);
 
-    this._refresh();
+    this.refresh();
 
     this.$viewContainer.on('click', 'table.view-table tbody>tr', function(evt){
       var $this = $(this);
@@ -205,10 +205,10 @@ $.widget("nm.view", {
       }
     });
 
-    Loader.armActions(client, o.view, this.$actionMoreMenu, o.actionId);
+    Loader.armActions(client, this, o.view, this.$actionMoreMenu, o.actionId);
   },
 
-  _refresh: function() {
+  refresh: function() {
     var o = this.options, self = this, view = o.view;
     this.$viewTitle.html(view.title||view.id);
 
@@ -626,7 +626,7 @@ $.widget("nm.view", {
       }
     });
 
-    Loader.armActions(client, doc, $dropdownMenu, this.options.actionId);
+    Loader.armActions(client, this, doc, $dropdownMenu, this.options.actionId);
   },
 
   _setRowActive: function($row){
@@ -659,7 +659,7 @@ $.widget("nm.view", {
         o.isNew = false;
         o.view = view;
         self.clone = _.cloneDeep(view);
-        self._refresh();
+        self.refresh();
         self.$saveAsModel.modal('toggle')
         self.element.trigger('documentcreated', [view, isNew]);
       });
@@ -723,6 +723,19 @@ $.widget("nm.view", {
     this.table.draw();
   },
 
+  showIdTitleDialog: function(options){
+    var self = this;
+    import(/* webpackChunkName: "idtitle-dialog" */ 'idtitle-dialog/idtitle-dialog').then(({default: itd}) => {
+      self.idtitleDialog = $('<div/>').idtitledialog(options).idtitledialog('show').idtitledialog('instance');
+    });
+    return this;
+  },
+
+  closeIdTitleDialog: function(){
+    this.idtitleDialog && this.idtitleDialog.close();
+    return this;
+  },
+
   _setOption: function(key, value){
     var o = this.options, self = this;
 
@@ -732,7 +745,7 @@ $.widget("nm.view", {
       if(!o.isNew){
         this.clone = _.cloneDeep(o.view);      
       }
-      this._refresh();
+      this.refresh();
     }
 
   }
