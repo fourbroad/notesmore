@@ -54,5 +54,6 @@ if(index >= 0){
 }
 
 $('body').runtime({
+//   currentDomain: 'starr-ah'
   currentDomain: '.root'
 });

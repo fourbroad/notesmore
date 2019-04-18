@@ -215,9 +215,9 @@ initSocket = function(socket, visitorId) {
     });
   });
 
-  socket.on('findUsers', function(domainId, query, options, callback){
-    filterQuery(visitorId, domainId, query, options).then( query => {
-      return User.find(domainId, query, options);
+  socket.on('findUsers', function(query, options, callback){
+    filterQuery(visitorId, Domain.ROOT, query, options).then( query => {
+      return User.find(query, options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
@@ -372,6 +372,42 @@ initSocket = function(socket, visitorId) {
   socket.on('distinctQueryCollection', function(domainId, collectionId, field, options, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'distinctQuery', null, options).then( collection => {
       return collection.distinctQuery(field, options);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
+  socket.on('putSnapshotTemplate', function(domainId, collectionId, template, options, callback){
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'putSnapshotTemplate', null, options).then( collection => {
+      return collection.putSnapshotTemplate(template, options);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
+  socket.on('getSnapshotTemplate', function(domainId, collectionId, options, callback){
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'getSnapshotTemplate', null, options).then( collection => {
+      return collection.getSnapshotTemplate(options);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
+  socket.on('putEventTemplate', function(domainId, collectionId, template, options, callback){
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'putEventTemplate', null, options).then( collection => {
+      return collection.putEventTemplate(template, options);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
+  socket.on('getEventTemplate', function(domainId, collectionId, options, callback){
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'getEventTemplate', null, options).then( collection => {
+      return collection.getEventTemplate(options);
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);

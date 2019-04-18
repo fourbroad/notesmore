@@ -61,9 +61,7 @@ const
         }
       }
     }
-  },
-  snapshotsTemplate = _.template(JSON.stringify(SNAPSHOT_TEMPLATE)),
-  eventsTemplate = _.template(JSON.stringify(EVENT_TEMPLATE));
+  };
 
 var elasticsearch, cache;
 
@@ -90,7 +88,7 @@ _.assign(Collection, {
     return elasticsearch.indices.putTemplate(_.merge({
       name: domainId + '~' + collectionId + '~snapshots',
       body: template ? _.template(JSON.stringify(template))({domainId: domainId, collectionId: collectionId}) 
-                     : snapshotsTemplate({domainId: domainId, collectionId: collectionId}),
+                     : _.template(JSON.stringify(SNAPSHOT_TEMPLATE))({domainId: domainId, collectionId: collectionId}),
       order: 1
     }, options));
   },
@@ -99,7 +97,7 @@ _.assign(Collection, {
     return elasticsearch.indices.putTemplate(_.merge({
       name: domainId + '~' + collectionId + '~events',
       body: template ? _.template(JSON.stringify(template))({domainId: domainId, collectionId: collectionId})
-                     : eventsTemplate({domainId: domainId, collectionId: collectionId}), 
+                     : _.template(JSON.stringify(EVENT_TEMPLATE))({domainId: domainId, collectionId: collectionId}), 
       order: 1
     }, options));
   },
@@ -203,33 +201,40 @@ inherits(Collection, Document,{
     });
   },
 
-  putSnapshotTemplate: function(params){
-    params = params || {body: SNAPSHOT_TEMPLATE};
-    params.name = this.domainId + '~' + this.id + '~snapshots';
-    return this._getElasticSearch().indices.putTemplate(params);
+  putSnapshotTemplate: function(template, options){
+    return this._getElasticSearch().indices.putTemplate(_.merge({
+      name: this.domainId + '~' + this.id + '~snapshots',
+      body: template
+    }, options));
   },
 
-  getSnapshotTemplate: function(params){
-    params = params || {};
-    params.name = this.domainId + '~' + this.id + '~snapshots';
-    return this._getElasticSearch().indices.getTemplate(params);
+  getSnapshotTemplate: function(options){
+    return this._getElasticSearch().indices.getTemplate(_.merge({
+      name: this.domainId + '~' + this.id + '~snapshots'
+    }, options)).then(data => {
+      return data[this.domainId + '~' + this.id + '~snapshots'];
+    });
   },
 
-  putEventTemplate: function(params){
-    params = params || {body: EVENT_TEMPLATE};
-    params.name = this.domainId + '~' + this.id + '~events';
-    return this._getElasticSearch().indices.putTemplate(params);
+  putEventTemplate: function(template, options){
+    return this._getElasticSearch().indices.putTemplate(_.merge({
+      name: this.domainId + '~' + this.id + '~events',
+      body: template
+    }, options));
   },
 
-  getEventTemplate: function(params){
-    params = params || {};
-    params.name = this.domainId + '~' + this.id + '~events';
-    return this._getElasticSearch().indices.getTemplate(params);
+  getEventTemplate: function(options){
+    return this._getElasticSearch().indices.getTemplate(_.merge({
+      name: this.domainId + '~' + this.id + '~events'
+    }, options)).then(data => {
+      return data[this.domainId + '~' + this.id + '~events'];
+    });
   },
 
-  rollover: function(params){
-    params.alias = this.domainId + '~' + this.id;
-    return this._getElasticSearch().indices.rollover(params);
+  rollover: function(options){
+    return this._getElasticSearch().indices.rollover(_.merge({
+      alias: this.domainId + '~' + this.id
+    }, this.rollover, options));
   },
 
   distinctQuery: function(field, options) {
