@@ -368,6 +368,19 @@ $.widget("nm.form", {
     this.enableChange = true;
   },
 
+  showIdTitleDialog: function(options){
+    var self = this;
+    import(/* webpackChunkName: "idtitle-dialog" */ 'idtitle-dialog/idtitle-dialog').then(({default: itd}) => {
+      self.idtitleDialog = $('<div/>').idtitledialog(options).idtitledialog('show').idtitledialog('instance');
+    });
+    return this;
+  },
+
+  closeIdTitleDialog: function(){
+    this.idtitleDialog && this.idtitleDialog.close();
+    return this;
+  },
+
   _destroy: function(){
     this.element.empty();    
   }

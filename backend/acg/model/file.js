@@ -5,11 +5,8 @@ const _ = require('lodash')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
   , WebHDFS = require('webhdfs')
-  , hdfs = WebHDFS.createClient({
-      user: 'fourbroad',
-      host: 'localhost',
-      port: 9870
-    })  
+  , config = require('config')
+  , hdfs = WebHDFS.createClient(JSON.parse(JSON.stringify(config.get('hdfs'))))
   , {uniqueId, inherits, getEntity} = require('./utils');
 
 const

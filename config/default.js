@@ -3,6 +3,11 @@ const config = {
     host: '',
     requestTimeout: 60000
   },
+  hdfs: {
+    user: '',
+    host: '',
+    port: 9870
+  },  
   redis: {
     host:''
   }  
