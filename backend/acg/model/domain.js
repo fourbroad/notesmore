@@ -25,12 +25,12 @@ const DOMAINS = '.domains'
   title: "Id",
   name: "id",
   data: "id",
-  className: "id"
+  defaultLink: true
 }, {
   title: "Title",
   name: "title",
   data: "title",
-  className: "title"
+  defaultLink: true
 }, {
   title: "Author",
   name: "_meta.author",
@@ -587,7 +587,7 @@ const DOMAINS = '.domains'
 };
 
 function indexName(domainId, collectionId) {
-  return domainId + `~` + collectionId + '~snapshots-1';
+  return domainId + `~` + collectionId + '~snapshots~1-1';
 }
 
 function createMeta(authorId, doc) {
@@ -841,16 +841,16 @@ inherits(Domain, Document, {
   copy: function(authorId, targetId, targetTitle, options){
     var self = this, es = this._getElasticSearch(), includeData = options && options.includeData;
 
-    function copyIndex(collection, targetDomainId){
+    function copyCollection(collection, targetDomainId){
       return Promise.all([
         collection.getSnapshotTemplate().then(template => {
-          var temp = {aliases:{}, index_patterns:[targetDomainId+'~'+collection.id+'~snapshots-*']};
+          var temp = {aliases:{}, index_patterns:[targetDomainId+'~'+collection.id+'~snapshots~*-*']};
           temp.aliases[targetDomainId+'~'+collection.id+'~all~snapshots'] = {};
           temp.aliases[targetDomainId+'~'+collection.id+'~hot~snapshots'] = {};
           return Collection.putSnapshotTemplate(targetDomainId, collection.id, _.merge(template[targetDomainId+'~'+collection.id+'~snapshots'],temp));
         }),
         collection.getEventTemplate().then(template => {
-          var temp = {aliases:{}, index_patterns:[targetDomainId+'~'+collection.id+'~events-*']};
+          var temp = {aliases:{}, index_patterns:[targetDomainId+'~'+collection.id+'~events~*-*']};
           temp.aliases[targetDomainId+'~'+collection.id+'~all~events'] = {};
           temp.aliases[targetDomainId+'~'+collection.id+'~hot~events'] = {};
           return Collection.putEventTemplate(targetDomainId, collection.id, _.merge(template[targetDomainId+'~'+collection.id+'~events'],temp));
@@ -875,18 +875,22 @@ inherits(Domain, Document, {
           case '.profiles':
           case '.roles':
           case '.views':
-            r.push(copyIndex(v, targetId).then( () => {
-              return Collection.reindex(v.domainId, v.id, targetId, v.id);
+            r.push(copyCollection(v, targetId).then( () => {
+              return Collection.copySnapshotIndices(v.domainId, v.id, targetId, v.id);
+            }).then(() => {
+              return Collection.copyEventIndices(v.domainId, v.id, targetId, v.id);
             }));
           break;
           case '.files':
           default:
             if(includeData){
-              r.push(copyIndex(v, targetId).then( () => {
-                return Collection.reindex(v.domainId, v.id, targetId, v.id);
+              r.push(copyCollection(v, targetId).then( () => {
+                return Collection.copySnapshotIndices(v.domainId, v.id, targetId, v.id);
+              }).then(() => {
+                return Collection.copyEventIndices(v.domainId, v.id, targetId, v.id);
               }));
             } else {
-              r.push(copyIndex(v, targetId));
+              r.push(copyCollection(v, targetId));
             }
         }
         return r;
@@ -926,14 +930,10 @@ inherits(Domain, Document, {
   delete: function(authorId, options) {
     var es = this._getElasticSearch(), self = this;
     return Domain.parent.delete.call(this, authorId, options).then(result=>{
-      return es.indices.delete({
-        index: self.id + '~*'
-      });
-    }
-    ).then(result=>{
+      return es.indices.delete({ index: self.id + '~*' });
+    }).then(result=>{
       return true;
-    }
-    );
+    });
   },
 
   findCollections: function(query, options) {

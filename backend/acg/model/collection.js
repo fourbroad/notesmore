@@ -9,7 +9,7 @@ const _ = require('lodash')
 const
   COLLECTIONS = '.collections',
   SNAPSHOT_TEMPLATE = {
-    "index_patterns": ["${domainId}~${collectionId}~snapshots-*"],
+    "index_patterns": ["${domainId}~${collectionId}~snapshots~*-*"],
     "aliases" : {
       "${domainId}~${collectionId}~hot~snapshots" : {},
       "${domainId}~${collectionId}~all~snapshots" : {}
@@ -39,7 +39,7 @@ const
     }
   },
   EVENT_TEMPLATE = {
-    "index_patterns": ["${domainId}~${collectionId}~events-*"],
+    "index_patterns": ["${domainId}~${collectionId}~events~*-*"],
     "aliases" : {
       "${domainId}~${collectionId}~hot~events" : {},
       "${domainId}~${collectionId}~all~events" : {}
@@ -109,25 +109,66 @@ _.assign(Collection, {
     ]);
   },
 
-  createSnapshotsIndex: function(domainId, collectionId){
-    return elasticsearch.indices.create({index:domainId+`~`+collectionId+'~snapshots-1'});
+  createSnapshotsIndex: function(domainId, collectionId, version, rolloverSn){
+    return elasticsearch.indices.create({index:domainId+`~`+collectionId+'~snapshots~' + (version||1) + '-' + (rolloverSn||1)});
   },
 
-  createEventsIndex: function(domainId, collectionId){
-    return elasticsearch.indices.create({index:domainId+`~`+collectionId+'~events-1'});
+  createEventsIndex: function(domainId, collectionId, version, rolloverSn){
+    return elasticsearch.indices.create({index:domainId+`~`+collectionId+'~events~' + (version||1) + '-' + (rolloverSn||1)});
   },
 
-  reindex: function(sourceDomainId, sourceCollectionId, targetDomainId, targetCollectionId, options){
-    return elasticsearch.reindex(_.merge({
-      body:{
-        source: {
-          index: sourceDomainId + '~' + sourceCollectionId + '~all~snapshots'
-        },
-        dest: {
-          index: targetDomainId + '~' + targetCollectionId + '~hot~snapshots'
-        }
-      }
-    }, options));
+  copySnapshotIndices: function(sourceDomainId, sourceCollectionId, targetDomainId, targetCollectionId, options){
+    function doCopySnapshotIndices(indices, targetDomainId, targetCollectionId){
+      if(_.isEmpty(indices)) return Promise.resolve(true);
+
+      var index = _.head(indices), segments = index.split('~'), suffix = segments[3].split('-'), 
+        version = Number(suffix[0]), rolloverSn = suffix[1];
+      return Collection.createSnapshotsIndex(targetDomainId, targetCollectionId, version, rolloverSn).then(() => {
+        return elasticsearch.reindex({
+          body:{
+            source: {
+              index: index
+            },
+            dest: {
+              index: targetDomainId + '~' + targetCollectionId + '~snapshots~' + version + '-' + rolloverSn
+            }
+          }
+        });
+      }).then(() => {
+        return doCopySnapshotIndices(_.drop(indices));
+      });
+    }
+
+    return elasticsearch.indices.get({index: sourceDomainId + '~' + sourceCollectionId + '~all~snapshots'}).then(indices => {
+      return doCopySnapshotIndices(_.keys(indices));
+    });
+  },
+
+  copyEventIndices: function(sourceDomainId, sourceCollectionId, targetDomainId, targetCollectionId, options){
+    function doCopyEventIndices(indices, targetDomainId, targetCollectionId){
+      if(_.isEmpty(indices)) return Promise.resolve(true);
+
+      var index = _.head(indices), segments = index.split('~'), suffix = segments[3].split('-'), 
+        version = Number(suffix[0]), rolloverSn = suffix[1];
+      return Collection.createSnapshotsIndex(targetDomainId, targetCollectionId, version, rolloverSn).then(() => {
+        return elasticsearch.reindex({
+          body:{
+            source: {
+              index: index
+            },
+            dest: {
+              index: targetDomainId + '~' + targetCollectionId + '~events~' + version + '-' + rolloverSn
+            }
+          }
+        });
+      }).then(() => {
+        return doCopyEventIndices(_.drop(indices));
+      });
+    }
+
+    return elasticsearch.indices.get({index: sourceDomainId + '~' + sourceCollectionId + '~all~events'}).then(indices => {
+      return doCopyEventIndices(_.keys(indices));
+    });
   },
 
   create: function(authorId, domainId, collectionId, collectionData, options){
@@ -194,7 +235,7 @@ inherits(Collection, Document,{
     return Promise.all(_.map(docs, function(doc, index){
       var metaId = _.at(doc, '_meta.metaId')[0] || '.meta';
       return buildMeta(domainId, doc, authorId, metaId).then( doc => {
-        return [{index:{_index: domainId + '~' + self.id + '~snapshots-1', _type: Document.TYPE, _id: doc.id || uuidv4()}}, doc];
+        return [{index:{_index: domainId + '~' + self.id + '~hot~snapshots', _type: Document.TYPE, _id: doc.id || uuidv4()}}, doc];
       });
     })).then(function(values) {
       return es.bulk({body: _.flatMap(values)});
@@ -237,13 +278,75 @@ inherits(Collection, Document,{
     }, this.rollover, options));
   },
 
+  reindexSnapshots: function(options){
+    var esc = this._getElasticSearch(), domainId = this.domainId, collectionId = this.id;
+
+    function doReindexSnapshots(indices){
+      if(_.isEmpty(indices)) return Promise.resolve(true);
+
+      var index = _.head(indices), segments = index.split('~'), domainId = segments[0], collectionId = segments[1], 
+        suffix = segments[3].split('-'), version = Number(suffix[0]), rolloverSn = suffix[1];
+      return Collection.createSnapshotsIndex(domainId, collectionId, version + 1).then(() => {
+        return esc.reindex({
+          body:{
+            source: {
+              index: index
+            },
+            dest: {
+              index: domainId + '~' + collectionId + '~snapshots~' + (version + 1) + '-' + rolloverSn
+            }
+          }
+        });
+      }).then(() => {
+        return esc.indices.delete({index:index});
+      }).then(() => {
+        return doReindexSnapshots(_.drop(indices));
+      });
+    }
+
+    return esc.indices.get({index: domainId + '~' + collectionId + '~all~snapshots'}).then(indices => {
+      return doReindexSnapshots(_.keys(indices));
+    });
+  },
+
+  reindexEvents: function(options){
+    var esc = this._getElasticSearch(), domainId = this.domainId, collectionId = this.id;
+
+    function doReindexEvents(indices){
+      if(_.isEmpty(indices)) return Promise.resolve(true);
+
+      var index = _.head(indices), segments = index.split('~'), domainId = segments[0], collectionId = segments[1], 
+        suffix = segments[3].split('-'), version = Number(suffix[0]), rolloverSn = suffix[1];
+      return Collection.createEventsIndex(domainId, collectionId, version + 1).then(() => {
+        return esc.reindex({
+          body:{
+            source: {
+              index: index
+            },
+            dest: {
+              index: domainId + '~' + collectionId + '~events~' + (version + 1) + '-' + rolloverSn
+            }
+          }
+        });
+      }).then(() => {
+        return esc.indices.delete({index:index});
+      }).then(() => {
+        return doReindexEvents(_.drop(indices));
+      });
+    }
+        
+    return esc.indices.get({index: domainId + '~' + collectionId + '~all~events'}).then(indices => {
+      return doReindexEvents(_.keys(indices));
+    });
+  },
+
   distinctQuery: function(field, options) {
     const query = {
       aggs: {
         values: {
           terms: {
             field: field + ".keyword",
-            include: ".*.*",
+            include: ".*",
             order: {
               _key: "asc"
             },

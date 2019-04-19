@@ -80,6 +80,8 @@ _.assign(Document, {
     return buildMeta(domainId, docData, authorId, metaId).then( docData => {
       return elasticsearch.create({ index: documentHotAlias(domainId, collectionId), type: DOC_TYPE, id: documentId, body: docData });
     }).then( result => {
+      return elasticsearch.indices.refresh({index: documentHotAlias(domainId, collectionId)});      
+    }).then(result => {
       return Document.get(domainId, collectionId, documentId, options);
     });
   },

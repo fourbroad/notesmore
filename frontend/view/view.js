@@ -250,18 +250,16 @@ $.widget("nm.view", {
         targets:'_all',
         render:function(data, type, row, meta) {
           var column = meta.settings.aoColumns[meta.col], d = utils.get(row, column.data);
-          switch(column.className){
-            case 'id':
-            case 'title':
-              d = '<a href="#">'+ d||"" + '</a>';
-              break;
-            case 'datetime':
-              var date = moment(d);
-              d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
-              break;
-            default:
-              break;
+          
+          if(column.className == 'datetime'){
+            var date = moment(d);
+            d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
           }
+
+          if(column.defaultLink){
+            d = '<a href="#">'+ d||"" + '</a>';
+          }
+
           return d;
         },
         defaultContent:''

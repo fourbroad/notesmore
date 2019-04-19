@@ -414,6 +414,24 @@ initSocket = function(socket, visitorId) {
     });
   });
 
+  socket.on('reindexSnapshots', function(domainId, collectionId, options, callback){
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'reindexSnapshots', null, options).then( collection => {
+      return collection.reindexSnapshots(options);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
+  socket.on('reindexEvents', function(domainId, collectionId, options, callback){
+    checkAcl2(visitorId, Collection, domainId, collectionId, 'reindexEvents', null, options).then( collection => {
+      return collection.reindexEvents(options);
+    }).then(result => callback(null, result)).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
   socket.on('refreshCollection', function(domainId, collectionId, options, callback){
     checkAcl2(visitorId, Collection, domainId, collectionId, 'refresh', null, options).then( collection => {
       return collection.refresh(options);
