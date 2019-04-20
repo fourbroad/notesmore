@@ -1,0 +1,146 @@
+.nm-login {
+  .content {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba($color: #666, $alpha: 0.2);
+    width: 100%;
+    height: 100%;
+    user-select: none;
+  }
+
+  .bg-img {
+    background: url(./images/bg_nm.jpg);
+  }
+
+  .body {
+    width: 432px;
+    background: #ffffff;
+    border-radius: 3px;
+    font-size: 14px;
+    color: #71818e;
+
+    .logo {
+      background: url(./images/logo_nm.png);
+      width: 247px;
+      height: 59px;
+      margin: 35px auto;
+      margin-top: 50px;
+    }
+
+    .row {
+      margin: 0px 40px;
+
+      input{
+        font-size: 14px;
+        color: #474e53;
+        border: none;
+        font-weight: bold;
+        flex: 1;
+
+        &::placeholder {
+          font-size: 14px;
+          color: #9fadb9;
+          font-weight: normal;
+        }
+      }
+
+      &.help {
+        justify-content: space-between;
+
+        p {
+          margin-bottom: 0px;
+          margin-top: 10px;
+          cursor: pointer;
+          text-align: left;
+          width: auto;
+          height: 26px;
+          line-height: 28px;
+        }
+        &.mar-bottom{
+          margin-bottom: 55px;
+        }
+      }
+
+      &.verify-code span {
+        color: #ff9c00;
+        cursor: pointer;
+        padding-left: 15px;
+
+        &.disabled {
+          color: #9fadb9;
+          cursor: default;
+        }
+      }
+
+      .input-box {
+        display: flex;
+        width: 100%;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ebebeb;
+      }
+
+      .error {
+        margin: 0px;
+        min-height: 26px;
+        width: 100%;
+        color: #df0000;
+        font-weight: 600;
+        line-height: 18px;
+        padding-top: 5px;
+        padding-bottom: 3px;
+        visibility: hidden;
+        text-align: left;
+
+        &.show {
+          visibility: visible;
+        }
+      }
+
+      &.submit {
+        padding-top: 0.4rem;
+
+        .submit-btn {
+          font-size: 1rem;
+          color: #fff;
+          background: #333f49;
+          box-shadow: none;
+        }
+      }
+    }
+
+    .footer {
+      height: 55px;
+      margin-top: 45px;
+      background: #f6f6f6;
+      border-top: 1px solid #ebebeb;
+      border-radius: 0px 0px 3px 3px;
+      text-align: center;
+
+      p {
+        height: 55px;
+        line-height: 55px;
+        font-size: 1rem;
+        color: #3e4e47;
+
+        a {
+          color: #ff9c00;
+        }
+      }
+    }
+
+    .model-2 {
+      display: none;
+    }
+
+  }
+
+  .copy {
+    position: fixed;
+    bottom: 0px;
+    color: #fff;
+  }
+}
