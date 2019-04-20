@@ -19,10 +19,12 @@ require('bootstrap'),
 require('datatables.net-bs4');
 require('datatables.net-bs4/css/dataTables.bootstrap4.css');
 
-require('select/select');
-require('numeric-range/numeric-range');
-require('datetime-range/datetime-range');
-require('full-text/full-text');
+require('search/select/select');
+require('search/numeric-range/numeric-range');
+require('search/datetime-range/datetime-range');
+require('search/datetime-duedate/datetime-duedate');
+require('search/contains-text/contains-text');
+require('search/full-text/full-text');
 
 require('./view.scss');
 const viewHtml = require('./view.html');
@@ -227,12 +229,14 @@ $.widget("nm.view", {
 
     this.$viewTable = $('<table class="table view-table table-striped table-hover" cellspacing="0" width="100%"></table>').insertAfter(this.$searchContainer);
     this.table = this.$viewTable.DataTable({
+      stateSave: true,
       dom: '<"top"i>rt<"bottom"lp><"clear">',
       lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],      
       processing: true,
       serverSide: true,
       columns: _.cloneDeep(view.columns),
       searchCols: this._armSearchCol(),
+      search: {search: view.search.keyword},
       order: (view.order&&JSON.parse(view.order))||[],
       columnDefs : [{
         targets: 0,
@@ -365,26 +369,90 @@ $.widget("nm.view", {
             class:'search-item',
             btnClass:'btn-sm',
             title: sc.title,
-            mode: sc.mode,
+            option: sc.option,
             unit: sc.unit,
-            earliest: sc.mode == "range" ? sc.sEarliest: sc.earliest,
-            latest: sc.mode == "range" ? sc.sLatest: sc.latest,
+            earliest: sc.option == "range" ? sc.sEarliest: sc.earliest,
+            latest: sc.option == "range" ? sc.sLatest: sc.latest,
             valueChanged: function(event, range){
               var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
-              sc2.mode = range.mode;
+              sc2.option = range.option;
               delete sc2.earliest;
               delete sc2.latest;
               delete sc2.unit;
               delete sc2.sEarliest;
               delete sc2.sLatest;
               
-              switch(sc2.mode){
+              switch(sc2.option){
                 case 'latest':
                   sc2.earliest = range.earliest;
                   sc2.unit = range.unit;
                 break;
                 case 'before':
                   sc2.latest = range.latest;
+                  sc2.unit = range.unit;
+                break;
+                case 'between':
+                  if(range.earliest){
+                    sc2.earliest = range.earliest;                    
+                  }
+
+                  if(range.latest){
+                    sc2.latest = range.latest;                    
+                  }
+                  break;
+                case 'range':
+                  if(range.earliest){
+                    sc2.sEarliest = range.earliest;                    
+                  }
+
+                  if(range.latest){
+                    sc2.sLatest = range.latest;                                        
+                  }
+                  break;
+                default:
+              }
+                    
+              self.table.column(sc2.name+':name')
+                .search(self._buildDatetimeRangeSearch(sc2))
+                .draw();
+              self._refreshHeader();
+            }
+          });
+          break;
+        case 'datetimeDuedate':
+          $("<div/>").appendTo(self.$searchContainer).datetimeduedate({
+            name: sc.name,
+            class:'search-item',
+            btnClass:'btn-sm',
+            title: sc.title,
+            option: sc.option,
+            unit: sc.unit,
+            willYn: sc.willYn,
+            earliest: sc.option == "range" ? sc.sEarliest: sc.earliest,
+            latest: sc.option == "range" ? sc.sLatest: sc.latest,
+            valueChanged: function(event, range){
+              var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
+              sc2.option = range.option;
+              delete sc2.earliest;
+              delete sc2.latest;
+              delete sc2.unit;
+              delete sc2.sEarliest;
+              delete sc2.sLatest;
+              
+              switch(sc2.option){
+                case 'overdue':
+                  break;
+                case 'overdue_more':
+                  sc2.latest = range.latest;
+                  sc2.unit = range.unit;
+                break;
+                case 'expire_yn':
+                  sc2.willYn = range.willYn;
+                  if(sc2.willYn == 'yes'){
+                    sc2.latest = range.latest;
+                  }else{
+                    sc2.earliest = range.earliest;
+                  }
                   sc2.unit = range.unit;
                 break;
                 case 'between':{
@@ -394,7 +462,7 @@ $.widget("nm.view", {
 
                   if(range.latest){
                     sc2.latest = range.latest;                    
-                  }                  
+                  }
                 }
                 break;
                 case 'range':{
@@ -407,7 +475,6 @@ $.widget("nm.view", {
                 }
                 break;
                 default:
-                console.error(o.mode);
               }
                     
               self.table.column(sc2.name+':name')
@@ -417,47 +484,87 @@ $.widget("nm.view", {
             }
           });
           break;
+        case 'containsText':
+          $("<div/>").appendTo(self.$searchContainer).containstext({
+            name: sc.name,
+            class:'search-item',
+            btnClass:'btn-sm',
+            title: sc.title,
+            containsText: sc.containsText,
+            valueChanged: function(event, range){
+              var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
+              sc2.containsText = range.containsText;
+              self.table.column(sc2.name+':name')
+                .search(sc2.containsText)
+                .draw();
+              self._refreshHeader();
+            }
+          });
+          break;
+        default:          
       }
     });
 
     $("<div/>").appendTo(this.$searchContainer).fulltextsearch({
       class: 'search-item',
+      keyword: view.search.keyword,
       valueChanged: function(event, keyword){
+        view.search.keyword = keyword.keyword; 
         self.table.search(keyword.keyword).draw();
+        self._refreshHeader();
       }
     });
   },
 
   _buildDatetimeRangeSearch: function(searchColumn){
     var earliest, latest;
-    switch(searchColumn.mode){
+    switch(searchColumn.option){
+      case 'overdue':
+        latest = +moment();
+        break;
+      case 'overdue_more':
+        if(searchColumn.latest && searchColumn.unit){
+          latest = + moment().subtract(searchColumn.latest, searchColumn.unit);
+        }
+        break;
+      case 'expire_yn':
+        if((searchColumn.earliest || searchColumn.latest) && searchColumn.unit){
+          var now = moment();
+          if(searchColumn.willYn == 'yes'){
+            earliest = + now.clone().subtract(searchColumn.earliest, searchColumn.unit);
+            latest = + now;
+          } else {
+            earliest = + now.add(searchColumn.earliest, searchColumn.unit);
+          }
+        }
+        break;
       case 'latest':
         if(searchColumn.earliest && searchColumn.unit){
           var now = moment();
           latest = + now;
           earliest = + now.clone().subtract(searchColumn.earliest, searchColumn.unit);
         }
-      break;
+        break;
       case 'before':
         if(searchColumn.latest && searchColumn.unit){
           latest = +moment().subtract(searchColumn.latest, searchColumn.unit);
         }
-      break;
-      case 'between':{
+        break;
+      case 'between':
         earliest = searchColumn.earliest
         latest = searchColumn.latest;
-      }
-      break;
-      case 'range':{
-        var now = moment();
-        if(searchColumn.sEarliest){
-          earliest = +now.clone().add(moment.duration(searchColumn.sEarliest));
+        break;
+      case 'range':
+        if(searchColumn.sEarliest || searchColumn.sLatest){
+          var now = moment();
+          if(searchColumn.sEarliest){
+            earliest = +now.clone().add(moment.duration(searchColumn.sEarliest));
+          }
+          if(searchColumn.sLatest){
+            latest = +now.clone().add(moment.duration(searchColumn.sLatest));
+          }
         }
-        if(searchColumn.sLatest){
-          latest = +now.clone().add(moment.duration(searchColumn.sLatest));
-        }
-      }
-      break;
+        break;
       default:
     }
 
@@ -478,6 +585,12 @@ $.widget("nm.view", {
             break;
           case 'datetimeRange':
             searchCols.push({search: self._buildDatetimeRangeSearch(sc)});
+            break;
+          case 'datetimeDuedate':
+            searchCols.push({search: self._buildDatetimeRangeSearch(sc)});
+            break;
+          case 'containsText':
+            searchCols.push({search: sc.containsText});
             break;
         }
       }else{
@@ -559,7 +672,11 @@ $.widget("nm.view", {
               }
             });
             break;
+         case 'containsText':
+            shouldArray.push({query_string: {default_field: mDataProp_i, query: '*'+sSearch_i+'*'}});
+            break;
          case 'datetimeRange':
+         case 'datetimeDuedate':
          case 'numericRange':
             var ra = sSearch_i.split(','), lv = ra[0], hv = ra[1];
             range = {};
@@ -707,6 +824,9 @@ $.widget("nm.view", {
           self.table.column(sc.name+':name')
                .search(_(sc.selectedItems).map("value").filter().flatMap().value().join(','));
           break;
+        case 'containsText':
+          self.table.column(sc.name+':name')
+               .search(sc.containsText);
         case 'numericRange':
           self.table.column(sc.name+':name')
                .search(sc.lowestValue||sc.highestValue ? [sc.lowestValue, sc.highestValue].join(','):'');

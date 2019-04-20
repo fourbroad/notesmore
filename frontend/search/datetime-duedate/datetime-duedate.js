@@ -5,27 +5,28 @@ import 'jquery-datetimepicker/jquery.datetimepicker.css';
 import validate from "validate.js";
 import utils from 'core/utils';
 
-import './datetime-range.scss';
-import datetimeRangeHtml from './datetime-range.html';
+import './datetime-duedate.scss';
+import datetimeDuedateHtml from './datetime-duedate.html';
 
 const isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/,
       isoMessage = "^Date range must comply with ISO 8609 specifications";
 
 
-$.widget("nm.datetimerange", {
+$.widget("nm.datetimeduedate", {
 
   options:{
-    mode: 'between', // latest, before, between, range
+    mode: 'normal', // duedate
+//     option: 'between', // overdue, overdue_more, expire_yn, between, range
     unit: 'minutes', // minutes, hours, days, weeks, months
     constraints: {
-      lEarliest:{
+      odMore:{
         presence: false,
         numericality: {
           onlyInteger: true,
           greaterThan: 0
         }
       },
-      bfLatest:{
+      expireYn:{
         presence: false,
         numericality: {
           onlyInteger: true,
@@ -58,17 +59,18 @@ $.widget("nm.datetimerange", {
   _create: function() {
     var o = this.options, self = this;
 
-    this._addClass('nm-datetimerange', 'dropdown btn-group');
-    this.element.html(datetimeRangeHtml);
+    this._addClass('nm-datetimeduedate', 'dropdown btn-group');
+    this.element.html(datetimeDuedateHtml);
 
     this.$btEarliest = $('input[name="btEarliest"]', this.element);
+    this.$btEarliestIcon = $('.btEarliest-icon', this.$form);
     this.$btLatest = $('input[name="btLatest"]', this.element);
     this.$btLatestIcon = $('.btLatest-icon', this.$form);
-    this.$btEarliestIcon = $('.btEarliest-icon', this.$form);
-    this.$lEarliest = $('input[name="lEarliest"]', this.element);
-    this.$lUnit = $('select.l-unit', this.element);
-    this.$bfLatest = $('input[name="bfLatest"]', this.element);
-    this.$bfUnit = $('select.bf-unit', this.element);
+    this.$odMore = $('input[name="odMore"]', this.element);
+    this.$oUnit = $('select.o-unit', this.element);
+    this.$willYn = $('select.will-yn', this.element);
+    this.$expireYn = $('input[name="expireYn"]', this.element);
+    this.$eUnit = $('select.e-unit', this.element);
     this.$rEarliest = $('input[name="rEarliest"]', this.element);
     this.$rLatest = $('input[name="rLatest"]', this.element);
     this.$datetimeRangeBtn = this.element.children('button');
@@ -145,32 +147,35 @@ $.widget("nm.datetimerange", {
   },
 
   _initRadio: function() {
-    var o = this.options, $mode = $('input[type="radio"][value="'+o.mode+'"]', this.$form);
+    var o = this.options, $option = $('input[type="radio"][value="'+o.option+'"]', this.$form);
     $('.custom-radio', this.$form).each(function(index){
       $(this).children('input').attr("id", o.name+index);
       $(this).children('label').attr("for", o.name+index);
-    })
+    });
     this._on({'change input[type="radio"]': this._onRadioChanged});
-    $mode.prop('checked', true);
-    $mode.closest('.form-row').find('input[type!="radio"], select').prop('disabled', false);
+    $option.prop('checked', true);
+    $option.closest('.form-row').find('input[type!="radio"], select').prop('disabled', false);
     $(':not(:checked)[type="radio"]', this.$form).closest('.form-row').css('color','gray');
 
     this.$form.on('click', '.form-row>.col-auto', function(e){
       $(this).closest('.form-row').find('input[type="radio"]').prop('checked', true).trigger('change', e.target);
     });
 
-    switch(o.mode){
-      case 'latest':
-        if(o.earliest){
-          this.$lEarliest.val(o.earliest);
-        }
-        this.$lUnit.val(o.unit);
+    switch(o.option){
+      case 'overdue':
         break;
-      case 'before':
-        if(o.latest){
-          this.$bfLatest.val(o.latest);
+      case 'overdue_more':
+        this.$odMore.val(o.latest);
+        this.$oUnit.val(o.unit);
+        break;
+      case 'expire_yn':
+        this.$willYn.val(o.willYn);
+        if(o.willYn == 'yes'){
+          this.$expireYn.val(o.latest);
+        } else {
+          this.$expireYn.val(o.earliest);
         }
-        this.$bfUnit.val(o.unit);
+        this.$eUnit.val(o.unit);
         break;
       case 'between':
         if(o.earliest) this.$btEarliest.val(moment(o.earliest).format('YYYY-MM-DD HH:mm:ss'));
@@ -181,7 +186,6 @@ $.widget("nm.datetimerange", {
         if(o.latest) this.$rLatest.val(o.latest);
         break;
       default:
-        console.error(o.mode);
     }
   },
 
@@ -201,7 +205,7 @@ $.widget("nm.datetimerange", {
   _onRadioChanged: function(e, orginal) {
     var o = this.options, $target = $(e.target), $targetParent = $target.closest('.form-row');
     
-    if($target.val() == o.mode) return;
+    if($target.val() == o.option) return;
 
     $(':not(:checked)[type="radio"]', this.$form).closest('.form-row').css('color','gray')
       .find('input[type!="radio"], select').prop('disabled', true);
@@ -215,22 +219,27 @@ $.widget("nm.datetimerange", {
     }
 
     utils.clearErrors(this.$form);
-    this.option({ mode: $target.val(), earliest: null, latest:null, unit: null});
+    this.option({ option: $target.val(), earliest: null, latest:null, unit: null});
   },
 
   _refreshButton: function(){
     var o = this.options, label = o.title+':all';
-    switch(o.mode){
-      case 'latest':
-        if(o.earliest){
-          label = o.title + " within the last " + o.earliest + " " + o.unit;
-        }
-      break;
-      case 'before':
+    switch(o.option){
+      case 'overdue':
+        label = o.title + " has expired.";
+        break;
+      case 'overdue_more':
         if(o.latest){
-          label = o.title + " more than " + o.latest + " " + o.unit + " ago";
+          label = o.title + " overdue for more than " + o.latest + " " + o.unit;
         }
-      break;
+        break;
+      case 'expire_yn':
+        if(o.willYn == 'yes' && o.latest){
+          label = o.title + " will expire in " + o.latest + " " + o.unit;
+        } else if(o.willYn == 'no' && o.earliest){
+          label = o.title + " will no expire in " + o.earliest + " " + o.unit;
+        }
+        break;
       case 'between':
         if(o.earliest && o.latest){
           label = o.title+':'+moment(o.earliest).format('YYYY-MM-DD') + '~' + moment(o.latest).format('YYYY-MM-DD');
@@ -267,17 +276,24 @@ $.widget("nm.datetimerange", {
     if (errors) {
       utils.showErrors(this.$form, errors);
     } else {
-      var value = {mode: o.mode};
-      switch(o.mode){
-        case 'latest':{
-          var ev = this.$lEarliest.val(), unit = this.$lUnit.val();
-          o.earliest = value.earliest = ev;
+      var value = {option: o.option};
+      switch(o.option){
+        case 'overdue':
+          break;
+        case 'overdue_more':{
+          var ov = this.$odMore.val(), unit = this.$oUnit.val();
+          o.latest = value.latest = ov;
           o.unit = value.unit = unit;
-        }                
+        }
         break;
-        case 'before':{
-          var lv = this.$bfLatest.val(), unit = this.$bfUnit.val();
-          o.latest = value.latest = lv;
+        case 'expire_yn':{
+          var wyn = this.$willYn.val(), ev = this.$expireYn.val(), unit = this.$eUnit.val();
+          o.willYn = value.willYn = wyn;
+          if(o.willYn == 'yes'){
+            o.latest = value.latest = ev
+          } else {
+            o.earliest = value.earliest = ev;
+          }          
           o.unit = value.unit = unit;
         }
         break;
@@ -295,7 +311,6 @@ $.widget("nm.datetimerange", {
         }
         break;
         default:
-          console.error(o.mode);
       }
 
       this._refreshButton();
@@ -312,12 +327,15 @@ $.widget("nm.datetimerange", {
   },
 
   _onReset: function(ev){
-    this.$lEarliest.val('');
-    this.$bfLatest.val('');
+    this.$odMore.val('');
+    this.$expireYn.val('');
     this.$btEarliest.val('');
     this.$btLatest.val('');
     this.$rEarliest.val('');
     this.$rLatest.val('');
+    delete this.options.option;
+    this.$form.find('input[type="radio"]:checked').prop('checked', false)
+        .closest('.form-row').css('color','gray').find('input[type!="radio"], select').prop('disabled', true);
     utils.clearErrors(this.$form);
     this._doSubmit(true);
   },

@@ -1,0 +1,58 @@
+.nm-datetimeduedate {
+  .dropdown-menu{
+    form {
+      width: 518px;
+      .form-row{
+        .invalid-feedback{
+          p {
+            margin-bottom: -8px;
+          }
+        }        
+        .input-group {
+          width: auto;
+
+          &.bt{
+            input[name="btEarliest"]{
+              width: 150px;
+              &.is-invalid{
+                width: 82px;                
+              }
+            }
+            input[name="btLatest"]{
+              width: 150px;
+              &.is-invalid{
+                width: 82px;                
+              }
+            }
+            .invalid-feedback{
+              p {
+                max-width: 194px;
+                margin-right: -126px;
+                margin-bottom: -10px;
+              }
+            }
+          }
+          &.before{
+            .invalid-feedback{
+              p {
+                max-width: 350px;
+                margin-right: -88px;
+                margin-bottom: -10px;
+              }
+            }
+          }                    
+        }
+      }
+    }
+  }
+
+  .messages{
+    p {
+      margin-bottom: 0px;
+    }
+  }
+
+  .btn-group{
+    margin-bottom: 0px;
+  }
+}
