@@ -58,13 +58,14 @@ $.widget("nm.login", {
     this._getverifyCode();
 
 
-    if (this.options.timeoutLogin) {
+    if (this.options.timeoutLogin) {  //超时登录
       this.element.find('.content').removeClass('bg-img')
         .find('.copy').remove().end()
         .find('.model-1 .forget').remove().end()
         .find('.help').addClass('mar-bottom').next().remove();
-      this.element.find('.model-0').show().next().hide();
-    } else {
+      this.element.find('.model-0').show().siblings('.model').hide();
+    } else {  //正常登录
+      this.element.find('.model-0').remove().next().show();
       //切换到注册
       this._on(this.$signupBtn, {
         'click': function () {
