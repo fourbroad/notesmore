@@ -1,17 +1,27 @@
 import validate from "validate.js";
 
 var client = require('../../lib/client')();
+const jwtDecode = require('jwt-decode');
 
 import loginHtml from './login.html';
 import './login.scss';
 
 $.widget("nm.login", {
   options: {
-    maxSMSCount: 3,       //获取最大验证码次数
-    waitSMSTime: 10,      //每次获取验证码后等待时长
-    hour: 1,              //短信次数用完后等待的小时数
+    maxSMSCount: 5,       //获取最大验证码次数
+    waitSMSTime: 60,      //每次获取验证码后等待时长
+    hour: 24,              //短信次数用完后等待的小时数
     timeoutLogin: false,  //超时登录
     constraints: {
+      'model-0': {
+        password: {
+          presence: { message: '请输入登录密码' },
+          // format: {
+          //   pattern: /.{8,}/,
+          //   message: "密码错误"
+          // }
+        }
+      },
       'model-1': {
         username: {
           presence: { message: '请输入手机号码或邮箱地址' },
@@ -58,12 +68,19 @@ $.widget("nm.login", {
     this._getverifyCode();
 
 
-    if (this.options.timeoutLogin) {  //超时登录
-      this.element.find('.content').removeClass('bg-img')
-        .find('.copy').remove().end()
+    if (this.options.timeoutLogin) {//超时登录
+      this.element.find('.content').removeClass('bg-img').find('.body').removeClass('login-width')
         .find('.model-1 .forget').remove().end()
         .find('.help').addClass('mar-bottom').next().remove();
-      this.element.find('.model-0').show().siblings('.model').hide();
+      this.element.find('.copy').remove();
+
+      let user = jwtDecode(client.token);
+      this.element.find('.model-0').show()
+        .find('.username').val(user.userId).end()
+        .siblings('.model').hide();
+
+      this.element.find('.nickname').text($('.workbench .nickname').text().trim());
+      this.element.find('.photo img').attr('src',$('.workbench .avatar').attr('src'));
     } else {  //正常登录
       this.element.find('.model-0').remove().next().show();
       //切换到注册
@@ -87,13 +104,24 @@ $.widget("nm.login", {
         let $target = $(e.currentTarget)
           , error = this._verifyData($target) || {};
         this._showError($target, error[$target.attr('name')]);
+      },
+      'keyup':function(e){
+        if (e.keyCode == 13) {
+          this._submit(e);
+        }
       }
     });
 
     //切换登录方式
     this._on(this.element.find('.toggle'), {
       'click': function (e) {
-        $(e.currentTarget).parents('.model').hide().siblings('.model').show();
+        let $model = $(e.currentTarget).parents('.model');
+        if ($model.hasClass('model-0')) {
+          $model.parent().addClass('login-width').find('.model-1').show();
+          $model.remove();
+        } else {
+          $model.hide().siblings('.model').show();
+        }
       }
     });
 
@@ -102,7 +130,7 @@ $.widget("nm.login", {
   },
 
   _destroy() {
-    this.element.removeClass("nm-login");
+    this.element.removeClass("nm-login").html('');
   },
 
   /**
@@ -134,9 +162,14 @@ $.widget("nm.login", {
         $model.find('.verify-code .error,.password .error').addClass('show').text(err.message);
         return false;
       }
+      if (self.options.timeoutLogin) {
+        self.destroy();
+        $('.nm-workbench .workbench').removeClass('bg-filter');
+        $(':nm-workbench').data('nmWorkbench')._setInterval();
+        return false;
+      }
       runtime.option({ uriAnchor: { col: '.pages', doc: '.workbench' }, override: true });
     });
-
   },
 
   /**
@@ -161,7 +194,7 @@ $.widget("nm.login", {
           return false;
         }
 
-        //恢复24小时候的数据
+        //恢复24小时后的数据
         $.each(countObj, function (k, v) {
           if (v.time + hour * 60 * 60 * 1000 < new Date().getTime()) {
             v.count = 0;

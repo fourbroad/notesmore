@@ -7,9 +7,9 @@ import './forgit-password.scss';
 
 $.widget("nm.signup", {
   options: {
-    maxSMSCount: 3,//获取最大验证码次数
-    waitSMSTime: 10,//每次获取验证码后等待时长
-    hour: 1,//短信次数用完后等待的小时数
+    maxSMSCount: 5,//获取最大验证码次数
+    waitSMSTime: 60,//每次获取验证码后等待时长
+    hour: 24,//短信次数用完后等待的小时数
     constraints: {
       'model-1': {
         username: {
@@ -81,6 +81,11 @@ $.widget("nm.signup", {
           } else {
             this._showError($target, ['']);
           }
+        }
+      },
+      'keyup':function(e){
+        if (e.keyCode == 13) {
+          this._submit(e);
         }
       }
     });
@@ -185,7 +190,7 @@ $.widget("nm.signup", {
           , countObj = JSON.parse(localStorage.getItem('getSMSCount') || '{}')
           , count, temp;
 
-        //恢复24小时候的数据
+        //恢复24小时后的数据
         $.each(countObj, function (k, v) {
           if (v.time + hour * 60 * 60 * 1000 < new Date().getTime()) {
             v.count = 0;
