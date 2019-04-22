@@ -154,6 +154,23 @@ $.widget('nm.workbench', {
     }
 
     this._refreshFavorites();
+    this._setInterval();
+  },
+
+  _destroy() {
+    clearInterval(this.interval);
+    this.element.removeClass("nm-workbench");
+  },
+
+  _setInterval(){
+    let _this = this;
+    this.interval = setInterval(function() {
+      if((new Date().getTime()/1000) > jwtDecode(client.token).exp){
+        clearInterval(_this.interval);
+        _this.element.find('.workbench').addClass('bg-filter');
+        _this.element.find('.timeout-login').login({timeoutLogin:true});
+      }
+    }, 1000 * 2 * 60);
   },
 
   _armFavoriteItem: function(doc){

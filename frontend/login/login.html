@@ -1,51 +1,76 @@
-<div class="peers ai-s fxw-nw">
-  <div class="logo d-n@sm- peer peer-greed pos-r bgr-n bgpX-c bgpY-c bgsz-cv" style='background-image: url("login/images/bg.jpg"); height: calc(100vh - 166px);'>
-    <div class="pos-a centerXY">
-      <div class="bgc-white bdrs-50p pos-r" style='width: 120px; height: 120px;'>
-        <img class="pos-a centerXY" src="./images/logo.png" alt="">
+<div class="content bg-img">
+  <div class="body login-width">
+    <div class="model model-0" data-model="model-0">
+      <div class="photo">
+        <img src="" alt="">
+        <p class="nickname">湘湖小子</p>
       </div>
-    </div>
-  </div>
-  <div class="col-12 col-md-4 peer pX-40 pY-80 bgc-white scrollable pos-r" style='min-width: 320px;'>
-    <h4 class="fw-300 c-grey-900 mB-40">Login</h4>
-    <div class="login">
-      <div class="alert alert-warning alert-dismissible d-none fade show" role="alert">
-        <button type="button" class="close" aria-label="Close">&times;</button>
-        <strong>Warning: </strong>
-        <p class="alert-content" style="display: inline-block;"></p>
-      </div>
-      <form class="px-3">
-        <div class="form-group">
-          <label class="control-label　text-normal text-dark" for="username">Username</label>
-          <input class="form-control" type="text" placeholder="Username" name="username">
-          <div class="messages"></div>
-        </div>
-        <div class="form-group">
-          <label class="control-label　text-normal text-dark" for="password">Password</label>
-          <input class="form-control" type="password" placeholder="Password" name="password">
-          <div class="messages"></div>
-        </div>
-        <div class="form-group">
-          <div class="peers ai-c jc-sb fxw-nw">
-            <div class="peer">
-              <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-                <input type="checkbox" id="inputCall1" name="inputCheckboxesCall" class="peer">
-                <label for="inputCall1" class=" peers peer-greed js-sb ai-c">
-                  <span class="peer peer-greed">Remember Me</span>
-                </label>
-              </div>
-            </div>
-            <div class="peer">
-              <button type="submit" id="login" role="button" class="btn btn-primary btn-default" data-loading-text="<i class='fa fa-spinner fa-spin '></i> Login...">
-                <i class='fa fa-vcard'/>Login            
-              </button>
-            </div>
+      <div class="right">
+        <div class="row password">
+          <div class="input-box">
+            <input class="username" type="hidden" name="username">
+            <input type="password" name="password" placeholder="登录已失效，请输入密码">
           </div>
+          <p class="error">密码错误</p>
         </div>
-      </form>
-      <div class="dropdown-divider"></div>
-      <span class="signup dropdown-item">New around here? Sign up</span>
-      <span class="dropdown-item">Forgot password?</span>
+        <div class="row submit">
+          <button type="button" class="btn btn-block submit-btn">登录</button>
+        </div>
+        <div class="row help">
+          <p class="toggle">其他身份登录</p>
+        </div>
+      </div>
+    </div>
+    <div class="model model-1" data-model="model-1">
+      <div class="logo"></div>
+      <div class="row user-name">
+        <div class="input-box">
+          <input class="" type="text" name="username" placeholder="请输入手机号码或邮箱地址">
+        </div>
+        <p class="error">请输入正确的手机号码或邮箱地址</p>
+      </div>
+      <div class="row password">
+        <div class="input-box">
+          <input type="password" name="password" placeholder="请输入密码">
+        </div>
+        <p class="error">密码错误</p>
+      </div>
+      <div class="row submit">
+        <button type="button" class="btn btn-block submit-btn">登录</button>
+      </div>
+      <div class="row help">
+        <p class="toggle">手机验证码登录</p>
+        <p class="forget">忘记密码？</p>
+      </div>
+      <div class="footer">
+        <p>没有账号？<a href="javascript:;">注册</a></p>
+      </div>
+    </div>
+    <div class="model model-2" data-model="model-2">
+      <div class="logo"></div>
+      <div class="row user-name">
+        <div class="input-box">
+          <input class="phones" type="text" name="phones" placeholder="请输入手机号码">
+        </div>
+        <p class="error">请输入正确的手机号码</p>
+      </div>
+      <div class="row verify-code">
+        <div class="input-box">
+          <input type="text" name="code" placeholder="请输入6位短信验证码">
+          <span>获取短信验证码</span>
+        </div>
+        <p class="error">短信验证码错误</p>
+      </div>
+      <div class="row submit">
+        <button type="button" class="btn btn-block submit-btn">登录</button>
+      </div>
+      <div class="row help">
+        <p class="toggle">密码登录（手机号或邮箱）</p>
+      </div>
+      <div class="footer">
+        <p>没有账号？<a href="javascript:;">注册</a></p>
+      </div>
     </div>
   </div>
+  <p class="copy">&copy;2011-2019 深圳市Notesmore技术有限公司 版权所有 | 粤ICP备14027470号-1</p>
 </div>
