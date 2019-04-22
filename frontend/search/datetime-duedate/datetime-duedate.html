@@ -1,0 +1,140 @@
+<button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+<div class="dropdown-menu">
+  <form class="px-3">
+    <div class="form-row mb-3">
+      <div class="col-auto pt-1 pr-0">
+        <div class="custom-control custom-radio">
+          <input type="radio" class="custom-control-input" name="radio-stacked" value="overdue">
+          <label class="custom-control-label"></label>
+        </div>
+      </div>
+      <div class="col-auto pt-1 pl-0">
+        <span>Overdue</span>
+      </div>
+    </div>
+    <div class="form-row mb-3">
+      <div class="col-auto pt-1 pr-0">
+        <div class="custom-control custom-radio">
+          <input type="radio" class="custom-control-input" name="radio-stacked" value="overdue_more">
+          <label class="custom-control-label"></label>
+        </div>
+      </div>
+      <div class="col-auto pt-1 pl-0">
+        <span>Overdue for more than</span>
+      </div>
+      <div class="input-group input-group-sm before col-auto px-0">
+        <input type="text" class="form-control" name="odMore" style="max-width:50px" disabled>
+        <div class="input-group-append">
+          <select class="o-unit custom-select custom-select-sm border-left-0 rounded-right" disabled>
+            <option value="minutes" selected>minutes</option>
+            <option value="hours">hours</option>
+            <option value="days">days</option>
+            <option value="weeks">weeks</option>
+            <option value="months">months</option>
+          </select>
+        </div>
+        <div class="invalid-feedback"></div>
+      </div>
+    </div>
+    <div class="form-row mb-3">
+      <div class="col-auto pt-1 pr-0">
+        <div class="custom-control custom-radio">
+          <input type="radio" class="custom-control-input" name="radio-stacked" value="expire_yn">
+          <label class="custom-control-label"></label>
+        </div>
+      </div>
+      <div class="col-auto">
+        <select class="will-yn custom-select custom-select-sm" disabled>
+          <option value="yes" selected>Will</option>
+          <option value="no">Will not</option>
+        </select>
+      </div>
+      <div class="col-auto pt-1 pl-0">
+        <span>expire in</span>
+      </div>
+      <div class="input-group input-group-sm before col-auto px-0">
+        <input type="text" class="form-control" name="expireYn" style="max-width:50px" disabled>
+        <div class="input-group-append">
+          <select class="e-unit custom-select custom-select-sm border-left-0 rounded-right" disabled>
+            <option value="minutes" selected>minutes</option>
+            <option value="hours">hours</option>
+            <option value="days">days</option>
+            <option value="weeks">weeks</option>
+            <option value="months">months</option>
+          </select>
+        </div>
+        <div class="invalid-feedback"></div>
+      </div>
+    </div>
+    <div class="form-row mb-3">
+      <div class="col-auto pt-1 pr-0">
+        <div class="custom-control custom-radio">
+          <input type="radio" class="custom-control-input" name="radio-stacked" value="between">
+          <label class="custom-control-label"></label>
+        </div>
+      </div>
+      <div class="col-auto pt-1 pl-0">
+        <span>Between</span>
+      </div>
+      <div class="input-group input-group-sm bt col-auto px-0">
+        <input type="text" class="form-control" name="btEarliest" disabled>
+        <div class="input-group-append">
+          <span class="input-group-text btEarliest-icon">
+            <i class="fa fa-calendar"></i>
+          </span>
+        </div>
+        <div class="invalid-feedback"></div>
+      </div>
+      <div class="col-auto pt-1">
+        <span>and</span>
+      </div>
+      <div class="input-group input-group-sm bt col-auto">
+        <input type="text" class="form-control" name="btLatest" disabled>
+        <div class="input-group-append">
+          <span class="input-group-text btLatest-icon">
+            <i class="fa fa-calendar"></i>
+          </span>
+        </div>
+        <div class="invalid-feedback"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-auto pt-1 pr-0">
+        <div class="custom-control custom-radio">
+          <input type="radio" class="custom-control-input" name="radio-stacked" value="range">
+          <label class="custom-control-label"></label>
+        </div>
+      </div>
+      <div class="col-auto pt-1 pl-0">
+        <span>In range</span>
+      </div>
+      <div class="col-auto px-0">
+        <input type="text" class="form-control form-control-sm" name="rEarliest" placeholder="- P1Y2M3DT4H5M6S" style="max-width: 132px;" disabled>
+        <div class="invalid-feedback" style="max-width: 132px;"></div>
+      </div>
+      <div class="col-auto pt-1">
+        <span>to</span>
+      </div>
+      <div class="col-auto px-0">
+        <input type="text" class="form-control form-control-sm" name="rLatest" placeholder="P1Y2M3DT4H5M6S"  style="max-width: 132px;" disabled>
+        <div class="invalid-feedback" style="max-width: 132px;"></div>
+      </div>
+    </div>
+    <div class="form-row mb-3">
+      <small class="col-auto form-text text-muted ml-4"><a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>: P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond</small>
+    </div>    
+    <div class="form-group btn-group mb-1">
+      <div class="peers ai-c jc-sb fxw-nw">
+        <div class="peer">
+          <button id="update" type="submit" class="btn btn-primary btn-sm" role="button">Update</button>
+        </div>
+        <div class="peer">
+          <a href="javascript:void(0)" id="reset" class="btn btn-secondary btn-sm" role="button">Reset</a>
+        </div>
+        <div class="peer">
+          <a href="javascript:void(0)" id="cancel" class="btn btn-secondary btn-sm" role="button">Cancel</a>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

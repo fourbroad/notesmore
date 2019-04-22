@@ -19,6 +19,9 @@ $.widget("nm.fulltextsearch", {
       this._addClass(null, o.class);
     }
 
+    this.$input.val(o.keyword);
+    this._refreshSearchIcon();
+
     this._on(this.$input, {
       keyup: this._onInputChange,
       change: this._onInputChange
@@ -36,13 +39,17 @@ $.widget("nm.fulltextsearch", {
   },
 
   _onInputChange: function(event){
-    var filter = this.$input.val();
+    this._refreshSearchIcon();
+    this._trigger('valueChanged', event, {keyword: this.getKeyword()});
+  },
+
+  _refreshSearchIcon: function(){
+    var filter = this.$input.val().trim();
     if(filter != ''){
       this._setCancelIcon();      
     } else {
       this._setSearchIcon();
     }
-    this._trigger('valueChanged', event, {keyword: this.getKeyword()});
   },
 
   _setSearchIcon: function(){

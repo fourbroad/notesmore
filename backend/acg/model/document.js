@@ -95,6 +95,7 @@ _.assign(Document, {
   find: function(domainId, collectionId, query, options) {
     query.index = documentAllAlias(domainId, collectionId || '*');
     query.type = DOC_TYPE;
+    query.version = true;
   	return elasticsearch.search(query).then(function(data){
   	  var result = {
   	    total:data.hits.total,
@@ -102,7 +103,8 @@ _.assign(Document, {
   	    documents: _.reduce(data.hits.hits, function(r, v, k){
   	      var doc = _.cloneDeep(v._source);
   	      doc.id = doc.id || v._id;
-          _.set(doc, '_meta.index', v._index);  	      
+          _.set(doc, '_meta.index', v._index);
+          _.set(doc, '_meta.version', v._version);
   	      r.push(doc);
   	      return r;  	        	      
   	    },[])

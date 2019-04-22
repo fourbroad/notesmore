@@ -10,7 +10,6 @@ const $ = require('jquery')
   , utils = require('core/utils')  
   , { checkPermission } = require('core/utils');
 
-require('select/select');
 require('./form.scss');
 require('bootstrap');
 require('jquery-ui/ui/widget');

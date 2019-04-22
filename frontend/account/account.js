@@ -98,7 +98,7 @@ $.widget("nm.account", {
       if(user.avatar){
         self.$avatar.attr('src', user.avatar);
       }
-      self.$nickname.text(user.title || user.id);        
+      self.$nickname.text(user.title || user.id);
     });
   },
 

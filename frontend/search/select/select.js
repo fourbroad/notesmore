@@ -40,8 +40,7 @@ $.widget("nm.select", {
     this._refreshButton();
 
     this._on(this.$input, {
-      keyup: this._onSearchInputChange,
-      change: this._onSearchInputChange
+      keyup: this._onSearchInputChange
     });
 
     this._on(this.$inputIcon, {
@@ -73,20 +72,20 @@ $.widget("nm.select", {
       'click li': function(e){
         var $target = $(e.target), $i = $('i.fa-li', $target), item = $target.data('item');
         if(o.mode == 'multi'){
-          if($i.hasClass('fa-check-square')){
-            $i.removeClass('fa-check-square').addClass('fa-square');
+          if($i.hasClass('fa-check-square-o')){
+            $i.removeClass('fa-check-square-o').addClass('fa-square-o');
             o.selectedItems = _.differenceWith(o.selectedItems, [item], _.isEqual);
-          }else if($i.hasClass('fa-square')){
-            $i.removeClass('fa-square').addClass('fa-check-square');
+          }else if($i.hasClass('fa-square-o')){
+            $i.removeClass('fa-square-o').addClass('fa-check-square-o');
             o.selectedItems = _.unionWith(o.selectedItems, [item], _.isEqual);
           }
         } else {
-          if($i.hasClass('fa-check-circle')){
-            $i.removeClass('fa-check-circle').addClass('fa-circle');
+          if($i.hasClass('fa-check-circle-o')){
+            $i.removeClass('fa-check-circle-o').addClass('fa-circle-o');
             o.selectedItems = [];
-          }else if($i.hasClass('fa-circle')){
-            $('li>.fa-li.fa-check-circle', this.$itemContainer).removeClass('fa-check-circle').addClass('fa-circle');
-            $i.removeClass('fa-circle').addClass('fa-check-circle');
+          }else if($i.hasClass('fa-circle-o')){
+            $('li>.fa-li.fa-check-circle-o', this.$itemContainer).removeClass('fa-check-circle-o').addClass('fa-circle-o');
+            $i.removeClass('fa-circle-o').addClass('fa-check-circle-o');
             o.selectedItems = [item];
           }
         }
@@ -112,9 +111,9 @@ $.widget("nm.select", {
     var o = this.options;
     if(o.selectedItems.length > 0){
       if(o.mode === 'multi'){
-        $('li>.fa-li.fa-check-square', this.$itemContainer).removeClass('fa-check-square').addClass('fa-square');
+        $('li>.fa-li.fa-check-square-o', this.$itemContainer).removeClass('fa-check-square-o').addClass('fa-square-o');
       }else{
-        $('li>.fa-li.fa-check-circle', this.$itemContainer).removeClass('fa-check-circle').addClass('fa-circle');
+        $('li>.fa-li.fa-check-circle-o', this.$itemContainer).removeClass('fa-check-circle-o').addClass('fa-circle-o');
       }
       o.selectedItems = [];
       this._refresh();
@@ -169,8 +168,9 @@ $.widget("nm.select", {
 
   _armItem: function(label, value, checked){
     var o = this.options, itemHtml, 
-        icon = o.mode == 'multi' ? 'fa-square' : 'fa-circle',
-        iconCheck = o.mode == 'multi' ? 'fa-check-square' : 'fa-check-circle';
+        icon = o.mode == 'multi' ? 'fa-square-o' : 'fa-circle-o',
+        iconCheck = o.mode == 'multi' ? 'fa-check-square-o' : 'fa-check-circle-o';
+        
     if(checked){
       itemHtml = '<li><i class="fa-li fa ' + iconCheck + '"></i>' + label + '</li>';
     }else{
