@@ -32,56 +32,50 @@ _.assign(User, {
   verify: function(token) {
     return new Promise((resolve, reject) => {
       jwt.verify(token, secret, function(err, decoded){
-        var userId;
+        if (err) return reject(createError(403, err.name));
 
-        if (err) return reject(err);
-
-        userId = decoded.userId
-      
-        redis.get(SESSION_PREFIX + userId,function(err, data){
-          if(err || token != (data && data.token))
-            reject(createError(406, 'Token is invalid!',{name:'invalidToken', code:406}));
+        var userId = decoded.userId
+        if(userId == 'anonymous'){
           return resolve(userId);
-        });
+        } else {
+          redis.get(SESSION_PREFIX + userId,function(err, data){
+            if(err || token != (data && data.token)){
+              console.log('invalidToken');
+              return reject(createError(406, "invalidToken"));
+            }
+              
+            return resolve(userId);
+          });
+        }
       });  
     });
   },
 
-  login: function(userId, password) {
-    return new Promise((resolve, reject) => {
-      function createToken(userId){
-        var newToken = jwt.sign({ userId: userId}, secret, {expiresIn: 60*60*1000+"ms"});
-        redis.set(SESSION_PREFIX + userId, {token: newToken});
-        return resolve(newToken);
-      }
-
-      if(userId == 'anonymous'){
-        redis.get(SESSION_PREFIX + userId, function(err, data){
-          if(err) return reject(err);
-          if(data && data.token){
-            jwt.verify(data.token, secret, function(err, decoded){
-              if(err){
-                return createToken(userId);
-              }else{
-                return resolve(data.token);
-              }
-            })
-          }else{
-            return createToken(userId);
-          }
-        })          
-      } else {
-        return User.get(userId).then( user => {
-          var md5 = crypto.createHash('md5');
-          if (md5.update(password + secret).digest('hex') == user.password) {
-            return createToken(userId);
-          } else {
-            return reject(createError(406, "Username or password is incorrect!"));
-          }
-        });
-      }
-     
+  updateToken: function(userId){
+    return User.get(userId).then( user => {
+      var expiresIn = _.at(user, 'session.expiresIn')[0] || 60*60*1000+"ms",
+          newToken = jwt.sign({ userId: userId}, secret, {expiresIn: expiresIn});
+      redis.set(SESSION_PREFIX + userId, {token: newToken});
+      return newToken;
     });
+  },
+
+  login: function(userId, password) {
+    if(userId == 'anonymous'){
+      return Promise.resolve(jwt.sign({ userId: userId}, secret, {expiresIn: 60*60*1000+"ms"}));
+    } else {
+      return User.get(userId).then( user => {
+        var md5 = crypto.createHash('md5');
+        if (md5.update(password + secret).digest('hex') == user.password) {
+          var expiresIn = _.at(user, 'session.expiresIn')[0] || 60*60*1000+"ms",
+              newToken = jwt.sign({userId: userId}, secret, {expiresIn: expiresIn});
+          redis.set(SESSION_PREFIX + userId, {token: newToken});
+          return Promise.resolve(newToken);            
+        } else {
+          return Promise.reject(createError(406, "usernamePasswordError"));
+        }
+      });
+    }
   },
 
   logout: function(userId) {
@@ -92,7 +86,7 @@ _.assign(User, {
   create: function(authorId, userId, userData, options) {
     var md5 = crypto.createHash('md5');
     if (!userId || !userData.password) {
-      return Promise.reject(createError(400, "Username or password is empty!"));
+      return Promise.reject(createError(400, "usernamePasswordEmpty"));
     }
 
     userData.password = md5.update(userData.password + secret).digest('hex');

@@ -103,6 +103,20 @@ function checkAcl3(visitorId, clsObj, domainId, collectionId, objId, method, dat
 
 initSocket = function(socket, visitorId) {
 
+  socket.use((packet, next) => {
+    const token = socket.handshake.query.token;
+    if(token){
+      User.verify(token).then( visitorId  => {
+        next();
+      }).catch((e) => {
+        next(e);
+        setTimeout(()=>{socket.disconnect();});
+      });
+    } else {
+      next();
+    }
+  });
+
   socket.on('login', function(userId, password, callback){
     User.login(userId, password).then(result => callback(null, result)).catch(err => callback(err));
   });
@@ -916,9 +930,21 @@ initSocket = function(socket, visitorId) {
     });
   });
 
+
+  socket.on('updateToken', function(callback){
+    User.updateToken(visitorId).then(token => {
+      socket.handshake.query.token = token;
+      callback(null, token);
+    }).catch(err => {
+      console.error(err);
+      callback(err);
+    });
+  });
+
   socket.on('disconnect', function(){
     console.log('%s disconnected.', visitorId);
   });
+
 };
 
 module.exports = {
@@ -928,9 +954,9 @@ module.exports = {
       if (token) {
         User.verify(token).then( visitorId  => {
           initSocket(socket, visitorId);
-        }).catch((err)=>{
-          socket.emit(err.name, err);
-          setTimeout(()=>{ socket.disconnect(); }, 5000);
+        }).catch(err => {
+          socket.emit(err.message);
+          setTimeout(()=>{ socket.disconnect();});
         });
       } else {
         initSocket(socket);

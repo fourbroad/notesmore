@@ -59,7 +59,7 @@ const DOMAINS = '.domains'
 }, {
   title: "Title",
   name: "title",
-  type: "keywords"
+  type: "containsText"
 }, {
   title: "Author",
   name: "_meta.author",

@@ -26,6 +26,9 @@ window.EVENT = EVENT;
 //   window.dispatchEvent(window.EVENT);
 // });
 
+window.Cookies = Cookies;
+window.jwtDecode = jwtDecode;
+
 $.widget('nm.runtime',{
   options:{
     currentDomain:document.domain,
@@ -33,19 +36,22 @@ $.widget('nm.runtime',{
   },
 
   _create: function(){
-    var o = this.options, self = this, token = Cookies.get('token') || localStorage.getItem('token');
+    var o = this.options, self = this, token = this.getToken();
 
-    this.connectedListener = $.proxy(this._gotoConnected, this);
-    this.loggedInListener = $.proxy(this._gotoConnected, this);
-    this.loggedOutListener = $.proxy(this._gotoLogin, this);
-    this.TokenExpiredErrorListener = $.proxy(this._gotoLogin, this);
-    this.invalidTokenListener = $.proxy(this._gotoLogin,this);
+    window.runtime = this;
 
-    client.on("connected", this.connectedListener);
-    client.on("loggedIn", this.loggedInListener);
-    client.on("loggedOut", this.loggedOutListener);
-    client.on("TokenExpiredError", this.TokenExpiredErrorListener);
-    client.on("invalidToken", this.invalidTokenListener);
+    this._connectedListener = $.proxy(this._gotoConnected, this);
+    this._loggedInListener = $.proxy(this._gotoConnected, this);
+    this._loggedOutListener = $.proxy(this._gotoLogin, this);
+    this._invalidTokenListener = $.proxy(this._gotoLogin,this);
+    this._tokenExpiredListener = $.proxy(this._gotoLogin,this);
+
+    client.on("connected", this._connectedListener);
+    client.on("loggedIn", this._loggedInListener);
+    client.on("loggedOut", this._loggedOutListener);
+    client.on("tokenExpired", this._tokenExpiredListener);
+    client.on("invalidToken", this._invalidTokenListener);
+    client.on('updateToken', this.setToken);
 
     this._on({
       "createdocument": function(event, meta){
@@ -86,10 +92,16 @@ $.widget('nm.runtime',{
     if(token){
       var decodedToken = jwtDecode(token);
       if((new Date().getTime()/1000) < decodedToken.exp){
-        client.connect(token, function(){});
+        client.connect(token, function(err, user){
+          if(err) return console.error(err);
+          $(window).trigger('hashchange');
+        });
       } else {
-        localStorage.removeItem('token');
-        client.login(function(){});
+        this.clearToken();
+        client.login(function(err, user){
+          if(err) return console.error(err);
+          $(window).trigger('hashchange');          
+        });
       }
     } else {
       client.login(function(){});
@@ -98,16 +110,11 @@ $.widget('nm.runtime',{
     window.runtime = this;
 
     this._on(window, {hashchange: this._onHashchange});
-    $(window).trigger('hashchange');
-  
   },
 
   _gotoConnected: function(user){
     var o = this.options, anchor = this._makeAnchorMap();
-    $.ajaxSetup({headers:{authorization: 'Bearer ' + client.token}});
-    Cookies.set('token', client.token);
-//     Cookies.remove('token');
-    localStorage.setItem('token', client.token);
+    this.setToken(client.token);
     this._setCurrentDomain(o.currentDomain);
     if(user.id == "anonymous"){
       if(anchor.col == '.pages' && anchor.doc == '.workbench'){
@@ -122,9 +129,25 @@ $.widget('nm.runtime',{
     }
   },
 
+  clearToken: function(){
+    localStorage.removeItem('token');
+    $.ajaxSetup({headers:{authorization: ''}});
+    Cookies.remove('token');
+  },
+
+  setToken: function(token){
+    $.ajaxSetup({headers:{authorization: 'Bearer ' + token}});
+    Cookies.set('token', token);
+    localStorage.setItem('token', token);
+  },
+
+  getToken: function(){
+    return localStorage.getItem('token') || Cookies.get('token');
+  },
+
   _gotoLogin: function(){
     var self = this;
-    localStorage.removeItem('token');
+    this.clearToken();
     client.login(function(){
       self.option({'uriAnchor': {col:'.pages', doc:'.login'}, override: true});
     });
@@ -258,10 +281,11 @@ $.widget('nm.runtime',{
   },
 
   _destroy: function(){
-    client.off("loggedIn", this.loggedInListener);
-    client.off("loggedOut", this.loggedOutListener);
-    client.off("TokenExpiredError", this.TokenExpiredErrorListener);
-    client.off("invalidToken", this.invalidTokenListener);
+    client.off("connected", this._connectedListener);
+    client.off("loggedIn", this._loggedInListener);
+    client.off("loggedOut", this._loggedOutListener);
+    client.off("tokenExpired", this._tokenExpiredListener);
+    client.off("invalidToken", this._invalidTokenListener);
   }
 
 });
