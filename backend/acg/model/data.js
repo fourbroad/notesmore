@@ -1,4 +1,34 @@
-const DEFAULT_COLUMNS = [{
+const DEFAULT_ACL = {
+  patch: {
+    roles: ["administrator"]
+  },
+  delete: {},
+  getMeta: {
+    roles: ["administrator"]
+  },
+  patchMeta: {
+    roles: ["administrator"]
+  },
+  clearAclSubject: {
+    roles: ["administrator"]
+  }
+}
+  , DEVELOPER_ACL = {
+  patch: {
+    roles: ["developer"]
+  },
+  delete: {},
+  getMeta: {
+    roles: ["developer"]
+  },
+  patchMeta: {
+    roles: ["developer"]
+  },
+  clearAclSubject: {
+    roles: ["developer"]
+  }
+}
+  , DEFAULT_COLUMNS = [{
   sortable: false
 }, {
   title: "Id",
@@ -136,7 +166,7 @@ const DEFAULT_COLUMNS = [{
   title: "Search Documents",
   _meta: {
     metaId: '.meta-view',
-    iconClass: "ti-search"    
+    iconClass: "ti-search"
   }
 }]
   , ACTIONS = [{
@@ -550,6 +580,12 @@ const DEFAULT_COLUMNS = [{
     iconClass: "ti-user"
   }
 }, {
+  id: "developer",
+  title: "Developer",
+  _meta: {
+    iconClass: "ti-user"
+  }
+}, {
   id: "anonymous",
   title: "Anonymous",
   _meta: {
@@ -574,6 +610,8 @@ const DEFAULT_COLUMNS = [{
 };
 
 module.exports = {
+  DEFAULT_ACL: DEFAULT_ACL,
+  DEVELOPER_ACL: DEVELOPER_ACL,
   DEFAULT_COLUMNS: DEFAULT_COLUMNS,
   DEFAULT_SEARCH_COLUMNS: DEFAULT_SEARCH_COLUMNS,
   COLLECTIONS: COLLECTIONS,

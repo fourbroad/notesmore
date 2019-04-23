@@ -15,7 +15,7 @@ const _ = require('lodash')
   , Role = require('./role')
   , User = require('./user')
   , Document = require('./document')
-  , {DEFAULT_COLUMNS, DEFAULT_SEARCH_COLUMNS, COLLECTIONS, ROOT_COLLECTIONS, VIEWS, ACTIONS, METAS, ROOT_METAS, PAGES, ROLES, ADMINISTRATOR, ANONYMOUS} = require('./data')
+  , {DEFAULT_ACL, DEVELOPER_ACL, DEFAULT_COLUMNS, DEFAULT_SEARCH_COLUMNS, COLLECTIONS, ROOT_COLLECTIONS, VIEWS, ACTIONS, METAS, ROOT_METAS, PAGES, ROLES, ADMINISTRATOR, ANONYMOUS} = require('./data')
   , {uniqueId, documentHotAlias, documentAllAlias, inherits, buildMeta, createEntity, getEntity} = require('./utils');
 
 const DOMAINS = '.domains'
@@ -28,7 +28,11 @@ function indexName(domainId, collectionId) {
 function createMeta(authorId, doc) {
   var _meta = doc._meta || {}
     , timestamp = new Date().getTime();
-  _meta.acl = _.merge(Document.DEFAULT_ACL, _.at(doc, '_meta.acl')[0]);
+  _meta.acl = _.merge(_.mergeWith(_.cloneDeep(DEFAULT_ACL), DEVELOPER_ACL,(objValue, srcValue)=>{
+    if (_.isArray(objValue)) {
+      return objValue.concat(srcValue);
+    }
+  }), _.at(doc, '_meta.acl')[0]);
   _meta = _.merge(_meta, {
     created: timestamp,
     updated: timestamp,

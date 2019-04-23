@@ -7,22 +7,7 @@ const _ = require('lodash')
   , { uniqueId, documentHotAlias, documentAllAlias, eventAllAlias, buildMeta, createEntity, getEntity} = require('./utils');
 
 const DOC_TYPE = 'snapshot'
-  , EVENT_TYPE = 'event'
-  , DEFAULT_ACL = {
-    patch: {
-      roles: ["administrator"]
-    },
-    delete: {},
-    getMeta: {
-      roles: ["administrator"]
-    },
-    patchMeta: {
-      roles: ["administrator"]
-    },
-    clearAclSubject: {
-      roles: ["administrator"]
-    }
-  };
+  , EVENT_TYPE = 'event';
 
 var elasticsearch, cache;
 
@@ -65,8 +50,6 @@ _.assign(Document, {
   TYPE: DOC_TYPE,
 
   EVENT_TYPE:EVENT_TYPE,
-
-  DEFAULT_ACL: DEFAULT_ACL,
 
   init: function(config) {
     elasticsearch = config.elasticSearch;
