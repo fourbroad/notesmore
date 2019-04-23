@@ -148,7 +148,7 @@ $.widget('nm.runtime',{
   _gotoLogin: function(){
     var self = this;
     this.clearToken();
-    client.login(function(){
+    client.login(function(err, result){
       self.option({'uriAnchor': {col:'.pages', doc:'.login'}, override: true});
     });
   },
