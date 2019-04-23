@@ -1,24 +1,23 @@
-import * as $ from 'jquery';
-import 'bootstrap';
-import _ from 'lodash';
-import moment from 'moment';
-
-import 'jquery-ui/ui/widget';
-import 'jquery-ui/ui/data';
-
-import PerfectScrollbar from 'perfect-scrollbar';
-import 'perfect-scrollbar/css/perfect-scrollbar.css';
-
-import * as jsonPatch from "fast-json-patch";
-
-import 'account/account';
-import Loader from 'core/loader';
-
 require('context/index.scss');
 require('./workbench.scss');
-import workbenchHtml from './workbench.html';
+require('perfect-scrollbar/css/perfect-scrollbar.css');
 
-const jwtDecode = require('jwt-decode');
+const
+  $ = require('jquery'),
+  _ = require('lodash'),
+  moment = require('moment'),
+  jwtDecode = require('jwt-decode'),
+  Loader = require('core/loader'),
+  jsonPatch = require("fast-json-patch"),
+  workbenchHtml = require('./workbench.html');
+
+import PerfectScrollbar from 'perfect-scrollbar';
+
+require('bootstrap');
+require('jquery-ui/ui/widget');
+require('jquery-ui/ui/data');
+require('account/account');
+require('notification/notification');
 
 $.widget('nm.workbench', {
   options: {
@@ -45,7 +44,7 @@ $.widget('nm.workbench', {
     this.$favoriteItems = $('.favorite-item-container', this.$favorites);
 
     this.$newDocumentBtn = $('li.new-document', this.$workbench);
-
+//     $('<li class="notifications dropdown"/>').prependTo($('.page-container .nav-right', this.$workbench)).notification();
     $('<li/>').appendTo($('.page-container .nav-right', this.$workbench)).account({client: client});
 
     this._armSidebar();
@@ -53,8 +52,7 @@ $.widget('nm.workbench', {
     this._on(this.$newDocumentBtn, {click: this._loadNewDialog});
     this._on(this.$workbench, {
       'click .search-toggle': function(e){
-        $('.search-box, .search-input', self.$workbench).toggleClass('active');
-        $('.search-input input', self.$workbench).focus();
+        self.option('anchor', {col:'.views', doc:'.searchDocuments'});
         e.preventDefault();
       },
       "createdocument": function(e, meta){

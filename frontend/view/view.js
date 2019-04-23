@@ -208,7 +208,6 @@ $.widget("nm.view", {
 
     this.$viewTable = $('<table class="table view-table table-striped table-hover" cellspacing="0" width="100%"></table>').insertAfter(this.$searchContainer);
     this.table = this.$viewTable.DataTable({
-      stateSave: true,
       dom: '<"top"i>rt<"bottom"lp><"clear">',
       lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],      
       processing: true,
@@ -685,7 +684,7 @@ $.widget("nm.view", {
     }
 
     if(sSearch != ''){
-      mustArray.push({bool:{must:{query_string:{fields:searchNames||[], query:'*'+sSearch+'*'}}}});
+      mustArray.push({bool:{must:{query_string:{fields:searchNames||[], query: '*'+sSearch+'*'}}}});
     }
 
     if(iSortingCols > 0){

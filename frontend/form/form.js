@@ -100,12 +100,12 @@ $.widget("nm.form", {
         }];
       } else {
         patch = [profile.favorites ? {
-          op:'add', 
-          path:'/favorites/-', 
+          op:'add',
+          path:'/favorites/-',
           value:{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}
         } : {
-          op:'add', 
-          path:'/favorites', 
+          op:'add',
+          path:'/favorites',
           value:[{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}]
         }];
       }
