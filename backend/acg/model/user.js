@@ -40,7 +40,6 @@ _.assign(User, {
         } else {
           redis.get(SESSION_PREFIX + userId,function(err, data){
             if(err || token != (data && data.token)){
-              console.log('invalidToken');
               return reject(createError(406, "invalidToken"));
             }
               

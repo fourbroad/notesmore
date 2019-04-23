@@ -21,13 +21,21 @@ $.widget('nm.idtitledialog', {
     
     this.element.appendTo('body').modal({show:false});
 
-    this.$modalTitle = $('.modal-title', this.element);
+    this.$modelTitle = $('.modal-title', this.element);
     this.$formTag = $('form.id-title', this.element);
     this.$titleInput = $('input[name="title"]', this.element);
     this.$idInput = $('input[name="id"]', this.element);
     this.$submitBtn = $('.btn.submit', this.element);
 
-    this.$modalTitle.html(o.modalTitle);
+    if(o.placeholder && o.placeholder.id){
+      this.$idInput.attr('placeholder', o.placeholder.id);
+    }
+
+    if(o.placeholder && o.placeholder.title){
+      this.$titleInput.attr('placeholder', o.placeholder.title);
+    }
+
+    this.$modelTitle.html(o.modelTitle);
 
     this.element.on('shown.bs.modal', $.proxy(function (e) {
       this.$idInput.val(o.id||'').focus();

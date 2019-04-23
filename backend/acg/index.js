@@ -956,7 +956,7 @@ module.exports = {
           initSocket(socket, visitorId);
         }).catch(err => {
           socket.emit(err.message);
-          setTimeout(()=>{ socket.disconnect();});
+          setTimeout(()=>{ socket.disconnect();}, 1000);
         });
       } else {
         initSocket(socket);

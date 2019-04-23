@@ -34,12 +34,7 @@ const {Action, Collection} = client;
 $.widget("nm.view", {
 
   options:{
-    isNew: false,
-    constraints: {
-      title: {
-        presence: true
-      }
-    }
+    isNew: false
   },
 
   _create: function() {
@@ -64,10 +59,6 @@ $.widget("nm.view", {
     this.$viewTitle = $('h4', this.$viewHeader);
 
     this.$viewTable = $('.view-table', this.element);
-    this.$saveAsModel = $('#save-as', this.$viewHeader);
-    this.$titleInput = $('input[name="title"]', this.$saveAsModel);
-    this.$form = $('form.new-view', this.$saveAsModel);
-    this.$submitBtn = $('.btn.submit', this.$saveAsModel);
     this.$searchContainer = $('.search-container', this.$view);
 
     this.refresh();
@@ -116,74 +107,61 @@ $.widget("nm.view", {
       evt.stopPropagation();
     });
 
-    this.$saveAsModel.on('shown.bs.modal', function () {
-      self.$titleInput.val('');
-      self.$titleInput.trigger('focus')
-    }) 
-
     this._on(this.$actionMoreMenu, {
       'click li.dropdown-item.save-as': this._onItemSaveAs,
       'click li.dropdown-item.delete' : this._onDeleteSelf
     });   
     this._on(this.$saveBtn, {click: this.save});
     this._on(this.$cancelBtn, {click: this._onCancel});
-    this._on(this.$submitBtn, {click: this._onSubmit});
-    this._on(this.$form, {submit: this._onSubmit});
     this._on(this.$favorite, {click: this._onFavorite});
   },
 
   _onFavorite: function(e){
-    var o = this.options, view = o.view, self = this, { User, Profile } = client;
-    User.get(function(err, user){
+    var o = this.options, view = o.view, self = this, currentUser = client.currentUser, Profile = client.Profile;
+    Profile.get(view.domainId, currentUser.id, function(err, profile){
       if(err) return console.error(err);
-      Profile.get(view.domainId, user.id, function(err, profile){
+      var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;}),
+          patch;
+      if(index >= 0){
+        patch = [{
+          op:'remove',
+          path: '/favorites/'+index            
+        }];
+      } else {
+        patch = [profile.favorites ? {
+          op:'add', 
+          path:'/favorites/-', 
+          value:{domainId:view.domainId, collectionId: view.collectionId, id: view.id}
+        } : {
+          op:'add', 
+          path:'/favorites', 
+          value:[{domainId:view.domainId, collectionId: view.collectionId, id: view.id}]
+        }];
+      }
+      profile.patch(patch, function(err, profile){
         if(err) return console.error(err);
-        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;}),
-            patch;
-        if(index >= 0){
-          patch = [{
-            op:'remove',
-            path: '/favorites/'+index            
-          }];
-        } else {
-          patch = [profile.favorites ? {
-            op:'add', 
-            path:'/favorites/-', 
-            value:{domainId:view.domainId, collectionId: view.collectionId, id: view.id}
-          } : {
-            op:'add', 
-            path:'/favorites', 
-            value:[{domainId:view.domainId, collectionId: view.collectionId, id: view.id}]
-          }];
-        }
-        profile.patch(patch, function(err, result){
-          if(err) return console.error(err);
-          self._refreshFavorite();
-          self.element.trigger('favoritechanged', view);
-        });
+        self._refreshFavorite();
+        self.element.trigger('favoritechanged', view);
       });
     });
   },
 
   _onDeleteSelf: function(e){
-    var view = this.options.view, self = this;
+    var view = this.options.view, self = this, currentUser = client.currentUser;
     view.delete(function(err, result){
       if(err) return console.error(err);
-      User.get(function(err, user){
+        Profile.get(view.domainId, currentUser.id, function(err, profile){
         if(err) return console.error(err);
-        Profile.get(view.domainId, user.id, function(err, profile){
-          if(err) return console.error(err);
-          var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;});
-          if(index >= 0){
-            profile.patch([{
-              op:'remove',
-              path: '/favorites/'+index            
-            }], function(err, result){
-              if(err) return console.error(err);
-              self.element.trigger('favoritechanged', view);              
-            });
-          }
-        });
+        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;});
+        if(index >= 0){
+          profile.patch([{
+            op:'remove',
+            path: '/favorites/'+index            
+          }], function(err, profile){
+            if(err) return console.error(err);
+            self.element.trigger('favoritechanged', view);
+          });
+        }
       });
       self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', view);
     });
@@ -192,7 +170,7 @@ $.widget("nm.view", {
   },
 
   _armActionMoreMenu: function(){
-    var o = this.options, self = this, view = o.view, currentUser = view.getClient().currentUser;
+    var o = this.options, self = this, view = o.view, currentUser = client.currentUser;
     this.$actionMoreMenu.empty();
 
     if(o.view.collectionId == ".collections"){
@@ -616,20 +594,17 @@ $.widget("nm.view", {
     if(o.isNew){
       this.$favorite.hide();
     }else{
-      var self = this, view = o.view,　{ User, Profile } = client;
+      var self = this, view = o.view,　currentUser = client.currentUser, Profile = client.Profile;
       this.$favorite.show();
-      User.get(function(err, user){
+      Profile.get(view.domainId, currentUser.id, function(err, profile){
         if(err) return console.error(err);
-        Profile.get(view.domainId, user.id, function(err, profile){
-          if(err) return console.error(err);
-          var $i = $('i', self.$favorite).removeClass();
-          if(_.find(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
-            $i.addClass('c-red-500 ti-star');
-          }else{
-            $i.addClass('ti-star');
-          }
-        });
-      });        
+        var $i = $('i', self.$favorite).removeClass();
+        if(_.find(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
+          $i.addClass('c-red-500 ti-star');
+        }else{
+          $i.addClass('ti-star');
+        }
+      });
     }
   },
 
@@ -732,7 +707,7 @@ $.widget("nm.view", {
   },
 
   _showDocMenu: function($dropdownMenu, doc){
-    var client = doc.getClient(), currentUser = client.currentUser;
+    var currentUser = client.currentUser;
     $dropdownMenu.empty();
     
     utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, function(err, result){
@@ -757,43 +732,40 @@ $.widget("nm.view", {
     return $row.hasClass('table-active');
   },
 
-  _onSubmit: function(evt){
-    var o = this.options, self = this, errors = validate(this.$form, o.constraints);
-
-    evt.preventDefault();
-    evt.stopPropagation();
-
-    if (errors) {
-      utils.showErrors(this.$form, errors);
-    } else {
-      var values = validate.collectFormValues(this.$form, {trim: true}), title = values.title;
-      this.saveAs(title, function(err, view){
-        if(err) return console.error(err);
-        utils.clearErrors(self.$form);
-        var isNew = o.isNew;
-        o.isNew = false;
-        o.view = view;
-        self.clone = _.cloneDeep(view);
-        self.refresh();
-        self.$saveAsModel.modal('toggle')
-        self.element.trigger('documentcreated', [view, isNew]);
-      });
-    }
-  },
-
   _onItemSaveAs: function(evt){
-    this.$saveAsModel.modal('toggle');
+    var view = this.options.view, self = this;
+    this.showIdTitleDialog({
+      modelTitle:'Save as...', 
+      id: uuidv4(), 
+      title: view.title || '', 
+      placeholder:{
+        id: 'Enter id of view',
+        title: 'Enter title of view'
+      },
+      submit:function(e, data){
+      self.saveAs(data.id, data.title);
+    }});
   },
 
-  saveAs: function(title, callback){
-    var o = this.options, {View} = o.view.getClient(), view = _.cloneDeep(o.view);
+  saveAs: function(id, title, callback){
+    var o = this.options, View = client.View, view = _.cloneDeep(o.view), self = this;
     view.title = title;
     delete view._meta;
     if(o.view.collectionId == '.collections'){
       view.collections = [o.view.id];
       _.set(view, '_meta.acl.delete.roles', ['administrator']);
     }
-    View.create(o.view.domainId, uuidv4(), view, callback);
+
+    View.create(o.view.domainId, id||uuidv4(), view, function(err, view){
+        if(err) return console.error(err);
+        var isNew = o.isNew;
+        o.isNew = false;
+        o.view = view;
+        self.clone = _.cloneDeep(view);
+        self.refresh();
+        self.closeIdTitleDialog();        
+        self.element.trigger('documentcreated', [view, isNew]);
+    });
   },
 
   save: function(){

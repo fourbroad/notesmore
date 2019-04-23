@@ -174,15 +174,15 @@ $.widget('nm.workbench', {
   },
 
   _armFavoriteItem: function(doc){
-    var item = String() + '<li class="view nav-item"><i class="'+doc._meta.iconClass+'"></i><a class="sidebar-link document">' + (doc.title || doc.id) + '</a></li>'
+    var item = String() + '<li class="view nav-item"><i class="'+(doc._meta.iconClass||'ti-file')+'"></i><a class="sidebar-link document">' + (doc.title || doc.id) + '</a></li>'
     return item;
   },
 
   _refreshFavorites: function(){
     var o = this.options, self = this, domainId = o.page.domainId, client = o.page.getClient(), 
-      { Profile, Document } = client,  decodedToken = jwtDecode(client.token);
+      { Profile, Document } = client,  currentUser = client.currentUser;
     this.$favoriteItems.empty();
-    Profile.get(o.page.domainId, decodedToken.userId, function(err, profile){
+    Profile.get(domainId, currentUser.id, function(err, profile){
       if(err) return console.error(err);
       self.$badge.html(profile.favorites&&profile.favorites.length||0);
       _.each(profile.favorites, function(f){
