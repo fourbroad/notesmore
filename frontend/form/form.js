@@ -87,38 +87,35 @@ $.widget("nm.form", {
     this.jsonEditor.focus();
   },
 
-  _onFavorite: function(e){
-    var o = this.options, doc = o.document, self = this, { User, Profile } = client;
-    User.get(function(err, user){
+  _onFavorite: function(e) {
+    var o = this.options, doc = o.document, self = this, currentUser = client.currentUser, Profile = client.Profile;
+    Profile.get(doc.domainId, currentUser.id, function(err, profile){
       if(err) return console.error(err);
-      Profile.get(doc.domainId, user.id, function(err, profile){
+      var oldFavorites = _.cloneDeep(profile.favorites), patch,
+          index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;});
+      if(index >= 0){
+        patch = [{
+          op:'remove',
+          path: '/favorites/'+index            
+        }];
+      } else {
+        patch = [profile.favorites ? {
+          op:'add', 
+          path:'/favorites/-', 
+          value:{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}
+        } : {
+          op:'add', 
+          path:'/favorites', 
+          value:[{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}]
+        }];
+      }
+      profile.patch(patch, function(err, profile){
         if(err) return console.error(err);
-        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;}),
-            patch;
-        if(index >= 0){
-          patch = [{
-            op:'remove',
-            path: '/favorites/'+index            
-          }];
-        } else {
-          patch = [profile.favorites ? {
-            op:'add', 
-            path:'/favorites/-', 
-            value:{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}
-          } : {
-            op:'add', 
-            path:'/favorites', 
-            value:[{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}]
-          }];
-        }
-        profile.patch(patch, function(err, result){
-          if(err) return console.error(err);
-          self._refreshFavorite();
-          self.element.trigger('favoritechanged', doc);
-        });
+        self._refreshFavorite(profile.favorites);
+        self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
       });
     });
-  },  
+  },
 
   _onDeleteSelf: function(e){
     var doc = this.options.document, self = this, {User, Profile, Collection} = doc.getClient();
@@ -128,14 +125,15 @@ $.widget("nm.form", {
         if(err) return console.error(err);
         Profile.get(doc.domainId, user.id, function(err, profile){
           if(err) return console.error(err);
-          var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;});
+          var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;}),
+              oldFavorites = _.cloneDeep(profile.favorites);
           if(index >= 0){
             profile.patch([{
               op:'remove',
               path: '/favorites/'+index            
-            }], function(err, result){
+            }], function(err, profile){
               if(err) return console.error(err);
-              self.element.trigger('favoritechanged', doc);              
+              self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
             });
           }
         });
@@ -165,22 +163,31 @@ $.widget("nm.form", {
     this._refreshHeader();
   },
 
-  _refreshFavorite: function(){
+  _refreshFavorite: function(favorites){
     var o = this.options;
     if(o.isNew){
       this.$favorite.hide();
     } else {
       var self = this, doc = o.document,　currentUser = client.currentUser, Profile = client.Profile;
       this.$favorite.show();
-      Profile.get(doc.domainId, currentUser.id, function(err, profile){
-        if(err) return console.error(err);
+      
+      function doRefreshFavorite(favorites){
         var $i = $('i', self.$favorite).removeClass();
-        if(_.find(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;})){
+        if(_.find(favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;})){
           $i.addClass('c-red-500 ti-star');
         }else{
           $i.addClass('ti-star');
         }
-      });
+      }
+
+      if(favorites){
+        doRefreshFavorite(favorites);
+      } else {
+        Profile.get(doc.domainId, currentUser.id, {refresh: true}, function(err, profile){
+          if(err) return console.error(err);
+          doRefreshFavorite(profile.favorites);
+        });
+      }
     }
   },
 

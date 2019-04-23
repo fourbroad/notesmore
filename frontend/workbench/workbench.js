@@ -98,8 +98,8 @@ $.widget('nm.workbench', {
         this.option('anchor', anchor);
         e.stopPropagation();
       },
-      "favoritechanged": function(e, doc){
-        self._refreshFavorites();
+      "favoritechanged": function(e, favorites, oldFavorites){
+        self._refreshFavorites(favorites);
       }
     });
 
@@ -178,20 +178,29 @@ $.widget('nm.workbench', {
     return item;
   },
 
-  _refreshFavorites: function(){
+  _refreshFavorites: function(favorites){
     var o = this.options, self = this, domainId = o.page.domainId, client = o.page.getClient(), 
       { Profile, Document } = client,  currentUser = client.currentUser;
     this.$favoriteItems.empty();
-    Profile.get(domainId, currentUser.id, function(err, profile){
-      if(err) return console.error(err);
-      self.$badge.html(profile.favorites&&profile.favorites.length||0);
-      _.each(profile.favorites, function(f){
+    
+    function doRefreshFavorites(favorites){
+      self.$badge.html((favorites && favorites.length)||0);
+      _.each(favorites, function(f){
         Document.get(f.domainId, f.collectionId, f.id, function(err, doc){
           if(err) return console.error(err);
           $(self._armFavoriteItem(doc)).data('anchor',  {col: doc.collectionId, doc: doc.id}).appendTo(self.$favoriteItems);
         });
       });
-    });
+    }
+
+    if(favorites){
+      doRefreshFavorites(favorites);
+    } else {
+      Profile.get(domainId, currentUser.id, {refresh: true}, function(err, profile){
+        if(err) return console.error(err);
+        doRefreshFavorites(profile.favorites);
+      });
+    }
   },
 
   _armSidebarItem(item){

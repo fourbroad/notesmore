@@ -120,8 +120,8 @@ $.widget("nm.view", {
     var o = this.options, view = o.view, self = this, currentUser = client.currentUser, Profile = client.Profile;
     Profile.get(view.domainId, currentUser.id, function(err, profile){
       if(err) return console.error(err);
-      var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;}),
-          patch;
+      var oldFavorites = _.cloneDeep(profile.favorites), patch,
+          index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;});
       if(index >= 0){
         patch = [{
           op:'remove',
@@ -140,8 +140,8 @@ $.widget("nm.view", {
       }
       profile.patch(patch, function(err, profile){
         if(err) return console.error(err);
-        self._refreshFavorite();
-        self.element.trigger('favoritechanged', view);
+        self._refreshFavorite(profile.favorites);
+        self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
       });
     });
   },
@@ -152,14 +152,15 @@ $.widget("nm.view", {
       if(err) return console.error(err);
         Profile.get(view.domainId, currentUser.id, function(err, profile){
         if(err) return console.error(err);
-        var index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;});
+        var oldFavorites = _.cloneDeep(profile.favorites), 
+            index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;});
         if(index >= 0){
           profile.patch([{
             op:'remove',
             path: '/favorites/'+index            
           }], function(err, profile){
             if(err) return console.error(err);
-            self.element.trigger('favoritechanged', view);
+            self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
           });
         }
       });
@@ -589,22 +590,31 @@ $.widget("nm.view", {
     }
   },
 
-  _refreshFavorite: function(){
+  _refreshFavorite: function(favorites){
     var o = this.options;
     if(o.isNew){
       this.$favorite.hide();
     }else{
       var self = this, view = o.view,　currentUser = client.currentUser, Profile = client.Profile;
       this.$favorite.show();
-      Profile.get(view.domainId, currentUser.id, function(err, profile){
-        if(err) return console.error(err);
+
+      function doRefreshFavorite(favorites){
         var $i = $('i', self.$favorite).removeClass();
-        if(_.find(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
+        if(_.find(favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
           $i.addClass('c-red-500 ti-star');
         }else{
           $i.addClass('ti-star');
         }
-      });
+      }
+
+      if(favorites){
+        doRefreshFavorite(favorites);
+      } else {
+        Profile.get(view.domainId, currentUser.id, {refresh: true}, function(err, profile){
+          if(err) return console.error(err);
+          doRefreshFavorite(profile.favorites);        
+        });
+      }
     }
   },
 

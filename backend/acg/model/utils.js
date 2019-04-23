@@ -83,10 +83,25 @@ function createEntity(elasticsearch, authorId, domainId, collectionId, documentI
 }
 
 function getEntity(elasticsearch, cache, domainId, collectionId, documentId, options){
-  var uid = uniqueId(domainId, collectionId, documentId), version = options && options.version, doc = cache.get(uid);
+  var uid = uniqueId(domainId, collectionId, documentId), options = options || {}, version = options.version, doc = cache.get(uid);
   if (!doc) {
-    return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId }).then( data => {
-      var source = data._source;
+//     return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId }).then( data => {
+//       var source = data._source;
+  if(documentId == null) debugger;
+   var promise = elasticsearch.search({index: documentAllAlias(domainId, collectionId), type: 'snapshot', version: true, body: {
+      query: {
+        ids: {
+          values:[documentId]
+        }
+      }
+    }}).then( result => {
+      if(result.hits.total == 0){
+//         debugger;
+        return Promise.reject('Document is not found!'); 
+      } 
+      
+      var data = result.hits.hits[0], source = data._source;
+
       if(version && version < source._meta.version){
         return elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body: {
           query:{ term:{'id.keyword': documentId} },
@@ -132,7 +147,7 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId, opt
               updated: updated
             }});
 
-            cache.set(uid, source);
+//             cache.set(uid, source);
             return source;
           } else {
             return Promise.reject("Version is not exists!");
@@ -140,14 +155,22 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId, opt
         });
       } else if((version && version > source._meta.version) || version == 0 ){
         return Promise.reject("Version is not exists!");
-      }else if(!version || version == source._meta.version){
+      } else if(!version || version == source._meta.version) {
         source.id = source.id || data._id;
         source._meta.index = data._index;
         source._meta.version = data._version;
-        cache.set(uid, source);
+//         cache.set(uid, source);
         return source;
       }
     }).catch(e => Promise.reject(e.toString()));
+
+    if(options.refresh) {
+      return elasticsearch.indices.refresh({index: documentAllAlias(domainId, collectionId)}).then(() => {
+        return promise;
+      });
+    } else {
+      return promise;
+    }
   } else {
     return Promise.resolve(doc);
   }
