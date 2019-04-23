@@ -80,7 +80,7 @@ $.widget("nm.login", {
         .siblings('.model').hide();
 
       this.element.find('.nickname').text($('.workbench .nickname').text().trim());
-      this.element.find('.photo img').attr('src',$('.workbench .avatar').attr('src'));
+      this.element.find('.photo img').attr('src', $('.workbench .avatar').attr('src'));
     } else {  //正常登录
       this.element.find('.model-0').remove().next().show();
       //切换到注册
@@ -105,7 +105,7 @@ $.widget("nm.login", {
           , error = this._verifyData($target) || {};
         this._showError($target, error[$target.attr('name')]);
       },
-      'keyup':function(e){
+      'keyup': function (e) {
         if (e.keyCode == 13) {
           this._submit(e);
         }
@@ -153,7 +153,7 @@ $.widget("nm.login", {
     if (hasError) return false;
 
     let inputData = validate.collectFormValues($model, { trim: true });
-    console.log(inputData);
+    // console.log(inputData);
     $target.addClass('ui-state-disabled');
     client.login(inputData.username, inputData.password, function (err, user) {
       $target.removeClass('ui-state-disabled');
@@ -162,10 +162,15 @@ $.widget("nm.login", {
         $model.find('.verify-code .error,.password .error').addClass('show').text(err.message);
         return false;
       }
-      if (self.options.timeoutLogin) {
-        self.destroy();
-        $('.nm-workbench .workbench').removeClass('bg-filter');
-        $(':nm-workbench').data('nmWorkbench')._setInterval();
+      if (self.options.timeoutLogin) {    //超时重新登录
+        if ($model.hasClass('model-0')) { //当前账号登录
+          self.destroy();
+          $('.nm-workbench .workbench').removeClass('bg-filter');
+          $(':nm-workbench').data('nmWorkbench')._setInterval();
+        } else { //切换账号登录
+          self.destroy();
+          location.replace(location.origin);
+        }
         return false;
       }
       runtime.option({ uriAnchor: { col: '.pages', doc: '.workbench' }, override: true });
