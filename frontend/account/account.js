@@ -87,9 +87,7 @@ $.widget("nm.account", {
     event.preventDefault();
     event.stopPropagation();
 
-    client.logout(function(){
-      runtime.option('uriAnchor', {col:'.pages', doc:'.login'});
-    });
+    client.logout();
   },
 
   _refresh: function(){

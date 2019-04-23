@@ -36,19 +36,8 @@ function inherits(Child, Parent, proto) {
 function getEntity(elasticsearch, cache, domainId, collectionId, documentId, options){
   var uid = uniqueId(domainId, collectionId, documentId), version = options && options.version, doc = cache.get(uid);
   if (!doc) {
-    return elasticsearch.search({index: documentAllAlias(domainId, collectionId), type: 'snapshot', version: true, body: {
-      query: {
-        ids: {
-          values:[documentId]
-        }
-      }
-    }}).then( result => {
-      if(result.hits.total == 0){
-//         debugger;
-        return Promise.reject('Document is not found!'); 
-      } 
-      
-      var data = result.hits.hits[0], source = data._source;
+    return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId }).then( data => {
+      var source = data._source;
       if(version && version < source._meta.version){
         return elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body: {
           query:{ term:{'id.keyword': documentId} },
