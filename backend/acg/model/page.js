@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
 
 const
   PAGES = '.pages';
@@ -24,14 +24,14 @@ _.assign(Page, {
 
   create: function(authorId, domainId, pageId, pageData, options){
     if(!_.at(pageData, '_meta.metaId')[0]) _.set(pageData, '_meta.metaId', '.meta-page');
-    return Document.create.call(this, authorId, domainId, PAGES, pageId, pageData, options).then( document => {
-      return Page.get(domainId, pageId, options);
+    return createEntity(elasticsearch, authorId, domainId, PAGES, pageId, pageData, options).then((data) => {
+      return new Page(domainId, data);
     });
   },
 
   get: function(domainId, pageId, options) {
-    return getEntity(elasticsearch, cache, domainId, PAGES, pageId, options).then( source => {
-      return new Page(domainId, source);
+    return getEntity(elasticsearch, cache, domainId, PAGES, pageId, options).then( data => {
+      return new Page(domainId, data);
     });
   },
 

@@ -4,7 +4,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentHotAlias, inherits, getEntity, buildMeta} = require('./utils');
+  , {uniqueId, documentHotAlias, inherits, createEntity, getEntity, buildMeta} = require('./utils');
 
 const
   COLLECTIONS = '.collections',
@@ -176,12 +176,12 @@ _.assign(Collection, {
 
     if(!_.at(collectionData, '_meta.metaId')[0]) _.set(collectionData, '_meta.metaId', '.meta-collection');
 
-    return this.putTemplates(domainId, collectionId).then( result => {
+    return this.putTemplates(domainId, collectionId).then(() => {
       self.createIndices(domainId, collectionId);
-    }).then(result =>{
-      return Document.create.call(self, authorId, domainId, COLLECTIONS, collectionId, collectionData, options);
-    }).then(result => {
-      return Collection.get(domainId, collectionId, options);
+    }).then(() =>{
+      return createEntity(elasticsearch, authorId, domainId, COLLECTIONS, collectionId, collectionData, options);
+    }).then((data) => {
+      return new Collection(domainId, data);
     });
   },
 

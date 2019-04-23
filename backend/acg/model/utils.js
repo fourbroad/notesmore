@@ -33,6 +33,55 @@ function inherits(Child, Parent, proto) {
   return Child;
 }
 
+
+function buildMeta(domainId, doc, authorId, metaId){
+  return Meta.get(domainId, metaId).then( meta => {
+    var defaultAcl = _.cloneDeep(meta.acl||{}), _meta = doc._meta || {}, timestamp = new Date().getTime();
+    delete defaultAcl.create;
+    _meta.acl = _.merge(defaultAcl, _.at(doc, '_meta.acl')[0]);
+    _meta.iconClass = _meta.iconClass || meta._meta.iconClass;
+    _meta = _.merge(_meta, {created:timestamp, updated:timestamp, version:1});
+    _meta.author = authorId;
+    doc._meta = _meta;
+    return doc;
+  });
+}
+
+function checkPermission(profile, permissions){
+  if(!permissions) return Promise.resolve(true);
+  if(_.intersection(profile.roles, permissions.roles).length > 0 
+  || _.intersection(profile.groups, permissions.groups).length > 0 
+  || (permissions.users && permissions.users.indexOf(profile.id) >= 0) ){
+    return true;
+  } else {
+    return Promise.reject(createError(401, "Unauthorized access"));
+  }
+}
+
+function createEntity(elasticsearch, authorId, domainId, collectionId, documentId, docData, options) {
+  var metaId = _.at(docData, '_meta.metaId')[0] || '.meta', 
+      index = documentHotAlias(domainId, collectionId);
+  docData.id = documentId;
+  return buildMeta(domainId, docData, authorId, metaId).then( docData => {
+    return elasticsearch.create({ index: index, type: "snapshot", id: documentId, body: docData });
+  }).then( (result) => {
+    if(result._version > 1){
+      _.set(docData, '_meta.version', result._version + 1);
+      return elasticsearch.index({ index: index, type: "snapshot", id: documentId, body: docData }).then(()=>{
+        return elasticsearch.get({ index: index, type: "snapshot", id: documentId});
+      });
+    }else {
+      return elasticsearch.get({ index: index, type: "snapshot", id: documentId});      
+    }    
+  }).then( data => {
+    var source = data._source;
+    source.id = source.id || data._id;
+    source._meta.index = data._index;
+    source._meta.version = data._version;
+    return source;
+  });
+}
+
 function getEntity(elasticsearch, cache, domainId, collectionId, documentId, options){
   var uid = uniqueId(domainId, collectionId, documentId), version = options && options.version, doc = cache.get(uid);
   if (!doc) {
@@ -104,30 +153,6 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId, opt
   }
 }
 
-function buildMeta(domainId, doc, authorId, metaId){
-  return Meta.get(domainId, metaId).then( meta => {
-    var defaultAcl = _.cloneDeep(meta.acl||{}), _meta = doc._meta || {}, timestamp = new Date().getTime();
-    delete defaultAcl.create;
-    _meta.acl = _.merge(defaultAcl, _.at(doc, '_meta.acl')[0]);
-    _meta.iconClass = _meta.iconClass || meta._meta.iconClass;
-    _meta = _.merge(_meta, {created:timestamp, updated:timestamp, version:1});
-    _meta.author = authorId;
-    doc._meta = _meta;
-    return doc;
-  });
-}
-
-function checkPermission(profile, permissions){
-  if(!permissions) return Promise.resolve(true);
-  if(_.intersection(profile.roles, permissions.roles).length > 0 
-  || _.intersection(profile.groups, permissions.groups).length > 0 
-  || (permissions.users && permissions.users.indexOf(profile.id) >= 0) ){
-    return true;
-  } else {
-    return Promise.reject(createError(401, "Unauthorized access", {code:401}));
-  }
-}
-
 module.exports = {
   uniqueId : uniqueId,
   documentHotAlias : documentHotAlias,
@@ -135,6 +160,7 @@ module.exports = {
   eventHotAlias : eventHotAlias,
   eventAllAlias: eventAllAlias,
   inherits : inherits,
+  createEntity: createEntity,
   getEntity : getEntity,
   buildMeta : buildMeta,
   checkPermission: checkPermission

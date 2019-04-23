@@ -10,7 +10,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , SESSION_PREFIX = 'session-'
-  , {inherits, uniqueId, getEntity} = require('./utils');
+  , {inherits, uniqueId, createEntity, getEntity} = require('./utils');
 
 const USERS = '.users';
 
@@ -92,14 +92,14 @@ _.assign(User, {
     userData.password = md5.update(userData.password + secret).digest('hex');
     if(!_.at(userData, '_meta.metaId')[0]) _.set(userData, '_meta.metaId', '.meta-user');
     
-    return Document.create.call(this, authorId, Domain.ROOT, USERS, userId, userData, options).then( document => {
-      return User.get(userId, options);
+    return createEntity(elasticsearch,authorId, Domain.ROOT, USERS, userId, userData, options).then((data) => {
+      return new User(data);
     });
   },
 
   get: function(userId, options) {
-    return getEntity(elasticsearch, cache, Domain.ROOT, USERS, userId, options).then( source => {
-      return new User(source);
+    return getEntity(elasticsearch, cache, Domain.ROOT, USERS, userId, options).then( data => {
+      return new User(data);
     });
   },
 

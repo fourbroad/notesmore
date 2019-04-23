@@ -4,7 +4,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, documentHotAlias, inherits, getEntity} = require('./utils');
+  , {uniqueId, documentHotAlias, inherits, createEntity, getEntity} = require('./utils');
 
 const 
   METAS = '.metas',
@@ -53,14 +53,14 @@ _.assign(Meta, {
   },
 
   create: function(authorId, domainId, metaId, metaData, options){
-    return Document.create.call(this, authorId, domainId, METAS, metaId, metaData, options).then( document =>{
-      return Meta.get(domainId, metaId, options);
-    });      
+    return createEntity(elasticsearch, authorId, domainId, METAS, metaId, metaData, options).then((data) => {
+      return new Meta(domainId, data);
+    });
   },
 
   get: function(domainId, metaId, options) {
-    return getEntity(elasticsearch, cache, domainId, METAS, metaId, options).then( source => {
-      return new Meta(domainId, source);
+    return getEntity(elasticsearch, cache, domainId, METAS, metaId, options).then( data => {
+      return new Meta(domainId, data);
     });
   },
 

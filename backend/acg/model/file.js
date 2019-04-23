@@ -7,7 +7,7 @@ const _ = require('lodash')
   , WebHDFS = require('webhdfs')
   , config = require('config')
   , hdfs = WebHDFS.createClient(JSON.parse(JSON.stringify(config.get('hdfs'))))
-  , {uniqueId, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
 
 const
   FILES = '.files';
@@ -28,8 +28,8 @@ _.assign(File, {
 
   create: function(authorId, domainId, fileId, fileData, options) {
     if(!_.at(fileData, '_meta.metaId')[0]) _.set(fileData, '_meta.metaId', '.meta-file');
-    return Document.create.call(this, authorId, domainId, FILES, fileId, fileData, options).then( document => {
-      return File.get(domainId, fileId, options);
+    return createEntity(elasticsearch, authorId, domainId, FILES, fileId, fileData, options).then((data) => {
+      return new File(domainId, data);
     });
   },
 

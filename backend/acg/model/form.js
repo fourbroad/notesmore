@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
 
 const
   FORMS = '.forms';
@@ -24,8 +24,8 @@ _.assign(Form, {
 
   create: function(authorId, domainId, formId, formData, options){
     if(!_.at(formData, '_meta.metaId')[0]) _.set(formData, '_meta.metaId', '.meta-form');
-    return Document.create.call(this, authorId, domainId, FORMS, formId, formData, options).then(document => {
-      return Form.get(domainId, formId, options);
+    return createEntity(elasticsearch, authorId, domainId, FORMS, formId, formData, options).then((data) => {
+      return new Form(domainId, data);
     });
   },
 

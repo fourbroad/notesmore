@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
 
 const
   ROLES = '.roles';
@@ -22,16 +22,16 @@ _.assign(Role, {
     return Role;
   },
 
-  create: function(authorId, domainId, roleId, roleData, metaId, options) {
+  create: function(authorId, domainId, roleId, roleData, options) {
     if(!_.at(roleData, '_meta.metaId')[0]) _.set(roleData, '_meta.metaId', '.meta-role');
-    return Document.create.call(this, authorId, domainId, ROLES, roleId, roleData, metaId, options).then( document => {
-      return Role.get(domainId, roleId, options);
+    return createEntity(elasticsearch, authorId, domainId, ROLES, roleId, roleData, options).then((data) => {
+      return new Role(domainId, data);
     });
   },
 
   get: function(domainId, roleId, options) {
-    return getEntity(elasticsearch, cache, domainId, ROLES, roleId, options).then( source => {
-      return new Role(domainId, source);
+    return getEntity(elasticsearch, cache, domainId, ROLES, roleId, options).then( data => {
+      return new Role(domainId, data);
     });
   },
 

@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
 
 const
   VIEWS = '.views';
@@ -51,8 +51,8 @@ _.assign(View, {
 
   create: function(authorId, domainId, viewId, viewData, options) {
     if(!_.at(viewData, '_meta.metaId')[0]) _.set(viewData, '_meta.metaId', '.meta-view');
-    return Document.create.call(this, authorId, domainId, VIEWS, viewId, viewData, options).then( document => {
-      return View.get(domainId, viewId, options);
+    return createEntity(elasticsearch, authorId, domainId, VIEWS, viewId, viewData, options).then((data) => {
+      return new View(domainId, data);
     });
   },
 

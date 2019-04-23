@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
 
 const
   PROFILES = '.profiles';
@@ -24,14 +24,14 @@ _.assign(Profile, {
 
   create: function(authorId, domainId, profileId, profileData, options) {
     if(!_.at(profileData, '_meta.metaId')[0]) _.set(profileData, '_meta.metaId', '.meta-profile');
-    return Document.create.call(this, authorId, domainId, PROFILES, profileId, profileData, options).then( document => {
-      return Profile.get(domainId, profileId, options);
+    return createEntity(elasticsearch, authorId, domainId, PROFILES, profileId, profileData, options).then((data) => {
+      return new Profile(domainId, data);
     });
   },
 
   get: function(domainId, profileId, options) {
-    return getEntity(elasticsearch, cache, domainId, PROFILES, profileId, options).then( source => {
-      return new Profile(domainId, source);
+    return getEntity(elasticsearch, cache, domainId, PROFILES, profileId, options).then( data => {
+      return new Profile(domainId, data);
     });
   },
 

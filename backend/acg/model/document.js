@@ -4,7 +4,7 @@ const _ = require('lodash')
   , uuidv4 = require('uuid/v4')
   , createError = require('http-errors')
   , jsonPatch = require('fast-json-patch')
-  , { uniqueId, documentHotAlias, documentAllAlias, eventAllAlias, buildMeta, getEntity} = require('./utils');
+  , { uniqueId, documentHotAlias, documentAllAlias, eventAllAlias, buildMeta, createEntity, getEntity} = require('./utils');
 
 const DOC_TYPE = 'snapshot'
   , EVENT_TYPE = 'event'
@@ -75,14 +75,8 @@ _.assign(Document, {
   },
 
   create: function(authorId, domainId, collectionId, documentId, docData, options) {
-    var self = this, metaId = _.at(docData, '_meta.metaId')[0] || '.meta';
-    docData.id = documentId;
-    return buildMeta(domainId, docData, authorId, metaId).then( docData => {
-      return elasticsearch.create({ index: documentHotAlias(domainId, collectionId), type: DOC_TYPE, id: documentId, body: docData });
-    }).then( result => {
-      return elasticsearch.indices.refresh({index: documentHotAlias(domainId, collectionId)});      
-    }).then(result => {
-      return Document.get(domainId, collectionId, documentId, options);
+    return createEntity(elasticsearch, authorId, domainId, collectionId, documentId, docData, options).then(data => {
+      return new Document(domainId, collectionId, data);
     });
   },
 

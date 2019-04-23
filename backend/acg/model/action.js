@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
 
 const
   ACTIONS = '.actions';
@@ -24,8 +24,8 @@ _.assign(Action, {
 
   create: function(authorId, domainId, actionId, actionData, options){
     if(!_.at(actionData, '_meta.metaId')[0]) _.set(actionData, '_meta.metaId', '.meta-action');
-    return Document.create.call(this, authorId, domainId, ACTIONS, actionId, actionData, options).then( document => {
-      return Action.get(domainId, actionId, options);
+    return createEntity(elasticsearch, authorId, domainId, ACTIONS, actionId, actionData, options).then((data) => {
+      return new Action(domainId, data);
     });
   },
 

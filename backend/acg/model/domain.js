@@ -15,7 +15,7 @@ const _ = require('lodash')
   , Role = require('./role')
   , User = require('./user')
   , Document = require('./document')
-  , {uniqueId, documentHotAlias, documentAllAlias, inherits, buildMeta, getEntity} = require('./utils');
+  , {uniqueId, documentHotAlias, documentAllAlias, inherits, buildMeta, createEntity, getEntity} = require('./utils');
 
 const DOMAINS = '.domains'
   , ROOT = '.root'
@@ -806,13 +806,12 @@ _.assign(Domain, {
       promise = User.get(authorId, options).then(user=>initDomain(authorId, user.title, domainId));
     }
 
-    if (!_.at(domainData, '_meta.metaId')[0])
-      _.set(domainData, '_meta.metaId', '.meta-domain');
+    if (!_.at(domainData, '_meta.metaId')[0]) _.set(domainData, '_meta.metaId', '.meta-domain');
 
-    return promise.then(result=>{
-      return Document.create.call(self, authorId, ROOT, DOMAINS, domainId, domainData, options);
-    }).then(()=>{
-      return Domain.get(domainId, options)
+    return promise.then(result => {
+      return createEntity(elasticsearch, authorId, ROOT, DOMAINS, domainId, domainData, options);
+    }).then(data => {
+      return new Domain(data);
     });
   },
 

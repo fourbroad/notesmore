@@ -3,7 +3,7 @@ const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
-  , {uniqueId, inherits, getEntity} = require('./utils');
+  , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
 
 const
   GROUPS = '.groups';
@@ -24,8 +24,8 @@ _.assign(Group, {
 
   create: function(authorId, domainId, groupId, groupData, options){
     if(!_.at(groupData, '_meta.metaId')[0]) _.set(groupData, '_meta.metaId', '.meta-group');
-    return Document.create.call(this, authorId, domainId, GROUPS, groupId, groupData, options).then( document => {
-      return Group.get(domainId, groupId, options);
+    return createEntity(elasticsearch, authorId, domainId, GROUPS, groupId, groupData, options).then((data) => {
+      return new Group(domainId, data);
     });
   },
 
