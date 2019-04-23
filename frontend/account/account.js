@@ -69,12 +69,7 @@ $.widget("nm.account", {
       self._refresh();
     }
 
-    this.loggedOutListener = function(user){
-      self._refresh();
-    }
-
     client.on("loggedIn", this.loggedInListener);
-    client.on("loggedOut", this.loggedOutListener);
 
     this._refresh();
     

@@ -110,7 +110,7 @@ initSocket = function(socket, visitorId) {
         next();
       }).catch((e) => {
         next(e);
-        setTimeout(()=>{socket.disconnect();});
+        setTimeout(()=>{socket.disconnect();}, 1000);
       });
     } else {
       next();
