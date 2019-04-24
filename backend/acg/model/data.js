@@ -39,6 +39,7 @@ const DEFAULT_ACL = {
   title: "Title",
   name: "title",
   data: "title",
+  sortable: false,
   defaultLink: true
 }, {
   title: "Author",

@@ -97,7 +97,7 @@ function getEntity(elasticsearch, cache, domainId, collectionId, documentId, opt
     }}).then( result => {
       if(result.hits.total == 0){
 //         debugger;
-        return Promise.reject('Document is not found!'); 
+        return Promise.reject('Document is not found: ' + [domainId, collectionId, documentId].join(',')); 
       } 
       
       var data = result.hits.hits[0], source = data._source;
