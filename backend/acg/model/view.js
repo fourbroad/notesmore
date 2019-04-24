@@ -80,6 +80,12 @@ inherits(View, Document,{
   findDocuments: function(query, options) {
     query.index = _joinIndices(this.domainId, this.collections);
     query.type = Document.TYPE;
+    
+    if(options&&options.sort) query.body.sort = options.sort;
+    if(options&&options.from) query.from = options.from;
+    if(options&&options.size) query.size = options.size;
+    if(options&&options.scroll) query.scroll = options.scroll;
+
   	return this._getElasticSearch().search(query).then(function(data){
   	  var result = {
   	    total:data.hits.total,

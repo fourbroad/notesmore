@@ -33,32 +33,36 @@ const DEFAULT_ACL = {
 }, {
   title: "Id",
   name: "id",
+  type: "keyword",
   data: "id",
   defaultLink: true
 }, {
   title: "Title",
   name: "title",
+  type: "keyword",
   data: "title",
   sortable: false,
   defaultLink: true
 }, {
   title: "Author",
   name: "_meta.author",
+  type: "keyword",
   data: "_meta.author"
 }, {
   title: "Version",
   name: "_meta.version",
+  type: "integer",
   data: "_meta.version"
 }, {
   title: "Created",
   name: "_meta.created",
-  data: "_meta.created",
-  className: "datetime"
+  type: "date",
+  data: "_meta.created"
 }, {
   title: "Updated",
   name: "_meta.updated",
-  data: "_meta.updated",
-  className: "datetime"
+  type: "date",
+  data: "_meta.updated"
 }, {
   sortable: false
 }]
@@ -331,7 +335,7 @@ const DEFAULT_ACL = {
     search: {
       names: ["id.keyword", "title.keyword", "_meta.author.keyword"]
     },
-    order: "[[6,\"desc\"],[5,\"desc\"]]"
+    sort:[{"_meta.updated": {order: "desc"}},{"_meta.created": {order: "desc"}}]
   },
   defaultAction: 'gridView',
   actions: ['gridView', 'edit'],
@@ -367,7 +371,7 @@ const DEFAULT_ACL = {
     search: {
       names: ["id.keyword", "title.keyword", "_meta.author.keyword"]
     },
-    order: "[[6,\"desc\"],[5,\"desc\"]]",
+    sort:[{"_meta.updated": {order: "desc"}},{"_meta.created": {order: "desc"}}],
     _meta: {
       metaId: '.meta-view'
     }

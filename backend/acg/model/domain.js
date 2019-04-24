@@ -65,7 +65,7 @@ function buildCollectionBatch(authorId, domainId) {
     c.search = {
       names: ["id", "title", "_meta.author"]
     };
-    c.order = "[[5,\"desc\"],[4,\"desc\"]]";
+    c.sort = [{"_meta.updated": {order: "desc"}},{"_meta.created": {order: "desc"}}];
     c._meta = createMeta(authorId, c);
     c._meta.metaId = '.meta-collection';
     return [{
@@ -86,7 +86,7 @@ function buildViewBatch(authorId, domainId) {
     v.search = {
       names: ["id", "title", "_meta.author"]
     };
-    v.order = "[[5,\"desc\"],[4,\"desc\"]]";
+    v.sort = [{"_meta.updated": {order: "desc"}},{"_meta.created": {order: "desc"}}];
     v._meta = createMeta(authorId, v);
     v._meta.metaId = '.meta-view';
     return [{

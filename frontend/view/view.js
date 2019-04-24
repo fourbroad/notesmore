@@ -7,6 +7,7 @@ const
   utils = require('core/utils'),
   Loader = require('core/loader'),
   uuidv4 = require('uuid/v4'),
+  FileSaver = require('file-saver'),
   client = require('../../lib/client')();
 
 // const PerfectScrollbar = require('perfect-scrollbar');
@@ -19,7 +20,7 @@ require('bootstrap'),
 require('datatables.net-bs4');
 require('datatables.net-bs4/css/dataTables.bootstrap4.css');
 
-require('search/select/select');
+require('search/keywords/keywords');
 require('search/numeric-range/numeric-range');
 require('search/datetime-range/datetime-range');
 require('search/datetime-duedate/datetime-duedate');
@@ -109,6 +110,7 @@ $.widget("nm.view", {
 
     this._on(this.$actionMoreMenu, {
       'click li.dropdown-item.save-as': this._onItemSaveAs,
+      'click li.dropdown-item.export-csv': this._exportCsv,
       'click li.dropdown-item.delete' : this._onDeleteSelf
     });   
     this._on(this.$saveBtn, {click: this.save});
@@ -179,6 +181,8 @@ $.widget("nm.view", {
     } else {
       $('<li class="dropdown-item save-as">Save as...</li>').appendTo(this.$actionMoreMenu);
     }
+
+    $('<li class="dropdown-item export-csv">Export CSV</li>').appendTo(this.$actionMoreMenu);
     
     utils.checkPermission(view.domainId, currentUser.id, 'delete', view, function(err, result){
       if(result){
@@ -215,7 +219,7 @@ $.widget("nm.view", {
       columns: _.cloneDeep(view.columns),
       searchCols: this._armSearchCol(),
       search: {search: view.search.keyword},
-      order: (view.order&&JSON.parse(view.order))||[],
+      order: this._buildOrder(view.sort),
       columnDefs : [{
         targets: 0,
         width: "10px",
@@ -233,7 +237,7 @@ $.widget("nm.view", {
         render:function(data, type, row, meta) {
           var column = meta.settings.aoColumns[meta.col], d = utils.get(row, column.data);
           
-          if(column.className == 'datetime'){
+          if(column.type == 'date'){
             var date = moment(d);
             d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
           }
@@ -248,9 +252,12 @@ $.widget("nm.view", {
       }],
       sAjaxSource: "view",
       fnServerData: function (sSource, aoData, fnCallback, oSettings ) {
-        var kvMap = self._kvMap(aoData), query = self._buildSearch(kvMap);
-        query.size = query.size >= 0 ? query.size : 10000;
-        view.findDocuments(query, function(err, docs){
+        var kvMap = self._kvMap(aoData);
+        view.findDocuments({
+          from:kvMap['iDisplayStart'],
+          size:kvMap['iDisplayLength'],
+          sort: self._buildSort(kvMap)
+        }, function(err, docs){
           if(err) {
             if(err.code == 401){
               fnCallback({
@@ -287,37 +294,28 @@ $.widget("nm.view", {
     _.each(view.searchColumns, function(sc){
       switch(sc.type){
         case 'keywords':
-          $("<div/>").appendTo(self.$searchContainer).select({
+          $("<div/>").appendTo(self.$searchContainer).keywords({
             name: sc.name,
             class:'search-item',
             btnClass:'btn-sm',
             mode: 'multi',
-            selectedItems: sc.selectedItems,
+            selectedItems: sc.values,
             menuItems: function(filter, callback){
               view.distinctQuery(sc.name, {include:filter, size:10000}, function(err, data){
                 if(err) return console.error(err);
-                var items = _.map(data.values, function(item){
-                  return {label:item, value:item};
-                });
-                callback(items);
+                callback(data.values);
               });
             },
             render: function(selectedItems){
               var label = _.reduce(selectedItems, function(text, item) {
-                var label;
-                if(text == ''){
-                  label = item.label;
-                }else{
-                  label = text + ',' + item.label;
-                }
-                return label;
+                return text == '' ? item : text + ',' + item;
               }, '');
               return label == '' ? sc.title + ":all" : label;
             },
             valueChanged: function(event, values){
               var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
-              sc2.selectedItems = values.selectedItems;
-              self.table.column(sc2.name+':name').search(_(sc2.selectedItems).map("value").filter().flatMap().value().join(',')).draw();
+              sc2.values = values.selectedItems;
+              self.table.column(sc2.name+':name').search(sc2.values.join(',')).draw();
               self._refreshHeader();
             }
           });
@@ -556,7 +554,7 @@ $.widget("nm.view", {
       if(sc){
         switch(sc.type){
           case 'keywords':
-            searchCols.push({search:_(sc.selectedItems).map("value").filter().flatMap().value().join(',')});
+            searchCols.push({search: _.isEmpty(sc.values) ? '' : sc.values.join(',')});
             break;
           case 'numericRange':
             searchCols.push({search: sc.lowestValue||sc.highestValue ? [sc.lowestValue, sc.highestValue].join(','):''});
@@ -625,94 +623,41 @@ $.widget("nm.view", {
     return this.options.isNew || this._getPatch().length > 0
   },
 
-  _searchColumnType: function(name){
+  _columnType: function(name){
     var view = this.options.view;
-    var index = _.findIndex(view.searchColumns, function(sc) { return sc.name == name;});
-    return view.searchColumns[index].type;
+    var index = _.findIndex(view.columns, function(sc) { return sc.name == name;});
+    return view.columns[index].type;
   },
 
   _kvMap: function(aoData){
     return _.reduce(aoData, function(result, kv){result[kv.name] = kv.value; return result;},{});
   },
 
-  _buildSearch: function(kvMap){
-    var
-      o = this.options, view = o.view,
-      iColumns = kvMap['iColumns'], iDisplayStart = kvMap['iDisplayStart'], iSortingCols = kvMap["iSortingCols"],
-      iDisplayLength = kvMap['iDisplayLength'], sSearch = kvMap['sSearch'], mustArray=[], 
-      searchNames = (view.search && view.search.names)||[], sort = [];
+  _buildOrder: function(sort){
+    var o = this.options, self = this, view = o.view;
+    return _.reduce(sort, function(order, value){
+      order.push([_.findIndex(view.columns, ['name', _.keys(value)[0]]), value[_.keys(value)[0]].order]);
+      return order;
+    },[]);
+  },
 
-    for(var i=0; i<iColumns; i++){
-      var mDataProp_i = kvMap['mDataProp_'+i], sSearch_i = kvMap['sSearch_'+i], shouldArray = [], range;
-
-      if(sSearch_i.trim() != ''){
-        switch(this._searchColumnType(mDataProp_i)){
-          case 'keywords':
-            _.each(sSearch_i.split(','), function(token){
-              if(token.trim() !=''){
-                var term = {};
-                term[mDataProp_i+'.keyword'] = token;
-                shouldArray.push({term:term});
-              }
-            });
-            break;
-         case 'containsText':
-            shouldArray.push({query_string: {default_field: mDataProp_i, query: '*'+sSearch_i+'*'}});
-            break;
-         case 'datetimeRange':
-         case 'datetimeDuedate':
-         case 'numericRange':
-            var ra = sSearch_i.split(','), lv = ra[0], hv = ra[1];
-            range = {};
-            range[mDataProp_i]={};
-            if(lv){
-              range[mDataProp_i].gte = lv;
-            }
-            if(hv){
-              range[mDataProp_i].lte = hv;
-            }
-            break;         
-        }
-
-        if(shouldArray.length > 0){
-          mustArray.push({bool:{should:shouldArray}});
-        }
-        if(range){
-          mustArray.push({bool:{filter:{range:range}}});
-        }
+  _buildSort: function(kvMap){
+    var iSortingCols = kvMap["iSortingCols"], sort = new Array(iSortingCols);
+    for(var i = 0; i < iSortingCols; i++){
+      var current = {}, colName = kvMap['mDataProp_'+kvMap['iSortCol_'+i]];
+      switch(this._columnType(colName)){
+        case 'keyword':
+          current[colName+'.keyword'] = kvMap['sSortDir_'+i];
+          break;
+        case 'date':
+        case 'integer':
+        default:
+          current[colName] = {order:kvMap['sSortDir_'+i]};
+          break;
       }
+      sort[i] = current;
     }
-
-    if(sSearch != ''){
-      mustArray.push({bool:{must:{query_string:{fields:searchNames||[], query: '*'+sSearch+'*'}}}});
-    }
-
-    if(iSortingCols > 0){
-      sort= new Array(iSortingCols);
-      for(var i = 0; i<iSortingCols; i++){
-        var current = {}, colName = kvMap['mDataProp_'+kvMap['iSortCol_'+i]];
-        switch(this._searchColumnType(colName)){
-          case 'keywords':
-            current[colName+'.keyword'] = kvMap['sSortDir_'+i];
-            break;
-          case 'numericRange':
-          default:
-            current[colName] = {order:kvMap['sSortDir_'+i]};
-            break;
-        }
-        sort[i] = current;
-      }
-      sort = sort.reverse();
-    }
-    
-    return {
-      body:{
-        query: mustArray.length > 0 ? {bool:{must:mustArray}} : {match_all:{}},
-        sort: sort
-      },
-      from:kvMap['iDisplayStart'],
-      size:kvMap['iDisplayLength']
-    };
+    return sort.reverse();
   },
 
   _showDocMenu: function($dropdownMenu, doc){
@@ -777,6 +722,41 @@ $.widget("nm.view", {
     });
   },
 
+  _exportCsv: function(allFields){
+    var view = this.options.view, columns = _.cloneDeep(view.columns), rows = [];
+    columns = _.omitBy(columns, function(c){return !c.title});
+    rows.push(_.values(_.mapValues(columns, function(c) {if(c.title) return c.title;})).join(','));
+
+    function doExport(scrollId){
+      var opts = {scroll:'1m'};
+      if(scrollId) opts.scrollId = scrollId;
+      view[scrollId ? 'scroll' : 'findDocuments'](opts, function(err, data){
+        if(err) return console.error(err);
+        _.each(data.documents, function(doc){
+          var row = _.reduce(columns, function(r, c){
+            var d = utils.get(doc, c.data);
+            if(c.type == 'date'){
+              var date = moment(d);
+              d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
+            }
+            r.push(d);
+            return r;
+          }, []);
+          rows.push(row.join(','));
+        });
+
+        if(data.documents.length > 0){
+          doExport(data.scrollId);
+        } else {
+          var blob = new Blob(["\uFEFF" + rows.join('\n')],{ type: "text/plain;charset=utf-8"});
+          FileSaver.saveAs(blob, view.title + ".csv");
+        }
+      });
+    }
+
+    doExport();
+  },
+
   save: function(){
     var o = this.options, self = this;
     if(this._isDirty()){
@@ -803,7 +783,7 @@ $.widget("nm.view", {
       switch(sc.type){
         case 'keywords':
           self.table.column(sc.name+':name')
-               .search(_(sc.selectedItems).map("value").filter().flatMap().value().join(','));
+               .search(_.isEmpty(sc.values) ? '' : sc.values.join(','));
           break;
         case 'containsText':
           self.table.column(sc.name+':name')

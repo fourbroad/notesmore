@@ -73,6 +73,12 @@ _.assign(Document, {
     query.index = documentAllAlias(domainId, collectionId || '*');
     query.type = DOC_TYPE;
     query.version = true;
+
+    if(options&&options.sort) query.body.sort = options.sort;
+    if(options&&options.from) query.from = options.from;
+    if(options&&options.size) query.size = options.size;
+    if(options&&options.scroll) query.scroll = options.scroll;
+
   	return elasticsearch.search(query).then(function(data){
   	  var result = {
   	    total:data.hits.total,
@@ -96,8 +102,7 @@ _.assign(Document, {
   scroll: function(options){
   　return elasticsearch.scroll(options).then(function(data){
   	  return {
-  	    total:data.hits.total,
-  	    offset: query.from || 0,
+  	    total: data.hits.total,
   	    scrollId: data._scroll_id,
   	    documents: _.reduce(data.hits.hits, function(r, v, k){
   	      var doc = _.cloneDeep(v._source);
