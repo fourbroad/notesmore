@@ -34,8 +34,8 @@ function inherits(Child, Parent, proto) {
 }
 
 
-function buildMeta(domainId, doc, authorId, metaId){
-  return Meta.get(domainId, metaId).then( meta => {
+function buildMeta(domainId, doc, authorId, metaId, options){
+  return Meta.get(domainId, metaId, options).then( meta => {
     var defaultAcl = _.cloneDeep(meta.acl||{}), _meta = doc._meta || {}, timestamp = new Date().getTime();
     delete defaultAcl.create;
     _meta.acl = _.merge(defaultAcl, _.at(doc, '_meta.acl')[0]);
@@ -59,10 +59,10 @@ function checkPermission(profile, permissions){
 }
 
 function createEntity(elasticsearch, authorId, domainId, collectionId, documentId, docData, options) {
-  var metaId = _.at(docData, '_meta.metaId')[0] || '.meta', 
-      index = documentHotAlias(domainId, collectionId);
+  var metaId = _.at(docData, '_meta.metaId')[0] || '.meta', index = documentHotAlias(domainId, collectionId),
+      metaIndex = _.at(options, 'metaIndex')[0], metaOpts = metaIndex ? {index: metaIndex} : null;
   docData.id = documentId;
-  return buildMeta(domainId, docData, authorId, metaId).then( docData => {
+  return buildMeta(domainId, docData, authorId, metaId, metaOpts).then( docData => {
     return elasticsearch.create({ index: index, type: "snapshot", id: documentId, body: docData });
   }).then( (result) => {
     if(result._version > 1){
@@ -82,97 +82,93 @@ function createEntity(elasticsearch, authorId, domainId, collectionId, documentI
   });
 }
 
-function getEntity(elasticsearch, cache, domainId, collectionId, documentId, options){
-  var uid = uniqueId(domainId, collectionId, documentId), options = options || {}, version = options.version, doc = cache.get(uid);
-  if (!doc) {
-//     return elasticsearch.get({index: documentAllAlias(domainId, collectionId), type: 'snapshot', id: documentId }).then( data => {
-//       var source = data._source;
-  if(documentId == null) debugger;
-   var promise = elasticsearch.search({index: documentAllAlias(domainId, collectionId), type: 'snapshot', version: true, body: {
+function getEntity(elasticsearch, domainId, collectionId, documentId, options){
+  var options = options || {}, version = options.version, promise;
+  if(options.index){
+    promise = elasticsearch.get({index: options.index, type: 'snapshot', id: documentId });
+  } else {
+    promise = elasticsearch.search({index: documentAllAlias(domainId, collectionId), type: 'snapshot', version: true, body: {
       query: {
         ids: {
           values:[documentId]
         }
       }
-    }}).then( result => {
+    }}).then(result => {
       if(result.hits.total == 0){
-//         debugger;
         return Promise.reject('Document is not found: ' + [domainId, collectionId, documentId].join(',')); 
-      } 
-      
-      var data = result.hits.hits[0], source = data._source;
+      } else {
+        return result.hits.hits[0];
+      }
+    });
+  }
 
-      if(version && version < source._meta.version){
-        return elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body: {
-          query:{ term:{'id.keyword': documentId} },
-          sort: [{
-            '_meta.created': {order : "desc"}
-          },{
-            version: {order: "desc"}
-          }]
-        }}).then(result => {
-          var patch = [], ver, updated;
-          _.each(result.hits.hits, (v,k)=>{
-            var evt = v._source;
+  promise = promise.then( data => {
+    var source = data._source;
+    if(version && version < source._meta.version){
+      return elasticsearch.search({index: eventAllAlias(domainId, collectionId), type: 'event', body: {
+        query:{ term:{'id.keyword': documentId} },
+        sort: [{
+          '_meta.created': {order : "desc"}
+        },{
+          version: {order: "desc"}
+        }]
+      }}).then(result => {
+        var patch = [], ver, updated;
+        _.each(result.hits.hits, (v,k)=>{
+          var evt = v._source;
 
-            if(evt.version > version - 1) return;
+          if(evt.version > version - 1) return;
 
-            if(evt.version == version - 1){
-              ver = evt.version + 1;
-              updated = evt._meta.created;              
-            }
+          if(evt.version == version - 1){
+            ver = evt.version + 1;
+            updated = evt._meta.created;              
+          }
 
-            if(evt.patch[0].op=="add" && evt.patch[0].path==""){
-              evt.patch = _.reduce(evt.patch, (r,v,k)=>{
-                if(v.value) v.value = JSON.parse(v.value);
-                r.push(v);
-                return r;
-              },[]);
-              patch = evt.patch.concat(patch);
-              return false;
-            }else{
-              evt.patch = _.reduce(evt.patch, (r,v,k)=>{
-                if(v.value) v.value = JSON.parse(v.value);
-                r.push(v);
-                return r;
-              },[]);
-              patch = evt.patch.concat(patch);
-              return true;
-            }
-          });
-
-          if(!_.isEmpty(patch)){
-            source = _.merge(jsonPatch.applyPatch({}, patch).newDocument,{_meta:{
-              version: ver,
-              updated: updated
-            }});
-
-//             cache.set(uid, source);
-            return source;
-          } else {
-            return Promise.reject("Version is not exists!");
+          if(evt.patch[0].op=="add" && evt.patch[0].path==""){
+            evt.patch = _.reduce(evt.patch, (r,v,k)=>{
+              if(v.value) v.value = JSON.parse(v.value);
+              r.push(v);
+              return r;
+            },[]);
+            patch = evt.patch.concat(patch);
+            return false;
+          }else{
+            evt.patch = _.reduce(evt.patch, (r,v,k)=>{
+              if(v.value) v.value = JSON.parse(v.value);
+              r.push(v);
+              return r;
+            },[]);
+            patch = evt.patch.concat(patch);
+            return true;
           }
         });
-      } else if((version && version > source._meta.version) || version == 0 ){
-        return Promise.reject("Version is not exists!");
-      } else if(!version || version == source._meta.version) {
-        source.id = source.id || data._id;
-        source._meta.index = data._index;
-        source._meta.version = data._version;
-//         cache.set(uid, source);
-        return source;
-      }
-    }).catch(e => Promise.reject(e.toString()));
 
-    if(options.refresh) {
-      return elasticsearch.indices.refresh({index: documentAllAlias(domainId, collectionId)}).then(() => {
-        return promise;
+        if(!_.isEmpty(patch)){
+          source = _.merge(jsonPatch.applyPatch({}, patch).newDocument,{_meta:{
+            version: ver,
+            updated: updated
+          }});
+          return source;
+        } else {
+          return Promise.reject("Version is not exists!");
+        }
       });
-    } else {
-      return promise;
+    } else if((version && version > source._meta.version) || version == 0 ){
+      return Promise.reject("Version is not exists!");
+    } else if(!version || version == source._meta.version) {
+      source.id = source.id || data._id;
+      source._meta.index = data._index;
+      source._meta.version = data._version;
+      return source;
     }
+  });
+
+  if(options.refresh) {
+    return elasticsearch.indices.refresh({index: documentAllAlias(domainId, collectionId)}).then(() => {
+      return promise;
+    });
   } else {
-    return Promise.resolve(doc);
+    return promise;
   }
 }
 

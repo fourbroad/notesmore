@@ -2,6 +2,7 @@
 const _ = require('lodash')
   , createError = require('http-errors')
   , jsonPatch = require('fast-json-patch')
+  , NodeCache = require("node-cache")
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
   , {uniqueId, documentHotAlias, inherits, createEntity, getEntity, buildMeta} = require('./utils');
@@ -73,7 +74,7 @@ _.assign(Collection, {
   
   init: function(config) {
     elasticsearch = config.elasticSearch;
-    cache = config.nodeCache;
+    cache = new NodeCache(config.ncConfig);
     return Collection;
   },
 
@@ -181,14 +182,25 @@ _.assign(Collection, {
     }).then(() =>{
       return createEntity(elasticsearch, authorId, domainId, COLLECTIONS, collectionId, collectionData, options);
     }).then((data) => {
-      return new Collection(domainId, data);
+      var collection = new Collection(domainId, data);
+      cache.set(uniqueId(domainId, COLLECTIONS, collectionId), collection);
+      return collection;
     });
   },
 
   get: function(domainId, collectionId, options) {
-    return getEntity(elasticsearch, cache, domainId, COLLECTIONS, collectionId, options).then(source => {
-      return new Collection(domainId, source);
-    });
+    var uid = uniqueId(domainId, COLLECTIONS, collectionId), version = _.at(options, 'version')[0], collection;
+    uid = version ? uid + '~' + version : uid;
+    collection = cache.get(uid);
+    if(collection){
+      return Promise.resolve(collection);
+    }else{
+      return getEntity(elasticsearch, domainId, COLLECTIONS, collectionId, options).then(source => {
+        collection = new Collection(domainId, source);
+        cache.set(uid, collection);
+        return collection;
+      });
+    }
   },
 
   find: function(domainId, query, options){

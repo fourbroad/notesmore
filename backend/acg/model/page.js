@@ -1,6 +1,7 @@
 
 const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
+  , NodeCache = require("node-cache")
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
   , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
@@ -18,21 +19,32 @@ _.assign(Page, {
   
   init: function(config) {
     elasticsearch = config.elasticSearch;
-    cache = config.nodeCache;
+    cache = new NodeCache(config.ncConfig);
     return Page;
   },
 
   create: function(authorId, domainId, pageId, pageData, options){
     if(!_.at(pageData, '_meta.metaId')[0]) _.set(pageData, '_meta.metaId', '.meta-page');
     return createEntity(elasticsearch, authorId, domainId, PAGES, pageId, pageData, options).then((data) => {
-      return new Page(domainId, data);
+      var page = new Page(domainId, data);
+      cache.set(uniqueId(domainId, PAGES, pageId), page);
+      return page;
     });
   },
 
   get: function(domainId, pageId, options) {
-    return getEntity(elasticsearch, cache, domainId, PAGES, pageId, options).then( data => {
-      return new Page(domainId, data);
-    });
+    var uid = uniqueId(domainId, PAGES, pageId), version = _.at(options, 'version')[0], page;
+    uid = version ? uid + '~' + version : uid;
+    page = cache.get(uid);
+    if(page){
+      return Promise.resolve(page);
+    }else{
+      return getEntity(elasticsearch, domainId, PAGES, pageId, options).then( source => {
+        page = new Page(domainId, source);
+        cache.set(uid, page);
+        return page;
+      });
+    }
   },
 
   find: function(domainId, query, options){

@@ -2,6 +2,7 @@ module.exports = User;
 
 const _ = require('lodash')
   , createError = require('http-errors')
+  , NodeCache = require("node-cache")
   , Domain = require('./domain')
   , Document = require('./document')
   , crypto = require('crypto')
@@ -24,7 +25,7 @@ _.assign(User, {
   
   init: function(config) {
     elasticsearch = config.elasticSearch;
-    cache = config.nodeCache;
+    cache = new NodeCache(config.ncConfig);
     secret = config.md5.secret
     return User;
   },
@@ -92,14 +93,25 @@ _.assign(User, {
     if(!_.at(userData, '_meta.metaId')[0]) _.set(userData, '_meta.metaId', '.meta-user');
     
     return createEntity(elasticsearch,authorId, Domain.ROOT, USERS, userId, userData, options).then((data) => {
-      return new User(data);
+      var user = new User(data);
+      cache.set(uniqueId(Domain.ROOT, USERS, userId), user);
+      return user;
     });
   },
 
   get: function(userId, options) {
-    return getEntity(elasticsearch, cache, Domain.ROOT, USERS, userId, options).then( data => {
-      return new User(data);
-    });
+    var uid = uniqueId(Domain.ROOT, USERS, userId), version = _.at(options, 'version')[0], user;
+    uid = version ? uid + '~' + version : uid;
+    user = cache.get(uid);
+    if(user){
+      return Promise.resolve(user);
+    }else{
+      return getEntity(elasticsearch, Domain.ROOT, USERS, userId, options).then(source=>{
+        user = new User(source);
+        cache.set(uid, user);
+        return user;
+      });
+    }
   },
 
   find: function(query, options){

@@ -1,8 +1,7 @@
 
 const _ = require('lodash')
   , createError = require('http-errors')
-  , config = require('config')
-  , model = require('./model')({elasticSearch: JSON.parse(JSON.stringify(config.get('elasticSearch')))});
+  , model = require('./model');
 
 const
   { Collection, Document, Domain, Form, Group, Meta, Page, Action, Role, Profile, File, User, View, Utils} = model;
@@ -52,13 +51,13 @@ function checkPermission(visitorId, domainId, obj, method, data, options){
     });
   }
 
-  if(method == 'patch' && data.length > 0){
-    var metas = _.filter(data, function(p) { return p.path=="/_meta" || p.path.startsWith("/_meta/"); });
+  if(method == 'patch' && data.patch.length > 0){
+    var metas = _.filter(data.patch, function(p) { return p.path=="/_meta" || p.path.startsWith("/_meta/"); });
     if(metas.length == 0){
       return doCheckPermission(visitorId, domainId, permissions, options);
     } else {
       var metaPermissions = _.at(obj,'_meta.acl.patchMeta')[0];
-      if(metas.length == data.length){
+      if(metas.length == data.patch.length){
         return doCheckPermission(visitorId, domainId, metaPermissions, options);
       } else {
         return Promise.all([doCheckPermission(visitorId, domainId, metaPermissions), doCheckPermission(visitorId, domainId, permissions)]);

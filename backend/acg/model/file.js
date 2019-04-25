@@ -2,6 +2,7 @@
 const _ = require('lodash')
   , Path = require('path')
   , jsonPatch = require('fast-json-patch')
+  , NodeCache = require("node-cache")
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
   , WebHDFS = require('webhdfs')
@@ -22,21 +23,32 @@ _.assign(File, {
   
   init: function(config) {
     elasticsearch = config.elasticSearch;
-    cache = config.nodeCache;
+    cache = new NodeCache(config.ncConfig);
     return File;
   },
 
   create: function(authorId, domainId, fileId, fileData, options) {
     if(!_.at(fileData, '_meta.metaId')[0]) _.set(fileData, '_meta.metaId', '.meta-file');
     return createEntity(elasticsearch, authorId, domainId, FILES, fileId, fileData, options).then((data) => {
-      return new File(domainId, data);
+      var file = new File(domainId, data);
+      cache.set(uniqueId(domainId, FILES, fileId), file);
+      return file;
     });
   },
 
   get: function(domainId, fileId, options) {
-    return getEntity(elasticsearch, cache, domainId, FILES, fileId, options).then( source => {
-      return new File(domainId, source);
-    });
+    var uid = uniqueId(domainId, FILES, fileId), version = _.at(options, 'version')[0], file;
+    uid = version ? uid + '~' + version : uid;
+    file = cache.get(uid);
+    if(file){
+      return Promise.resolve(file);
+    }else{
+      return getEntity(elasticsearch, domainId, FILES, fileId, options).then( source => {
+        file = new File(domainId, source);
+        cache.set(uid, file);
+        return file;
+      });
+    }
   },
 
   find: function(domainId, query, options){

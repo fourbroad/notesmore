@@ -2,6 +2,7 @@ module.exports = Domain;
 
 const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
+  , NodeCache = require("node-cache")
   , uuidv4 = require('uuid/v4')
   , Meta = require('./meta')
   , Collection = require('./collection')
@@ -52,7 +53,8 @@ function initTempates(domainId) {
 function createIndices(domainId) {
   var cols = domainId == ROOT ? COLLECTIONS.concat(ROOT_COLLECTIONS) : COLLECTIONS;
   return Promise.all(_.map(cols, function(col) {
-    return Collection.createIndices(domainId, col.id);
+    console.log('Create index ('+ domainId +',' + col.id +') ...');
+    return Collection.createIndices(domainId, col.id).then(()=>console.log('Index ('+ domainId +',' + col.id +') created!'));
   }));
 }
 
@@ -226,19 +228,20 @@ function buildUserBatch(authorId, authorTitle, domainId) {
 }
 
 function initDomain(authorId, authorTitle, domainId) {
-  return initTempates(domainId).then(result=>{
+  return initTempates(domainId).then(()=>{
     return createIndices(domainId);
-  }).then(result=>{
+  }).then(()=>{
     var cb = buildCollectionBatch(authorId, domainId)
       , mb = buildMetaBatch(authorId, domainId)
       , vb = buildViewBatch(authorId, domainId)
       , ab = buildActionBatch(authorId, domainId)
       , pb = buildPageBatch(authorId, domainId)
       , rb = buildRoleBatch(authorId, domainId)
-      , ub = buildUserBatch(authorId, authorTitle, domainId);
+      , ub = buildUserBatch(authorId, authorTitle, domainId);    
+    console.log('Batch create Collections, Metas, Views, Actions, Pages, Roles and Users...');
     return elasticsearch.bulk({
       body: cb.concat(mb).concat(vb).concat(ab).concat(pb).concat(rb).concat(ub)
-    });
+    }).then(()=>{console.log('Collections, Metas, Views, Actions, Pages, Roles and Users created!');});
   });
 }
 
@@ -254,7 +257,7 @@ _.assign(Domain, {
 
   init: function(config) {
     elasticsearch = config.elasticSearch;
-    cache = config.nodeCache;
+    cache = new NodeCache(config.ncConfig);
     return Domain;
   },
 
@@ -269,18 +272,28 @@ _.assign(Domain, {
 
     if (!_.at(domainData, '_meta.metaId')[0]) _.set(domainData, '_meta.metaId', '.meta-domain');
 
-    return promise.then(result => {
-      return createEntity(elasticsearch, authorId, ROOT, DOMAINS, domainId, domainData, options);
+    return promise.then(() => {
+      return createEntity(elasticsearch, authorId, ROOT, DOMAINS, domainId, domainData, {metaIndex: ROOT + '~' + Meta.METAS + '~hot~snapshots'});
     }).then(data => {
-      return new Domain(data);
+      var domain = new Domain(data);
+      cache.set(uniqueId(ROOT, DOMAINS, domainId), domain);
+      return domain;
     });
   },
 
   get: function(domainId, options) {
-    return getEntity(elasticsearch, cache, ROOT, DOMAINS, domainId, options).then(source=>{
-      return new Domain(source);
+    var uid = uniqueId(ROOT, DOMAINS, domainId), version = _.at(options, 'version')[0], domain;
+    uid = version ? uid + '~' + version : uid;
+    domain = cache.get(uid);
+    if(domain){
+      return Promise.resolve(domain);
+    }else{
+      return getEntity(elasticsearch, ROOT, DOMAINS, domainId, options).then(source=>{
+        domain = new Domain(source);
+        cache.set(uid, domain);
+        return domain;
+      });
     }
-    );
   },
 
   find: function(query, options) {

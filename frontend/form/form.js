@@ -109,7 +109,7 @@ $.widget("nm.form", {
           value:[{domainId:doc.domainId, collectionId: doc.collectionId, id: doc.id}]
         }];
       }
-      profile.patch(patch, function(err, profile){
+      profile.patch({patch: patch}, function(err, profile){
         if(err) return console.error(err);
         self._refreshFavorite(profile.favorites);
         self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
@@ -128,10 +128,10 @@ $.widget("nm.form", {
           var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;}),
               oldFavorites = _.cloneDeep(profile.favorites);
           if(index >= 0){
-            profile.patch([{
+            profile.patch({patch:[{
               op:'remove',
               path: '/favorites/'+index            
-            }], function(err, profile){
+            }]}, function(err, profile){
               if(err) return console.error(err);
               self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
             });
@@ -230,7 +230,7 @@ $.widget("nm.form", {
   save: function(){
     var o = this.options, self = this;
     if(this._isDirty()){
-      o.document.patch(this._getPatch(), function(err, document){
+      o.document.patch({patch:this._getPatch()}, function(err, document){
         if(err) return console.error(err);
 
   	    _.forOwn(o.document,function(v,k){delete o.document[k]});
@@ -312,7 +312,7 @@ $.widget("nm.form", {
     var doc = this.options.document, self = this;
     this.showIdTitleDialog({
       modelTitle:'Save as...', 
-      id: doc.id, 
+      id: doc.id || uuidv4(), 
       title: doc.title || '', 
       placeholder:{
         id: 'Enter id of form',

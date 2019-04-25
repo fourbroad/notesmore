@@ -1,6 +1,7 @@
 
 const _ = require('lodash')
   , jsonPatch = require('fast-json-patch')
+  , NodeCache = require("node-cache")
   , uuidv4 = require('uuid/v4')
   , Document = require('./document')
   , {uniqueId, inherits, createEntity, getEntity} = require('./utils');
@@ -45,22 +46,33 @@ _.assign(View, {
   
   init: function(config) {
     elasticsearch = config.elasticSearch;
-    cache = config.nodeCache;
+    cache = new NodeCache(config.ncConfig);
     return View;
   },
 
   create: function(authorId, domainId, viewId, viewData, options) {
     if(!_.at(viewData, '_meta.metaId')[0]) _.set(viewData, '_meta.metaId', '.meta-view');
     return createEntity(elasticsearch, authorId, domainId, VIEWS, viewId, viewData, options).then((data) => {
-      return new View(domainId, data);
+      var view = new View(domainId, source);
+      cache.set(uniqueId(domainId, VIEWS, viewId), view);
+      return view;
     });
   },
 
   get: function(domainId, viewId, options) {
-    return getEntity(elasticsearch, cache, domainId, VIEWS, viewId, options).then( source => {
-      return new View(domainId, source);
-    });
-  },
+    var uid = uniqueId(domainId, VIEWS, viewId), version = _.at(options, 'version')[0], view;
+    uid = version ? uid + '~' + version : uid;
+    view = cache.get(uid);
+    if(view){
+      return Promise.resolve(view);
+    }else{
+      return getEntity(elasticsearch, domainId, VIEWS, viewId, options).then(source => {
+        view = new View(domainId, source);
+        cache.set(uid, view);
+        return view;
+      });
+    }
+  },  
 
   find: function(domainId, query, options){
     return Document.find.call(this, domainId, VIEWS, query, options);

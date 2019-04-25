@@ -140,7 +140,7 @@ $.widget("nm.view", {
           value:[{domainId:view.domainId, collectionId: view.collectionId, id: view.id}]
         }];
       }
-      profile.patch(patch, function(err, profile){
+      profile.patch({patch: patch}, function(err, profile){
         if(err) return console.error(err);
         self._refreshFavorite(profile.favorites);
         self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
@@ -157,10 +157,10 @@ $.widget("nm.view", {
         var oldFavorites = _.cloneDeep(profile.favorites), 
             index = _.findIndex(profile.favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;});
         if(index >= 0){
-          profile.patch([{
+          profile.patch({patch:[{
             op:'remove',
             path: '/favorites/'+index            
-          }], function(err, profile){
+          }]}, function(err, profile){
             if(err) return console.error(err);
             self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
           });
@@ -760,7 +760,7 @@ $.widget("nm.view", {
   save: function(){
     var o = this.options, self = this;
     if(this._isDirty()){
-      o.view.patch(this._getPatch(), function(err, view){
+      o.view.patch({patch: this._getPatch()}, function(err, view){
         if(err) return console.error(err);
   	    _.forOwn(o.view,function(v,k){delete o.view[k]});
         _.merge(o.view, view);

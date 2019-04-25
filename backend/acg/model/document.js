@@ -4,6 +4,7 @@ const _ = require('lodash')
   , uuidv4 = require('uuid/v4')
   , createError = require('http-errors')
   , jsonPatch = require('fast-json-patch')
+  , NodeCache = require("node-cache")
   , { uniqueId, documentHotAlias, documentAllAlias, eventAllAlias, buildMeta, createEntity, getEntity} = require('./utils');
 
 const DOC_TYPE = 'snapshot'
@@ -53,20 +54,31 @@ _.assign(Document, {
 
   init: function(config) {
     elasticsearch = config.elasticSearch;
-    cache = config.nodeCache;
+    cache = new NodeCache(config.ncConfig);
     return Document;
   },
 
   create: function(authorId, domainId, collectionId, documentId, docData, options) {
     return createEntity(elasticsearch, authorId, domainId, collectionId, documentId, docData, options).then(data => {
-      return new Document(domainId, collectionId, data);
+      var document = new Document(domainId, collectionId, data);
+      cache.set(uniqueId(domainId, collectionId, documentId), document);
+      return document;
     });
   },
 
   get: function(domainId, collectionId, documentId, options){
-    return getEntity(elasticsearch, cache, domainId, collectionId, documentId, options).then(source => {
-      return new Document(domainId, collectionId, source);
-    });
+    var uid = uniqueId(domainId, collectionId, documentId), version = _.at(options, 'version')[0], document;
+    uid = version ? uid + '~' + version : uid;
+    document = cache.get(uid);
+    if(document){
+      return Promise.resolve(document);
+    }else{
+      return getEntity(elasticsearch, domainId, collectionId, documentId, options).then(source => {
+        document = new Document(domainId, collectionId, source);
+        cache.set(uid, document);
+        return document;
+      });
+    }
   },
 
   find: function(domainId, collectionId, query, options) {
@@ -188,7 +200,7 @@ _.assign(Document.prototype, {
 
   patch: function(authorId, patch, options) {
     var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id);
-    return this._doPatch({patch: patch, _meta:{author: authorId, created: new Date().getTime()}}, options).then(result => {
+    return this._doPatch(_.merge(patch, {_meta:{author: authorId, created: new Date().getTime()}}), options).then(result => {
       cache.del(uid);
       return self;
     });
@@ -241,8 +253,8 @@ _.assign(Document.prototype, {
 
   patchMeta: function(authorId, metaPatch, options) {
     var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id);
-    _.each(metaPatch, function(p){ p.path = "/_meta" + p.path; });
-    return this._doPatch({patch: metaPatch, _meta:{author: authorId, created: new Date().getTime()}}).then(result => {
+    _.each(metaPatch.patch, function(p){ p.path = "/_meta" + p.path; });
+    return this._doPatch(_.merge(metaPatch, {_meta:{author: authorId, created: new Date().getTime()}})).then(result => {
       self._getCache().del(uid);
       return self._meta;
     });
