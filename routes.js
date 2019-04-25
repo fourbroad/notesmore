@@ -49,6 +49,16 @@ router.post('/:domainId/:collectionId/:documentId/_patch', function(req, res){
   });
 });
 
+router.delete('/_logout', function(req, res){
+  let visitorId = req.visitorId;
+  User.logout(visitorId).then( result => {
+    return visitorId + " has logged out";
+  }).then(result => res.send(result)).catch(err => {
+    console.error(err);
+    res.status(err.status).json(err);
+  });
+});
+
 router.post('/:domainId/.files', function(req, res) {
   var visitorId = req.visitorId
     , domainId = req.params.domainId
