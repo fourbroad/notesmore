@@ -201,7 +201,6 @@ _.assign(Document.prototype, {
   patch: function(authorId, patch, options) {
     var self = this, uid = uniqueId(this.domainId, this.collectionId, this.id);
     return this._doPatch(_.merge(patch, {_meta:{author: authorId, created: new Date().getTime()}}), options).then(result => {
-      cache.del(uid);
       return self;
     });
   },

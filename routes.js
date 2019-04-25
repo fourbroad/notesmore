@@ -8,20 +8,15 @@ const _ = require('lodash')
   , inspect = require('util').inspect
   , Busboy = require('busboy')
   , StringDecoder = require('string_decoder').StringDecoder
-  , acg = require('./backend/acg')
-  , hdfs = WebHDFS.createClient({
-  user: 'fourbroad',
-  // Hadoop user
-  host: 'localhost',
-  // Namenode host
-  port: 9870 // Namenode port
-});
+  , config = require('config')
+  , model = require('./backend/acg/model')
+  , hdfs = WebHDFS.createClient(config.get('elasticSearch'));
 
 //router.get('/', function(request, response){
 //  response.redirect( '/index.html' );
 //});
 
-const {Domain, User, File, Collection, Profile, Utils} = acg.model;
+const {Domain, User, File, Collection, Profile, Utils} = model;
 
 router.post('/:domainId/.files', function(req, res) {
   var visitorId = req.visitorId

@@ -1,9 +1,9 @@
 var 
   unless = require('express-unless'),
-  acg = require('../acg'),
+  model = require('../acg/model'),
   utils = require('./utils');
 
-const {User} = acg.model;
+const User = model.User;
   
 function UnauthorizedError(code, error) {
 	this.name = "UnauthorizedError";
