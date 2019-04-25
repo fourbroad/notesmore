@@ -43,13 +43,12 @@ app.use('/dist', express.static(path.join(__dirname,'dist')));
 // app.use('/test', express.static(path.join(__dirname,'test')));
 
 app.use(cookieParser());
-app.use(jwt());
-// app.use(jwt().unless({
-//   path: [
-//     '/index.html',
-//     { url: '/', methods: ['GET', 'PUT']}
-//   ]
-// }))
+app.use(jwt().unless({
+  path: [
+    '/index.html',
+    { url: '/_login', methods: ['POST']}
+  ]
+}))
 app.use("/", routes);
 
 // catch 404 and forward to error handler

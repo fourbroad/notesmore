@@ -10,13 +10,44 @@ const _ = require('lodash')
   , StringDecoder = require('string_decoder').StringDecoder
   , config = require('config')
   , model = require('./backend/acg/model')
+  , ACL = require('./backend/acg/acl')
   , hdfs = WebHDFS.createClient(config.get('elasticSearch'));
+
+const
+  { Collection, Document, Domain, Form, Group, Meta, Page, Action, Role, Profile, File, User, View, Utils} = model,
+  { getClass, filterQuery, checkPermission, checkCreate, checkAcl1, checkAcl2, checkAcl3 } = ACL;
+
 
 //router.get('/', function(request, response){
 //  response.redirect( '/index.html' );
 //});
 
-const {Domain, User, File, Collection, Profile, Utils} = model;
+router.post('/_login', function(req, res){
+  let user = req.body;  
+  User.login(user.id, user.password).then(token => {
+    res.send(token);
+  }).catch(err => res.status(err.status).json(err));
+});
+
+router.post('/:domainId/:collectionId/_bulk', function(req, res){
+  let visitorId = req.visitorId, domainId = req.params.domainId, collectionId = req.params.collectionId, docs = req.body;
+  checkAcl2(visitorId, Collection, domainId, collectionId, 'bulk', null).then( collection => {
+    return collection.bulk(visitorId, docs);
+  }).then(result => res.json(result)).catch(err => {
+    console.error(err);
+    res.status(err.status).json(err);
+  });
+});
+
+router.post('/:domainId/:collectionId/:documentId/_patch', function(req, res){
+  let visitorId = req.visitorId, domainId = req.params.domainId, collectionId = req.params.collectionId, documentId = req.params.documentId, patch = req.body;
+  checkAcl3(visitorId, getClass(collectionId), domainId, collectionId, documentId, 'patch', patch).then( document => {
+    return document.patch(visitorId, patch);
+  }).then(doc => res.json(doc)).catch(err => {
+    console.error(err);
+    res.status(err.status).json(err);
+  });
+});
 
 router.post('/:domainId/.files', function(req, res) {
   var visitorId = req.visitorId
