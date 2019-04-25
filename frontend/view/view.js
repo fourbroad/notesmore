@@ -110,7 +110,8 @@ $.widget("nm.view", {
 
     this._on(this.$actionMoreMenu, {
       'click li.dropdown-item.save-as': this._onItemSaveAs,
-      'click li.dropdown-item.export-csv': this._exportCsv,
+      'click li.dropdown-item.export-csv-all': this._exportCsvAll,
+      'click li.dropdown-item.export-csv-current': this._exportCsvCurrent,
       'click li.dropdown-item.delete' : this._onDeleteSelf
     });   
     this._on(this.$saveBtn, {click: this.save});
@@ -182,7 +183,10 @@ $.widget("nm.view", {
       $('<li class="dropdown-item save-as">Save as...</li>').appendTo(this.$actionMoreMenu);
     }
 
-    $('<li class="dropdown-item export-csv">Export CSV</li>').appendTo(this.$actionMoreMenu);
+    $('<div class="dropdown-divider"></div>').appendTo(this.$actionMoreMenu);
+    $('<li class="dropdown-item export-csv-all">Export CSV (All fields)</li>').appendTo(this.$actionMoreMenu);
+    $('<li class="dropdown-item export-csv-current">Export CSV (Current fields)</li>').appendTo(this.$actionMoreMenu);
+    $('<div class="dropdown-divider"></div>').appendTo(this.$actionMoreMenu);
     
     utils.checkPermission(view.domainId, currentUser.id, 'delete', view, function(err, result){
       if(result){
@@ -289,9 +293,11 @@ $.widget("nm.view", {
   },
 
   _refreshSearchBar: function(){
-    var o = this.options, self = this, view = o.view;
+    var o = this.options, self = this, view = o.view, 
+        searchColumns = _.filter(view.searchColumns, function(sc) { return sc.visible == undefined || sc.visible == true; });
+
     this.$searchContainer.empty();
-    _.each(view.searchColumns, function(sc){
+    _.each(searchColumns, function(sc){
       switch(sc.type){
         case 'keywords':
           $("<div/>").appendTo(self.$searchContainer).keywords({
@@ -722,11 +728,9 @@ $.widget("nm.view", {
     });
   },
 
-  _exportCsv: function(allFields){
-    var view = this.options.view, columns = _.cloneDeep(view.columns), rows = [];
-    columns = _.omitBy(columns, function(c){return !c.title});
+  _doExportCsv: function(columns){
+    var view = this.options.view, rows = [];
     rows.push(_.values(_.mapValues(columns, function(c) {if(c.title) return c.title;})).join(','));
-
     function doExport(scrollId){
       var opts = {scroll:'1m'};
       if(scrollId) opts.scrollId = scrollId;
@@ -755,6 +759,18 @@ $.widget("nm.view", {
     }
 
     doExport();
+  },
+
+  _exportCsvAll: function(){
+    var columns = _.cloneDeep(this.options.view.columns);
+    columns = _.omitBy(columns, function(c){return !c.title});
+    this._doExportCsv(columns);
+  },
+
+  _exportCsvCurrent: function(){
+    var columns = _.cloneDeep(this.options.view.columns);
+    columns = _.omitBy(columns, function(c){return !c.title || c.visible == false});
+    this._doExportCsv(columns);
   },
 
   save: function(){
