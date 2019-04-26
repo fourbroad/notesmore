@@ -3,7 +3,7 @@ import validate from "validate.js";
 import fphtml from './forgit-password.html';
 import './forgit-password.scss';
 
-$.widget("nm.signup", {
+$.widget("nm.forgitPassword", {
   options: {
     maxSMSCount: 5,//获取最大验证码次数
     waitSMSTime: 60,//每次获取验证码后等待时长
