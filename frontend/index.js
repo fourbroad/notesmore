@@ -32,7 +32,7 @@ if(currentDomain == 'www') currentDomain = '.root';
 
 $('body').runtime({
   client: {
-    host:'47.100.213.55', 
+    host:'notesmore.com', 
     port:'3000'
   },
   currentDomain: currentDomain
