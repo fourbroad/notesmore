@@ -161,7 +161,7 @@ $.widget('nm.workbench', {
   },
 
   _setInterval(){
-    let _this = this;
+    let _this = this, o = this.options, client = o.page.getClient();
     this.interval = setInterval(function() {
       if((new Date().getTime()/1000) > jwtDecode(client.token).exp){
         clearInterval(_this.interval);
@@ -261,9 +261,10 @@ $.widget('nm.workbench', {
   },
 
   _loadNewDialog: function(){
-    var self = this;
+    var self = this, o = this.options;
     import(/* webpackChunkName: "new-dialog" */ 'new-dialog/new-dialog').then(({default: nd}) => {
       $('<div/>').newdialog({
+        client: o.page.getClient(),
         $anchor: this.$newDocumentBtn,
         domain: currentDomain
       }).newdialog('show');

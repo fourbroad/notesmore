@@ -1,5 +1,4 @@
-const _ = require('lodash')
-  , client = require('../../lib/client')();
+const _ = require('lodash');
 
 var showErrorsForInput, showErrors, clearErrors, clearInputError, checkPermission, get;
 
@@ -35,7 +34,7 @@ clearInputError = function($input){
 }
 
 checkPermission = function(domainId, userId, method, doc, callback) {
-  const {Profile} = client, permissions = _.at(doc, '_meta.acl.'+method)[0];
+  const client = doc.getClient(), Profile = client.Profile, permissions = _.at(doc, '_meta.acl.'+method)[0];
 
   if (!permissions)
     return callback ? callback(null, true) : console.log(true);

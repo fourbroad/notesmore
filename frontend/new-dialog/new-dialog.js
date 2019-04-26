@@ -5,16 +5,13 @@ import Masonry from 'masonry-layout';
 import './new-dialog.scss';
 import newDialogHtml from './new-dialog.html';
 
-const client = require('../../lib/client')()
-      , uuidv4 = require('uuid/v4');
-
-const { Meta } = client;
+const uuidv4 = require('uuid/v4');
 
 $.widget('nm.newdialog', {
   options: {},
 
   _create: function(){
-    var o = this.options, self = this;
+    var o = this.options, self = this, client = o.client, Meta = client.Meta;
 
     this._addClass('nm-newdialog', 'modal fade');
     this.element.html(newDialogHtml);

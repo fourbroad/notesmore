@@ -6,8 +6,23 @@ import 'jquery-ui/ui/widget';
 import 'jquery-ui/ui/data';
 import 'jquery.urianchor';
 
-const client = require('../../lib/client')()
-  , jwtDecode = require('jwt-decode');
+const jwtDecode = require('jwt-decode');
+
+const client = require('lib/client');
+
+window.client = client;
+window.User = client.User;
+window.Collection = client.Collection;
+window.Document = client.Document;
+window.Domain = client.Domain;
+window.Form = client.Form;
+window.Group = client.Group;
+window.Meta = client.Meta;
+window.Page = client.Page;
+window.Action = client.Action;
+window.Profile = client.Profile;
+window.Role = client.Role;
+window.View = client.View;
 
 /**
  * NOTE: Register resize event for Masonry layout
@@ -39,6 +54,7 @@ $.widget('nm.runtime',{
     var o = this.options, self = this, token = this.getToken();
 
     window.runtime = this;
+    client.init(o.client);
 
     this._connectedListener = $.proxy(this._gotoConnected, this);
     this._loggedInListener = $.proxy(this._gotoConnected, this);
@@ -162,7 +178,6 @@ $.widget('nm.runtime',{
   },
 
   _setCurrentDomain: function(domainId){
-    var o = this.options;
     client.Domain.get(domainId, function(err, domain){
       if(err) return console.error(err);
       window.currentDomain = domain;

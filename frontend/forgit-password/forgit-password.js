@@ -1,7 +1,5 @@
 import validate from "validate.js";
 
-var client = require('../../lib/client')();
-
 import fphtml from './forgit-password.html';
 import './forgit-password.scss';
 

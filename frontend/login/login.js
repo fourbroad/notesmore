@@ -1,6 +1,5 @@
 import validate from "validate.js";
 
-var client = require('../../lib/client')();
 const jwtDecode = require('jwt-decode');
 
 import loginHtml from './login.html';
@@ -58,6 +57,8 @@ $.widget("nm.login", {
   },
 
   _create() {
+    let o = this.options, client = o.document.getClient();
+    
     this._addClass('nm-login');
     this.element.html(loginHtml);
 
@@ -68,7 +69,7 @@ $.widget("nm.login", {
     this._getverifyCode();
 
 
-    if (this.options.timeoutLogin) {//超时登录
+    if (o.timeoutLogin) {//超时登录
       this.element.find('.content').removeClass('bg-img').find('.body').removeClass('login-width')
         .find('.model-1 .forget').remove().end()
         .find('.help').addClass('mar-bottom').next().remove();
@@ -138,7 +139,9 @@ $.widget("nm.login", {
    *
    */
   _submit(e) {
-    let $target = $(e.currentTarget)
+    let o = this.options
+      , client = o.document.getClient()
+      , $target = $(e.currentTarget)
       , $model = $target.parents('.model')
       , error = this._verifyData($target)
       , self = this

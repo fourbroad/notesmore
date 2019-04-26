@@ -1,11 +1,7 @@
 import utils from 'core/utils';
 import validate from "validate.js";
 
-var client = require('../../lib/client')();
-
 import accountHtml from './account.html';
-
-var {User} = client;
 
 $.widget("nm.account", {
   options:{
@@ -69,7 +65,7 @@ $.widget("nm.account", {
       self._refresh();
     }
 
-    client.on("loggedIn", this.loggedInListener);
+    o.client.on("loggedIn", this.loggedInListener);
 
     this._refresh();
     
@@ -77,7 +73,7 @@ $.widget("nm.account", {
   },
 
   _onSignoff: function(event){
-    var o = this.options;
+    var o = this.options, client = o.client;
 
     event.preventDefault();
     event.stopPropagation();
@@ -86,7 +82,7 @@ $.widget("nm.account", {
   },
 
   _refresh: function(){
-    var o = this.options, self = this;
+    var o = this.options, self = this, User = o.client.User;
     User.get(function(err, user){
       if(user.avatar){
         self.$avatar.attr('src', user.avatar);
@@ -100,6 +96,7 @@ $.widget("nm.account", {
   },
 
   _destroy: function() {
+    var o = this.options, client = o.client;
     this.element.empty();
     client.off("loggedIn", this.loggedInListener);
     client.off("loggedOut", this.loggedOutListener);

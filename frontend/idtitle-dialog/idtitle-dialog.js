@@ -5,8 +5,6 @@ const
   Loader = require('core/loader'),
   idtitleDialog  = require('./idtitle-dialog.html');
 
-const { Meta } = client;
-
 $.widget('nm.idtitledialog', {
   options: {
     modelTitle: 'Save...'

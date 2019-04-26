@@ -88,7 +88,7 @@ $.widget("nm.form", {
   },
 
   _onFavorite: function(e) {
-    var o = this.options, doc = o.document, self = this, currentUser = client.currentUser, Profile = client.Profile;
+    var o = this.options, doc = o.document, self = this, client = doc.getClient(), currentUser = client.currentUser, Profile = client.Profile;
     Profile.get(doc.domainId, currentUser.id, function(err, profile){
       if(err) return console.error(err);
       var oldFavorites = _.cloneDeep(profile.favorites), patch,
@@ -152,7 +152,7 @@ $.widget("nm.form", {
   },
 
   _refresh: function(){
-    var o = this.options, doc = o.document, self = this, currentUser = client.currentUser;
+    var o = this.options, doc = o.document, self = this, client = doc.getClient(), currentUser = client.currentUser;
     checkPermission(doc.domainId, currentUser.id, 'patch', doc, function(err, result){
       if(!result){
         self.jsonEditor.setReadOnly(true);
@@ -168,7 +168,7 @@ $.widget("nm.form", {
     if(o.isNew){
       this.$favorite.hide();
     } else {
-      var self = this, doc = o.document,　currentUser = client.currentUser, Profile = client.Profile;
+      var self = this, doc = o.document,　client = doc.getClient(), currentUser = client.currentUser, Profile = client.Profile;
       this.$favorite.show();
       
       function doRefreshFavorite(favorites){
@@ -293,7 +293,7 @@ $.widget("nm.form", {
   },
 
   _armActionMoreMenu: function(){
-    var o = this.options, self = this, doc = o.document, currentUser = doc.getClient().currentUser;
+    var o = this.options, self = this, doc = o.document, client = doc.getClient(), currentUser = client.currentUser;
     this.$actionMoreMenu.empty();
     $('<li class="dropdown-item save-as">Save as ...</li>').appendTo(this.$actionMoreMenu);
 

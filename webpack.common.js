@@ -8,8 +8,8 @@ module.exports = {
   resolve: {
     extensions: ['.webpack-loader.js', '.web-loader.js', '.loader.js', '.js'],
     alias: {
-//       config: path.resolve(__dirname, 'config'),
       frontend: path.resolve(__dirname, 'frontend'),
+      lib: path.resolve(__dirname, 'lib'),
       test: path.resolve(__dirname, 'test'),
       'jquery-ui/ui/widget': 'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
       'canvas-to-blob': 'blueimp-canvas-to-blob/js/canvas-to-blob.js',
@@ -20,6 +20,7 @@ module.exports = {
     },    
     modules: [
       path.join(__dirname, 'frontend'), 
+      path.join(__dirname, 'lib'),
       path.resolve(__dirname, 'node_modules')
     ]
   },

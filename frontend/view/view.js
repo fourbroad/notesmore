@@ -7,8 +7,7 @@ const
   utils = require('core/utils'),
   Loader = require('core/loader'),
   uuidv4 = require('uuid/v4'),
-  FileSaver = require('file-saver'),
-  client = require('../../lib/client')();
+  FileSaver = require('file-saver');
 
 // const PerfectScrollbar = require('perfect-scrollbar');
 // require('perfect-scrollbar/css/perfect-scrollbar.css');
@@ -29,8 +28,6 @@ require('search/full-text/full-text');
 
 require('./view.scss');
 const viewHtml = require('./view.html');
-
-const {Action, Collection} = client;
 
 $.widget("nm.view", {
 
@@ -120,7 +117,7 @@ $.widget("nm.view", {
   },
 
   _onFavorite: function(e){
-    var o = this.options, view = o.view, self = this, currentUser = client.currentUser, Profile = client.Profile;
+    var o = this.options, view = o.view, self = this, client = view.getClient(), currentUser = client.currentUser, Profile = client.Profile;
     Profile.get(view.domainId, currentUser.id, function(err, profile){
       if(err) return console.error(err);
       var oldFavorites = _.cloneDeep(profile.favorites), patch,
@@ -150,7 +147,7 @@ $.widget("nm.view", {
   },
 
   _onDeleteSelf: function(e){
-    var view = this.options.view, self = this, currentUser = client.currentUser;
+    var view = this.options.view, self = this, client = view.getClient(), currentUser = client.currentUser;
     view.delete(function(err, result){
       if(err) return console.error(err);
         Profile.get(view.domainId, currentUser.id, function(err, profile){
@@ -174,7 +171,7 @@ $.widget("nm.view", {
   },
 
   _armActionMoreMenu: function(){
-    var o = this.options, self = this, view = o.view, currentUser = client.currentUser;
+    var o = this.options, self = this, view = o.view, client = view.getClient(), currentUser = client.currentUser;
     this.$actionMoreMenu.empty();
 
     if(o.view.collectionId == ".collections"){
@@ -195,7 +192,7 @@ $.widget("nm.view", {
     });
 
     Loader.armActions(client, this, o.view, this.$actionMoreMenu, o.actionId);
-  },
+  },  
 
   refresh: function() {
     var o = this.options, self = this, view = o.view;
@@ -222,7 +219,7 @@ $.widget("nm.view", {
       serverSide: true,
       columns: _.cloneDeep(view.columns),
       searchCols: this._armSearchCol(),
-      search: {search: view.search.keyword},
+      search: {search: _.at(view,'search.keyword')[0]},
       order: this._buildOrder(view.sort),
       columnDefs : [{
         targets: 0,
@@ -489,7 +486,7 @@ $.widget("nm.view", {
 
     $("<div/>").appendTo(this.$searchContainer).fulltextsearch({
       class: 'search-item',
-      keyword: view.search.keyword,
+      keyword: _.at(view,'search.keyword')[0],
       valueChanged: function(event, keyword){
         view.search.keyword = keyword.keyword; 
         self.table.search(keyword.keyword).draw();
@@ -598,7 +595,7 @@ $.widget("nm.view", {
     if(o.isNew){
       this.$favorite.hide();
     }else{
-      var self = this, view = o.view,　currentUser = client.currentUser, Profile = client.Profile;
+      var self = this, view = o.view,　client = view.getClient(), currentUser = client.currentUser, Profile = client.Profile;
       this.$favorite.show();
 
       function doRefreshFavorite(favorites){
@@ -667,7 +664,7 @@ $.widget("nm.view", {
   },
 
   _showDocMenu: function($dropdownMenu, doc){
-    var currentUser = client.currentUser;
+    var client = this.options.view.getClient(), currentUser = client.currentUser;
     $dropdownMenu.empty();
     
     utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, function(err, result){
@@ -708,7 +705,7 @@ $.widget("nm.view", {
   },
 
   saveAs: function(id, title, callback){
-    var o = this.options, View = client.View, view = _.cloneDeep(o.view), self = this;
+    var o = this.options, client = o.view.getClient(), View = client.View, view = _.cloneDeep(o.view), self = this;
     view.title = title;
     delete view._meta;
     if(o.view.collectionId == '.collections'){
