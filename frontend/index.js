@@ -9,6 +9,7 @@ import 'calendar/calendar';
 import 'chat/chat';
 import 'email/email';
 import 'signup/signup';
+import 'forgit-password/forgit-password';
 import 'login/login';
 import 'form/form';
 import 'uploadfiles/uploadfiles.js';
