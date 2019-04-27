@@ -195,10 +195,10 @@ $.widget("nm.view", {
   },  
 
   refresh: function() {
-    var o = this.options, self = this, view = o.view;
+    var o = this.options, self = this, view = o.view.get(o.locale);
     this.$viewTitle.html(view.title||view.id);
 
-    $('i', this.$icon).removeClass().addClass(o.view._meta.iconClass||'ti-file');
+    $('i', this.$icon).removeClass().addClass(view._meta.iconClass||'ti-file');
 
     this._refreshFavorite()
     this._armActionMoreMenu();
@@ -217,10 +217,10 @@ $.widget("nm.view", {
       lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],      
       processing: true,
       serverSide: true,
-      columns: _.cloneDeep(view.columns),
+      columns: _.map(_.cloneDeep(view.columns), (c)=>{if(c&&c.name&&!c.data){c.data = c.name} return c;}),
       searchCols: this._armSearchCol(),
-      search: {search: _.at(view,'search.keyword')[0]},
-      order: this._buildOrder(view.sort),
+      search: {search: _.at(view,'.search.fulltext.keyword')[0]},
+      order: this._buildOrder(_.at(view, 'search.sort')[0]),
       columnDefs : [{
         targets: 0,
         width: "10px",
@@ -290,21 +290,21 @@ $.widget("nm.view", {
   },
 
   _refreshSearchBar: function(){
-    var o = this.options, self = this, view = o.view, 
-        searchColumns = _.filter(view.searchColumns, function(sc) { return sc.visible == undefined || sc.visible == true; });
+    var o = this.options, self = this, view = o.view.get(o.locale), 
+        searchFields = _.filter(view.search.fields, function(sf) { return sf.visible == undefined || sf.visible == true; });
 
     this.$searchContainer.empty();
-    _.each(searchColumns, function(sc){
-      switch(sc.type){
+    _.each(searchFields, function(sf){
+      switch(sf.type){
         case 'keywords':
           $("<div/>").appendTo(self.$searchContainer).keywords({
-            name: sc.name,
+            name: sf.name,
             class:'search-item',
             btnClass:'btn-sm',
             mode: 'multi',
-            selectedItems: sc.values,
+            selectedItems: sf.values,
             menuItems: function(filter, callback){
-              view.distinctQuery(sc.name, {include:filter, size:10000}, function(err, data){
+              view.distinctQuery(sf.name, {include:filter, size:10000}, function(err, data){
                 if(err) return console.error(err);
                 callback(data.values);
               });
@@ -313,30 +313,30 @@ $.widget("nm.view", {
               var label = _.reduce(selectedItems, function(text, item) {
                 return text == '' ? item : text + ',' + item;
               }, '');
-              return label == '' ? sc.title + ":all" : label;
+              return label == '' ? sf.title + ":all" : label;
             },
             valueChanged: function(event, values){
-              var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
-              sc2.values = values.selectedItems;
-              self.table.column(sc2.name+':name').search(sc2.values.join(',')).draw();
+              var sf2 = _.find(view.search.fields, function(o){return o.name == sf.name});
+              sf2.values = values.selectedItems;
+              self.table.column(sf2.name+':name').search(sf2.values.join(',')).draw();
               self._refreshHeader();
             }
           });
           break;
         case 'numericRange':
           $("<div/>").appendTo(self.$searchContainer).numericrange({
-            name: sc.name,
+            name: sf.name,
             class:'search-item',
             btnClass:'btn-sm',
-            title: sc.title,
-            lowestValue: sc.lowestValue,
-            highestValue: sc.highestValue,
+            title: sf.title,
+            lowestValue: sf.lowestValue,
+            highestValue: sf.highestValue,
             valueChanged: function(event, range){
-              var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
-              sc2.lowestValue = range.lowestValue;
-              sc2.highestValue = range.highestValue;
-              self.table.column(sc2.name+':name')
-                .search(sc2.lowestValue||sc2.highestValue ? [sc2.lowestValue, sc2.highestValue].join(','):'')
+              var sf2 = _.find(view.search.fields, function(o){return o.name == sf.name});
+              sf2.lowestValue = range.lowestValue;
+              sf2.highestValue = range.highestValue;
+              self.table.column(sf2.name+':name')
+                .search(sf2.lowestValue||sf2.highestValue ? [sf2.lowestValue, sf2.highestValue].join(','):'')
                 .draw();
               self._refreshHeader();
             }
@@ -344,55 +344,55 @@ $.widget("nm.view", {
           break;
         case 'datetimeRange':
           $("<div/>").appendTo(self.$searchContainer).datetimerange({
-            name: sc.name,
+            name: sf.name,
             class:'search-item',
             btnClass:'btn-sm',
-            title: sc.title,
-            option: sc.option,
-            unit: sc.unit,
-            earliest: sc.option == "range" ? sc.sEarliest: sc.earliest,
-            latest: sc.option == "range" ? sc.sLatest: sc.latest,
+            title: sf.title,
+            option: sf.option,
+            unit: sf.unit,
+            earliest: sf.option == "range" ? sf.sEarliest: sf.earliest,
+            latest: sf.option == "range" ? sf.sLatest: sf.latest,
             valueChanged: function(event, range){
-              var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
-              sc2.option = range.option;
-              delete sc2.earliest;
-              delete sc2.latest;
-              delete sc2.unit;
-              delete sc2.sEarliest;
-              delete sc2.sLatest;
+              var sf2 = _.find(view.search.fields, function(o){return o.name == sf.name});
+              sf2.option = range.option;
+              delete sf2.earliest;
+              delete sf2.latest;
+              delete sf2.unit;
+              delete sf2.sEarliest;
+              delete sf2.sLatest;
               
-              switch(sc2.option){
+              switch(sf2.option){
                 case 'latest':
-                  sc2.earliest = range.earliest;
-                  sc2.unit = range.unit;
+                  sf2.earliest = range.earliest;
+                  sf2.unit = range.unit;
                 break;
                 case 'before':
-                  sc2.latest = range.latest;
-                  sc2.unit = range.unit;
+                  sf2.latest = range.latest;
+                  sf2.unit = range.unit;
                 break;
                 case 'between':
                   if(range.earliest){
-                    sc2.earliest = range.earliest;                    
+                    sf2.earliest = range.earliest;                    
                   }
 
                   if(range.latest){
-                    sc2.latest = range.latest;                    
+                    sf2.latest = range.latest;                    
                   }
                   break;
                 case 'range':
                   if(range.earliest){
-                    sc2.sEarliest = range.earliest;                    
+                    sf2.sEarliest = range.earliest;                    
                   }
 
                   if(range.latest){
-                    sc2.sLatest = range.latest;                                        
+                    sf2.sLatest = range.latest;                                        
                   }
                   break;
                 default:
               }
                     
-              self.table.column(sc2.name+':name')
-                .search(self._buildDatetimeRangeSearch(sc2))
+              self.table.column(sf2.name+':name')
+                .search(self._buildDatetimeRangeSearch(sf2))
                 .draw();
               self._refreshHeader();
             }
@@ -400,64 +400,64 @@ $.widget("nm.view", {
           break;
         case 'datetimeDuedate':
           $("<div/>").appendTo(self.$searchContainer).datetimeduedate({
-            name: sc.name,
+            name: sf.name,
             class:'search-item',
             btnClass:'btn-sm',
-            title: sc.title,
-            option: sc.option,
-            unit: sc.unit,
-            willYn: sc.willYn,
-            earliest: sc.option == "range" ? sc.sEarliest: sc.earliest,
-            latest: sc.option == "range" ? sc.sLatest: sc.latest,
+            title: sf.title,
+            option: sf.option,
+            unit: sf.unit,
+            willYn: sf.willYn,
+            earliest: sf.option == "range" ? sf.sEarliest: sf.earliest,
+            latest: sf.option == "range" ? sf.sLatest: sf.latest,
             valueChanged: function(event, range){
-              var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
-              sc2.option = range.option;
-              delete sc2.earliest;
-              delete sc2.latest;
-              delete sc2.unit;
-              delete sc2.sEarliest;
-              delete sc2.sLatest;
+              var sf2 = _.find(view.search.fields, function(o){return o.name == sf.name});
+              sf2.option = range.option;
+              delete sf2.earliest;
+              delete sf2.latest;
+              delete sf2.unit;
+              delete sf2.sEarliest;
+              delete sf2.sLatest;
               
-              switch(sc2.option){
+              switch(sf2.option){
                 case 'overdue':
                   break;
                 case 'overdue_more':
-                  sc2.latest = range.latest;
-                  sc2.unit = range.unit;
+                  sf2.latest = range.latest;
+                  sf2.unit = range.unit;
                 break;
                 case 'expire_yn':
-                  sc2.willYn = range.willYn;
-                  if(sc2.willYn == 'yes'){
-                    sc2.latest = range.latest;
+                  sf2.willYn = range.willYn;
+                  if(sf2.willYn == 'yes'){
+                    sf2.latest = range.latest;
                   }else{
-                    sc2.earliest = range.earliest;
+                    sf2.earliest = range.earliest;
                   }
-                  sc2.unit = range.unit;
+                  sf2.unit = range.unit;
                 break;
                 case 'between':{
                   if(range.earliest){
-                    sc2.earliest = range.earliest;                    
+                    sf2.earliest = range.earliest;                    
                   }
 
                   if(range.latest){
-                    sc2.latest = range.latest;                    
+                    sf2.latest = range.latest;                    
                   }
                 }
                 break;
                 case 'range':{
                   if(range.earliest){
-                    sc2.sEarliest = range.earliest;                    
+                    sf2.sEarliest = range.earliest;                    
                   }
                   if(range.latest){
-                    sc2.sLatest = range.latest;                                        
+                    sf2.sLatest = range.latest;                                        
                   }
                 }
                 break;
                 default:
               }
                     
-              self.table.column(sc2.name+':name')
-                .search(self._buildDatetimeRangeSearch(sc2))
+              self.table.column(sf2.name+':name')
+                .search(self._buildDatetimeRangeSearch(sf2))
                 .draw();
               self._refreshHeader();
             }
@@ -465,16 +465,16 @@ $.widget("nm.view", {
           break;
         case 'containsText':
           $("<div/>").appendTo(self.$searchContainer).containstext({
-            name: sc.name,
+            name: sf.name,
             class:'search-item',
             btnClass:'btn-sm',
-            title: sc.title,
-            containsText: sc.containsText,
+            title: sf.title,
+            containsText: sf.containsText,
             valueChanged: function(event, range){
-              var sc2 = _.find(view.searchColumns, function(o){return o.name == sc.name});
-              sc2.containsText = range.containsText;
-              self.table.column(sc2.name+':name')
-                .search(sc2.containsText)
+              var sf2 = _.find(view.search.fields, function(o){return o.name == sf.name});
+              sf2.containsText = range.containsText;
+              self.table.column(sf2.name+':name')
+                .search(sf2.containsText)
                 .draw();
               self._refreshHeader();
             }
@@ -486,9 +486,9 @@ $.widget("nm.view", {
 
     $("<div/>").appendTo(this.$searchContainer).fulltextsearch({
       class: 'search-item',
-      keyword: _.at(view,'search.keyword')[0],
+      keyword: _.at(view,'search.fulltext.keyword')[0],
       valueChanged: function(event, keyword){
-        view.search.keyword = keyword.keyword; 
+        _.set(view, 'search.fulltext.keyword', keyword.keyword);
         self.table.search(keyword.keyword).draw();
         self._refreshHeader();
       }
@@ -553,23 +553,23 @@ $.widget("nm.view", {
   _armSearchCol: function(){
     var o = this.options, self = this, view = o.view;
     return _.reduce(view.columns, function(searchCols, col){
-      var sc = _.find(view.searchColumns, {'name': col.name});
-      if(sc){
-        switch(sc.type){
+      var sf = _.find(view.search.fields, {'name': col.name});
+      if(sf){
+        switch(sf.type){
           case 'keywords':
-            searchCols.push({search: _.isEmpty(sc.values) ? '' : sc.values.join(',')});
+            searchCols.push({search: _.isEmpty(sf.values) ? '' : sf.values.join(',')});
             break;
           case 'numericRange':
-            searchCols.push({search: sc.lowestValue||sc.highestValue ? [sc.lowestValue, sc.highestValue].join(','):''});
+            searchCols.push({search: sf.lowestValue||sf.highestValue ? [sf.lowestValue, sf.highestValue].join(','):''});
             break;
           case 'datetimeRange':
-            searchCols.push({search: self._buildDatetimeRangeSearch(sc)});
+            searchCols.push({search: self._buildDatetimeRangeSearch(sf)});
             break;
           case 'datetimeDuedate':
-            searchCols.push({search: self._buildDatetimeRangeSearch(sc)});
+            searchCols.push({search: self._buildDatetimeRangeSearch(sf)});
             break;
           case 'containsText':
-            searchCols.push({search: sc.containsText});
+            searchCols.push({search: sf.containsText});
             break;
         }
       }else{
@@ -628,7 +628,7 @@ $.widget("nm.view", {
 
   _columnType: function(name){
     var view = this.options.view;
-    var index = _.findIndex(view.columns, function(sc) { return sc.name == name;});
+    var index = _.findIndex(view.columns, function(sf) { return (sf&&sf.name) == name;});
     return view.columns[index].type;
   },
 
@@ -792,22 +792,22 @@ $.widget("nm.view", {
     this._refreshHeader();
     this._refreshSearchBar();
 
-    _.each(o.view.searchColumns, function(sc){
-      switch(sc.type){
+    _.each(o.view.search.fields, function(sf){
+      switch(sf.type){
         case 'keywords':
-          self.table.column(sc.name+':name')
-               .search(_.isEmpty(sc.values) ? '' : sc.values.join(','));
+          self.table.column(sf.name+':name')
+               .search(_.isEmpty(sf.values) ? '' : sf.values.join(','));
           break;
         case 'containsText':
-          self.table.column(sc.name+':name')
-               .search(sc.containsText);
+          self.table.column(sf.name+':name')
+               .search(sf.containsText);
         case 'numericRange':
-          self.table.column(sc.name+':name')
-               .search(sc.lowestValue||sc.highestValue ? [sc.lowestValue, sc.highestValue].join(','):'');
+          self.table.column(sf.name+':name')
+               .search(sf.lowestValue||sf.highestValue ? [sf.lowestValue, sf.highestValue].join(','):'');
           break;
         case 'datetimeRange':
-          self.table.column(sc.name+':name')
-               .search(sc.earliest||sc.latest ? [sc.earliest, sc.latest].join(','):'');
+          self.table.column(sf.name+':name')
+               .search(sf.earliest||sf.latest ? [sf.earliest, sf.latest].join(','):'');
           break;
       }
     });

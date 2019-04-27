@@ -73,7 +73,7 @@ _doLoadDocument = function(client, element, domId, metaId, doc, actId, opts, cal
   });
 }
 
-loadDocument = function(client, element, domId, colId, docId, actId, opts, callback) {
+loadDocument = function(client, element, domId, colId, docId, actId, opts, locale, callback) {
   var metaId, {Meta, Domain, View, Page, Form, Role, Group, User, Document, Action} = client;
 
   function prepareMetaId(doc, opts) {
@@ -84,6 +84,8 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
     opts.document = doc;
     return metaId;
   }
+
+  opts = _.merge(opts, {locale:locale});
 
   switch (colId) {
   case '.metas':
@@ -208,7 +210,7 @@ loadDocument = function(client, element, domId, colId, docId, actId, opts, callb
   }
 }
 
-createDocument = function(client, element, domainId, metaId, callback){
+createDocument = function(client, element, domainId, metaId, locale, callback){
   var { Meta, Action} = client;
   Meta.get(domainId, metaId, function(err, meta){
     var collectionId = meta.container.id, doc, plugin, pluginName, docData = {}, opts = {};
@@ -264,6 +266,7 @@ createDocument = function(client, element, domainId, metaId, callback){
     }
 
     opts.document = doc;
+    opts.locale = locale;
     opts.isNew = true;
 
     Action.get(domainId, 'new', function(err, action) {

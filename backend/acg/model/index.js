@@ -37,13 +37,6 @@ let nc = _.merge({
   collection: {stdTTL: 100, checkperiod: 120, useClones:false}
 }, config.get('nodeCache'));
 
-// let nodeCache = new NodeCache(config.get('nodeCache.default'));
-// let nodeCache = {
-//       get:function(){return null},
-//       set:function(){},
-//       del:function(){}
-//     };
-
 User.init({elasticSearch: esClient, ncConfig: nc.user, md5:{secret: secret}}),
 Meta.init({elasticSearch: esClient, ncConfig: nc.meta}),
 Form.init({elasticSearch: esClient, ncConfig: nc.form}),
@@ -61,7 +54,16 @@ Collection.init({elasticSearch: esClient, ncConfig: nc.collection}),
 
 Domain.get(Domain.ROOT).catch((e)=>{
   console.log("Root domain is initializing......!");
-  Domain.create('administrator', Domain.ROOT, {title: 'Root'}).then(result => console.log("Root domain is initialized!")).catch(err => console.error(err));
+  Domain.create('administrator', Domain.ROOT, {
+    title: 'Notesmore',
+    slogan: 'Work is easy due to collaboration.',
+    _i18n:{
+      "zh-CN":{
+        title: '协同',
+        slogan: '工作因协同而轻松.'
+      }
+    }
+  }).then(result => console.log("Root domain is initialized!")).catch(err => console.error(err));
 });
 
 module.exports = {

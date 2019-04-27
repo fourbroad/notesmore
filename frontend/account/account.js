@@ -5,33 +5,6 @@ import accountHtml from './account.html';
 
 $.widget("nm.account", {
   options:{
-    constraints: {
-      // These are the constraints used to validate the form
-      username: {
-        presence: true,
-        // You need to pick a username too
-        length: {
-          // And it must be between 3 and 20 characters long
-          minimum: 3,
-          maximum: 20
-        },
-        format: {
-          pattern: "[a-z0-9]+",
-          // We don't allow anything that a-z and 0-9
-          flags: "i",
-          // but we don't care if the username is uppercase or lowercase
-          message: "can only contain a-z and 0-9"
-        }
-      },
-      password: {
-        presence: true,
-        // Password is also required
-        length: {
-          // And must be at least 5 characters long
-          minimum: 5
-        }
-      }
-    }
   },
 
   _create: function() {
@@ -39,21 +12,6 @@ $.widget("nm.account", {
 
     this._addClass('nm-account','dropdown');
     this.element.html(accountHtml)
-
-    // Before using it we must add the parse and format functions
-    // Here is a sample implementation using moment.js
-    validate.extend(validate.validators.datetime, {
-      // The value is guaranteed not to be null or undefined but otherwise it
-      // could be anything.
-      parse: function(value, options) {
-        return +moment.utc(value);
-      },
-      // Input is a unix timestamp
-      format: function(value, options) {
-        var format = options.dateOnly ? "YYYY-MM-DD" : "YYYY-MM-DD hh:mm:ss";
-        return moment.utc(value).format(format);
-      }
-    });
 
     this.$avatar = $('.avatar', this.element);
     this.$nickname = $('.nickname', this.element);
@@ -84,9 +42,11 @@ $.widget("nm.account", {
   _refresh: function(){
     var o = this.options, self = this, User = o.client.User;
     User.get(function(err, user){
+      if(err) return console.error(err);
       if(user.avatar){
-        self.$avatar.attr('src', user.avatar);
+        self.$avatar.attr('src', user.avatar);        
       }
+      
       self.$nickname.text(user.title || user.id);
     });
   },

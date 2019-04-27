@@ -30,9 +30,11 @@ if(index >= 0){
 
 if(currentDomain == 'www') currentDomain = '.root';
 
-$('body').runtime({
+window.runtime = $('body').runtime({
   client: {
-    host:'https://notesmore.com'
+//     url:'https://notesmore.com/domains'
+    url: 'localhost:3000/domains'
   },
+  locale: localStorage.getItem('language') || navigator.language,
   currentDomain: currentDomain
-});
+}).runtime('instance');

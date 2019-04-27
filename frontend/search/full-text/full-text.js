@@ -23,8 +23,7 @@ $.widget("nm.fulltextsearch", {
     this._refreshSearchIcon();
 
     this._on(this.$input, {
-      keyup: this._onInputChange,
-      change: this._onInputChange
+      keyup: this._onInputChange
     });
 
     this._on(this.$inputIcon, {

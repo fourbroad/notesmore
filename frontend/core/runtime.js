@@ -53,7 +53,6 @@ $.widget('nm.runtime',{
   _create: function(){
     var o = this.options, self = this, token = this.getToken();
 
-    window.runtime = this;
     client.init(o.client);
 
     this._connectedListener = $.proxy(this._gotoConnected, this);
@@ -198,13 +197,13 @@ $.widget('nm.runtime',{
         }
 
         if(value.col == '.metas' && value.act == 'new'){
-          Loader.createDocument(client, self.element, domainId, metaId, callback);
+          Loader.createDocument(client, self.element, domainId, metaId, o.locale, callback);
         } else {
-          Loader.loadDocument(client, self.element, value.dom||o.currentDomain, value.col, value.doc, value.act, value._doc, callback);
+          Loader.loadDocument(client, self.element, value.dom||o.currentDomain, value.col, value.doc, value.act, value._doc, o.locale, callback);
         }
       }else if(key == 'currentDomain' && value != o.currentDomain){
         var anchor = o.uriAnchor, oldDomainId = o.currentDomain;
-        Loader.loadDocument(client, self.element, value, anchor.col, anchor.doc, anchor.act, anchor._doc, function(err, doc){
+        Loader.loadDocument(client, self.element, value, anchor.col, anchor.doc, anchor.act, anchor._doc, o.locale, function(err, doc){
           if(err){
             self._setOption('currentDomain', oldDomainId);
             return console.log($.extend(err,{domainId: value, collectionId: anchor.col, documentId:anchor.doc, actionId:anchor.act, opts:anchor._doc}));

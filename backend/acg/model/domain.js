@@ -62,14 +62,7 @@ function buildCollectionBatch(authorId, domainId) {
   var cols = domainId == ROOT ? COLLECTIONS.concat(ROOT_COLLECTIONS) : COLLECTIONS;
   return _.flatMap(_.map(cols, function(col) {
     var c = _.cloneDeep(col);
-    c.columns = DEFAULT_COLUMNS;
-    c.searchColumns = DEFAULT_SEARCH_COLUMNS;
-    c.search = {
-      names: ["id", "title", "_meta.author"]
-    };
-    c.sort = [{"_meta.updated": {order: "desc"}},{"_meta.created": {order: "desc"}}];
     c._meta = createMeta(authorId, c);
-    c._meta.metaId = '.meta-collection';
     return [{
       index: {
         _index: indexName(domainId, '.collections'),
@@ -83,14 +76,7 @@ function buildCollectionBatch(authorId, domainId) {
 function buildViewBatch(authorId, domainId) {
   return _.flatMap(_.map(VIEWS, function(view) {
     var v = _.cloneDeep(view);
-    v.columns = DEFAULT_COLUMNS;
-    v.searchColumns = DEFAULT_SEARCH_COLUMNS;
-    v.search = {
-      names: ["id", "title", "_meta.author"]
-    };
-    v.sort = [{"_meta.updated": {order: "desc"}},{"_meta.created": {order: "desc"}}];
     v._meta = createMeta(authorId, v);
-    v._meta.metaId = '.meta-view';
     return [{
       index: {
         _index: indexName(domainId, '.views'),
