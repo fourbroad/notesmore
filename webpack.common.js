@@ -50,10 +50,22 @@ module.exports = {
     }]
   },
   optimization: {
+    runtimeChunk: 'single',
     splitChunks: {
-      chunks: 'all'
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all'
+        }
+      }
     }
-  },  
+  }, 
+//   optimization: {
+//     splitChunks: {
+//       chunks: 'all'
+//     }
+//   },  
   plugins: [
     // To strip all locales except “en”, “es-us” and “ru”
     // (“en” is built into Moment and can’t be removed)
