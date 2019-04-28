@@ -766,7 +766,7 @@ $.widget("nm.view", {
   },
 
   _doExportCsv: function(columns){
-    let view = this.options.view, rows = [];
+    let o = this.options, view = this.options.view, rows = [];
     rows.push(_.values(_.mapValues(columns, function(c) {if(c.title) return c.title;})).join(','));
     function doExport(scrollId){
       let opts = {scroll:'1m'};
@@ -775,7 +775,7 @@ $.widget("nm.view", {
         if(err) return console.error(err);
         _.each(data.documents, function(doc){
           let row = _.reduce(columns, function(r, c){
-            let d = utils.get(doc, c.name);
+            let d = utils.get(doc.get(o.locale), c.name);
             if(c.type == 'date'){
               let date = moment(d);
               d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
