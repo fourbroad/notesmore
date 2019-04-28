@@ -13,7 +13,8 @@
 // ---------------------------------------------------------
 
 .sidebar {
-  background-color: $default-white;
+  background-color: rgb(43,58,66);
+  color: white;
   bottom: 0;
   overflow: hidden;
   position: fixed;
@@ -31,7 +32,6 @@
 
     .sidebar-inner {
       .sidebar-logo {
-        border-bottom: 1px solid transparent;
         padding: 0;
 
         a {
@@ -44,7 +44,7 @@
 
       .sidebar-menu {
         overflow-x: hidden;
-
+        
         > li {
           > a {
             .title {
@@ -77,7 +77,6 @@
 
       .sidebar-inner {
         .sidebar-logo {
-          border-bottom: 1px solid $border-color;
           padding: 0 20px;
         }
 
@@ -131,8 +130,6 @@
 // ---------------------------------------------------------
 
 .sidebar-logo {
-  border-bottom: 1px solid $border-color;
-  border-right: 1px solid $border-color;
   line-height: 0;
   padding: 0 20px;
   transition: all 0.2s ease;
@@ -148,10 +145,6 @@
       min-height: calc(#{$header-height} - 1px);
       width: 100%;
       width: 70px;
-    }
-
-    .logo-text {
-      color: $grey-900;
     }
   }
 
@@ -188,6 +181,7 @@
   overflow: auto;
   padding: 0;
   position: relative;
+  border-top: 1px inset #1d8cd0;
 
   .dropdown-toggle::after {
     display: none;
@@ -195,7 +189,6 @@
 
   .sidebar-link {
     &.active::before {
-      background: $md-blue-500;
       border-radius: 50%;
       content: '';
       display: inline-block;
@@ -208,9 +201,10 @@
   }
 
   li {
+    color:white;
     position: relative;
 
-    &.dropdown {
+    &.dropdown {     
       .arrow {
         font-size: 10px;
         line-height: 40px;
@@ -235,7 +229,7 @@
 
       &.open {
         > a {
-          color: $default-dark;
+          color: white;
 
           .icon-holder {
             color: $default-info;
@@ -261,12 +255,12 @@
     }
 
     a {
-      color: $default-text-color;
+      color: white;
       transition: all 0.3s ease;
 
       &:hover,
       &:focus {
-        color: $default-dark;
+        color: white;
         text-decoration: none;
 
         .icon-holder {
@@ -292,19 +286,14 @@
 
           > li {
             > a {
+              color: white;
               display: inline-block;
               padding: 10px 15px;
 
               &:hover,
               &:focus {
                 background-color: transparent;
-                color: $default-dark;
-              }
-            }
-
-            &.active {
-              a {
-                color: $default-dark;
+                color: white;
               }
             }
           }
@@ -387,7 +376,6 @@
 
         .sidebar-inner {
           .sidebar-logo {
-            border-bottom: 1px solid $border-color;
             padding: 0 20px;
           }
 
@@ -426,7 +414,6 @@
 
       .sidebar-inner {
         .sidebar-logo {
-          border-bottom: 1px solid $border-color;
           padding: 0 20px;
 
           > a {

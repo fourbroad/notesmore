@@ -9,8 +9,7 @@
 // ---------------------------------------------------------
 
 .header {
-  background-color: $default-white;
-  border-bottom: 1px solid $border-color;
+  background-color: rgb(43,58,66);
   display: block;
   margin-bottom: 0;
   padding: 0;
@@ -43,7 +42,7 @@
         float: left;
 
         > a {
-          color: $default-text-color;
+          color: white;
           display: block;
           line-height: $header-height;
           min-height: $header-height;
@@ -56,7 +55,8 @@
 
           &:hover,
           &:focus {
-            color: $default-dark;
+//             color: $default-dark;
+            color: white;
             text-decoration: none;
           }
 

@@ -1030,25 +1030,19 @@ const DEFAULT_ACL = {
   title: "Workbench",
   sidebarItems: [{
     collectionId: ".pages",
-    id: ".dashboard",
-    iconColor: "c-blue-500"
+    id: ".dashboard"
   }, {
     collectionId: ".pages",
-    id: ".calendar",
-    iconColor: "c-deep-orange-500"
+    id: ".calendar"
   }, {
     collectionId: ".pages",
-    id: ".im",
-    iconColor: "c-deep-purple-500"
+    id: ".im"
   }, {
     collectionId: ".pages",
-    id: ".emails",
-    iconColor: "c-brown-500"
+    id: ".emails"
   }, {
     collectionId: ".collections",
-    id: ".collections",
-    label: "All Documents",
-    iconColor: "c-deep-purple-500"
+    id: ".collections"
   }],
   _i18n: {
     "zh-CN": {
