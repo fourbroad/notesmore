@@ -175,14 +175,14 @@ $.widget("nm.view", {
     this.$actionMoreMenu.empty();
 
     if(o.view.collectionId == ".collections"){
-      $('<li class="dropdown-item save-as">'+ _.at(viewLocale, 'toolbox.saveAsView')[0] +'</li>').appendTo(this.$actionMoreMenu);
+      $('<li class="dropdown-item save-as">'+ (_.at(viewLocale, 'toolbox.saveAsView')[0] || 'Save as view...') +'</li>').appendTo(this.$actionMoreMenu);
     } else {
-      $('<li class="dropdown-item save-as">' + _.at(viewLocale, 'toolbox.saveAs')[0] +'</li>').appendTo(this.$actionMoreMenu);
+      $('<li class="dropdown-item save-as">' + (_.at(viewLocale, 'toolbox.saveAs')[0] || 'Save as...') +'</li>').appendTo(this.$actionMoreMenu);
     }
 
     $('<div class="dropdown-divider"></div>').appendTo(this.$actionMoreMenu);
-    $('<li class="dropdown-item export-csv-all">' + _.at(viewLocale, 'toolbox.exportAllCSV')[0] + '</li>').appendTo(this.$actionMoreMenu);
-    $('<li class="dropdown-item export-csv-current">' + _.at(viewLocale, 'toolbox.exportCurrentCSV')[0] + '</li>').appendTo(this.$actionMoreMenu);
+    $('<li class="dropdown-item export-csv-all">' + (_.at(viewLocale, 'toolbox.exportAllCSV')[0]||'Exports CSV (All Fields)') + '</li>').appendTo(this.$actionMoreMenu);
+    $('<li class="dropdown-item export-csv-current">' + (_.at(viewLocale, 'toolbox.exportCurrentCSV')[0]||'Exports CSV (Current Fields)') + '</li>').appendTo(this.$actionMoreMenu);
     $('<div class="dropdown-divider"></div>').appendTo(this.$actionMoreMenu);
     
     utils.checkPermission(view.domainId, currentUser.id, 'delete', view, function(err, result){
@@ -260,7 +260,9 @@ $.widget("nm.view", {
         targets: -1,
         width: "30px",
         data: null,
-        defaultContent: '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="fa fa-ellipsis-h"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>'
+        render: function(data, type, row, meta) {
+          return '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="fa fa-ellipsis-h"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>';
+        }
       }, {
         targets:'_all',
         render:function(data, type, row, meta) {
@@ -272,7 +274,7 @@ $.widget("nm.view", {
           if(d && column.defaultLink){
             d = '<a href="#">'+ d||"" + '</a>';
           }
-          return d ? d : '';
+          return d||'';
         },
         defaultContent:''
       }],
