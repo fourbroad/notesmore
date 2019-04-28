@@ -5,6 +5,16 @@ import containsTextHtml from './contains-text.html';
 $.widget("nm.containstext", {
 
   options:{
+    i18n:{
+      'zh-CN':{
+        all: "全部",
+        contains: "包含",
+        update: "更新",
+        reset: "清除",
+        cancel: "取消",
+        containsTextPlaceholder: "包含文本"
+      }      
+    }
   },
 
   _create: function() {
@@ -46,20 +56,39 @@ $.widget("nm.containstext", {
     this._on(this.$form, {submit: this._onSubmit});
   },
 
-  _refreshButton: function(){
-    var o = this.options, label = '';
-    if(o.containsText){
-      label = o.title+' contains "' + o.containsText + '"';
-    }else{
-      label = o.title+':all'
+  _render: function(){
+    var o = this.options, label;
+    if(o.render){
+      label = o.render(o.containsText);
     }
 
-    this.$containstextBtn.html(label);
+    if(!label){
+      if(o.containsText){
+        label = o.title+this._i18n('contains', ' contains ')+ '"' + o.containsText + '"';
+      }else{
+        label = o.title+': '+this._i18n('all', 'all');
+      }
+    }
+  
+    return label == '' ? "Please enter keyword for " + o.title : label;
+  },
+
+  _refreshButton: function(){
+    this.$containstextBtn.html(this._render());
+    this.$containsTextInput.attr('placeholder',this._i18n('containsTextPlaceholder', 'Contains text'));
+    this.$updateBtn.html(this._i18n('update', 'Update'));
+    this.$resetBtn.html(this._i18n('reset', 'Reset'));
+    this.$cancelBtn.html(this._i18n('cancel', 'Cancel'));
+  },
+
+  _i18n: function(name, defaultValue){
+    let o = this.options;
+    return (o.i18n[o.locale] && o.i18n[o.locale][name]) || defaultValue;
   },
 
   _doSubmit: function(dropdown){
     var o = this.options;
-    o.containsText = this.$containsTextInput.val();
+    o.containsText = this.$containsTextInput.val().trim();
     this._refreshButton();
     this._trigger('valueChanged', null, {containsText: o.containsText});
     if(!dropdown) this.element.trigger('click');

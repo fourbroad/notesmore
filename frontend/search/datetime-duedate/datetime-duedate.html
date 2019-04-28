@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-auto pt-1 pl-0">
-        <span>Overdue</span>
+        <span class="overdue">Overdue</span>
       </div>
     </div>
     <div class="form-row mb-3">
@@ -20,7 +20,7 @@
         </div>
       </div>
       <div class="col-auto pt-1 pl-0">
-        <span>Overdue for more than</span>
+        <span class="overdueMore">Overdue for more than</span>
       </div>
       <div class="input-group input-group-sm before col-auto px-0">
         <input type="text" class="form-control" name="odMore" style="max-width:50px" disabled>
@@ -43,14 +43,8 @@
           <label class="custom-control-label"></label>
         </div>
       </div>
-      <div class="col-auto">
-        <select class="will-yn custom-select custom-select-sm" disabled>
-          <option value="yes" selected>Will</option>
-          <option value="no">Will not</option>
-        </select>
-      </div>
       <div class="col-auto pt-1 pl-0">
-        <span>expire in</span>
+        <span class="inNext">In next</span>
       </div>
       <div class="input-group input-group-sm before col-auto px-0">
         <input type="text" class="form-control" name="expireYn" style="max-width:50px" disabled>
@@ -65,6 +59,15 @@
         </div>
         <div class="invalid-feedback"></div>
       </div>
+      <div class="col-auto pt-1">
+        <span class="inZhCn d-none"></span>
+      </div>
+      <div class="col-auto">
+        <select class="will-yn custom-select custom-select-sm" disabled>
+          <option value="yes" selected>Will be overdue</option>
+          <option value="no">Will not be overdue</option>
+        </select>
+      </div>
     </div>
     <div class="form-row mb-3">
       <div class="col-auto pt-1 pr-0">
@@ -74,7 +77,7 @@
         </div>
       </div>
       <div class="col-auto pt-1 pl-0">
-        <span>Between</span>
+        <span class="between">Between</span>
       </div>
       <div class="input-group input-group-sm bt col-auto px-0">
         <input type="text" class="form-control" name="btEarliest" disabled>
@@ -86,7 +89,7 @@
         <div class="invalid-feedback"></div>
       </div>
       <div class="col-auto pt-1">
-        <span>and</span>
+        <span class="and">and</span>
       </div>
       <div class="input-group input-group-sm bt col-auto">
         <input type="text" class="form-control" name="btLatest" disabled>
@@ -106,14 +109,14 @@
         </div>
       </div>
       <div class="col-auto pt-1 pl-0">
-        <span>In range</span>
+        <span class="inRange">In range</span>
       </div>
       <div class="col-auto px-0">
         <input type="text" class="form-control form-control-sm" name="rEarliest" placeholder="- P1Y2M3DT4H5M6S" style="max-width: 132px;" disabled>
         <div class="invalid-feedback" style="max-width: 132px;"></div>
       </div>
       <div class="col-auto pt-1">
-        <span>to</span>
+        <span class="to">to</span>
       </div>
       <div class="col-auto px-0">
         <input type="text" class="form-control form-control-sm" name="rLatest" placeholder="P1Y2M3DT4H5M6S"  style="max-width: 132px;" disabled>
@@ -121,7 +124,7 @@
       </div>
     </div>
     <div class="form-row mb-3">
-      <small class="col-auto form-text text-muted ml-4"><a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>: P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond</small>
+      <small class="col-auto form-text text-muted ml-4"><a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601:&nbsp</a><span class="iso8601">P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond</span></small>
     </div>    
     <div class="form-group btn-group mb-1">
       <div class="peers ai-c jc-sb fxw-nw">

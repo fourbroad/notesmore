@@ -48,7 +48,7 @@ $.widget('nm.workbench', {
 
     this.$newDocumentBtn = $('li.new-document', this.$workbench);
 //     $('<li class="notifications dropdown"/>').prependTo($('.page-container .nav-right', this.$workbench)).notification();
-    $('<li/>').appendTo($('.page-container .nav-right', this.$workbench)).account({client: client});
+    $('<li/>').appendTo($('.page-container .nav-right', this.$workbench)).account({client: client, locale: o.locale});
 
     this._on(this.$newDocumentBtn, {click: this._loadNewDialog});
     this._on(this.$workbench, {
@@ -268,7 +268,8 @@ $.widget('nm.workbench', {
       $('<div/>').newdialog({
         client: o.page.getClient(),
         $anchor: this.$newDocumentBtn,
-        domain: currentDomain
+        domain: currentDomain,
+        locale: o.locale
       }).newdialog('show');
     });
   },

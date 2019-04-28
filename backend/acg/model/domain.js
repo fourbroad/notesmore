@@ -162,7 +162,12 @@ function buildUserBatch(authorId, authorTitle, domainId) {
       , anonyProfile = {
       id: 'anonymous',
       title: 'Anonymous',
-      "roles": ["anonymous"]
+      "roles": ["anonymous"],
+      _i18n:{
+        'zh-CN':{
+          title:"匿名画像"
+        }
+      }
     };
 
     adminProfile._meta = createMeta(authorId, adminProfile);

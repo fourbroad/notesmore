@@ -10,7 +10,14 @@ $.widget("nm.keywords", {
   options:{
     mode: 'multi', // single, multi
     classes: {},
-    selectedItems: []
+    selectedItems: [],
+    i18n:{
+      'zh-CN':{
+        all: "全部",
+        please: "请选择",
+        clearLink: "清除已选择项目"
+      }
+    }
   },
 
   _create: function() {
@@ -107,6 +114,11 @@ $.widget("nm.keywords", {
     }    
   },
 
+  _i18n: function(name, defaultValue){
+    let o = this.options;
+    return (o.i18n[o.locale] && o.i18n[o.locale][name]) || defaultValue;
+  },  
+
   clear: function(){
     var o = this.options;
     if(o.selectedItems.length > 0){
@@ -144,6 +156,7 @@ $.widget("nm.keywords", {
 
   _refreshClearLink: function(){
     var o = this.options, filter = this.$input.val();
+    this.$clearLink.html(this._i18n('clearLink','Clear selected items'));
     if(filter.trim() == ''){
       this.$clearLink.show();
       if(o.selectedItems.length > 0){
@@ -199,12 +212,16 @@ $.widget("nm.keywords", {
     }
 
     if(!label){
-      label = _.reduce(o.selectedItems, function(text, item) {
-        return text == '' ? item : text + ',' + item;
-      }, '');
+      if(o.selectedItems && o.selectedItems.length > 1){
+        label = _.reduce(o.selectedItems, function(text, item) {
+          return text == '' ? item : text + ',' + item;
+        }, '');
+      } else {
+        label = o.title+': '+this._i18n('all', 'all');
+      }
     }
   
-    return label == '' ? "Please select a " + o.title : label;
+    return label == '' ? this._i18n("please", "Please select a ") + o.title : label;
   },
 
   _refreshButton: function(){

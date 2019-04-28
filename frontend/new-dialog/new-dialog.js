@@ -8,7 +8,15 @@ import newDialogHtml from './new-dialog.html';
 const uuidv4 = require('uuid/v4');
 
 $.widget('nm.newdialog', {
-  options: {},
+  options: {
+    i18n:{
+      'zh-CN':{
+        selectMeta: "请选择元文档类型",
+        create: "创建",
+        cancel: "取消"
+      }      
+    }
+  },
 
   _create: function(){
     var o = this.options, self = this, client = o.client, Meta = client.Meta;
@@ -19,8 +27,10 @@ $.widget('nm.newdialog', {
     
     this.element.appendTo('body').modal({show:false});
 
+　　 this.$dialogTitle = $('.title', this.element);
     this.$metaGrid = $('.masonry', this.element);
     this.$createBtn = $('button.create', this.element);
+    this.$cancelBtn = $('button.cancel', this.element);
 
     this.masonry = new Masonry(this.$metaGrid.get(0), {
       itemSelector: '.masonry-item',
@@ -28,15 +38,18 @@ $.widget('nm.newdialog', {
       percentPosition: true,
     });
 
+    this.refresh();
+
     this.element.on('shown.bs.modal', function (e) {
       $('.masonry-item', self.$metaGrid).remove();
       Meta.find(currentDomain.id, {size:1000}, function(err, result){
         if(err) return console.log(err);
         var $items = _.reduce(result.metas, function(items, meta){
-          var $item = $('<div class="masonry-item col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">'
+          let metaLocale = meta.get(o.locale),
+              $item = $('<div class="masonry-item col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">'
                       +'<div class="meta p-10 bd">'
                         +'<span class="icon-holder"><i class="'+ meta._meta.iconClass+'"></i></span>'
-                        +'<h6>' + (meta.title||meta.id) +'</h6>'
+                        +'<h6>' + (metaLocale.title||metaLocale.id) +'</h6>'
                       +'</div>'
                     +'</div>');
           $('.meta', $item).data('item',meta);
@@ -63,13 +76,25 @@ $.widget('nm.newdialog', {
     return $('.meta.selected', this.$metaGrid).data('item');
   },
 
+  _i18n: function(name, defaultValue){
+    let o = this.options;
+    return (o.i18n[o.locale] && o.i18n[o.locale][name]) || defaultValue;
+  },
+
   _onCreate: function(e){
     var o = this.options, meta = this.getSelected();
     o.$anchor.trigger('createdocument', meta);
     this.element.modal('toggle');
   },
 
+  refresh: function(){
+　　 this.$dialogTitle.html(this._i18n('selectMeta', 'Please select a type of meta-document'));
+    this.$createBtn.html(this._i18n('create', 'Create'));
+    this.$cancelBtn.html(this._i18n('cancel', 'Cancel'));
+  },
+
   show: function(){
+    this.refresh();
     this.element.modal('show');
   }
 });

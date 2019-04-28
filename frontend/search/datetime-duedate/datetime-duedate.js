@@ -1,3 +1,4 @@
+const _ = require('lodash');
 
 import 'jquery-datetimepicker';
 import 'jquery-datetimepicker/jquery.datetimepicker.css';
@@ -53,7 +54,52 @@ $.widget("nm.datetimeduedate", {
           message: isoMessage
         }
       }
-    }
+    },
+    i18n:{
+      'zh-CN':{
+        all: "全部",
+        overdue: "已逾期",
+        overdueMore: "逾期超过",
+        inNext: "在未来",
+        willBeOverdue: "将会逾期",
+        willNotBeOverdue: "不会逾期",
+        between: "从",
+        and: "到",
+        inRange: "从",
+        to: "到",
+        update: "更新",
+        reset: "清除",
+        cancel: "取消",
+        minutes: "分钟",
+        hours: "小时",
+        days: "天",
+        weeks: "周",
+        months: "月",
+        iso8601: "P:期间, Y:年, M:月, D:日, T:时间, H:小时, M:分钟, S:秒",
+        constraints:{
+          odMore:{
+            numericality:{
+              message: "请输入大于0的整数"
+            }
+          },
+          expireYn:{
+            numericality:{
+              message: "请输入大于0的整数"
+            }
+          },
+          rEarliest:{
+            format:{
+              message: "日期范围必须符合ISO 8609规范"
+            }
+          },
+          rLatest:{
+            format:{
+              message: "日期范围必须符合ISO 8609规范"
+            }
+          }
+        }
+      }      
+    }    
   },
 
   _create: function() {
@@ -68,6 +114,8 @@ $.widget("nm.datetimeduedate", {
     this.$btLatestIcon = $('.btLatest-icon', this.$form);
     this.$odMore = $('input[name="odMore"]', this.element);
     this.$oUnit = $('select.o-unit', this.element);
+    this.$inNext = $('span.inNext', this.element);
+    this.$inZhCn = $('span.inZhCn', this.element);
     this.$willYn = $('select.will-yn', this.element);
     this.$expireYn = $('input[name="expireYn"]', this.element);
     this.$eUnit = $('select.e-unit', this.element);
@@ -76,6 +124,15 @@ $.widget("nm.datetimeduedate", {
     this.$datetimeRangeBtn = this.element.children('button');
     this.$dropdownMenu = $('.dropdown-menu', this.element);
     this.$form = $('form', this.$dropdownMenu);
+
+    this.$overdue = $('span.overdue', this.$form);
+    this.$overdueMore = $('span.overdueMore', this.$form);
+    this.$between = $('span.between', this.$form);
+    this.$and = $('span.and', this.$form);
+    this.$inRange = $('span.inRange', this.$form);
+    this.$to = $('span.to', this.$form);
+    this.$iso8601 = $('span.iso8601', this.$form);
+
     this.$updateBtn = $('#update', this.$form)
     this.$resetBtn = $('#reset', this.$form)
     this.$cancelBtn = $('#cancel', this.$form)
@@ -97,6 +154,13 @@ $.widget("nm.datetimeduedate", {
         return moment(value).format(format);
       }
     });
+
+    if(o.locale){
+      _.merge(o.constraints, _.at(o, 'i18n.'+o.locale+'.constraints')[0]);
+      if(o.locale == 'zh-CN'){
+        $.datetimepicker.setLocale('ch');        
+      }
+    }
 
     this._initRadio();
     this._refreshButton();
@@ -223,21 +287,29 @@ $.widget("nm.datetimeduedate", {
   },
 
   _refreshButton: function(){
-    var o = this.options, label = o.title+':all';
+    var o = this.options, label = o.title+':' + this._i18n('all','all');
     switch(o.option){
       case 'overdue':
-        label = o.title + " has expired.";
+        label = o.title + this._i18n('overdue'," has expired.");
         break;
       case 'overdue_more':
         if(o.latest){
-          label = o.title + " overdue for more than " + o.latest + " " + o.unit;
+          label = o.title + this._i18n('overdueMore', " overdue for more than ") + o.latest + " " + this._i18n(o.unit, o.unit);
         }
         break;
       case 'expire_yn':
         if(o.willYn == 'yes' && o.latest){
-          label = o.title + " will expire in " + o.latest + " " + o.unit;
+          if(o.locale == 'zh-CN'){
+            label = o.title + '将会在'+ o.latest + " " + this._i18n(o.unit, o.unit)　+'之内逾期' ;
+          } else {
+            label = o.title + this._i18n('willBeOverdue',' will be overdue in ') + o.latest + " " + this._i18n(o.unit, o.unit);
+          }
         } else if(o.willYn == 'no' && o.earliest){
-          label = o.title + " will no expire in " + o.earliest + " " + o.unit;
+          if(o.locale == 'zh-CN'){
+            label = o.title + '将会在'+ o.latest + " " + this._i18n(o.unit, o.unit)　+'之后逾期' ;
+          } else {
+            label = o.title + this._i18n('willNotBeOverdue',' will no be overdue in ') + o.earliest + " " + this._i18n(o.unit, o.unit);
+          }
         }
         break;
       case 'between':
@@ -248,7 +320,7 @@ $.widget("nm.datetimeduedate", {
         } else if(o.latest){
           label = o.title+'<='+moment(o.latest).format('YYYY-MM-DD');
         }else{
-          label = o.title+':all'
+          label = o.title+':' + this._i18n('all','all');
         }
       break;
       case 'range':{
@@ -267,8 +339,44 @@ $.widget("nm.datetimeduedate", {
       default:      
       break;
     }
-
     this.$datetimeRangeBtn.html(label);
+
+    this.$overdue.html(this._i18n('overdue', 'Overdue'));
+    this.$overdueMore.html(this._i18n('overdueMore', 'Overdue for more than'));
+    this.$between.html(this._i18n('between', 'Between'));
+    this.$and.html(this._i18n('and', 'and'));
+    this.$inRange.html(this._i18n('inRange', 'In Range'));
+    this.$to.html(this._i18n('to', 'to'));
+    this.$iso8601.html(this._i18n('iso8601', ': P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond'));
+    
+    let selects = '<option value="minutes" selected>'+ this._i18n('minutes','minutes')+'</option>' +
+                  '<option value="hours">'+ this._i18n('hours','hours')+'</option>' +
+                  '<option value="days">'+ this._i18n('days','days')+'</option>' +
+                  '<option value="weeks">'+ this._i18n('weeks','weeks')+'</option>' +
+                  '<option value="months">'+ this._i18n('months','months')+'</option>';
+    this.$oUnit.html(selects);
+    this.$eUnit.html(selects);
+    if(o.unit){
+      this.$oUnit.val(o.unit);
+      this.$eUnit.val(o.unit);
+    }
+
+    selects = '<option value="yes" selected>' + this._i18n('willBeOverdue', 'Will be overdue') + '</option>' +
+              '<option value="no">'+ this._i18n('willNotBeOverdue','Will not be overdue') + '</option>'
+    this.$willYn.html(selects);
+    this.$inNext.html(this._i18n('inNext', 'In next'));
+    if(o.locale == 'zh-CN'){
+      this.$inZhCn.html('之内').removeClass('d-none');
+    }else{
+      this.$inZhCn.html('').addClass('d-none');
+    }
+    if(o.willYn){
+      this.$willYn.val(o.willYn);
+    }
+
+    this.$updateBtn.html(this._i18n('update', 'Update'));
+    this.$resetBtn.html(this._i18n('reset', 'Reset'));
+    this.$cancelBtn.html(this._i18n('cancel', 'Cancel'));
   },
 
   _doSubmit: function(dropdown){
@@ -318,6 +426,11 @@ $.widget("nm.datetimeduedate", {
 
       if(!dropdown) this.element.trigger('click');
     }
+  },
+
+  _i18n: function(name, defaultValue){
+    let o = this.options;
+    return (o.i18n[o.locale] && o.i18n[o.locale][name]) || defaultValue;
   },
 
   _onSubmit: function(ev){

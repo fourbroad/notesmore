@@ -123,6 +123,19 @@ const DEFAULT_ACL = {
 }, {
   title: "更新日期"
 }]
+  , DEFAULT_I18N_TOOLBOX = {
+  save: "保存",
+  cancel: "取消",
+  delete: "删除",
+  saveAs: "另存为...",
+  saveAsView: "另存为视图...",
+  exportAllCSV: "导出为CSV文件(所有字段)",
+  exportCurrentCSV: "导出为CSV文件(当前字段)"
+}
+
+  , DEFAULT_I18N_CONTEXTMENU = {
+  delete: "删除"
+}
   , COLLECTIONS = [{
   id: ".collections",
   title: "Data Warehouse",
@@ -138,7 +151,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -160,7 +175,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -182,7 +199,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -204,7 +223,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -226,7 +247,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -248,7 +271,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -270,7 +295,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -293,7 +320,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -315,7 +344,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -337,7 +368,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -360,7 +393,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -382,7 +417,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -405,7 +442,9 @@ const DEFAULT_ACL = {
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
-      }
+      },
+      toolbox: DEFAULT_I18N_TOOLBOX,
+      contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
   },
   _meta: {
@@ -645,7 +684,9 @@ const DEFAULT_ACL = {
         title: "新文档集合",
         search: {
           fields: DEFAULT_I18N_SEARCH_FIELDS
-        }
+        },
+        toolbox: DEFAULT_I18N_TOOLBOX,
+        contextMenu: DEFAULT_I18N_CONTEXTMENU
       }
     },
     _meta: {
@@ -712,7 +753,9 @@ const DEFAULT_ACL = {
         title: "新视图",
         search: {
           fields: DEFAULT_I18N_SEARCH_FIELDS
-        }
+        },
+        toolbox: DEFAULT_I18N_TOOLBOX,
+        contextMenu: DEFAULT_I18N_CONTEXTMENU
       }
     },
     _meta: {

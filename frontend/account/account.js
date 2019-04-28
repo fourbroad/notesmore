@@ -43,11 +43,12 @@ $.widget("nm.account", {
     var o = this.options, self = this, User = o.client.User;
     User.get(function(err, user){
       if(err) return console.error(err);
-      if(user.avatar){
-        self.$avatar.attr('src', user.avatar);        
+      let userLocale = user.get(o.locale);
+      if(userLocale.avatar){
+        self.$avatar.attr('src', userLocale.avatar);
       }
       
-      self.$nickname.text(user.title || user.id);
+      self.$nickname.text(userLocale.title || userLocale.id);
     });
   },
 

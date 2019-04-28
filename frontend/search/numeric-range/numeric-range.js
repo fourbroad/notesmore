@@ -20,6 +20,18 @@ $.widget("nm.numericrange", {
           return {greaterThanOrEqualTo: Number(attributes.lowestValue)};
         }
       }
+    },
+    i18n:{
+      'zh-CN':{
+        all: "全部",
+        lowestLabel: "最小值",
+        lowestPlaceholder: "最小值",
+        highestLabel: "最大值",
+        highestPlaceholder: "最大值",
+        update: "更新",
+        reset: "清除",
+        cancel: "取消"
+      }      
     }
   },
 
@@ -32,7 +44,9 @@ $.widget("nm.numericrange", {
     this.$numericRangeBtn = this.element.children('button');
     this.$dropdownMenu = $('.dropdown-menu', this.element);
     this.$form = $('form', this.$dropdownMenu);
+    this.$lowestLabel = $('label[for=lowestValue]', this.$form);
     this.$lowestInput = $('input[name=lowestValue]', this.$form);
+    this.$highestLabel = $('label[for=highestValue]', this.$form);
     this.$highestInput = $('input[name=highestValue]', this.$form);
     this.$updateBtn = $('#update', this.$form);
     this.$resetBtn = $('#reset', this.$form);
@@ -93,11 +107,24 @@ $.widget("nm.numericrange", {
     } else if(o.highestValue){
       label = o.title+'<='+o.highestValue;
     }else{
-      label = o.title+':all'
+      label = o.title+':' + this._i18n('all', 'all');
     }
 
     this.$numericRangeBtn.html(label);
+
+    this.$lowestLabel.html(this._i18n('lowestLabel','Lowest value'));
+    this.$lowestInput.attr('placeholder', this._i18n('lowestPlaceholder','Lowest value'));
+    this.$highestLabel.html(this._i18n('lowestLabel','Highest value'));
+    this.$highestInput.attr('placeholder', this._i18n('highestPlaceholder','Highest value'));
+    this.$updateBtn.html(this._i18n('update','Update'));
+    this.$resetBtn.html(this._i18n('reset','Reset'));
+    this.$cancelBtn.html(this._i18n('cancel','Cancel'));
   },
+
+  _i18n: function(name, defaultValue){
+    let o = this.options;
+    return (o.i18n[o.locale] && o.i18n[o.locale][name]) || defaultValue;
+  },  
 
   _doSubmit: function(dropdown){
     var o = this.options, errors = validate(this.$form, o.constraints);

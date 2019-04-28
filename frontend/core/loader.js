@@ -288,14 +288,15 @@ createDocument = function(client, element, domainId, metaId, locale, callback){
   });
 }
 
-armActions = function(client, pluginInstance, doc, container, currentActionId) {
+armActions = function(client, pluginInstance, doc, container, currentActionId, locale) {
   const { Action } = client;
   function armItems(domainId, actIds) {
     Action.mget(doc.domainId, actIds, function(err, result) {
       if (err) return console.error(err);
       $.each(result.actions, function(i, action) {
+        let actionLocale = action.get(locale);
         if(action.id != currentActionId){
-          var $li = $('<li class="dropdown-item"></li>').html(action.title).appendTo(container).data('action', action)
+          var $li = $('<li class="dropdown-item"></li>').html(actionLocale.title).appendTo(container).data('action', action)
           ,   mode = action.plugin.mode || 'inline';
           $li.on('click', function(e) {
             if ('offline' == mode) {

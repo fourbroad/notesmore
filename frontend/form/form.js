@@ -29,7 +29,15 @@ $.widget("nm.form", {
 
   options:{
     isNew: false,
-    constraints:{}
+    constraints:{},
+    i18n:{
+      'zh-CN':{
+        save: "保存",
+        saveAs: "另存为",
+        cancel: "取消",
+        delete:　"删除"
+      }
+    }
   },
 
   _create: function() {
@@ -192,22 +200,27 @@ $.widget("nm.form", {
   },
 
   _refreshHeader: function(){
-    var o = this.options, doc = o.document;
-    this.$formTitle.html(doc.title||doc.id);    
+    var o = this.options, doc = o.document,　docLocale = doc.get(o.locale);
+    this.$formTitle.html(docLocale.title||docLocale.id);    
     $('i', this.$icon).removeClass().addClass(doc._meta.iconClass||'ti-file');
 
     if(this._isDirty()){
       if(o.isNew){
-        this.$saveBtn.html("Save as...");
+        this.$saveBtn.html(this._i18n('saveAs', 'Save as...'));
       } else {
-        this.$saveBtn.html("Save");        
+        this.$saveBtn.html(this._i18n('save', 'Save'));
       }
       this.$saveBtn.show();
-      this.$cancelBtn.show();
+      this.$cancelBtn.show().html(this._i18n('cancel', 'Cancel'));
     }else{
       this.$saveBtn.hide();
       this.$cancelBtn.hide();
     }
+  },
+
+  _i18n: function(name, defaultValue){
+    let o = this.options;
+    return (o.i18n[o.locale] && o.i18n[o.locale][name]) || defaultValue;
   },
 
   _getPatch: function(){
@@ -295,11 +308,11 @@ $.widget("nm.form", {
   _armActionMoreMenu: function(){
     var o = this.options, self = this, doc = o.document, client = doc.getClient(), currentUser = client.currentUser;
     this.$actionMoreMenu.empty();
-    $('<li class="dropdown-item save-as">Save as ...</li>').appendTo(this.$actionMoreMenu);
+    $('<li class="dropdown-item save-as">'+ this._i18n('saveAs','Save as ...')+'</li>').appendTo(this.$actionMoreMenu);
 
     utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, function(err, result){
       if(result){
-        $('<li class="dropdown-item delete">Delete</li>').appendTo(self.$actionMoreMenu);
+        $('<li class="dropdown-item delete">' + self._i18n('delete','Delete') + '</li>').appendTo(self.$actionMoreMenu);
       }
     });
 
