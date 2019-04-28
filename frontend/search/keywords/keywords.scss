@@ -1,24 +1,28 @@
 .nm-keywords {
-  input{
-    border-right-width: 0px;    
-  }
+  .dropdown-menu {
+    min-width: 220px;
+    
+    input{
+      border-right-width: 0px;    
+    }
 
-  a.disabled {
-    color: #c3c3c3;
-  }
+    a.disabled {
+      color: #c3c3c3;
+    }
 
-  li {
-    cursor: default;
-  }
+    li {
+      cursor: default;
+    }
   
-  .input-group-text{
-    border-left-width: 0px;
-    background-color: white;
-  }
+    .input-group-text{
+      border-left-width: 0px;
+      background-color: white;
+    }
 
-  .item-container-wrapper {
-    position: relative;
-    max-height: 400px;
-    overflow-y: auto;
+    .item-container-wrapper {
+      position: relative;
+      max-height: 400px;
+      overflow-y: auto;
+    }
   }
 }
