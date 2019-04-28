@@ -106,8 +106,8 @@ _.assign(User, {
     if(user){
       return Promise.resolve(user);
     }else{
-      return getEntity(elasticsearch, Domain.ROOT, USERS, userId, options).then(source=>{
-        user = new User(source);
+      return getEntity(elasticsearch, Domain.ROOT, USERS, userId, options).then(data=>{
+        user = new User(data);
         cache.set(uid, user);
         return user;
       });

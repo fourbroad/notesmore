@@ -43,8 +43,8 @@ _.assign(File, {
     if(file){
       return Promise.resolve(file);
     }else{
-      return getEntity(elasticsearch, domainId, FILES, fileId, options).then( source => {
-        file = new File(domainId, source);
+      return getEntity(elasticsearch, domainId, FILES, fileId, options).then( data => {
+        file = new File(domainId, data);
         cache.set(uid, file);
         return file;
       });

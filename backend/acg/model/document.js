@@ -73,8 +73,8 @@ _.assign(Document, {
     if(document){
       return Promise.resolve(document);
     }else{
-      return getEntity(elasticsearch, domainId, collectionId, documentId, options).then(source => {
-        document = new Document(domainId, collectionId, source);
+      return getEntity(elasticsearch, domainId, collectionId, documentId, options).then(data => {
+        document = new Document(domainId, collectionId, data);
         cache.set(uid, document);
         return document;
       });

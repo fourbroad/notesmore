@@ -7,6 +7,7 @@ const
   utils = require('core/utils'),
   Loader = require('core/loader'),
   uuidv4 = require('uuid/v4'),
+  { Parser } = require('json2csv'),
   FileSaver = require('file-saver');
 
 // const PerfectScrollbar = require('perfect-scrollbar');
@@ -264,15 +265,15 @@ $.widget("nm.view", {
       }, {
         targets:'_all',
         render:function(data, type, row, meta) {
-          let column = meta.settings.aoColumns[meta.col], d = utils.get(row, column.data);
+          let column = meta.settings.aoColumns[meta.col], d = utils.get(row, column.name);
           if(column.type == 'date'){
             let date = moment(d);
             d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
           }
-          if(column.defaultLink){
+          if(d && column.defaultLink){
             d = '<a href="#">'+ d||"" + '</a>';
           }
-          return d;
+          return d ? d : '';
         },
         defaultContent:''
       }],
@@ -775,10 +776,13 @@ $.widget("nm.view", {
         if(err) return console.error(err);
         _.each(data.documents, function(doc){
           let row = _.reduce(columns, function(r, c){
-            let d = utils.get(doc, c.data);
+            let d = utils.get(doc, c.name);
             if(c.type == 'date'){
               let date = moment(d);
               d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
+            }
+            if(_.isArray(d)){
+              d = '\"'+ d.toString() + '\"';
             }
             r.push(d);
             return r;

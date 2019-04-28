@@ -279,8 +279,8 @@ _.assign(Domain, {
     if(domain){
       return Promise.resolve(domain);
     }else{
-      return getEntity(elasticsearch, ROOT, DOMAINS, domainId, options).then(source=>{
-        domain = new Domain(source);
+      return getEntity(elasticsearch, ROOT, DOMAINS, domainId, options).then(data=>{
+        domain = new Domain(data);
         cache.set(uid, domain);
         return domain;
       });

@@ -39,8 +39,8 @@ _.assign(Role, {
     if(role){
       return Promise.resolve(role);
     }else{
-      return getEntity(elasticsearch, domainId, ROLES, roleId, options).then( source => {
-        role = new Role(domainId, source);
+      return getEntity(elasticsearch, domainId, ROLES, roleId, options).then( data => {
+        role = new Role(domainId, data);
         cache.set(uid, role);
         return role;
       });

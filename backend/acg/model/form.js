@@ -39,8 +39,8 @@ _.assign(Form, {
     if(form){
       return Promise.resolve(form);
     }else{
-      return getEntity(elasticsearch, domainId, FORMS, formId, options).then( source => {
-        form = new Form(domainId, source);
+      return getEntity(elasticsearch, domainId, FORMS, formId, options).then( data => {
+        form = new Form(domainId, data);
         cache.set(uid, form);
         return form;
       });

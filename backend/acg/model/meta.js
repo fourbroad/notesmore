@@ -70,8 +70,8 @@ _.assign(Meta, {
     if(meta){
       return Promise.resolve(meta);
     }else{
-      return getEntity(elasticsearch, domainId, METAS, metaId, options).then( source => {
-        meta = new Meta(domainId, source);
+      return getEntity(elasticsearch, domainId, METAS, metaId, options).then( data => {
+        meta = new Meta(domainId, data);
         cache.set(uid, meta);
         return meta;
       });

@@ -195,8 +195,8 @@ _.assign(Collection, {
     if(collection){
       return Promise.resolve(collection);
     }else{
-      return getEntity(elasticsearch, domainId, COLLECTIONS, collectionId, options).then(source => {
-        collection = new Collection(domainId, source);
+      return getEntity(elasticsearch, domainId, COLLECTIONS, collectionId, options).then(data => {
+        collection = new Collection(domainId, data);
         cache.set(uid, collection);
         return collection;
       });

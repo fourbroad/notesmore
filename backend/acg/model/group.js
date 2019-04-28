@@ -39,8 +39,8 @@ _.assign(Group, {
     if(group){
       return Promise.resolve(group);
     }else{
-      return getEntity(elasticsearch, domainId, GROUPS, groupId, options).then( source => {
-        group = new Group(domainId, source);
+      return getEntity(elasticsearch, domainId, GROUPS, groupId, options).then( data => {
+        group = new Group(domainId, data);
         cache.set(uid, group);
         return group;
       });

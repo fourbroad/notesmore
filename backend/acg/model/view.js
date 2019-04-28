@@ -52,7 +52,7 @@ _.assign(View, {
 
   create: function(authorId, domainId, viewId, viewData, options) {
     if(!_.at(viewData, '_meta.metaId')[0]) _.set(viewData, '_meta.metaId', '.meta-view');
-    return createEntity(elasticsearch, authorId, domainId, VIEWS, viewId, viewData, options).then((data) => {
+    return createEntity(elasticsearch, authorId, domainId, VIEWS, viewId, viewData, options).then((source) => {
       var view = new View(domainId, source);
       cache.set(uniqueId(domainId, VIEWS, viewId), view);
       return view;

@@ -39,8 +39,8 @@ _.assign(Profile, {
     if(profile){
       return Promise.resolve(profile);
     }else{
-      return getEntity(elasticsearch, domainId, PROFILES, profileId, options).then( source => {
-        profile = new Profile(domainId, source);
+      return getEntity(elasticsearch, domainId, PROFILES, profileId, options).then( data => {
+        profile = new Profile(domainId, data);
         cache.set(uid, profile);
         return profile;
       });

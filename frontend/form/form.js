@@ -317,7 +317,7 @@ $.widget("nm.form", {
     });
 
     if(!o.isNew){
-      Loader.armActions(client, this, o.document, this.$actionMoreMenu, o.actionId);
+      Loader.armActions(client, this, o.document, this.$actionMoreMenu, o.actionId, o.locale);
     }
   },
 

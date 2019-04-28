@@ -39,8 +39,8 @@ _.assign(Action, {
     if(action){
       return Promise.resolve(action);
     }else{
-      return getEntity(elasticsearch, domainId, ACTIONS, actionId, options).then( source => {
-        action = new Action(domainId, source);
+      return getEntity(elasticsearch, domainId, ACTIONS, actionId, options).then( data => {
+        action = new Action(domainId, data);
         cache.set(uid, action);
         return action;
       });

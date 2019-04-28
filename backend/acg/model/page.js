@@ -39,8 +39,8 @@ _.assign(Page, {
     if(page){
       return Promise.resolve(page);
     }else{
-      return getEntity(elasticsearch, domainId, PAGES, pageId, options).then( source => {
-        page = new Page(domainId, source);
+      return getEntity(elasticsearch, domainId, PAGES, pageId, options).then( data => {
+        page = new Page(domainId, data);
         cache.set(uid, page);
         return page;
       });
