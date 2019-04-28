@@ -7,7 +7,6 @@ const
   utils = require('core/utils'),
   Loader = require('core/loader'),
   uuidv4 = require('uuid/v4'),
-  { Parser } = require('json2csv'),
   FileSaver = require('file-saver');
 
 // const PerfectScrollbar = require('perfect-scrollbar');
