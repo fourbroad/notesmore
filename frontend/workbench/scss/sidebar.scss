@@ -187,18 +187,18 @@
     display: none;
   }
 
-  .sidebar-link {
-    &.active::before {
-      border-radius: 50%;
-      content: '';
-      display: inline-block;
-      height: 8px;
-      left: -4px;
-      position: absolute;
-      top: calc(50% - 4px);
-      width: 8px;
-    }
-  }
+//   .sidebar-link {
+//     &.active::before {
+//       border-radius: 50%;
+//       content: '';
+//       display: inline-block;
+//       height: 8px;
+//       left: -4px;
+//       position: absolute;
+//       top: calc(50% - 4px);
+//       width: 8px;
+//     }
+//   }
 
   li {
     color:white;
@@ -259,7 +259,8 @@
       transition: all 0.3s ease;
 
       &:hover,
-      &:focus {
+      &:focus,
+      &.active {
         color: white;
         text-decoration: none;
 

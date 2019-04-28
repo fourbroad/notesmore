@@ -169,11 +169,6 @@ $.widget('nm.workbench', {
     }, 1000 * 2 * 60);
   },
 
-  _armFavoriteItem: function(doc){
-    let item = String() + '<li class="view nav-item"><i class="'+(doc._meta.iconClass||'ti-file')+'"></i><a class="sidebar-link document">' + (doc.title || doc.id) + '</a></li>'
-    return item;
-  },
-
   _refreshFavorites: function(favorites){
     let o = this.options, _this = this, domainId = o.page.domainId, client = o.page.getClient(), 
       { Profile, Document } = client,  currentUser = client.currentUser;
@@ -185,7 +180,8 @@ $.widget('nm.workbench', {
         Document.get(f.domainId, f.collectionId, f.id, function(err, doc){
           if(err) return console.error(err);
           doc = doc.get(o.locale);
-          $(_this._armFavoriteItem(doc)).data('anchor',  {col: doc.collectionId, doc: doc.id}).appendTo(_this.$favoriteItems);
+          $(_this._armSidebarItem({collectionId:doc.collectionId, id:doc.id, iconClass: doc._meta.iconClass||'ti-file', title: doc.title}))
+              .data('anchor',  {col: doc.collectionId, doc: doc.id}).appendTo(_this.$favoriteItems);
         });
       });
     }
