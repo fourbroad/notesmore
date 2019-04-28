@@ -322,15 +322,12 @@ $.widget("nm.form", {
   },
 
   _onSaveAs: function(evt){
-    var doc = this.options.document, self = this;
+    var o = this.options, docLocale = o.document.get(o.locale), self = this;
     this.showIdTitleDialog({
-      modelTitle:'Save as...', 
-      id: doc.id || uuidv4(), 
-      title: doc.title || '', 
-      placeholder:{
-        id: 'Enter id of form',
-        title: 'Entier title of form'        
-      },
+      modelTitle:_.at(docLocale, 'toolbox.saveAs')[0] || 'Save as...',
+      id: docLocale.id || uuidv4(), 
+      title: docLocale.title || '', 
+      locale: o.locale,
       submit:function(e, data){
       self.saveAs(data.id, data.title);
     }});

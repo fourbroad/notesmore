@@ -7,7 +7,13 @@ const
 
 $.widget('nm.idtitledialog', {
   options: {
-    modelTitle: 'Save...'
+    modelTitle: 'Save...',
+    i18n: {
+      'zh-CN':{
+        id: "唯一标识",
+        title:　"标题"
+      }
+    }
   },
 
   _create: function(){
@@ -21,8 +27,10 @@ $.widget('nm.idtitledialog', {
 
     this.$modelTitle = $('.modal-title', this.element);
     this.$formTag = $('form.id-title', this.element);
+    this.$idLabel = $('label[for=id]', this.element);
+    this.$idInput = $('input[name=id]', this.element);
+    this.$titleLabel = $('label[for=title]', this.element);
     this.$titleInput = $('input[name="title"]', this.element);
-    this.$idInput = $('input[name="id"]', this.element);
     this.$submitBtn = $('.btn.submit', this.element);
 
     if(o.placeholder && o.placeholder.id){
@@ -35,7 +43,9 @@ $.widget('nm.idtitledialog', {
 
     this.$modelTitle.html(o.modelTitle);
 
-    this.element.on('shown.bs.modal', $.proxy(function (e) {
+    this.element.on('show.bs.modal', $.proxy(function (e) {
+      this.$idLabel.html(this._i18n('id',"ID"));
+      this.$titleLabel.html(this._i18n('title',"Title"));
       this.$idInput.val(o.id||'').focus();
       this.$titleInput.val(o.title||'')
     },this));
@@ -58,6 +68,11 @@ $.widget('nm.idtitledialog', {
 
   show: function(){
     this.element.modal('show');
+  },
+
+  _i18n: function(name, defaultValue){
+    let o = this.options;
+    return (o.i18n[o.locale] && o.i18n[o.locale][name]) || defaultValue;
   },
 
   close: function(){

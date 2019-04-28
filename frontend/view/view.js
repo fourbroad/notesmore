@@ -732,18 +732,16 @@ $.widget("nm.view", {
   },
 
   _onItemSaveAs: function(evt){
-    let view = this.options.view, self = this;
+    let o = this.options, view = o.view, viewLocale = view.get(o.locale), self = this;
     this.showIdTitleDialog({
-      modelTitle:'Save as...', 
+      modelTitle:_.at(viewLocale, 'toolbox.saveAs')[0] || 'Save as...', 
       id: uuidv4(), 
-      title: view.title || '', 
-      placeholder:{
-        id: 'Enter id of view',
-        title: 'Enter title of view'
-      },
+      title: viewLocale.title || '', 
+      locale: o.locale,
       submit:function(e, data){
-      self.saveAs(data.id, data.title);
-    }});
+        self.saveAs(data.id, data.title);
+      }
+    });
   },
 
   saveAs: function(id, title, callback){
