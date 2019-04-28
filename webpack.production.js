@@ -16,7 +16,7 @@ module.exports = merge(common, {
   entry: {
     index                              : path.join(__dirname, 'frontend/index.js'),
     '@notesabc/calendar/calendar'      : path.join(__dirname, 'frontend/calendar/calendar.js'),
-    '@notesabc/chat/chat'              : path.join(__dirname, 'frontend/chat/chat.js'),
+    '@notesabc/im/im'                  : path.join(__dirname, 'frontend/im/im.js'),
     '@notesabc/dashboard/dashboard'    : path.join(__dirname, 'frontend/dashboard/dashboard.js'),
     '@notesabc/email/email'            : path.join(__dirname, 'frontend/email/email.js'),
     '@notesabc/form/form'              : path.join(__dirname, 'frontend/form/form.js'),

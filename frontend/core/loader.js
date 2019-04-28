@@ -8,7 +8,6 @@ identity = function(name) {
 
 loadPlugin = function(plugin, callback) {
   const _identity = identity(plugin.name);
-
   if (plugin.css) {
     $("<link>").attr({
       type: "text/css",
@@ -16,9 +15,10 @@ loadPlugin = function(plugin, callback) {
       href: plugin.css
     }).appendTo("head");
   }
-
   $.getScript(plugin.js).done(function() {
-    callback && callback(window[_identity]);
+    $(function(){
+      callback && callback(window[_identity]);
+    });
     delete window[_identity];
   });
 }

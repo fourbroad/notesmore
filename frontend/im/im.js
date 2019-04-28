@@ -1,10 +1,10 @@
 
 import PerfectScrollbar from 'perfect-scrollbar';
 
-import './chat.scss';
-import chatHtml from './chat.html';
+import './im.scss';
+import imHtml from './im.html';
 
-$.widget('nm.chat', {
+$.widget('nm.im', {
   options:{
 
   },
@@ -12,8 +12,8 @@ $.widget('nm.chat', {
   _create:function(){
     var o = this.options, self = this;
 
-    this._addClass('nm-chat','full-container');
-    this.element.html(chatHtml);
+    this._addClass('nm-im','full-container');
+    this.element.html(imHtml);
 
     this._on({
       "click #chat-sidebar-toggle": function(e){
