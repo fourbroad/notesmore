@@ -6,6 +6,7 @@ const
   cssNext = require('postcss-cssnext'),
   ManifestPlugin = require('webpack-manifest-plugin'),  
   MiniCssExtractPlugin = require("mini-css-extract-plugin"),
+  UglifyJsPlugin = require('uglifyjs-webpack-plugin'),
   TerserPlugin = require('terser-webpack-plugin'),
   CopyWebpackPlugin = require('copy-webpack-plugin'),
   ImageminPlugin    = require('imagemin-webpack-plugin').default;
@@ -78,7 +79,10 @@ module.exports = merge(common, {
     }]
   },
   optimization: {
-    minimizer: [new TerserPlugin()],
+    minimizer: [
+//       new TerserPlugin()
+     new UglifyJsPlugin({uglifyOptions:{ie8: true}})
+   ]
   },  
   plugins: [
 //     new webpack.ProvidePlugin({
