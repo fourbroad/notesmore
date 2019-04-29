@@ -244,7 +244,7 @@ $.widget("nm.view", {
       lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],      
       processing: true,
       serverSide: true,
-      columns: _.map(_.cloneDeep(view.columns), (c)=>{if(c&&c.name&&!c.data){c.data = c.name} return c;}),
+      columns: _.map(_.cloneDeep(viewLocale.columns), (c)=>{if(c&&c.name&&!c.data){c.data = c.name} return c;}),
       searchCols: this._armSearchCol(),
       search: {search: _.at(view,'.search.fulltext.keyword')[0]},
       order: this._buildOrder(_.at(view, 'search.sort')[0]),
