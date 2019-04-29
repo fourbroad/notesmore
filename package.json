@@ -5,11 +5,12 @@
   "main": "server.js",
   "scripts": {
     "build": "webpack --config=webpack.production.js --progress",
+    "analyse": "webpack --config=webpack.production.js --profile --json > stats.json",
     "context": "webpack --config=webpack.context.js --progress",
     "watch": "webpack --watch --progress",
     "start": "webpack-dev-server --config=webpack.development.js --progress",
     "http-server": "http-server dist",
-    "dashboard": "webpack-dashboard -t 'Project' -- webpack-dev-server",
+    "dashboard": "webpack-dashboard -t 'Project' -- webpack-dev-server --config=webpack.development.js",
     "preview": "webpack-dev-server --mode=production",
     "test": "webpack-dev-server --config webpack.test.js",
     "lint:js": "eslint ./src ./webpack ./*.js -f table --ext .js --ext .jsx",
@@ -113,6 +114,7 @@
     "style-loader": "^0.23.1",
     "stylelint": "^9.6.0",
     "stylelint-config-standard": "^18.2.0",
+    "terser-webpack-plugin": "^1.2.3",
     "url-loader": "^1.1.2",
     "webpack": "^4.28.2",
     "webpack-cli": "^3.1.2",
@@ -120,7 +122,9 @@
     "webpack-dev-middleware": "^3.4.0",
     "webpack-dev-server": "^3.1.10",
     "webpack-hot-middleware": "^2.24.3",
+    "webpack-manifest-plugin": "^2.0.4",
     "webpack-merge": "^4.1.4",
-    "whatwg-fetch": "^3.0.0"
+    "whatwg-fetch": "^3.0.0",
+    "workbox-webpack-plugin": "^4.3.0"
   }
 }

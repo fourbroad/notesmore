@@ -29,7 +29,13 @@ const DEFAULT_ACL = {
   }
 }
   , DEFAULT_SEARCH_FULLTEXT = {
-  fields: ["id.keyword", "title.keyword", "_meta.author.keyword"]
+  fields: [
+    "id.keyword", 
+    "title.keyword", 
+    "_meta.author.keyword",
+    "_i18n.zh-CN.id.keyword", 
+    "_i18n.zh-CN.title.keyword"
+  ]
 }
   , DEFAULT_SORT = [{
   "_meta.updated": {
@@ -171,7 +177,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "元文档集合",
+      title: "元集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -195,7 +201,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "页面文档集合",
+      title: "页面集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -219,7 +225,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "视图文档集合",
+      title: "视图集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -243,7 +249,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "表单文档集合",
+      title: "表单集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -267,7 +273,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "行动文档集合",
+      title: "行动集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -291,7 +297,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "文件文档集合",
+      title: "文件集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -316,7 +322,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "角色文档集合",
+      title: "角色集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -340,7 +346,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "组文档集合",
+      title: "组集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -364,7 +370,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "画像文档集合",
+      title: "画像集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -389,7 +395,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "用户文档集合",
+      title: "用户集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -413,7 +419,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "域文档集合",
+      title: "域集合",
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -480,7 +486,7 @@ const DEFAULT_ACL = {
   },
   _i18n: {
     "zh-CN": {
-      title: "编辑"
+      title: "编辑(Json)"
     }
   },
   _meta: {
@@ -682,6 +688,7 @@ const DEFAULT_ACL = {
     _i18n: {
       "zh-CN": {
         title: "新文档集合",
+        columns: DEFAULT_I18N_COLUMNS,
         search: {
           fields: DEFAULT_I18N_SEARCH_FIELDS
         },
@@ -751,6 +758,7 @@ const DEFAULT_ACL = {
     _i18n: {
       "zh-CN": {
         title: "新视图",
+        columns: DEFAULT_I18N_COLUMNS,
         search: {
           fields: DEFAULT_I18N_SEARCH_FIELDS
         },

@@ -1,3 +1,4 @@
+
 // __webpack_public_path__ = myRuntimePublicPath;
 
 import './index.scss';
@@ -38,3 +39,13 @@ window.runtime = $('body').runtime({
   locale: localStorage.getItem('language') || navigator.language,
   currentDomain: currentDomain
 }).runtime('instance');
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+      console.log('SW registered: ', registration);
+    }).catch(registrationError => {
+      console.log('SW registration failed: ', registrationError);
+    });
+  });
+}
