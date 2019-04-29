@@ -1,13 +1,13 @@
-const
+const 
   path = require('path'),
-  webpack = require('webpack'),  
-  merge = require('webpack-merge'),
-  common = require('./webpack.common.js'),
+  webpack  = require('webpack'),
+  MomentLocalesPlugin = require('moment-locales-webpack-plugin'),  
+  MiniCssExtractPlugin = require("mini-css-extract-plugin"),
   cssNext = require('postcss-cssnext'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   DashboardPlugin = require('webpack-dashboard/plugin');
 
-module.exports = merge(common, {
+module.exports = {
   mode: 'production',
   devtool: 'source-map',
   entry: {
@@ -17,8 +17,49 @@ module.exports = merge(common, {
     filename: '[name].bundle.js',
     library: '[name]'
   },
-  module:{
-    rules:[{
+  resolve: {
+    extensions: ['.webpack-loader.js', '.web-loader.js', '.loader.js', '.js'],
+    alias: {
+      frontend: path.resolve(__dirname, 'frontend'),
+      lib: path.resolve(__dirname, 'lib'),
+      test: path.resolve(__dirname, 'test'),
+      'jquery-ui/ui/widget': 'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
+      'canvas-to-blob': 'blueimp-canvas-to-blob/js/canvas-to-blob.js',
+      'load-image': 'blueimp-load-image/js/load-image.js',
+      'load-image-exif': 'blueimp-load-image/js/load-image-exif.js',
+      'load-image-meta': 'blueimp-load-image/js/load-image-meta.js',
+      'load-image-scale': 'blueimp-load-image/js/load-image-scale.js'
+    },    
+    modules: [
+      path.join(__dirname, 'frontend'), 
+      path.join(__dirname, 'lib'),
+      path.resolve(__dirname, 'node_modules')
+    ]
+  },
+  module: {
+    rules: [{
+      test: /\.(eot|svg|ttf|otf|woff|woff2)$/,
+      use: ['file-loader']
+    },{
+      test: /\.(png|gif|jpg|svg)$/,
+      use: [{
+        loader: 'file-loader',
+        options: {
+          outputPath: 'assets/images'
+        }
+      }]
+    },{
+      test: /\.(js)$/,
+      use: ['babel-loader']
+    },{
+      test: /\.html$/,
+      use: [{
+        loader: 'html-loader',
+        options: {
+          minimize: true
+        }
+      }]
+    },{
       test: /\.(sa|sc|c)ss$/,
       use: [{
         loader: 'style-loader',
@@ -44,7 +85,7 @@ module.exports = merge(common, {
             path.join(__dirname, 'test')
           ]
         }
-      }]
+      }]      
     },{
       test: require.resolve('jquery'),
       use: [{
@@ -65,15 +106,26 @@ module.exports = merge(common, {
       use: [{
         loader: 'expose-loader',
         options: 'moment'
-      }]
+      }]      
     }]
   },
   plugins: [
-//     new CleanWebpackPlugin([path.resolve(__dirname, 'dist')]),  
     new webpack.DllPlugin({
       path: 'manifest.json',
       name: '[name]',
       context: __dirname,
+    }),  
+    // To strip all locales except “en”, “es-us” and “ru”
+    // (“en” is built into Moment and can’t be removed)
+    new MomentLocalesPlugin({
+      localesToKeep: ['es-us', 'zh-cn'],
+    }),  
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output both options are optional
+//       filename: "[name].[chunkhash].css",
+//       chunkFilename: "[name].[chunkhash].css"
+      filename: '[name].bundle.css',
+      chunkFilename: '[name].bundle.css',
     })
   ]
-});
+};
