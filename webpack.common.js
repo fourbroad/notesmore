@@ -33,9 +33,9 @@ module.exports = {
       use: [{
         loader: 'file-loader',
         options: {
-          outputPath: 'assets'
+          outputPath: 'assets/images'
         }
-      }]      
+      }]
     },{
       test: /\.(js)$/,
       use: ['babel-loader']
