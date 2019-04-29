@@ -32,8 +32,8 @@ if(currentDomain == 'www') currentDomain = '.root';
 
 window.runtime = $('body').runtime({
   client: {
-//     url:'https://notesmore.com/domains'
-    url: 'localhost:3000/domains'
+    url:'https://notesmore.com/domains'
+//     url: 'localhost:3000/domains'
   },
   locale: localStorage.getItem('language') || navigator.language,
   currentDomain: currentDomain
