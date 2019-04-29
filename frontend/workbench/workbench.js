@@ -40,7 +40,8 @@ $.widget('nm.workbench', {
     this.$avatar = $('.avatar', this.element);
     this.$nickname = $('.nickname', this.element);
     this.$profileMenu = $('.profile-menu', this.element);
-    this.$signOff = $('.sign-off', this.$profileMenu);
+    this.$profile = $('li.profile', this.$profileMenu);
+    this.$signOff = $('li.sign-off', this.$profileMenu);
 
     this.ps = new PerfectScrollbar(this.$mainContainer[0],{suppressScrollX:true, wheelPropagation: true});
 
@@ -157,6 +158,7 @@ $.widget('nm.workbench', {
     }
 
     this._on(this.$signOff, {click: this._onSignoff});
+    this._on(this.$profile, {click: this._onProfile});
 
     this._loggedInListener = $.proxy(this._onLoggedIn, this);
     this._loggedOutListener = $.proxy(this._onLoggedOut, this);
@@ -168,13 +170,13 @@ $.widget('nm.workbench', {
     this._setInterval();  // TODO: ???????????????????
   },
 
+  _onProfile: function(){
+    let currentUser = this.options.page.getClient().currentUser;
+    this.option('anchor',{col:'.profiles', doc: currentUser.id});
+  },
+
   _onSignoff: function(event){
-    var o = this.options, client = o.page.getClient();
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    client.logout();
+    this.options.page.getClient().logout();
   },
 
   _setInterval(){
