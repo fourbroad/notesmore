@@ -16,7 +16,6 @@ import PerfectScrollbar from 'perfect-scrollbar';
 require('bootstrap');
 require('jquery-ui/ui/widget');
 require('jquery-ui/ui/data');
-require('account/account');
 require('notification/notification');
 
 $.widget('nm.workbench', {
@@ -38,7 +37,11 @@ $.widget('nm.workbench', {
     this.$slogan = $(".slogan", this.element);
     this.$mainContainer = $('.main-container', this.$workbench);
     this.$mainContent = $("#mainContent", this.$mainContainer);
- 
+    this.$avatar = $('.avatar', this.element);
+    this.$nickname = $('.nickname', this.element);
+    this.$profileMenu = $('.profile-menu', this.element);
+    this.$signOff = $('.sign-off', this.$profileMenu);
+
     this.ps = new PerfectScrollbar(this.$mainContainer[0],{suppressScrollX:true, wheelPropagation: true});
 
     this.$favorites = $('li.favorites', this.$workbench);
@@ -48,7 +51,7 @@ $.widget('nm.workbench', {
 
     this.$newDocumentBtn = $('li.new-document', this.$workbench);
 //     $('<li class="notifications dropdown"/>').prependTo($('.page-container .nav-right', this.$workbench)).notification();
-    $('<li/>').appendTo($('.page-container .nav-right', this.$workbench)).account({client: client, locale: o.locale});
+//     $('<li/>').appendTo($('.page-container .nav-right', this.$workbench)).account({client: client, locale: o.locale});
 
     this._on(this.$newDocumentBtn, {click: this._loadNewDialog});
     this._on(this.$workbench, {
@@ -153,9 +156,25 @@ $.widget('nm.workbench', {
       this._loadDocument(anchor.dom||o.page.domainId, anchor.col, anchor.doc, anchor.act, anchor.opts, callback);
     }
 
+    this._on(this.$signOff, {click: this._onSignoff});
+
+    this._loggedInListener = $.proxy(this._onLoggedIn, this);
+    this._loggedOutListener = $.proxy(this._onLoggedOut, this);
+    client.on("loggedIn", this._loggedInListener);
+    client.on("loggedOut", this._loggedOutListener);
+
     this.refresh();
 
     this._setInterval();  // TODO: ???????????????????
+  },
+
+  _onSignoff: function(event){
+    var o = this.options, client = o.page.getClient();
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    client.logout();
   },
 
   _setInterval(){
@@ -303,11 +322,37 @@ $.widget('nm.workbench', {
       _this.$favoritesTitle.html(_.at(o.page.get(o.locale),'favorites.title')[0]);
     });    
 
+    this._refreshAccount();
     this._refreshSidebar();
     this._refreshFavorites();
   },
 
+  _refreshAccount: function(){
+    var o = this.options, _this = this, client = o.page.getClient(), User = client.User;
+    User.get(function(err, user){
+      if(err) return console.error(err);
+      let userLocale = user.get(o.locale);
+      if(userLocale.avatar){
+        _this.$avatar.attr('src', userLocale.avatar);
+      }
+      
+      _this.$nickname.text(userLocale.title || userLocale.id);
+    });
+  },
+
+  _onLoggedIn: function(){
+    this.refresh();
+  },
+
+  _onLoggedOut: function(){
+  },
+
   _destroy() {
+    var o = this.options, client = o.page.getClient();
+    this.element.empty();
+    client.off("loggedIn", this._loggedInListener);
+    client.off("loggedOut", this._loggedOutListener);
+
     clearInterval(this.interval);
   }  
     
