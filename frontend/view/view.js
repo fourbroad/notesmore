@@ -817,7 +817,7 @@ $.widget("nm.view", {
     if(this._isDirty()){
       o.view.patch({patch: this._getPatch()}, function(err, view){
         if(err) return console.error(err);
-  	    _.forOwn(o.view,function(v,k){delete o.view[k]});
+  	    _.forOwn(o.view,function(v,k){try{delete o.view[k]}catch(e){}});
         _.merge(o.view, view);
         self.clone = _.cloneDeep(view);
         self._refreshHeader();
@@ -828,7 +828,7 @@ $.widget("nm.view", {
   _onCancel: function(){
     let o = this.options, self = this, view = o.view;
 
-  	 _.forOwn(view,function(v,k){delete view[k]});
+  	 _.forOwn(view,function(v,k){try{delete view[k]}catch(e){}});
     _.merge(view, this.clone);
 
     this._refreshHeader();

@@ -338,7 +338,7 @@ $.widget("nm.form", {
       this.element.trigger('cancelaction');
     }else{
       var doc = o.document;
-   	  _.forOwn(doc,function(v,k){delete doc[k]});
+   	  _.forOwn(doc,function(v,k){try{delete doc[k]}catch(e){}});
       _.merge(doc, this.clone);
       this._setJsonEditorValue();
       this._refresh();
