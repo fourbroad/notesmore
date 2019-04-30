@@ -38,8 +38,8 @@ app.use(cors({credentials: true, origin: 'http://localhost:8080'}));
 // app.use(cors());
 
 app.use(logger('dev'));
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/dist', express.static(path.join(__dirname,'dist')));
 // app.use('/test', express.static(path.join(__dirname,'test')));
 
