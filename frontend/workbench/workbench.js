@@ -1,22 +1,21 @@
-require('context/index.scss');
-require('./workbench.scss');
-require('perfect-scrollbar/css/perfect-scrollbar.css');
+import 'context/index.scss';
+import './workbench.scss';
+import 'perfect-scrollbar/css/perfect-scrollbar.css';
 
-const
-  $ = require('jquery'),
-  _ = require('lodash'),
-  moment = require('moment'),
-  jwtDecode = require('jwt-decode'),
-  Loader = require('core/loader'),
-  jsonPatch = require("fast-json-patch"),
-  workbenchHtml = require('./workbench.html');
+import $ from 'jquery';
+import _ from 'lodash';
+import moment from 'moment';
+import jwtDecode from 'jwt-decode';
+import Loader from 'core/loader';
+import jsonPatch from "fast-json-patch";
+import workbenchHtml from './workbench.html';
 
 import PerfectScrollbar from 'perfect-scrollbar';
 
-require('bootstrap');
-require('jquery-ui/ui/widget');
-require('jquery-ui/ui/data');
-require('notification/notification');
+import 'bootstrap';
+import 'jquery-ui/ui/widget';
+import 'jquery-ui/ui/data';
+import 'notification/notification';
 
 $.widget('nm.workbench', {
   options: {
@@ -166,8 +165,6 @@ $.widget('nm.workbench', {
     client.on("loggedOut", this._loggedOutListener);
 
     this.refresh();
-
-    this._setInterval();  // TODO: ???????????????????
   },
 
   _onProfile: function(){
@@ -177,17 +174,6 @@ $.widget('nm.workbench', {
 
   _onSignoff: function(event){
     this.options.page.getClient().logout();
-  },
-
-  _setInterval(){
-    let _this = this, o = this.options, client = o.page.getClient();
-    this.interval = setInterval(function() {
-      if((new Date().getTime()/1000) > jwtDecode(client.token).exp){
-        clearInterval(_this.interval);
-        _this.element.find('.workbench').addClass('bg-filter');
-        _this.element.find('.timeout-login').login({timeoutLogin:true});
-      }
-    }, 1000 * 2 * 60);
   },
 
   _refreshFavorites: function(favorites){

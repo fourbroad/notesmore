@@ -4,6 +4,7 @@ const
   MomentLocalesPlugin = require('moment-locales-webpack-plugin'),  
   MiniCssExtractPlugin = require("mini-css-extract-plugin"),
   cssNext = require('postcss-cssnext'),
+  UglifyJsPlugin = require('uglifyjs-webpack-plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   DashboardPlugin = require('webpack-dashboard/plugin');
 
@@ -50,7 +51,26 @@ module.exports = {
       }]
     },{
       test: /\.(js)$/,
-      use: ['babel-loader']
+      exclude: /(node_modules|bower_components)/,
+      use: {
+        loader:'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
+          plugins: [
+            '@babel/plugin-transform-runtime',
+            '@babel/plugin-proposal-export-default-from',
+            '@babel/plugin-syntax-dynamic-import',
+            '@babel/plugin-proposal-object-rest-spread', // [v,] => [v]
+            '@babel/plugin-proposal-export-namespace-from',
+            '@babel/plugin-proposal-class-properties',
+            '@babel/plugin-transform-template-literals', // `foo${bar}` => "foo".concat(bar)
+//             '@babel/plugin-transform-modules-commonjs',
+            ['@babel/plugin-proposal-decorators', {
+              "decoratorsBeforeExport": true
+            }]
+          ]
+        }
+      }
     },{
       test: /\.html$/,
       use: [{
@@ -66,8 +86,7 @@ module.exports = {
       },{
         loader: 'css-loader',
         options: {
-          sourceMap : true,
-          minimize  : false
+          sourceMap : true
         }
       },{
         loader: 'postcss-loader',
@@ -109,6 +128,15 @@ module.exports = {
       }]      
     }]
   },
+  optimization: {
+    minimizer: [
+//       new TerserPlugin()
+     new UglifyJsPlugin({
+       sourceMap: true,
+       uglifyOptions:{ie8: true}
+     })
+   ]
+  },  
   plugins: [
     new webpack.DllPlugin({
       path: 'manifest.json',

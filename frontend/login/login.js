@@ -1,6 +1,6 @@
 import validate from "validate.js";
 
-const jwtDecode = require('jwt-decode');
+import jwtDecode from'jwt-decode';
 
 import loginHtml from './login.html';
 import './login.scss';

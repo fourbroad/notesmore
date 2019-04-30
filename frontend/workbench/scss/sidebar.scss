@@ -34,11 +34,11 @@
       .sidebar-logo {
         padding: 0;
 
-        a {
-          .logo {
-            background-position: center center;
-            width: $collapsed-size;
-          }
+        .logo {
+          width: 70px;
+          height: 64px;
+          background-position: center center;
+          width: $collapsed-size;
         }
       }
 
@@ -134,18 +134,13 @@
   padding: 0 20px;
   transition: all 0.2s ease;
 
-  a {
+  .logo {
     display: inline-block;
-    width: 100%;
-
-    .logo {
-      background-position: center left;
-      background-repeat: no-repeat;
-      display: inline-block;
-      min-height: calc(#{$header-height} - 1px);
-      width: 100%;
-      width: 70px;
-    }
+    background-position: center left;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 64px;
+    width: 70px;
   }
 
   .mobile-toggle {
@@ -153,10 +148,6 @@
     float: right;
     font-size: 18px;
     line-height: calc(#{$header-height} - 1px);
-
-    a {
-      color: $default-text-color;
-    }
 
     @include to($breakpoint-md) {
       display: inline-block;
@@ -186,19 +177,6 @@
   .dropdown-toggle::after {
     display: none;
   }
-
-//   .sidebar-link {
-//     &.active::before {
-//       border-radius: 50%;
-//       content: '';
-//       display: inline-block;
-//       height: 8px;
-//       left: -4px;
-//       position: absolute;
-//       top: calc(50% - 4px);
-//       width: 8px;
-//     }
-//   }
 
   li {
     color:white;
@@ -420,12 +398,11 @@
         .sidebar-logo {
           padding: 0 20px;
 
-          > a {
-            .logo {
-              background-position: center left;
-              width: 150px;
-            }
+          .logo {
+            background-position: center left;
+            width: 70px;
           }
+
         }
 
         .sidebar-menu {

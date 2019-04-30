@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 var identity, loadPlugin, createDocument, _doLoadDocument, _armWidget, loadDocument, armActions;
 
@@ -332,7 +332,7 @@ armActions = function(client, pluginInstance, doc, container, currentActionId, l
   }
 }
 
-module.exports = {
+export default {
   loadPlugin: loadPlugin,
   createDocument: createDocument,
   loadDocument: loadDocument,

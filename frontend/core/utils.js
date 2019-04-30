@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import  _  from 'lodash';
 
 var showErrorsForInput, showErrors, clearErrors, clearInputError, checkPermission, get;
 
@@ -75,7 +75,7 @@ get = function(object, path){
   }
 }
 
-module.exports = {
+export default {
   showErrorsForInput: showErrorsForInput,
   showErrors: showErrors,
   clearErrors: clearErrors,

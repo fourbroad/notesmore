@@ -1,18 +1,24 @@
 
 // __webpack_public_path__ = myRuntimePublicPath;
 
+// require('core-js/features/object/define-property');
+// require('core-js/features/object/create');
+// require('core-js/features/object/assign');
+// require('core-js/features/array/for-each');
+// require('core-js/features/array/index-of');
+// require('core-js/features/function/bind');
+// require('core-js/features/promise');
+
 import './index.scss';
 import 'font-awesome/scss/font-awesome.scss';
-
 import 'core/runtime';
+import moment from 'moment';
+import jsonPatch from"fast-json-patch";
 
-const moment = require('moment');
 window.moment = moment;
-
-var jsonPatch = require("fast-json-patch");
 window.jsonPatch = jsonPatch;
 
-// var elasticsearch = require('elasticsearch-browser');
+// var elasticsearch from'elasticsearch-browser');
 // window.esc = new elasticsearch.Client({
 //   host: 'localhost:9200',
 //   log: 'trace'

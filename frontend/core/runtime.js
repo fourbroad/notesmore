@@ -6,9 +6,8 @@ import 'jquery-ui/ui/widget';
 import 'jquery-ui/ui/data';
 import 'jquery.urianchor';
 
-const jwtDecode = require('jwt-decode');
-
-const client = require('lib/client');
+import jwtDecode from 'jwt-decode';
+import client from 'lib/client';
 
 window.client = client;
 window.User = client.User;

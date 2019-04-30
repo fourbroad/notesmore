@@ -1,4 +1,4 @@
-const notificationHtml = require('./notification.html');
+import notificationHtml from './notification.html';
 
 $.widget("nm.notification", {
   options: {},

@@ -1,28 +1,27 @@
-const $ = require('jquery')
-  , _ = require('lodash')
-  , moment = require('moment')
-  , validate = require("validate.js")
-  , jsonPatch = require("fast-json-patch")
-  , uuidv4 = require('uuid/v4')
-  , Loader = require('core/loader')
-  , formHtml = require('./form.html')
-  , ace = require('brace') 
-  , utils = require('core/utils')  
-  , { checkPermission } = require('core/utils');
+import * as $ from 'jquery';
+import _ from 'lodash';
+import moment from 'moment';
+import validate from "validate.js";
+import jsonPatch from "fast-json-patch";
+import uuidv4 from 'uuid/v4';
+import Loader from 'core/loader';
+import formHtml from './form.html';
+import ace from 'brace'; 
+import utils from 'core/utils';;
 
-require('./form.scss');
-require('bootstrap');
-require('jquery-ui/ui/widget');
-require('jquery-ui/ui/data');
+import './form.scss';
+import 'bootstrap';
+import 'jquery-ui/ui/widget';
+import 'jquery-ui/ui/data';
 
-require('brace/mode/json');
-require('brace/theme/iplastic');
-require('brace/ext/searchbox');
-// require('brace/ext/error_marker');
-// require('brace/ext/beautify');
-// require('brace/ext/keybinding_menu');
-// require('brace/ext/linking');
-// require('brace/ext/statusbar');
+import 'brace/mode/json';
+import 'brace/theme/iplastic';
+import 'brace/ext/searchbox';
+// import 'brace/ext/error_marker';
+// import 'brace/ext/beautify';
+// import 'brace/ext/keybinding_menu';
+// import 'brace/ext/linking';
+// import 'brace/ext/statusbar';
 
 
 $.widget("nm.form", {
@@ -161,7 +160,7 @@ $.widget("nm.form", {
 
   _refresh: function(){
     var o = this.options, doc = o.document, self = this, client = doc.getClient(), currentUser = client.currentUser;
-    checkPermission(doc.domainId, currentUser.id, 'patch', doc, function(err, result){
+    utils.checkPermission(doc.domainId, currentUser.id, 'patch', doc, function(err, result){
       if(!result){
         self.jsonEditor.setReadOnly(true);
       }
@@ -246,7 +245,7 @@ $.widget("nm.form", {
       o.document.patch({patch:this._getPatch()}, function(err, document){
         if(err) return console.error(err);
 
-  	    _.forOwn(o.document,function(v,k){delete o.document[k]});
+  	    _.forOwn(o.document,function(v,k){try{delete o.document[k]}catch(e){}});
         _.merge(o.document, document);
 
         self.clone = _.cloneDeep(document);

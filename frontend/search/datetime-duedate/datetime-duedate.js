@@ -1,11 +1,8 @@
-const _ = require('lodash');
-
+import  _ from'lodash';
 import 'jquery-datetimepicker';
 import 'jquery-datetimepicker/jquery.datetimepicker.css';
-
 import validate from "validate.js";
 import utils from 'core/utils';
-
 import './datetime-duedate.scss';
 import datetimeDuedateHtml from './datetime-duedate.html';
 

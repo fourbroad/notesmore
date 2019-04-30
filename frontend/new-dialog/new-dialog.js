@@ -1,11 +1,9 @@
 
 import Loader from 'core/loader';
 import Masonry from 'masonry-layout';
-
 import './new-dialog.scss';
 import newDialogHtml from './new-dialog.html';
-
-const uuidv4 = require('uuid/v4');
+import uuidv4 from'uuid/v4';
 
 $.widget('nm.newdialog', {
   options: {

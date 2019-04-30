@@ -10,7 +10,7 @@ const
 module.exports = {
   entry: {
     index                              : path.join(__dirname, 'frontend/index.js'),
-     polyfills                         : path.join(__dirname, 'frontend/polyfills.js'),
+//      polyfills                         : path.join(__dirname, 'frontend/polyfills.js'),
     '@notesabc/calendar/calendar'      : path.join(__dirname, 'frontend/calendar/calendar.js'),
     '@notesabc/im/im'                  : path.join(__dirname, 'frontend/im/im.js'),
     '@notesabc/dashboard/dashboard'    : path.join(__dirname, 'frontend/dashboard/dashboard.js'),
@@ -60,7 +60,26 @@ module.exports = {
       }]
     },{
       test: /\.(js)$/,
-      use: ['babel-loader']
+      exclude: /(node_modules|bower_components)/,
+      use: {
+        loader:'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
+          plugins: [
+            '@babel/plugin-transform-runtime',
+            '@babel/plugin-proposal-export-default-from',
+            '@babel/plugin-syntax-dynamic-import',
+            '@babel/plugin-proposal-object-rest-spread', // [v,] => [v]
+            '@babel/plugin-proposal-export-namespace-from',
+            '@babel/plugin-proposal-class-properties',
+            '@babel/plugin-transform-template-literals', // `foo${bar}` => "foo".concat(bar)
+//             '@babel/plugin-transform-modules-commonjs',
+            ['@babel/plugin-proposal-decorators', {
+              "decoratorsBeforeExport": true
+            }]
+          ]
+        }
+      }
     },{
       test: /\.html$/,
       use: [{
@@ -94,23 +113,24 @@ module.exports = {
     new MomentLocalesPlugin({
       localesToKeep: ['es-us', 'zh-cn'],
     }),
-    new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'frontend/index.html'),
-      path: path.join(__dirname, 'dist'),
-      filename: 'index.html',
-      inject: true,
-      minify: {
-        collapseWhitespace: true,
-        minifyCSS: true,
-        minifyJS: true,
-        removeComments: true,
-        useShortDoctype: true
-      },
-    }),
-//     new HtmlWebpackIncludeAssetsPlugin({
-//       assets: ['dist/context.bundle.js'],
-//       append: false
+//     new HtmlWebpackPlugin({
+//       template: path.join(__dirname, 'frontend/index.html'),
+//       path: path.join(__dirname, 'dist'),
+//       filename: 'index.html',
+//       inject: true,
+//       minify: {
+//         collapseWhitespace: true,
+//         minifyCSS: true,
+//         minifyJS: true,
+//         removeComments: true,
+//         useShortDoctype: true
+//       },
 //     }),
+    new HtmlWebpackPlugin({title: "Notesmore"}),
+    new HtmlWebpackIncludeAssetsPlugin({
+      assets: ['context.bundle.js'],
+      append: false
+    }),
     new webpack.DllReferencePlugin({
       context: __dirname,
       manifest: require('./manifest.json'),

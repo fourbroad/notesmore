@@ -1,33 +1,32 @@
-const
-  $ = require('jquery'),
-  _ = require('lodash'),
-  moment = require('moment'),
-  jsonPatch = require('fast-json-patch'),
-  validate = require("validate.js"),
-  utils = require('core/utils'),
-  Loader = require('core/loader'),
-  uuidv4 = require('uuid/v4'),
-  FileSaver = require('file-saver');
+import * as $ from'jquery';
+import _ from'lodash';
+import moment from'moment';
+import jsonPatch from'fast-json-patch';
+import validate from"validate.js";
+import utils from'core/utils';
+import Loader from'core/loader';
+import uuidv4 from'uuid/v4';
+import FileSaver from'file-saver';
 
-// const PerfectScrollbar = require('perfect-scrollbar');
-// require('perfect-scrollbar/css/perfect-scrollbar.css');
+// const PerfectScrollbar from'perfect-scrollbar');
+// import 'perfect-scrollbar/css/perfect-scrollbar.css');
 
-require('jquery-ui/ui/widget');
-require('jquery-ui/ui/data');
-require('jquery.urianchor');
-require('bootstrap'),
-require('datatables.net-bs4');
-require('datatables.net-bs4/css/dataTables.bootstrap4.css');
+import 'jquery-ui/ui/widget';
+import 'jquery-ui/ui/data';
+import 'jquery.urianchor';
+import 'bootstrap';
+import 'datatables.net-bs4';
+import 'datatables.net-bs4/css/dataTables.bootstrap4.css';
 
-require('search/keywords/keywords');
-require('search/numeric-range/numeric-range');
-require('search/datetime-range/datetime-range');
-require('search/datetime-duedate/datetime-duedate');
-require('search/contains-text/contains-text');
-require('search/full-text/full-text');
+import 'search/keywords/keywords';
+import 'search/numeric-range/numeric-range';
+import 'search/datetime-range/datetime-range';
+import 'search/datetime-duedate/datetime-duedate';
+import 'search/contains-text/contains-text';
+import 'search/full-text/full-text';
 
-require('./view.scss');
-const viewHtml = require('./view.html');
+import './view.scss';
+import viewHtml from'./view.html';
 
 $.widget("nm.view", {
 

@@ -56,8 +56,7 @@ module.exports = merge(common, {
       },{
         loader: 'css-loader',
         options: {
-          sourceMap : false,
-          minimize  : true
+          sourceMap : false
         }
       },{
         loader: 'postcss-loader',
@@ -81,7 +80,10 @@ module.exports = merge(common, {
   optimization: {
     minimizer: [
 //       new TerserPlugin()
-     new UglifyJsPlugin({uglifyOptions:{ie8: true}})
+     new UglifyJsPlugin({
+       sourceMap: true,
+       uglifyOptions:{ie8: true}
+     })
    ]
   },  
   plugins: [
@@ -99,6 +101,10 @@ module.exports = merge(common, {
     new CopyWebpackPlugin([{
       from : path.join(__dirname, 'frontend/context/static'),
       to   : path.join(__dirname, 'dist/context/static')
+    }]),
+    new CopyWebpackPlugin([{
+      from : path.join(__dirname, 'frontend/favicon.ico'),
+      to   : path.join(__dirname, 'dist/favicon.ico')
     }]),
 //     new ManifestPlugin(),    
     new webpack.HashedModuleIdsPlugin(),

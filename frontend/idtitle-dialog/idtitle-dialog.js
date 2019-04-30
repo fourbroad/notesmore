@@ -1,9 +1,7 @@
 
-require('./idtitle-dialog.scss');
-
-const 
-  Loader = require('core/loader'),
-  idtitleDialog  = require('./idtitle-dialog.html');
+import './idtitle-dialog.scss';
+import Loader from'core/loader';
+import idtitleDialog  from'./idtitle-dialog.html';
 
 $.widget('nm.idtitledialog', {
   options: {
