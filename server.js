@@ -2,6 +2,7 @@ const
   createError = require('http-errors'),
   http = require('http'),
   express = require('express'),
+  bodyParser = require('body-parser'),
   cookieParser = require('cookie-parser'),
   logger = require('morgan'),
   path = require('path'),
@@ -37,8 +38,8 @@ app.use(cors({credentials: true, origin: 'http://localhost:8080'}));
 // app.use(cors());
 
 app.use(logger('dev'));
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/dist', express.static(path.join(__dirname,'dist')));
 // app.use('/test', express.static(path.join(__dirname,'test')));
 
