@@ -84,8 +84,8 @@ function createEntity(elasticsearch, authorId, domainId, collectionId, documentI
 
 function getEntity(elasticsearch, domainId, collectionId, documentId, options){
   var options = options || {}, version = options.version, promise;
-  if(options.index){
-    promise = elasticsearch.get({index: options.index, type: 'snapshot', id: documentId });
+  if(options.index || options.hot){
+    promise = elasticsearch.get({index: options.index||documentHotAlias(domainId, collectionId), type: 'snapshot', id: documentId });
   } else {
     promise = elasticsearch.search({index: documentAllAlias(domainId, collectionId), type: 'snapshot', version: true, body: {
       query: {

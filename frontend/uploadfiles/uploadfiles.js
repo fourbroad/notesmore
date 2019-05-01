@@ -1,12 +1,12 @@
 import 'font-awesome/scss/font-awesome.scss';
 
-import * as $ from 'jquery';
-import 'jquery-ui/ui/widget';
-import 'jquery-ui/ui/data';
+// import * as $ from 'jquery';
+// import 'jquery-ui/ui/widget';
+// import 'jquery-ui/ui/data';
 
-import 'bootstrap';
-import _ from 'lodash';
-import moment from 'moment';
+// import 'bootstrap';
+// import _ from 'lodash';
+// import moment from 'moment';
 
 import 'blueimp-gallery/css/blueimp-gallery.css';
 import 'blueimp-file-upload/css/jquery.fileupload.css';
@@ -42,11 +42,13 @@ $.widget("nm.uploadfiles", {
     this.$uploadForm = $('form.file-upload', this.$uploadFiles)
     this.$uploadFiles.appendTo(this.element.empty());
 
+    console.log(`${doc.upload.url}/${doc.domainId}/.files`);
+
     // Initialize the jQuery File Upload widget:
     this.$uploadForm.fileupload({
       // Uncomment the following to send cross-domain cookies:
       xhrFields: {withCredentials: true},
-      url: 'http://localhost:3000/'+doc.domainId + '/.files',
+      url: `${doc.upload.url}/${doc.domainId}/.files`,
       forceIframeTransport: o.forceIframeTransport
     });
 

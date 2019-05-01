@@ -105,4 +105,6 @@ server.on('listening', function() {
   debug('Listening on ' + bind);
 });
 
-server.listen(port);
+server.listen(port, ()=>{
+  console.log(`Notesmore ACG listening on port ${port}`);
+});

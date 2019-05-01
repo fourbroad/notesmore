@@ -32,7 +32,8 @@ $.widget('nm.workbench', {
     this.element.html(workbenchHtml);
 
     this.$workbench = $(".workbench", this.element);
-    this.$domainName = $(".domain-name", this.element);
+    this.$workbenchTitle = $(".workbench-title", this.element);
+    this.$logoImg = $('.logo img', this.element);
     this.$slogan = $(".slogan", this.element);
     this.$mainContainer = $('.main-container', this.$workbench);
     this.$mainContent = $("#mainContent", this.$mainContainer);
@@ -304,9 +305,10 @@ $.widget('nm.workbench', {
     let o = this.options, page = o.page, client = page.getClient(), Domain = client.Domain, _this = this;
     Domain.get(page.domainId, function(err, domain){
       if(err) return console.error(err);
-      domain = domain.get(o.locale);
-      _this.$domainName.html(domain.title);
-      _this.$slogan.html(domain.slogan);
+      let domainLocale = domain.get(o.locale), pageLocale = page.get(o.locale);
+      _this.$workbenchTitle.html(domainLocale.title || pageLocale.title);
+      _this.$logoImg.attr('src', domainLocale.logo || pageLocale.logo);
+      _this.$slogan.html(pageLocale.slogan || domainLocale.slogan);
       _this.$favoritesTitle.html(_.at(o.page.get(o.locale),'favorites.title')[0]);
     });    
 

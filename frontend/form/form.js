@@ -76,7 +76,7 @@ $.widget("nm.form", {
         var json;
         try { json =  JSON.parse(self.jsonEditor.getValue()); }catch(e){}
         if(json){
-          o.document.replace(json);
+          o.document = o.document.replace(json);
           self._refreshHeader();
         }
       }
@@ -204,11 +204,7 @@ $.widget("nm.form", {
     $('i', this.$icon).removeClass().addClass(doc._meta.iconClass||'ti-file');
 
     if(this._isDirty()){
-      if(o.isNew){
-        this.$saveBtn.html(this._i18n('saveAs', 'Save as...'));
-      } else {
-        this.$saveBtn.html(this._i18n('save', 'Save'));
-      }
+      this.$saveBtn.html(this._i18n('save', 'Save'));
       this.$saveBtn.show();
       this.$cancelBtn.show().html(this._i18n('cancel', 'Cancel'));
     }else{
@@ -231,9 +227,9 @@ $.widget("nm.form", {
   },
 
   _onSave: function(e){
-    var o = this.options;
+    var o = this.options, doc = o.document;
     if(o.isNew){
-      this._onSaveAs();
+      this.saveAs(doc.id||uuidv4(), doc.title, ()=>{});
     }else{
       this.save();
     }

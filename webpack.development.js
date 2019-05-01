@@ -78,17 +78,6 @@ module.exports = merge(common, {
     }]
   },
   plugins: [
-//     new webpack.ProvidePlugin({
-//       $: 'jquery',
-//       jQuery: 'jquery',
-//       'window.$': 'jquery',
-//       'window.jQuery': 'jquery',
-//       moment: 'moment',
-//       'window.moment': 'moment',
-//       merge: ['lodash','merge'],
-//       'window._':'lodash',
-//       Popper: ['popper.js', 'default']
-//     }),  
     new DashboardPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.HotModuleReplacementPlugin()

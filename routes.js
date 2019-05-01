@@ -11,7 +11,7 @@ const _ = require('lodash')
   , config = require('config')
   , model = require('./backend/acg/model')
   , ACL = require('./backend/acg/acl')
-  , hdfs = WebHDFS.createClient(config.get('elasticSearch'));
+  , hdfs = WebHDFS.createClient(config.get('hdfs'));
 
 const
   { Collection, Document, Domain, Form, Group, Meta, Page, Action, Role, Profile, File, User, View, Utils} = model,
@@ -60,7 +60,7 @@ router.delete('/_logout', function(req, res){
 });
 
 router.post('/:domainId/.files', function(req, res) {
-  var visitorId = req.visitorId
+  let visitorId = req.visitorId
     , domainId = req.params.domainId
     , files = {}
     , busboyFinished = false
@@ -72,9 +72,8 @@ router.post('/:domainId/.files', function(req, res) {
     if (!busboyFinished)
       return;
 
-    var fs = new Array();
-    var hdfsFinished = true;
-    for (var name in files) {
+    let fs = new Array(), hdfsFinished = true;
+    for (let name in files) {
       if (files.hasOwnProperty(name)) {
         if (files[name].process) {
           hdfsFinished = false;
@@ -99,9 +98,8 @@ router.post('/:domainId/.files', function(req, res) {
   }
 
   busboy.on('file', function(fieldName, stream, fileName, encoding, mimeType) {
-    var domainId = ".root"
-      , fileId = uuidv4()
-      , path = '/' + domainId + '/' + fileId + Path.extname(fileName);
+    let fileId = uuidv4()
+      , path = `/${domainId}/${fileId}${Path.extname(fileName)}`;
     files[path] = {
       id: fileId,
       title: fileName,
@@ -118,9 +116,9 @@ router.post('/:domainId/.files', function(req, res) {
     });
     stream.on('end', function() {
       _.merge(files[path], {
-        url: "http://localhost:3000/" + domainId + "/.files/" + fileId,
-        thumbnailUrl: "http://localhost:3000/" + domainId + "/.files/" + fileId,
-        deleteUrl: "http://localhost:3000/" + domainId + "/.files/" + fileId,
+        url: `http://localhost:3000/${domainId}/.files/${fileId}?hot=true`,
+        thumbnailUrl: `http://localhost:3000/${domainId}/.files/${fileId}?hot=true`,
+        deleteUrl: `http://localhost:3000/${domainId}/.files/${fileId}?hot=true`,
         deleteType: "DELETE"
       });
       delete files[path].process;
@@ -131,7 +129,7 @@ router.post('/:domainId/.files', function(req, res) {
   });
 
   busboy.on('field', function(fieldName, val, fieldnameTruncated, valTruncated) {
-    console.log('Field [' + fieldName + ']: value: ' + inspect(val));
+    console.log(`Field [${fieldName}]: value: ${inspect(val)}`);
   });
 
   busboy.on('finish', function() {
@@ -144,18 +142,19 @@ router.post('/:domainId/.files', function(req, res) {
 });
 
 router.get('/:domainId/.files/:fileId', function(request, response) {
-  var visitorId = request.visitorId
+  let visitorId = request.visitorId
     , domainId = request.params.domainId
     , fileId = request.params.fileId
     , range = request.headers.range
-    , startPos = 0;
+    , startPos = 0
+    , opts = request.query.hot ? {hot: true} : {};
   Profile.get(domainId, visitorId).then(profile=>{
-    File.get(domainId, fileId).then(file=>{
+    File.get(domainId, fileId, opts).then(file=>{
       Utils.checkPermission(profile, _.at(file, '_meta.acl.get')[0]).then(result=>{
         if (result) {
-          var path = '/' + domainId + '/' + fileId + Path.extname(file.name);
+          let path = '/' + domainId + '/' + fileId + Path.extname(file.name);
           if (typeof range != 'undefined') {
-            var startPosMatch = /^bytes=([0-9]+)-$/.exec(range);
+            let startPosMatch = /^bytes=([0-9]+)-$/.exec(range);
             startPos = Number(startPosMatch[1]);
           }
 
@@ -172,15 +171,13 @@ router.get('/:domainId/.files/:fileId', function(request, response) {
           }).pipe(response);
 
         }
-      }
-      );
-    }
-    );
+      });
+    });
   })
 });
 
 router.delete('/:domainId/.files/:fileId', function(request, response) {
-  var visitorId = request.visitorId
+  let visitorId = request.visitorId
     , domainId = request.params.domainId
     , fileId = request.params.fileId;
 
@@ -188,7 +185,7 @@ router.delete('/:domainId/.files/:fileId', function(request, response) {
     file.delete(visitorId);
     return file;
   }).then(function(file) {
-    var path = '/' + domainId + '/' + fileId + Path.extname(file.name), resObj = {};
+    let path = '/' + domainId + '/' + fileId + Path.extname(file.name), resObj = {};
     resObj[file.fileName] = true;
     hdfs.unlink(path);
     response.send({

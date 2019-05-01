@@ -35,7 +35,7 @@ $.widget("nm.view", {
   },
 
   _create: function() {
-    let o = this.options, self = this;
+    let o = this.options, _this = this;
 
     this._addClass('nm-view', 'container-fluid');
     this.element.html(viewHtml);
@@ -62,30 +62,30 @@ $.widget("nm.view", {
 
     this.$viewContainer.on('click', 'table.view-table tbody>tr', function(evt){
       let $this = $(this);
-      if(self._isRowActive($this)){
-        self._clearRowActive($this);
+      if(_this._isRowActive($this)){
+        _this._clearRowActive($this);
       } else {
-        self._setRowActive($this);
+        _this._setRowActive($this);
       }
     });
 
     this.$viewContainer.on('show.bs.dropdown', 'table.view-table tbody>tr', function(evt){
       let $this = $(this);
-      if(!self._isRowActive($this)){
-        self._setRowActive($this);
+      if(!_this._isRowActive($this)){
+        _this._setRowActive($this);
       }
-      self._showDocMenu($(evt.target).find('.dropdown-menu'), self.table.row(this).data());
+      _this._showDocMenu($(evt.target).find('.dropdown-menu'), _this.table.row(this).data());
     });
 
     this.$viewContainer.on('click','table.view-table li.dropdown-item.delete', function(evt){
-      let $this = $(this), $tr = $this.parents('tr'), v = self.table.row($tr).data();
+      let $this = $(this), $tr = $this.parents('tr'), v = _this.table.row($tr).data();
       v.delete(function(err, result){
         if(err) return console.error(err);
         Collection.get(v.domainId, v.collectionId, function(err, collection){
           if(err) return console.error(err);
           collection.refresh(function(err, result){
             if(err) return console.error(err);
-            self.table.draw(false);
+            _this.table.draw(false);
           });
         })
       });
@@ -94,11 +94,11 @@ $.widget("nm.view", {
     });
 
     this.$viewContainer.on('click','table.view-table a', function(evt){
-      let $this = $(this), $tr = $this.parents('tr'), doc = self.table.row($tr).data();
+      let $this = $(this), $tr = $this.parents('tr'), doc = _this.table.row($tr).data();
       if(evt.ctrlKey){
-        self.element.trigger('docctrlclick', doc);
+        _this.element.trigger('docctrlclick', doc);
       }else{
-        self.element.trigger('docclick', doc);
+        _this.element.trigger('docclick', doc);
       }
       evt.preventDefault();
       evt.stopPropagation();
@@ -116,7 +116,7 @@ $.widget("nm.view", {
   },
 
   _onFavorite: function(e){
-    let o = this.options, view = o.view, self = this, client = view.getClient(), currentUser = client.currentUser, Profile = client.Profile;
+    let o = this.options, view = o.view, _this = this, client = view.getClient(), currentUser = client.currentUser, Profile = client.Profile;
     Profile.get(view.domainId, currentUser.id, function(err, profile){
       if(err) return console.error(err);
       let oldFavorites = _.cloneDeep(profile.favorites), patch,
@@ -139,14 +139,14 @@ $.widget("nm.view", {
       }
       profile.patch({patch: patch}, function(err, profile){
         if(err) return console.error(err);
-        self._refreshFavorite(profile.favorites);
-        self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
+        _this._refreshFavorite(profile.favorites);
+        _this.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
       });
     });
   },
 
   _onDeleteSelf: function(e){
-    let view = this.options.view, self = this, client = view.getClient(), currentUser = client.currentUser;
+    let view = this.options.view, _this = this, client = view.getClient(), currentUser = client.currentUser;
     view.delete(function(err, result){
       if(err) return console.error(err);
         Profile.get(view.domainId, currentUser.id, function(err, profile){
@@ -159,18 +159,18 @@ $.widget("nm.view", {
             path: '/favorites/'+index            
           }]}, function(err, profile){
             if(err) return console.error(err);
-            self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
+            _this.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
           });
         }
       });
-      self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', view);
+      _this.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', view);
     });
 
     e.stopPropagation();
   },
 
   _armActionMoreMenu: function(){
-    let o = this.options, self = this, view = o.view, viewLocale = view.get(o.locale), client = view.getClient(), currentUser = client.currentUser;
+    let o = this.options, _this = this, view = o.view, viewLocale = view.get(o.locale), client = view.getClient(), currentUser = client.currentUser;
     this.$actionMoreMenu.empty();
 
     if(o.view.collectionId == ".collections"){
@@ -186,7 +186,7 @@ $.widget("nm.view", {
     
     utils.checkPermission(view.domainId, currentUser.id, 'delete', view, function(err, result){
       if(result){
-        $('<li class="dropdown-item delete">' + (_.at(viewLocale, 'toolbox.delete')[0]||'Delete') +'</li>').appendTo(self.$actionMoreMenu);
+        $('<li class="dropdown-item delete">' + (_.at(viewLocale, 'toolbox.delete')[0]||'Delete') +'</li>').appendTo(_this.$actionMoreMenu);
       }
     });
 
@@ -194,7 +194,7 @@ $.widget("nm.view", {
   },  
 
   refresh: function() {
-    let o = this.options, self = this, view = o.view, viewLocale = view.get(o.locale), language = {};
+    let o = this.options, _this = this, view = o.view, viewLocale = view.get(o.locale), language = {};
     this.$viewTitle.html(viewLocale.title||viewLocale.id);
 
     $('i', this.$icon).removeClass().addClass(view._meta.iconClass||'ti-file');
@@ -279,11 +279,11 @@ $.widget("nm.view", {
       }],
       sAjaxSource: "view",
       fnServerData: function (sSource, aoData, fnCallback, oSettings ) {
-        let kvMap = self._kvMap(aoData);
+        let kvMap = _this._kvMap(aoData), from = kvMap['iDisplayStart'], size = kvMap['iDisplayLength'];
         view.findDocuments({
-          from:kvMap['iDisplayStart'],
-          size:kvMap['iDisplayLength'],
-          sort: self._buildSort(kvMap)
+          from: from,
+          size: size,
+          sort: _this._buildSort(kvMap)
         }, function(err, docs){
           if(err) {
             if(err.code == 401){
@@ -301,8 +301,13 @@ $.widget("nm.view", {
             "sEcho": kvMap['sEcho'],
             "iTotalRecords": docs.total,
             "iTotalDisplayRecords": docs.total,
-            "aaData": self._toLocale(docs.documents)
+            "aaData": _this._toLocale(docs.documents)
           });
+          
+          let $pageBtn = $('li.page-item.next', _this.element).prev();
+          if(Number($pageBtn.find('a').html())*size >= 10000){
+            $pageBtn.hide();
+          }
         });
       }
     });
@@ -324,7 +329,7 @@ $.widget("nm.view", {
   },
 
   _refreshSearchBar: function(){
-    let o = this.options, self = this, view = o.view, viewLocale = view.get(o.locale),
+    let o = this.options, _this = this, view = o.view, viewLocale = view.get(o.locale),
         searchFields = _.filter(view.search.fields, function(sf) { return sf.visible == undefined || sf.visible == true; });
 
     this.$searchContainer.empty();
@@ -332,7 +337,7 @@ $.widget("nm.view", {
       let title = _.filter(viewLocale.search.fields, function(sfl) { return sfl.name == sf.name })[0].title;
       switch(sf.type){
         case 'keywords':
-          $("<div/>").appendTo(self.$searchContainer).keywords({
+          $("<div/>").appendTo(_this.$searchContainer).keywords({
             title: title,
             name: sf.name,
             class:'search-item',
@@ -349,13 +354,13 @@ $.widget("nm.view", {
             valueChanged: function(event, values){
               let sf2 = _.find(view.search.fields, function(o){return o.name == sf.name});
               sf2.values = values.selectedItems;
-              self.table.column(sf2.name+':name').search(sf2.values.join(',')).draw();
-              self._refreshHeader();
+              _this.table.column(sf2.name+':name').search(sf2.values.join(',')).draw();
+              _this._refreshHeader();
             }
           });
           break;
         case 'numericRange':
-          $("<div/>").appendTo(self.$searchContainer).numericrange({
+          $("<div/>").appendTo(_this.$searchContainer).numericrange({
             title: title,
             name: sf.name,
             class:'search-item',
@@ -367,15 +372,15 @@ $.widget("nm.view", {
               let sf2 = _.find(view.search.fields, function(o){return o.name == sf.name});
               sf2.lowestValue = range.lowestValue;
               sf2.highestValue = range.highestValue;
-              self.table.column(sf2.name+':name')
+              _this.table.column(sf2.name+':name')
                 .search(sf2.lowestValue||sf2.highestValue ? [sf2.lowestValue, sf2.highestValue].join(','):'')
                 .draw();
-              self._refreshHeader();
+              _this._refreshHeader();
             }
           });
           break;
         case 'datetimeRange':
-          $("<div/>").appendTo(self.$searchContainer).datetimerange({
+          $("<div/>").appendTo(_this.$searchContainer).datetimerange({
             title: title,
             name: sf.name,
             class:'search-item',
@@ -424,15 +429,15 @@ $.widget("nm.view", {
                 default:
               }
                     
-              self.table.column(sf2.name+':name')
-                .search(self._buildDatetimeRangeSearch(sf2))
+              _this.table.column(sf2.name+':name')
+                .search(_this._buildDatetimeRangeSearch(sf2))
                 .draw();
-              self._refreshHeader();
+              _this._refreshHeader();
             }
           });
           break;
         case 'datetimeDuedate':
-          $("<div/>").appendTo(self.$searchContainer).datetimeduedate({
+          $("<div/>").appendTo(_this.$searchContainer).datetimeduedate({
             title: title,
             name: sf.name,
             class:'search-item',
@@ -490,15 +495,15 @@ $.widget("nm.view", {
                 default:
               }
                     
-              self.table.column(sf2.name+':name')
-                .search(self._buildDatetimeRangeSearch(sf2))
+              _this.table.column(sf2.name+':name')
+                .search(_this._buildDatetimeRangeSearch(sf2))
                 .draw();
-              self._refreshHeader();
+              _this._refreshHeader();
             }
           });
           break;
         case 'containsText':
-          $("<div/>").appendTo(self.$searchContainer).containstext({
+          $("<div/>").appendTo(_this.$searchContainer).containstext({
             title: title,
             name: sf.name,
             class:'search-item',
@@ -508,10 +513,10 @@ $.widget("nm.view", {
             valueChanged: function(event, range){
               let sf2 = _.find(view.search.fields, function(o){return o.name == sf.name});
               sf2.containsText = range.containsText;
-              self.table.column(sf2.name+':name')
+              _this.table.column(sf2.name+':name')
                 .search(sf2.containsText)
                 .draw();
-              self._refreshHeader();
+              _this._refreshHeader();
             }
           });
           break;
@@ -524,8 +529,8 @@ $.widget("nm.view", {
       keyword: _.at(view,'search.fulltext.keyword')[0],
       valueChanged: function(event, keyword){
         _.set(view, 'search.fulltext.keyword', keyword.keyword);
-        self.table.search(keyword.keyword).draw();
-        self._refreshHeader();
+        _this.table.search(keyword.keyword).draw();
+        _this._refreshHeader();
       }
     });
   },
@@ -586,7 +591,7 @@ $.widget("nm.view", {
   },
 
   _armSearchCol: function(){
-    let o = this.options, self = this, view = o.view;
+    let o = this.options, _this = this, view = o.view;
     return _.reduce(view.columns, function(searchCols, col){
       let sf = _.find(view.search.fields, {'name': col.name});
       if(sf){
@@ -598,10 +603,10 @@ $.widget("nm.view", {
             searchCols.push({search: sf.lowestValue||sf.highestValue ? [sf.lowestValue, sf.highestValue].join(','):''});
             break;
           case 'datetimeRange':
-            searchCols.push({search: self._buildDatetimeRangeSearch(sf)});
+            searchCols.push({search: _this._buildDatetimeRangeSearch(sf)});
             break;
           case 'datetimeDuedate':
-            searchCols.push({search: self._buildDatetimeRangeSearch(sf)});
+            searchCols.push({search: _this._buildDatetimeRangeSearch(sf)});
             break;
           case 'containsText':
             searchCols.push({search: sf.containsText});
@@ -616,7 +621,7 @@ $.widget("nm.view", {
   },
 
   _refreshHeader: function(){
-    var o = this.options, view = o.view.get(o.locale);
+    let o = this.options, view = o.view.get(o.locale);
     if(this._isDirty()){
       this.$saveBtn.show().html(_.at(view, 'toolbox.save')[0]);
       this.$cancelBtn.show().html(_.at(view, 'toolbox.cancel')[0]);
@@ -631,11 +636,11 @@ $.widget("nm.view", {
     if(o.isNew){
       this.$favorite.hide();
     }else{
-      let self = this, view = o.view,　client = view.getClient(), currentUser = client.currentUser, Profile = client.Profile;
+      let _this = this, view = o.view,　client = view.getClient(), currentUser = client.currentUser, Profile = client.Profile;
       this.$favorite.show();
 
       function doRefreshFavorite(favorites){
-        let $i = $('i', self.$favorite).removeClass();
+        let $i = $('i', _this.$favorite).removeClass();
         if(_.find(favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
           $i.addClass('c-red-500 ti-star');
         }else{
@@ -678,7 +683,7 @@ $.widget("nm.view", {
   },
 
   _buildOrder: function(sort){
-    let o = this.options, self = this, view = o.view;
+    let o = this.options, _this = this, view = o.view;
     return _.reduce(sort, function(order, value){
       order.push([_.findIndex(view.columns, ['name', _.keys(value)[0]]), value[_.keys(value)[0]].order]);
       return order;
@@ -731,25 +736,26 @@ $.widget("nm.view", {
   },
 
   _onItemSaveAs: function(evt){
-    let o = this.options, view = o.view, viewLocale = view.get(o.locale), self = this;
+    let o = this.options, view = o.view, viewLocale = view.get(o.locale), _this = this;
     this.showIdTitleDialog({
       modelTitle:_.at(viewLocale, 'toolbox.saveAs')[0] || 'Save as...', 
       id: uuidv4(), 
-      title: viewLocale.title || '', 
       locale: o.locale,
       submit:function(e, data){
-        self.saveAs(data.id, data.title);
+        _this.saveAs(data.id, data.title);
       }
     });
   },
 
   saveAs: function(id, title, callback){
-    let o = this.options, client = o.view.getClient(), View = client.View, view = _.cloneDeep(o.view), self = this;
+    let o = this.options, locale = o.locale, client = o.view.getClient(), View = client.View, view = _.cloneDeep(o.view), _this = this;
     view.title = title;
+    if(o.locale){
+      _.set(view, `_i18n.${locale}.title`, title);
+    }
     delete view._meta;
     if(o.view.collectionId == '.collections'){
       view.collections = [o.view.id];
-      _.set(view, '_meta.acl.delete.roles', ['administrator']);
     }
 
     View.create(o.view.domainId, id||uuidv4(), view, function(err, view){
@@ -757,10 +763,10 @@ $.widget("nm.view", {
         let isNew = o.isNew;
         o.isNew = false;
         o.view = view;
-        self.clone = _.cloneDeep(view);
-        self.refresh();
-        self.closeIdTitleDialog();        
-        self.element.trigger('documentcreated', [view, isNew]);
+        _this.clone = _.cloneDeep(view);
+        _this.refresh();
+        _this.closeIdTitleDialog();        
+        _this.element.trigger('documentcreated', [view, isNew]);
     });
   },
 
@@ -813,20 +819,20 @@ $.widget("nm.view", {
   },
 
   save: function(){
-    let o = this.options, self = this;
+    let o = this.options, _this = this;
     if(this._isDirty()){
       o.view.patch({patch: this._getPatch()}, function(err, view){
         if(err) return console.error(err);
   	    _.forOwn(o.view,function(v,k){try{delete o.view[k]}catch(e){}});
         _.merge(o.view, view);
-        self.clone = _.cloneDeep(view);
-        self._refreshHeader();
+        _this.clone = _.cloneDeep(view);
+        _this._refreshHeader();
       });
     }
   },  
 
   _onCancel: function(){
-    let o = this.options, self = this, view = o.view;
+    let o = this.options, _this = this, view = o.view;
 
   	 _.forOwn(view,function(v,k){try{delete view[k]}catch(e){}});
     _.merge(view, this.clone);
@@ -837,18 +843,18 @@ $.widget("nm.view", {
     _.each(o.view.search.fields, function(sf){
       switch(sf.type){
         case 'keywords':
-          self.table.column(sf.name+':name')
+          _this.table.column(sf.name+':name')
                .search(_.isEmpty(sf.values) ? '' : sf.values.join(','));
           break;
         case 'containsText':
-          self.table.column(sf.name+':name')
+          _this.table.column(sf.name+':name')
                .search(sf.containsText);
         case 'numericRange':
-          self.table.column(sf.name+':name')
+          _this.table.column(sf.name+':name')
                .search(sf.lowestValue||sf.highestValue ? [sf.lowestValue, sf.highestValue].join(','):'');
           break;
         case 'datetimeRange':
-          self.table.column(sf.name+':name')
+          _this.table.column(sf.name+':name')
                .search(sf.earliest||sf.latest ? [sf.earliest, sf.latest].join(','):'');
           break;
       }
@@ -858,9 +864,9 @@ $.widget("nm.view", {
   },
 
   showIdTitleDialog: function(options){
-    let self = this;
+    let _this = this;
     import(/* webpackChunkName: "idtitle-dialog" */ 'idtitle-dialog/idtitle-dialog').then(({default: itd}) => {
-      self.idtitleDialog = $('<div/>').idtitledialog(options).idtitledialog('show').idtitledialog('instance');
+      _this.idtitleDialog = $('<div/>').idtitledialog(options).idtitledialog('show').idtitledialog('instance');
     });
     return this;
   },
@@ -871,7 +877,7 @@ $.widget("nm.view", {
   },
 
   _setOption: function(key, value){
-    let o = this.options, self = this;
+    let o = this.options, _this = this;
 
     this._super(key, value);
 

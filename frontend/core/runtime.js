@@ -20,6 +20,7 @@ window.Meta = client.Meta;
 window.Page = client.Page;
 window.Action = client.Action;
 window.Profile = client.Profile;
+window.File =client.File;
 window.Role = client.Role;
 window.View = client.View;
 

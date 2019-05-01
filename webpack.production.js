@@ -87,17 +87,6 @@ module.exports = merge(common, {
    ]
   },  
   plugins: [
-//     new webpack.ProvidePlugin({
-//       $: 'jquery',
-//       jQuery: 'jquery',
-//       'window.jQuery': 'jquery',
-//       'window.$': 'jquery',
-//       moment: 'moment',
-//       'window.moment': 'moment',
-//       _: 'lodash',
-//       'window._':'lodash',
-//       Popper: ['popper.js', 'default']
-//     }),
     new CopyWebpackPlugin([{
       from : path.join(__dirname, 'frontend/context/static'),
       to   : path.join(__dirname, 'dist/context/static')

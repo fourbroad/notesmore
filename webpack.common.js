@@ -68,6 +68,7 @@ module.exports = {
           plugins: [
             '@babel/plugin-transform-runtime',
             '@babel/plugin-proposal-export-default-from',
+            '@babel/plugin-transform-arrow-functions',
             '@babel/plugin-syntax-dynamic-import',
             '@babel/plugin-proposal-object-rest-spread', // [v,] => [v]
             '@babel/plugin-proposal-export-namespace-from',
@@ -108,6 +109,18 @@ module.exports = {
 //     }
 //   },  
   plugins: [
+//     new webpack.ProvidePlugin({
+//       $: 'jquery',
+//       jQuery: 'jquery',
+//       'window.jQuery': 'jquery',
+//       'window.$': 'jquery',
+//       moment: 'moment',
+//       'window.moment': 'moment',
+//       _: 'lodash',
+//       'window._':'lodash',
+//       Popper: ['popper.js', 'default']
+//     }),
+  
     // To strip all locales except “en”, “es-us” and “ru”
     // (“en” is built into Moment and can’t be removed)
     new MomentLocalesPlugin({

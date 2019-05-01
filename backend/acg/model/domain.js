@@ -157,12 +157,17 @@ function buildUserBatch(authorId, authorTitle, domainId) {
     var adminProfile = {
       id: authorId,
       title: authorTitle,
-      "roles": ["administrator"]
+      roles: ["administrator"],
+      _i18n:{
+        'zh-CN':{
+          title:"管理员画像"
+        }
+      }
     }
       , anonyProfile = {
       id: 'anonymous',
       title: 'Anonymous',
-      "roles": ["anonymous"],
+      roles: ["anonymous"],
       _i18n:{
         'zh-CN':{
           title:"匿名画像"
@@ -204,7 +209,12 @@ function buildUserBatch(authorId, authorTitle, domainId) {
     var profile = {
       id: authorId,
       title: authorTitle,
-      "roles": ["administrator"]
+      roles: ["administrator"],
+      _i18n:{
+        'zh-CN':{
+          title:"管理员画像"
+        }
+      }
     };
     profile._meta = createMeta(authorId, profile);
     profile._meta.metaId = '.meta-profile';

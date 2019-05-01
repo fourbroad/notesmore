@@ -12,6 +12,7 @@
 import './index.scss';
 import 'font-awesome/scss/font-awesome.scss';
 import 'core/runtime';
+
 import moment from 'moment';
 import jsonPatch from"fast-json-patch";
 
@@ -39,8 +40,8 @@ if(currentDomain == 'www') currentDomain = '.root';
 
 window.runtime = $('body').runtime({
   client: {
-    url:'https://notesmore.com/domains'
-//     url: 'localhost:3000/domains'
+//     url:'https://notesmore.com/domains'
+    url: 'localhost:3000/domains'
   },
   locale: localStorage.getItem('language') || navigator.language,
   currentDomain: currentDomain

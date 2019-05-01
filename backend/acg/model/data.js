@@ -1,150 +1,151 @@
 const DEFAULT_ACL = {
   patch: {
-    roles: ["administrator"]
+    roles: ['administrator']
   },
   delete: {},
   getMeta: {
-    roles: ["administrator"]
+    roles: ['administrator']
   },
   patchMeta: {
-    roles: ["administrator"]
+    roles: ['administrator']
   },
   clearAclSubject: {
-    roles: ["administrator"]
+    roles: ['administrator']
   }
 }
   , DEVELOPER_ACL = {
   patch: {
-    roles: ["developer"]
+    roles: ['developer']
   },
   delete: {},
   getMeta: {
-    roles: ["developer"]
+    roles: ['developer']
   },
   patchMeta: {
-    roles: ["developer"]
+    roles: ['developer']
   },
   clearAclSubject: {
-    roles: ["developer"]
+    roles: ['developer']
   }
 }
   , DEFAULT_SEARCH_FULLTEXT = {
   fields: [
-    "id.keyword", 
-    "title.keyword", 
-    "_meta.author.keyword",
-    "_i18n.zh-CN.id.keyword", 
-    "_i18n.zh-CN.title.keyword"
+    'id.keyword', 
+    'title.keyword', 
+    '_meta.author.keyword',
+    '_i18n.*.id.keyword',
+    '_i18n.*.title.keyword',
+    '_i18n.*._meta.author.keyword'
   ]
 }
   , DEFAULT_SORT = [{
-  "_meta.updated": {
-    order: "desc"
+  '_meta.updated': {
+    order: 'desc'
   }
 }, {
-  "_meta.created": {
-    order: "desc"
+  '_meta.created': {
+    order: 'desc'
   }
 }]
   , DEFAULT_COLUMNS = [{
   sortable: false
 }, {
-  title: "Id",
-  name: "id",
-  type: "keyword",
+  title: 'Id',
+  name: 'id',
+  type: 'keyword',
   defaultLink: true
 }, {
-  title: "Title",
-  name: "title",
-  type: "keyword",
+  title: 'Title',
+  name: 'title',
+  type: 'keyword',
   sortable: false,
   defaultLink: true
 }, {
-  title: "Author",
-  name: "_meta.author",
-  type: "keyword"
+  title: 'Author',
+  name: '_meta.author',
+  type: 'keyword'
 }, {
-  title: "Version",
-  name: "_meta.version",
-  type: "integer"
+  title: 'Version',
+  name: '_meta.version',
+  type: 'integer'
 }, {
-  title: "Created",
-  name: "_meta.created",
-  type: "date"
+  title: 'Created',
+  name: '_meta.created',
+  type: 'date'
 }, {
-  title: "Updated",
-  name: "_meta.updated",
-  type: "date"
+  title: 'Updated',
+  name: '_meta.updated',
+  type: 'date'
 }, {
   sortable: false
 }]
   , DEFAULT_I18N_COLUMNS = [{}, {
-  title: "唯一标识"
+  title: '唯一标识'
 }, {
-  title: "标题"
+  title: '标题'
 }, {
-  title: "作者"
+  title: '作者'
 }, {
-  title: "版本"
+  title: '版本'
 }, {
-  title: "创建日期"
+  title: '创建日期'
 }, {
-  title: "更新日期"
+  title: '更新日期'
 }, {}]
   , DEFAULT_SEARCH_FIELDS = [{
-  title: "Id",
-  name: "id",
-  type: "keywords"
+  title: 'Id',
+  name: 'id',
+  type: 'keywords'
 }, {
-  title: "Title",
-  name: "title",
-  type: "containsText"
+  title: 'Title',
+  name: 'title',
+  type: 'containsText'
 }, {
-  title: "Author",
-  name: "_meta.author",
-  type: "keywords"
+  title: 'Author',
+  name: '_meta.author',
+  type: 'keywords'
 }, {
-  title: "Version",
-  name: "_meta.version",
-  type: "numericRange"
+  title: 'Version',
+  name: '_meta.version',
+  type: 'numericRange'
 }, {
-  title: "Created",
-  name: "_meta.created",
-  type: "datetimeRange"
+  title: 'Created',
+  name: '_meta.created',
+  type: 'datetimeRange'
 }, {
-  title: "Updated",
-  name: "_meta.updated",
-  type: "datetimeRange"
+  title: 'Updated',
+  name: '_meta.updated',
+  type: 'datetimeRange'
 }]
   , DEFAULT_I18N_SEARCH_FIELDS = [{
-  title: "唯一标识"
+  title: '唯一标识'
 }, {
-  title: "标题"
+  title: '标题'
 }, {
-  title: "作者"
+  title: '作者'
 }, {
-  title: "版本"
+  title: '版本'
 }, {
-  title: "创建日期"
+  title: '创建日期'
 }, {
-  title: "更新日期"
+  title: '更新日期'
 }]
   , DEFAULT_I18N_TOOLBOX = {
-  save: "保存",
-  cancel: "取消",
-  delete: "删除",
-  saveAs: "另存为...",
-  saveAsView: "另存为视图...",
-  exportAllCSV: "导出为CSV文件(所有字段)",
-  exportCurrentCSV: "导出为CSV文件(当前字段)"
+  save: '保存',
+  cancel: '取消',
+  delete: '删除',
+  saveAs: '另存为...',
+  saveAsView: '另存为视图...',
+  exportAllCSV: '导出为CSV文件(所有字段)',
+  exportCurrentCSV: '导出为CSV文件(当前字段)'
 }
 
   , DEFAULT_I18N_CONTEXTMENU = {
-  delete: "删除"
+  delete: '删除'
 }
   , COLLECTIONS = [{
-  id: ".collections",
-  title: "Data Warehouse",
+  id: '.collections',
+  title: 'Data Warehouse',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -152,8 +153,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "数据仓库",
+    'zh-CN': {
+      title: '数据仓库',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -164,11 +165,11 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-harddrives"
+    iconClass: 'ti-harddrives'
   }
 }, {
-  id: ".metas",
-  title: "Metas",
+  id: '.metas',
+  title: 'Metas',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -176,8 +177,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "元集合",
+    'zh-CN': {
+      title: '元集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -188,11 +189,11 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".pages",
-  title: "Pages",
+  id: '.pages',
+  title: 'Pages',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -200,8 +201,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "页面集合",
+    'zh-CN': {
+      title: '页面集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -212,11 +213,11 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".views",
-  title: "Views",
+  id: '.views',
+  title: 'Views',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -224,8 +225,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "视图集合",
+    'zh-CN': {
+      title: '视图集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -236,11 +237,11 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".forms",
-  title: "Forms",
+  id: '.forms',
+  title: 'Forms',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -248,8 +249,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "表单集合",
+    'zh-CN': {
+      title: '表单集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -260,11 +261,11 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".actions",
-  title: "Actions",
+  id: '.actions',
+  title: 'Actions',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -272,8 +273,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "行动集合",
+    'zh-CN': {
+      title: '行动集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -284,20 +285,23 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".files",
-  title: "Files",
+  id: '.files',
+  title: 'Files',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  upload:{
+    url: 'http://localhost:3000'
+  },  
   _i18n: {
-    "zh-CN": {
-      title: "文件集合",
+    'zh-CN': {
+      title: '文件集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -308,12 +312,12 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder",
-    actions: ['uploadFiles', 'edit']
+    iconClass: 'ti-folder',
+    actions: ['gridView', 'uploadFiles', 'edit']
   }
 }, {
-  id: ".roles",
-  title: "Roles",
+  id: '.roles',
+  title: 'Roles',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -321,8 +325,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "角色集合",
+    'zh-CN': {
+      title: '角色集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -333,11 +337,11 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".groups",
-  title: "Groups",
+  id: '.groups',
+  title: 'Groups',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -345,8 +349,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "组集合",
+    'zh-CN': {
+      title: '组集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -357,11 +361,11 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".profiles",
-  title: "Profiles",
+  id: '.profiles',
+  title: 'Profiles',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -369,8 +373,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "画像集合",
+    'zh-CN': {
+      title: '画像集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -381,12 +385,12 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }]
   , ROOT_COLLECTIONS = [{
-  id: ".users",
-  title: "Users",
+  id: '.users',
+  title: 'Users',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -394,8 +398,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "用户集合",
+    'zh-CN': {
+      title: '用户集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -406,11 +410,11 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".domains",
-  title: "Domains",
+  id: '.domains',
+  title: 'Domains',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -418,8 +422,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "域集合",
+    'zh-CN': {
+      title: '域集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -430,12 +434,12 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }]
   , VIEWS = [{
-  id: ".searchDocuments",
-  title: "Search Documents",
+  id: '.searchDocuments',
+  title: 'Search Documents',
   columns: DEFAULT_COLUMNS,
   search: {
     fields: DEFAULT_SEARCH_FIELDS,
@@ -443,8 +447,8 @@ const DEFAULT_ACL = {
     sort: DEFAULT_SORT,
   },
   _i18n: {
-    "zh-CN": {
-      title: "搜索文档",
+    'zh-CN': {
+      title: '搜索文档',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -455,206 +459,213 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-view',
-    iconClass: "ti-search"
+    iconClass: 'ti-search'
   }
 }]
   , ACTIONS = [{
-  id: "new",
-  title: "New",
+  id: 'new',
+  title: 'New',
   plugin: {
-    name: "@notesabc/form",
+    name: '@notesabc/form',
     mode: 'offline',
-    js: "@notesabc/form/form.bundle.js",
-    css: "@notesabc/form/form.bundle.css"
+    js: '@notesabc/form/form.bundle.js',
+    css: '@notesabc/form/form.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "新建"
+    'zh-CN': {
+      title: '新建'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
-  id: "edit",
-  title: "Edit(Json)",
+  id: 'edit',
+  title: 'Edit(Json)',
   plugin: {
-    name: "@notesabc/form",
+    name: '@notesabc/form',
     mode: 'offline',
-    js: "@notesabc/form/form.bundle.js",
-    css: "@notesabc/form/form.bundle.css"
+    js: '@notesabc/form/form.bundle.js',
+    css: '@notesabc/form/form.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "编辑(Json)"
+    'zh-CN': {
+      title: '编辑(Json)'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
-  id: "gridView",
-  title: "Grid View",
+  id: 'gridView',
+  title: 'Grid View',
   plugin: {
-    name: "@notesabc/view",
+    name: '@notesabc/view',
     mode: 'offline',
-    js: "@notesabc/view/view.bundle.js",
-    css: "@notesabc/view/view.bundle.css"
+    js: '@notesabc/view/view.bundle.js',
+    css: '@notesabc/view/view.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "表格"
+    'zh-CN': {
+      title: '表格'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
   id: 'login',
   title: 'Login',
   plugin: {
-    name: "@notesabc/login",
+    name: '@notesabc/login',
     mode: 'offline',
-    js: "@notesabc/login/login.bundle.js",
-    css: "@notesabc/login/login.bundle.css"
+    js: '@notesabc/login/login.bundle.js',
+    css: '@notesabc/login/login.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "登录"
+    'zh-CN': {
+      title: '登录'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
   id: 'signup',
   title: 'Signup',
   plugin: {
-    name: "@notesabc/signup",
+    name: '@notesabc/signup',
     mode: 'offline',
-    js: "@notesabc/signup/signup.bundle.js",
-    css: "@notesabc/signup/signup.bundle.css"
+    js: '@notesabc/signup/signup.bundle.js',
+    css: '@notesabc/signup/signup.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "注册"
+    'zh-CN': {
+      title: '注册'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
   id: 'workbench',
-  title: "Workbench",
+  title: 'Workbench',
   plugin: {
-    name: "@notesabc/workbench",
+    name: '@notesabc/workbench',
     mode: 'offline',
-    js: "@notesabc/workbench/workbench.bundle.js",
-    css: "@notesabc/workbench/workbench.bundle.css"
+    js: '@notesabc/workbench/workbench.bundle.js',
+    css: '@notesabc/workbench/workbench.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "工作台"
+    'zh-CN': {
+      title: '工作台'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
   id: 'dashboard',
   title: 'Dashboard',
   plugin: {
-    name: "@notesabc/dashboard",
+    name: '@notesabc/dashboard',
     mode: 'offline',
-    js: "@notesabc/dashboard/dashboard.bundle.js",
-    css: "@notesabc/dashboard/dashboard.bundle.css"
+    js: '@notesabc/dashboard/dashboard.bundle.js',
+    css: '@notesabc/dashboard/dashboard.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "仪表盘"
+    'zh-CN': {
+      title: '仪表盘'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
   id: 'calendar',
-  title: "Calendar",
+  title: 'Calendar',
   plugin: {
-    name: "@notesabc/calendar",
+    name: '@notesabc/calendar',
     mode: 'offline',
-    js: "@notesabc/calendar/calendar.bundle.js",
-    css: "@notesabc/calendar/calendar.bundle.css"
+    js: '@notesabc/calendar/calendar.bundle.js',
+    css: '@notesabc/calendar/calendar.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "日历"
+    'zh-CN': {
+      title: '日历'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
   id: 'im',
-  title: "Instant message",
+  title: 'Instant message',
   plugin: {
-    name: "@notesabc/im",
+    name: '@notesabc/im',
     mode: 'offline',
-    js: "@notesabc/im/im.bundle.js",
-    css: "@notesabc/im/im.bundle.css"
+    js: '@notesabc/im/im.bundle.js',
+    css: '@notesabc/im/im.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "即时消息"
+    'zh-CN': {
+      title: '即时消息'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
   id: 'email',
-  title: "Email",
+  title: 'Email',
   plugin: {
-    name: "@notesabc/email",
+    name: '@notesabc/email',
     mode: 'offline',
-    js: "@notesabc/email/email.bundle.js",
-    css: "@notesabc/email/email.bundle.css"
+    js: '@notesabc/email/email.bundle.js',
+    css: '@notesabc/email/email.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "电子邮箱"
+    'zh-CN': {
+      title: '电子邮箱'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
-  id: "uploadFiles",
-  title: "Upload Files",
+  id: 'uploadFiles',
+  title: 'Upload Files',
   plugin: {
-    name: "@notesabc/uploadfiles",
+    name: '@notesabc/uploadfiles',
     mode: 'offline',
-    js: "@notesabc/upload-files/upload-files.bundle.js",
-    css: "@notesabc/upload-files/upload-files.bundle.css"
+    js: '@notesabc/upload-files/upload-files.bundle.js',
+    css: '@notesabc/upload-files/upload-files.bundle.css'
   },
   _i18n: {
-    "zh-CN": {
-      title: "上传文件"
+    'zh-CN': {
+      title: '上传文件'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }]
   , METAS = [{
-  id: ".meta",
-  title: "Meta",
+  id: '.meta',
+  title: 'Meta',
   defaultValue: {
-    title: "New Meta",
+    title: 'New Meta',
     _i18n: {
-      "zh-CN": {
-        title: "新元文档"
+      'zh-CN': {
+        title: '新元文档'
       }
+    },
+    _meta:{
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   container: {
@@ -663,22 +674,22 @@ const DEFAULT_ACL = {
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元文档"
+    'zh-CN': {
+      title: '元文档'
     }
   },
   _meta: {
-    iconClass: "ti-wand"
+    iconClass: 'ti-wand'
   }
 }, {
-  id: ".meta-collection",
-  title: "Meta-Collection",
+  id: '.meta-collection',
+  title: 'Meta-Collection',
   container: {
     id: '.collections',
     title: 'Collections'
   },
   defaultValue: {
-    title: "New Collection",
+    title: 'New Collection',
     columns: DEFAULT_COLUMNS,
     search: {
       fields: DEFAULT_SEARCH_FIELDS,
@@ -686,8 +697,8 @@ const DEFAULT_ACL = {
       sort: DEFAULT_SORT,
     },
     _i18n: {
-      "zh-CN": {
-        title: "新文档集合",
+      'zh-CN': {
+        title: '新文档集合',
         columns: DEFAULT_I18N_COLUMNS,
         search: {
           fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -697,33 +708,43 @@ const DEFAULT_ACL = {
       }
     },
     _meta: {
-      metaId: ".meta-collection",
-      iconClass: "ti-folder"
+      metaId: '.meta-collection',
+      iconClass: 'ti-folder',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }
     }
   },
   defaultAction: 'gridView',
   actions: ['gridView', 'edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元文档集合"
+    'zh-CN': {
+      title: '元文档集合'
     }
   },
   _meta: {
-    iconClass: "ti-folder"
+    iconClass: 'ti-folder'
   }
 }, {
-  id: ".meta-page",
-  title: "Meta-page",
+  id: '.meta-page',
+  title: 'Meta-page',
   defaultValue: {
-    title: "New Page",
+    title: 'New Page',
     _i18n: {
-      "zh-CN": {
-        title: "新页面"
+      'zh-CN': {
+        title: '新页面'
       }
     },
     _meta: {
-      metaId: ".meta-page",
-      iconClass: "ti-layout-width-default"
+      metaId: '.meta-page',
+      iconClass: 'ti-layout-width-default',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   container: {
@@ -732,22 +753,22 @@ const DEFAULT_ACL = {
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元页面"
+    'zh-CN': {
+      title: '元页面'
     }
   },
   _meta: {
-    iconClass: "ti-layout-width-default"
+    iconClass: 'ti-layout-width-default'
   }
 }, {
-  id: ".meta-view",
-  title: "Meta-view",
+  id: '.meta-view',
+  title: 'Meta-view',
   container: {
     id: '.views',
     title: 'Views'
   },
   defaultValue: {
-    title: "New View",
+    title: 'New View',
     collections: [],
     columns: DEFAULT_COLUMNS,
     search: {
@@ -756,8 +777,8 @@ const DEFAULT_ACL = {
       sort: DEFAULT_SORT,
     },
     _i18n: {
-      "zh-CN": {
-        title: "新视图",
+      'zh-CN': {
+        title: '新视图',
         columns: DEFAULT_I18N_COLUMNS,
         search: {
           fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -768,32 +789,42 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-view',
-      iconClass: "ti-view-list-alt"
+      iconClass: 'ti-view-list-alt',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
-  defaultAction: "gridView",
+  defaultAction: 'gridView',
   actions: ['gridView', 'edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元视图"
+    'zh-CN': {
+      title: '元视图'
     }
   },
   _meta: {
-    iconClass: "ti-view-list-alt"
+    iconClass: 'ti-view-list-alt'
   }
 }, {
-  id: ".meta-form",
-  title: "Meta-form",
+  id: '.meta-form',
+  title: 'Meta-form',
   defaultValue: {
-    title: "New Form",
+    title: 'New Form',
     _i18n: {
-      "zh-CN": {
-        title: "新表单"
+      'zh-CN': {
+        title: '新表单'
       }
     },
     _meta: {
       metaId: '.meta-form',
-      iconClass: "ti-layout-cta-btn-right"
+      iconClass: 'ti-layout-cta-btn-right',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   container: {
@@ -802,26 +833,31 @@ const DEFAULT_ACL = {
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元表单"
+    'zh-CN': {
+      title: '元表单'
     }
   },
   _meta: {
-    iconClass: "ti-layout-cta-btn-right"
+    iconClass: 'ti-layout-cta-btn-right'
   }
 }, {
-  id: ".meta-action",
-  title: "Meta-action",
+  id: '.meta-action',
+  title: 'Meta-action',
   defaultValue: {
-    title: "New Action",
+    title: 'New Action',
     _i18n: {
-      "zh-CN": {
-        title: "新行动"
+      'zh-CN': {
+        title: '新行动'
       }
     },
     _meta: {
       metaId: '.meta-action',
-      iconClass: "ti-control-play"
+      iconClass: 'ti-control-play',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   container: {
@@ -830,26 +866,31 @@ const DEFAULT_ACL = {
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元行动"
+    'zh-CN': {
+      title: '元行动'
     }
   },
   _meta: {
-    iconClass: "ti-control-play"
+    iconClass: 'ti-control-play'
   }
 }, {
-  id: ".meta-file",
-  title: "Meta-file",
+  id: '.meta-file',
+  title: 'Meta-file',
   defaultValue: {
-    title: "New File",
+    title: 'New File',
     _i18n: {
-      "zh-CN": {
-        title: "新文件"
+      'zh-CN': {
+        title: '新文件'
       }
     },
     _meta: {
       metaId: '.meta-file',
-      iconClass: "ti-file"
+      iconClass: 'ti-file',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   container: {
@@ -858,26 +899,31 @@ const DEFAULT_ACL = {
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元文件"
+    'zh-CN': {
+      title: '元文件'
     }
   },
   _meta: {
-    iconClass: "ti-file"
+    iconClass: 'ti-file'
   }
 }, {
-  id: ".meta-role",
-  title: "Meta-role",
+  id: '.meta-role',
+  title: 'Meta-role',
   defaultValue: {
-    title: "New Role",
+    title: 'New Role',
     _i18n: {
-      "zh-CN": {
-        title: "新角色"
+      'zh-CN': {
+        title: '新角色'
       }
     },
     _meta: {
       metaId: '.meta-role',
-      iconClass: "ti-id-badge"
+      iconClass: 'ti-id-badge',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   container: {
@@ -886,26 +932,31 @@ const DEFAULT_ACL = {
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元角色"
+    'zh-CN': {
+      title: '元角色'
     }
   },
   _meta: {
-    iconClass: "ti-id-badge"
+    iconClass: 'ti-id-badge'
   }
 }, {
-  id: ".meta-group",
-  title: "Meta-group",
+  id: '.meta-group',
+  title: 'Meta-group',
   defaultValue: {
-    title: "New Group",
+    title: 'New Group',
     _i18n: {
-      "zh-CN": {
-        title: "新组"
+      'zh-CN': {
+        title: '新组'
       }
     },
     _meta: {
       metaId: '.meta-group',
-      iconClass: "ti-view-grid"
+      iconClass: 'ti-view-grid',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   container: {
@@ -914,26 +965,31 @@ const DEFAULT_ACL = {
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元组"
+    'zh-CN': {
+      title: '元组'
     }
   },
   _meta: {
-    iconClass: "ti-view-grid"
+    iconClass: 'ti-view-grid'
   }
 }, {
-  id: ".meta-profile",
-  title: "Meta-profile",
+  id: '.meta-profile',
+  title: 'Meta-profile',
   defaultValue: {
-    title: "New Profile",
+    title: 'New Profile',
     _i18n: {
-      "zh-CN": {
-        title: "新画像"
+      'zh-CN': {
+        title: '新画像'
       }
     },
     _meta: {
       metaId: '.meta-profile',
-      iconClass: "ti-id-badge"
+      iconClass: 'ti-id-badge',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   container: {
@@ -942,17 +998,17 @@ const DEFAULT_ACL = {
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元画像"
+    'zh-CN': {
+      title: '元画像'
     }
   },
   _meta: {
-    iconClass: "ti-id-badge"
+    iconClass: 'ti-id-badge'
   }
 }]
   , ROOT_METAS = [{
-  id: ".meta-user",
-  title: "Meta-user",
+  id: '.meta-user',
+  title: 'Meta-user',
   container: {
     id: '.users',
     title: 'Users'
@@ -960,217 +1016,229 @@ const DEFAULT_ACL = {
   defaultValue: {
     id: 'newuser',
     password: 'password',
-    title: "New User",
+    title: 'New User',
     _i18n: {
-      "zh-CN": {
-        title: "新用户"
+      'zh-CN': {
+        title: '新用户'
       }
     },
     _meta: {
       metaId: '.meta-user',
-      iconClass: "ti-user"
+      iconClass: 'ti-user',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元用户"
+    'zh-CN': {
+      title: '元用户'
     }
   },
   _meta: {
-    iconClass: "ti-user"
+    iconClass: 'ti-user'
   }
 }, {
-  id: ".meta-domain",
-  title: "Meta-domain",
+  id: '.meta-domain',
+  title: 'Meta-domain',
   container: {
     id: '.domains',
     title: 'Domains'
   },
   defaultValue: {
-    title: "New Domain",
+    title: 'New Domain',
     _i18n: {
-      "zh-CN": {
-        title: "新域"
+      'zh-CN': {
+        title: '新域'
       }
     },
     _meta: {
       metaId: '.meta-domain',
-      iconClass: "ti-layout-width-full"
+      iconClass: 'ti-layout-width-full',
+      acl: {
+        patchMeta: {
+          roles: [['administrator']]
+        }
+      }      
     }
   },
   actions: ['edit'],
   _i18n: {
-    "zh-CN": {
-      title: "元域"
+    'zh-CN': {
+      title: '元域'
     }
   },
   _meta: {
-    iconClass: "ti-layout-width-full"
+    iconClass: 'ti-layout-width-full'
   }
 }, ]
   , PAGES = [{
-  id: ".login",
-  title: "Login",
+  id: '.login',
+  title: 'Login',
   _i18n: {
-    "zh-CN": {
-      title: "登录"
+    'zh-CN': {
+      title: '登录'
     }
   },
   _meta: {
-    iconClass: "ti-layout-width-default",
+    iconClass: 'ti-layout-width-default',
     actions: ['login']
   }
 }, {
-  id: ".signup",
-  title: "Signup",
+  id: '.signup',
+  title: 'Signup',
   _i18n: {
-    "zh-CN": {
-      title: "注册"
+    'zh-CN': {
+      title: '注册'
     }
   },
   _meta: {
-    iconClass: "ti-layout-width-default",
+    iconClass: 'ti-layout-width-default',
     actions: ['signup']
   }
 }, {
-  id: ".workbench",
-  title: "Workbench",
+  id: '.workbench',
+  title: 'Workbench',
+  slogan: 'Work is easy due to collaboration!',  
   sidebarItems: [{
-    collectionId: ".pages",
-    id: ".dashboard"
+    collectionId: '.pages',
+    id: '.dashboard'
   }, {
-    collectionId: ".pages",
-    id: ".calendar"
+    collectionId: '.pages',
+    id: '.calendar'
   }, {
-    collectionId: ".pages",
-    id: ".im"
+    collectionId: '.pages',
+    id: '.im'
   }, {
-    collectionId: ".pages",
-    id: ".emails"
+    collectionId: '.pages',
+    id: '.emails'
   }, {
-    collectionId: ".collections",
-    id: ".collections"
+    collectionId: '.collections',
+    id: '.collections'
   }],
   _i18n: {
-    "zh-CN": {
-      title: "工作台",
+    'zh-CN': {
+      title: '工作台',
+      slogan: '工作因协同而轻松!',
       favorites: {
-        title: "我的收藏"
+        title: '我的收藏'
       }
     }
   },
   _meta: {
-    iconClass: "ti-blackboard",
+    iconClass: 'ti-blackboard',
     actions: ['workbench']
   }
 }, {
-  id: ".dashboard",
-  title: "Dashboard",
+  id: '.dashboard',
+  title: 'Dashboard',
   _i18n: {
-    "zh-CN": {
-      title: "仪表盘"
+    'zh-CN': {
+      title: '仪表盘'
     }
   },
   _meta: {
-    iconClass: "ti-dashboard",
+    iconClass: 'ti-dashboard',
     actions: ['dashboard']
   }
 }, {
-  id: ".calendar",
-  title: "Calendar",
+  id: '.calendar',
+  title: 'Calendar',
   _i18n: {
-    "zh-CN": {
-      title: "日历"
+    'zh-CN': {
+      title: '日历'
     }
   },
   _meta: {
-    iconClass: "ti-calendar",
+    iconClass: 'ti-calendar',
     actions: ['calendar']
   }
 }, {
-  id: ".im",
-  title: "Instant message",
+  id: '.im',
+  title: 'Instant message',
   _i18n: {
-    "zh-CN": {
-      title: "即时消息"
+    'zh-CN': {
+      title: '即时消息'
     }
   },
   _meta: {
-    iconClass: "ti-comments",
+    iconClass: 'ti-comments',
     actions: ['im']
   }
 }, {
-  id: ".emails",
-  title: "Emails",
+  id: '.emails',
+  title: 'Emails',
   _i18n: {
-    "zh-CN": {
-      title: "电子邮箱"
+    'zh-CN': {
+      title: '电子邮箱'
     }
   },
   _meta: {
-    iconClass: "ti-email",
+    iconClass: 'ti-email',
     actions: ['email']
   }
 }]
   , ROLES = [{
-  id: "administrator",
-  title: "Administrator Role",
+  id: 'administrator',
+  title: 'Administrator Role',
   _i18n: {
-    "zh-CN": {
-      title: "管理员"
+    'zh-CN': {
+      title: '管理员'
     }
   },
   _meta: {
-    iconClass: "ti-user"
+    iconClass: 'ti-user'
   }
 }, {
-  id: "developer",
-  title: "Developer",
+  id: 'developer',
+  title: 'Developer',
   _i18n: {
-    "zh-CN": {
-      title: "开发人员"
+    'zh-CN': {
+      title: '开发人员'
     }
   },
   _meta: {
-    iconClass: "ti-user"
+    iconClass: 'ti-user'
   }
 }, {
-  id: "anonymous",
-  title: "Anonymous Role",
+  id: 'anonymous',
+  title: 'Anonymous Role',
   _i18n: {
-    "zh-CN": {
-      title: "匿名用色"
+    'zh-CN': {
+      title: '匿名用色'
     }
   },
   _meta: {
-    iconClass: "ti-user"
+    iconClass: 'ti-user'
   }
 }]
   , ADMINISTRATOR = {
-  id: "administrator",
-  title: "Administrator",
-  password: "3c3f601a1960b8d7b347d376d52b6e59",
+  id: 'administrator',
+  title: 'Administrator',
+  password: '3c3f601a1960b8d7b347d376d52b6e59',
   _i18n: {
-    "zh-CN": {
-      title: "管理员"
+    'zh-CN': {
+      title: '管理员'
     }
   },
   _meta: {
-    iconClass: "ti-user",
+    iconClass: 'ti-user',
   }
 }
   , ANONYMOUS = {
-  id: "anonymous",
-  title: "Anonymous",
-  password: "a29b1ee7caefc17a3a73d6d137c8169b",
+  id: 'anonymous',
+  title: 'Anonymous',
+  password: 'a29b1ee7caefc17a3a73d6d137c8169b',
   _i18n: {
-    "zh-CN": {
-      title: "匿名用户"
+    'zh-CN': {
+      title: '匿名用户'
     }
   },
   _meta: {
-    iconClass: "ti-user"
+    iconClass: 'ti-user'
   }
 };
 

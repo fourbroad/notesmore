@@ -8,14 +8,17 @@ $.widget('nm.idtitledialog', {
     modelTitle: 'Save...',
     i18n: {
       'zh-CN':{
+        modelTitle: "保存",
         id: "唯一标识",
-        title:　"标题"
+        title:　"标题",
+        save: "保存",
+        cancel:　"取消"
       }
     }
   },
 
   _create: function(){
-    var o = this.options, self = this;
+    let o = this.options, _this = this;
 
     this._addClass('nm-idtitledialog', 'modal fade');
     this.element.html(idtitleDialog);
@@ -30,20 +33,13 @@ $.widget('nm.idtitledialog', {
     this.$titleLabel = $('label[for=title]', this.element);
     this.$titleInput = $('input[name="title"]', this.element);
     this.$submitBtn = $('.btn.submit', this.element);
+    this.$cancelBtn = $('.btn.cancel', this.element);
 
-    if(o.placeholder && o.placeholder.id){
-      this.$idInput.attr('placeholder', o.placeholder.id);
-    }
 
-    if(o.placeholder && o.placeholder.title){
-      this.$titleInput.attr('placeholder', o.placeholder.title);
-    }
-
-    this.$modelTitle.html(o.modelTitle);
+    this.refresh();
 
     this.element.on('show.bs.modal', $.proxy(function (e) {
-      this.$idLabel.html(this._i18n('id',"ID"));
-      this.$titleLabel.html(this._i18n('title',"Title"));
+      this.refresh();
       this.$idInput.val(o.id||'').focus();
       this.$titleInput.val(o.title||'')
     },this));
@@ -62,6 +58,15 @@ $.widget('nm.idtitledialog', {
 
     this.$submitBtn.html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span> Please wait...').prop( "disabled", true);
     this._trigger('submit',evt, {id: this.$idInput.val(), title:this.$titleInput.val()});
+  },
+
+  refresh: function(){
+    let o = this.options;
+    this.$idLabel.html(this._i18n('id',"ID"));
+    this.$titleLabel.html(this._i18n('title',"Title"));
+    this.$modelTitle.html(this._i18n('modelTitle', 'Save'));
+    this.$submitBtn.html(this._i18n('save', 'Save'));
+    this.$cancelBtn.html(this._i18n('cancel', 'Cancel'));
   },
 
   show: function(){

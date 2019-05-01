@@ -22,6 +22,14 @@
   transition: all 0.2s ease;
   width: $offscreen-size;
   z-index: 1000;
+  
+  .slogan {
+    line-height: 10px;
+  }
+
+  .workbench-title {
+    margin-bottom: 3px !important;
+  }
 
   ul {
     list-style-type: none;
@@ -39,6 +47,9 @@
           height: 64px;
           background-position: center center;
           width: $collapsed-size;
+        }
+        .logo-text{
+          height: 64px;
         }
       }
 
@@ -141,6 +152,9 @@
     display: inline-block;
     height: 64px;
     width: 70px;
+  }
+  .logo-text {
+    height: 64px;
   }
 
   .mobile-toggle {
@@ -318,11 +332,6 @@
       width: $collapsed-size;
 
       .sidebar-inner {
-        .sidebar-logo {
-          border-bottom: 1px solid transparent;
-          padding: 0;
-        }
-
         .sidebar-menu {
           overflow-x: hidden;
 
