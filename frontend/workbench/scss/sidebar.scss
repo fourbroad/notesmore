@@ -54,7 +54,7 @@
       }
 
       .sidebar-menu {
-        overflow-x: hidden;
+//         overflow-x: hidden;
         
         > li {
           > a {
@@ -180,10 +180,11 @@
 .sidebar-menu {
   @include clearfix;
   border-right: 1px solid $border-color;
+  overflow-x: hidden;
+  overflow-y: auto;
 //   height: calc(100vh - #{$header-height});
   list-style: none;
   margin: 0;
-  overflow: auto;
   padding: 0;
   position: relative;
   border-top: 1px inset #1d8cd0;
@@ -333,7 +334,7 @@
 
       .sidebar-inner {
         .sidebar-menu {
-          overflow-x: hidden;
+//           overflow-x: hidden;
 
           > li {
             > a {

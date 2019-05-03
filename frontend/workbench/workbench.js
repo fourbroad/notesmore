@@ -193,7 +193,7 @@ $.widget('nm.workbench', {
         Document.get(f.domainId, f.collectionId, f.id, function(err, doc){
           if(err) return console.error(err);
           doc = doc.get(o.locale);
-          $(_this._armSidebarItem({collectionId:doc.collectionId, id:doc.id, iconClass: doc._meta.iconClass||'ti-file', title: doc.title}))
+          $(_this._armSidebarItem({collectionId:doc.collectionId, id:doc.id, iconClass: doc._meta.iconClass||'fa fa-file-text-o', title: doc.title}))
               .data('anchor',  {col: doc.collectionId, doc: doc.id}).appendTo(_this.$favoriteItems);
         });
       });
@@ -231,7 +231,7 @@ $.widget('nm.workbench', {
         let item;
         doc = doc.get(o.locale);
         item = _.filter(items, function(i) { return i.collectionId == doc.collectionId && i.id == doc.id;});
-        _this._armSidebarItem(_.merge(item[0], {iconClass: doc._meta.iconClass||'ti-file', title: doc.title}))
+        _this._armSidebarItem(_.merge(item[0], {iconClass: doc._meta.iconClass||'fa fa-file-text-o', title: doc.title}))
             .insertBefore(_this.$favorites);
       });
     });

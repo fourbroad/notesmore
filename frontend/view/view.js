@@ -197,7 +197,7 @@ $.widget("nm.view", {
     let o = this.options, _this = this, view = o.view, viewLocale = view.get(o.locale), language = {};
     this.$viewTitle.html(viewLocale.title||viewLocale.id);
 
-    $('i', this.$icon).removeClass().addClass(view._meta.iconClass||'ti-file');
+    $('i', this.$icon).removeClass().addClass(view._meta.iconClass||'fa fa-file-text-o');
 
     this._refreshFavorite()
     this._armActionMoreMenu();
@@ -253,14 +253,14 @@ $.widget("nm.view", {
         width: "10px",
         data: null,
         render: function(data, type, row, meta) {
-          return '<span class="icon-holder"><i class="'+ (data._meta.iconClass||'ti-file')+'"></i></span>';
+          return '<span class="icon-holder"><i class="'+ (data._meta.iconClass||'fa fa-file-text-o')+'"></i></span>';
         }
       }, {
         targets: -1,
         width: "30px",
         data: null,
         render: function(data, type, row, meta) {
-          return '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="ti-more-alt"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>';
+          return '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="fa fa-ellipsis-h"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>';
         }
       }, {
         targets:'_all',
@@ -642,9 +642,9 @@ $.widget("nm.view", {
       function doRefreshFavorite(favorites){
         let $i = $('i', _this.$favorite).removeClass();
         if(_.find(favorites, function(f) {return f.domainId==view.domainId&&f.collectionId==view.collectionId&&f.id==view.id;})){
-          $i.addClass('c-red-500 ti-star');
+          $i.addClass('c-red-500 fa fa-star-o');
         }else{
-          $i.addClass('ti-star');
+          $i.addClass('fa fa-star-o');
         }
       }
 
@@ -777,6 +777,7 @@ $.widget("nm.view", {
       let opts = {scroll:'1m'};
       if(scrollId) opts.scrollId = scrollId;
       view[scrollId ? 'scroll' : 'findDocuments'](opts, function(err, data){
+        console.log(data);
         if(err) return console.error(err);
         _.each(data.documents, function(doc){
           let row = _.reduce(columns, function(r, c){

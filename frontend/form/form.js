@@ -182,9 +182,9 @@ $.widget("nm.form", {
       function doRefreshFavorite(favorites){
         var $i = $('i', self.$favorite).removeClass();
         if(_.find(favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;})){
-          $i.addClass('c-red-500 ti-star');
+          $i.addClass('c-red-500 fa fa-star-o');
         }else{
-          $i.addClass('ti-star');
+          $i.addClass('fa fa-star-o');
         }
       }
 
@@ -202,7 +202,7 @@ $.widget("nm.form", {
   _refreshHeader: function(){
     var o = this.options, doc = o.document,　docLocale = doc.get(o.locale);
     this.$formTitle.html(docLocale.title||docLocale.id);    
-    $('i', this.$icon).removeClass().addClass(doc._meta.iconClass||'ti-file');
+    $('i', this.$icon).removeClass().addClass(doc._meta.iconClass||'fa fa-file-text-o');
 
     if(this._isDirty()){
       this.$saveBtn.html(this._i18n('save', 'Save')).prop("disabled", false);

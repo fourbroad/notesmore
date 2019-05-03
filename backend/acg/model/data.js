@@ -166,7 +166,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-harddrives'
+    iconClass: 'fa fa-university'
   }
 }, {
   id: '.metas',
@@ -190,7 +190,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.pages',
@@ -214,7 +214,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.views',
@@ -238,7 +238,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.forms',
@@ -262,7 +262,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.actions',
@@ -286,7 +286,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.files',
@@ -313,7 +313,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder',
+    iconClass: 'fa fa-folder-o',
     actions: ['gridView', 'uploadFiles', 'edit']
   }
 }, {
@@ -338,7 +338,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.groups',
@@ -362,7 +362,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.profiles',
@@ -386,7 +386,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }]
   , ROOT_COLLECTIONS = [{
@@ -411,7 +411,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.domains',
@@ -435,7 +435,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }]
   , VIEWS = [{
@@ -460,7 +460,7 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-view',
-    iconClass: 'ti-search'
+    iconClass: 'fa fa-search'
   }
 }]
   , ACTIONS = [{
@@ -478,7 +478,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'edit',
@@ -495,7 +495,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'gridView',
@@ -512,7 +512,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'login',
@@ -529,7 +529,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'signup',
@@ -546,7 +546,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'workbench',
@@ -563,7 +563,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'dashboard',
@@ -580,7 +580,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'calendar',
@@ -597,7 +597,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'im',
@@ -614,7 +614,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'email',
@@ -631,7 +631,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'uploadFiles',
@@ -648,7 +648,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }]
   , METAS = [{
@@ -680,7 +680,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-wand'
+    iconClass: 'fa fa-magic'
   }
 }, {
   id: '.meta-collection',
@@ -710,7 +710,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-collection',
-      iconClass: 'ti-folder',
+      iconClass: 'fa fa-folder-o',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -726,7 +726,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-folder'
+    iconClass: 'fa fa-folder-o'
   }
 }, {
   id: '.meta-page',
@@ -740,7 +740,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-page',
-      iconClass: 'ti-layout-width-default',
+      iconClass: 'fa fa-columns',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -759,7 +759,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-layout-width-default'
+    iconClass: 'fa fa-columns'
   }
 }, {
   id: '.meta-view',
@@ -790,7 +790,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-view',
-      iconClass: 'ti-view-list-alt',
+      iconClass: 'fa fa-windows',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -806,7 +806,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-view-list-alt'
+    iconClass: 'fa fa-windows'
   }
 }, {
   id: '.meta-form',
@@ -820,7 +820,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-form',
-      iconClass: 'ti-layout-cta-btn-right',
+      iconClass: 'fa fa-list-alt',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -839,7 +839,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-layout-cta-btn-right'
+    iconClass: 'fa fa-list-alt'
   }
 }, {
   id: '.meta-action',
@@ -853,7 +853,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-action',
-      iconClass: 'ti-control-play',
+      iconClass: 'fa fa-tasks',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -872,7 +872,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-control-play'
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: '.meta-file',
@@ -886,7 +886,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-file',
-      iconClass: 'ti-file',
+      iconClass: 'fa fa-file-text-o',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -905,7 +905,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-file'
+    iconClass: 'fa fa-file-text-o'
   }
 }, {
   id: '.meta-role',
@@ -919,7 +919,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-role',
-      iconClass: 'ti-id-badge',
+      iconClass: 'fa fa-user-circle',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -938,7 +938,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-id-badge'
+    iconClass: 'fa fa-user-circle'
   }
 }, {
   id: '.meta-group',
@@ -952,7 +952,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-group',
-      iconClass: 'ti-view-grid',
+      iconClass: 'fa fa-users',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -971,7 +971,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-view-grid'
+    iconClass: 'fa fa-users'
   }
 }, {
   id: '.meta-profile',
@@ -985,7 +985,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-profile',
-      iconClass: 'ti-id-badge',
+      iconClass: 'fa fa-user-circle-o',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -1004,7 +1004,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-id-badge'
+    iconClass: 'fa fa-user-circle-o'
   }
 }]
   , ROOT_METAS = [{
@@ -1025,7 +1025,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-user',
-      iconClass: 'ti-user',
+      iconClass: 'fa fa-user-o',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -1040,7 +1040,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-user'
+    iconClass: 'fa fa-user-o'
   }
 }, {
   id: '.meta-domain',
@@ -1058,7 +1058,7 @@ const DEFAULT_ACL = {
     },
     _meta: {
       metaId: '.meta-domain',
-      iconClass: 'ti-layout-width-full',
+      iconClass: 'fa fa-flag-o',
       acl: {
         patchMeta: {
           roles: [['administrator']]
@@ -1073,7 +1073,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-layout-width-full'
+    iconClass: 'fa fa-flag-o'
   }
 }, ]
   , PAGES = [{
@@ -1085,7 +1085,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-layout-width-default',
+    iconClass: 'fa fa-columns',
     actions: ['login']
   }
 }, {
@@ -1097,7 +1097,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-layout-width-default',
+    iconClass: 'fa fa-columns',
     actions: ['signup']
   }
 }, {
@@ -1130,7 +1130,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-blackboard',
+    iconClass: 'fa fa-desktop',
     actions: ['workbench']
   }
 }, {
@@ -1142,7 +1142,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-dashboard',
+    iconClass: 'fa fa-tachometer',
     actions: ['dashboard']
   }
 }, {
@@ -1154,7 +1154,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-calendar',
+    iconClass: 'fa fa-calendar',
     actions: ['calendar']
   }
 }, {
@@ -1166,7 +1166,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-comments',
+    iconClass: 'fa fa-comments-o',
     actions: ['im']
   }
 }, {
@@ -1178,7 +1178,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-email',
+    iconClass: 'fa fa-envelope-o',
     actions: ['email']
   }
 }]
@@ -1191,7 +1191,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-user'
+    iconClass: 'fa fa-user-circle'
   }
 }, {
   id: 'developer',
@@ -1202,7 +1202,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-user'
+    iconClass: 'fa fa-user-circle'
   }
 }, {
   id: 'anonymous',
@@ -1213,7 +1213,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-user'
+    iconClass: 'fa fa-user-circle'
   }
 }]
   , ADMINISTRATOR = {
@@ -1226,7 +1226,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-user',
+    iconClass: 'fa fa-user-o',
   }
 }
   , ANONYMOUS = {
@@ -1239,7 +1239,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'ti-user'
+    iconClass: 'fa fa-user-secret'
   }
 };
 

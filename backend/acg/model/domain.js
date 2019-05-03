@@ -162,7 +162,10 @@ function buildUserBatch(authorId, authorTitle, domainId) {
         'zh-CN':{
           title:"管理员画像"
         }
-      }
+      },
+      _meta: {
+        iconClass: 'fa fa-user-circle-o',
+      }      
     }
       , anonyProfile = {
       id: 'anonymous',
@@ -172,7 +175,10 @@ function buildUserBatch(authorId, authorTitle, domainId) {
         'zh-CN':{
           title:"匿名画像"
         }
-      }
+      },
+      _meta: {
+        iconClass: 'fa fa-user-circle-o',
+      }      
     };
 
     adminProfile._meta = createMeta(authorId, adminProfile);
@@ -386,7 +392,7 @@ inherits(Domain, Document, {
     return Document.create(authorId, ROOT, '.domains', targetId, {
       title: targetTitle,
       _meta: {
-        iconClass: "ti-layout-width-full"
+        iconClass: "fa fa-flag-o"
       }
     }).then(()=>{
       return self.findCollections({scroll:'1m'});
