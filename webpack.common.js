@@ -89,6 +89,21 @@ module.exports = {
           minimize: true
         }
       }]
+    },{
+      test: require.resolve('jquery'),
+      use: [{
+        loader: 'expose-loader',
+        options: 'jQuery'
+      },{
+        loader: 'expose-loader',
+        options: '$'
+      }]
+    },{
+      test: require.resolve('moment'),
+      use: [{
+        loader: 'expose-loader',
+        options: 'moment'
+      }]
     }]
   },
   optimization: {
@@ -102,24 +117,22 @@ module.exports = {
         }
       }
     }
-  }, 
-//   optimization: {
 //     splitChunks: {
 //       chunks: 'all'
 //     }
-//   },  
+  }, 
   plugins: [
-//     new webpack.ProvidePlugin({
-//       $: 'jquery',
-//       jQuery: 'jquery',
-//       'window.jQuery': 'jquery',
-//       'window.$': 'jquery',
-//       moment: 'moment',
-//       'window.moment': 'moment',
-//       _: 'lodash',
-//       'window._':'lodash',
-//       Popper: ['popper.js', 'default']
-//     }),
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery',
+      'window.$': 'jquery',
+      moment: 'moment',
+      'window.moment': 'moment',
+      _: 'lodash',
+      'window._':'lodash',
+      Popper: ['popper.js', 'default']
+    }),
   
     // To strip all locales except “en”, “es-us” and “ru”
     // (“en” is built into Moment and can’t be removed)
@@ -140,14 +153,14 @@ module.exports = {
 //       },
 //     }),
     new HtmlWebpackPlugin({title: "Notesmore"}),
-    new HtmlWebpackIncludeAssetsPlugin({
-      assets: ['context.bundle.js'],
-      append: false
-    }),
-    new webpack.DllReferencePlugin({
-      context: __dirname,
-      manifest: require('./manifest.json'),
-    }),
+//     new HtmlWebpackIncludeAssetsPlugin({
+//       assets: ['context.bundle.js'],
+//       append: false
+//     }),
+//     new webpack.DllReferencePlugin({
+//       context: __dirname,
+//       manifest: require('./manifest.json'),
+//     }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output both options are optional
 //       filename: "[name].[chunkhash].css",

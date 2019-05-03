@@ -15,13 +15,14 @@ $.widget("nm.keywords", {
       'zh-CN':{
         all: "全部",
         please: "请选择",
-        clearLink: "清除已选择项目"
+        clearLink: "清除已选择项目",
+        enterHint: "输入更多内容,　可以缩小选择范围..."
       }
     }
   },
 
   _create: function() {
-    var o = this.options, self = this;
+    let o = this.options, _this = this;
 
     this._addClass('nm-keywords', 'dropdown btn-group');
     this.element.html(keywordsHtml);
@@ -31,6 +32,8 @@ $.widget("nm.keywords", {
     this.$clearLink = $('.clear-selected-items', this.element);
     this.$itemContainerWrapper = $('.item-container-wrapper', this.element);
     this.$itemContainer = $('.item-container', this.$itemContainerWrapper);
+    this.$spinner = $('.spinner-grow', this.$itemContainerWrapper);
+    this.$enterHint = $('.enter-hint', this.$itemContainerWrapper);
     this.$input = $('input', this.element);
     this.$inputIcon = $('.input-group-text>i', this.element);
 
@@ -44,7 +47,7 @@ $.widget("nm.keywords", {
       this._addClass(this.$keywordsBtn, null, o.btnClass);
     }
 
-    this._refreshButton();
+    this.refresh();
 
     this._on(this.$input, {
       keyup: this._onSearchInputChange
@@ -52,7 +55,7 @@ $.widget("nm.keywords", {
 
     this._on(this.$inputIcon, {
       'click': function(){
-        var filter = this.$input.val(), rearm = filter.trim() != '';
+        let filter = this.$input.val(), rearm = filter.trim() != '';
         this.$input.val('');
         this._setSearchIcon();    
         if(rearm){
@@ -64,9 +67,9 @@ $.widget("nm.keywords", {
     this._on(this.$clearLink, { 'click': this._onClear });
 
     this.element.on('show.bs.dropdown', function () {
-      self.$input.val('');
-      self._setSearchIcon();
-      self._fetchMenuItems();
+      _this.$input.val('');
+      _this._setSearchIcon();
+      _this._fetchMenuItems();
     });
 
     this._on(this.$dropdownMenu, {
@@ -77,7 +80,7 @@ $.widget("nm.keywords", {
 
     this._on(this.$itemContainer, {
       'click li': function(e){
-        var $target = $(e.target), $i = $('i.fa-li', $target), item = $target.data('item');
+        let $target = $(e.target), $i = $('i.fa-li', $target), item = $target.data('item');
         if(o.mode == 'multi'){
           if($i.hasClass('fa-check-square-o')){
             $i.removeClass('fa-check-square-o').addClass('fa-square-o');
@@ -96,7 +99,7 @@ $.widget("nm.keywords", {
             o.selectedItems = [item];
           }
         }
-        this._refresh();
+        this.refresh();
         this._trigger('valueChanged', e, {selectedItems: o.selectedItems});        
       }
     });
@@ -120,7 +123,7 @@ $.widget("nm.keywords", {
   },  
 
   clear: function(){
-    var o = this.options;
+    let o = this.options;
     if(o.selectedItems.length > 0){
       if(o.mode === 'multi'){
         $('li>.fa-li.fa-check-square-o', this.$itemContainer).removeClass('fa-check-square-o').addClass('fa-square-o');
@@ -128,14 +131,14 @@ $.widget("nm.keywords", {
         $('li>.fa-li.fa-check-circle-o', this.$itemContainer).removeClass('fa-check-circle-o').addClass('fa-circle-o');
       }
       o.selectedItems = [];
-      this._refresh();
+      this.refresh();
       this._fetchMenuItems();
       this._trigger('valueChanged', event, {selectedItems: o.selectedItems});
     }        
   },
 
   _onSearchInputChange: function(){
-    var filter = this.$input.val();
+    let filter = this.$input.val();
     if(filter != ''){
       this._setClearIcon();
     } else {
@@ -155,10 +158,9 @@ $.widget("nm.keywords", {
   },
 
   _refreshClearLink: function(){
-    var o = this.options, filter = this.$input.val();
-    this.$clearLink.html(this._i18n('clearLink','Clear selected items'));
+    let o = this.options, filter = this.$input.val();
     if(filter.trim() == ''){
-      this.$clearLink.show();
+      this.$clearLink.html(this._i18n("clearLink", "Clear selected items")).show();
       if(o.selectedItems.length > 0){
         this.$clearLink.removeClass('disabled');      
       }else{
@@ -170,17 +172,30 @@ $.widget("nm.keywords", {
   },
 
   _fetchMenuItems: function(){
-    var o = this.options, self = this, filter = this.$input.val().trim();
+    let o = this.options, _this = this, filter = this.$input.val().trim();
+
+    this.$itemContainer.empty();
+    this.$spinner.show();
+    this.$enterHint.addClass('d-none');
+    this.ps.update();
+
     filter = filter == "" ? '.*' : '.*'+filter+'.*';
     o.menuItems(filter, function(items){
-      self._refreshClearLink();
-      self._armItems(items);
-      self.$itemContainerWrapper.scrollTop(0);
+      _this.$spinner.hide();
+      _this._refreshClearLink();
+      _this._armItems(items);
+      if(items.length > 100){
+        _this.$enterHint.removeClass('d-none')
+             .html(_this._i18n('enterHint', 'Enter more content to narrow your selection...'));
+      }else{
+        _this.$enterHint.addClass('d-none');
+      }
+      _this.ps.update();
     });
   },
 
   _armItem: function(item, checked){
-    var o = this.options, itemHtml, 
+    let o = this.options, itemHtml, 
         icon = o.mode == 'multi' ? 'fa-square-o' : 'fa-circle-o',
         iconCheck = o.mode == 'multi' ? 'fa-check-square-o' : 'fa-check-circle-o';
         
@@ -193,26 +208,28 @@ $.widget("nm.keywords", {
   },
 
   _armItems: function(items){
-    var o = this.options, self = this;
-
-    this.$itemContainer.empty();
-    _.each(_.intersectionWith(items, o.selectedItems, _.isEqual), function(item){
-      $(self._armItem(item, true)).data('item', item).appendTo(self.$itemContainer);
+    let o = this.options, _this = this;
+    
+//     _.each(_.intersectionWith(items, o.selectedItems, _.isEqual), function(item){
+//       $(_this._armItem(item, true)).data('item', item).appendTo(_this.$itemContainer);
+//     });
+    _.each(o.selectedItems, function(item){
+      $(_this._armItem(item, true)).data('item', item).appendTo(_this.$itemContainer);
     });
 
     $.each(_.differenceWith(items, o.selectedItems, _.isEqual), function(index, item){
-      $(self._armItem(item)).data('item', item).appendTo(self.$itemContainer);
+      $(_this._armItem(item)).data('item', item).appendTo(_this.$itemContainer);
     });
   },
 
   _render: function(){
-    var o = this.options, label;
+    let o = this.options, label;
     if(o.render){
       label = o.render(o.selectedItems);
     }
 
     if(!label){
-      if(o.selectedItems && o.selectedItems.length > 1){
+      if(o.selectedItems && o.selectedItems.length > 0){
         label = _.reduce(o.selectedItems, function(text, item) {
           return text == '' ? item : text + ',' + item;
         }, '');
@@ -228,16 +245,16 @@ $.widget("nm.keywords", {
     this.$keywordsBtn.html(this._render());
   },
 
-  _refresh: function(){
+  refresh: function(){
     this._refreshClearLink();
     this._refreshButton();
   },
 
   _setOption: function( key, value ) {
-    var o = this.options;
+    let o = this.options;
     this._super( key, value );
     if ( key == "selectedItems" ) {
-      this._refresh();      
+      this.refresh();      
     }
   }
     

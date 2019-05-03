@@ -1,4 +1,3 @@
-import 'context/index.scss';
 import './workbench.scss';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
 
@@ -22,6 +21,12 @@ $.widget('nm.workbench', {
     anchor:{
       col: '.pages',
       doc: '.dashboard'
+    },
+    i18n: {
+      'zh-CN':{
+        profile: "设置",
+        logout: "退出登录"
+      }
     }
   },
 
@@ -312,12 +317,12 @@ $.widget('nm.workbench', {
       _this.$favoritesTitle.html(_.at(o.page.get(o.locale),'favorites.title')[0]);
     });    
 
-    this._refreshAccount();
+    this._refreshProfile();
     this._refreshSidebar();
     this._refreshFavorites();
   },
 
-  _refreshAccount: function(){
+  _refreshProfile: function(){
     var o = this.options, _this = this, client = o.page.getClient(), User = client.User;
     User.get(function(err, user){
       if(err) return console.error(err);
@@ -328,6 +333,8 @@ $.widget('nm.workbench', {
       
       _this.$nickname.text(userLocale.title || userLocale.id);
     });
+    this.$profile.find('span.label').html(this._i18n('profile', 'Profile'));
+    this.$signOff.find('span.label').html(this._i18n('logout', 'Logout'));
   },
 
   _onLoggedIn: function(){
@@ -335,6 +342,11 @@ $.widget('nm.workbench', {
   },
 
   _onLoggedOut: function(){
+  },
+
+  _i18n: function(name, defaultValue){
+    let o = this.options;
+    return (o.i18n[o.locale] && o.i18n[o.locale][name]) || defaultValue;
   },
 
   _destroy() {

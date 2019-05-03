@@ -359,10 +359,10 @@ inherits(Collection, Document,{
           terms: {
             field: field + ".keyword",
             include: ".*",
-            order: {
-              _key: "asc"
-            },
-            size: 10000
+//             order: {
+//               _key: "desc"
+//             },
+            size: 100
           }
         }
       }

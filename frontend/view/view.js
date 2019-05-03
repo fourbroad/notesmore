@@ -110,7 +110,7 @@ $.widget("nm.view", {
       'click li.dropdown-item.export-csv-current': this._exportCsvCurrent,
       'click li.dropdown-item.delete' : this._onDeleteSelf
     });   
-    this._on(this.$saveBtn, {click: this.save});
+    this._on(this.$saveBtn, {click: this._onSave});
     this._on(this.$cancelBtn, {click: this._onCancel});
     this._on(this.$favorite, {click: this._onFavorite});
   },
@@ -260,7 +260,7 @@ $.widget("nm.view", {
         width: "30px",
         data: null,
         render: function(data, type, row, meta) {
-          return '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="fa fa-ellipsis-h"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>';
+          return '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="ti-more-alt"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>';
         }
       }, {
         targets:'_all',
@@ -346,7 +346,7 @@ $.widget("nm.view", {
             locale: o.locale,
             selectedItems: sf.values,
             menuItems: function(filter, callback){
-              view.distinctQuery(sf.name, {include:filter, size:10000}, function(err, data){
+              view.distinctQuery(sf.name, {include:filter, size:200}, function(err, data){
                 if(err) return console.error(err);
                 callback(data.values);
               });
@@ -621,10 +621,10 @@ $.widget("nm.view", {
   },
 
   _refreshHeader: function(){
-    let o = this.options, view = o.view.get(o.locale);
+    let o = this.options, viewLocale = o.view.get(o.locale);
     if(this._isDirty()){
-      this.$saveBtn.show().html(_.at(view, 'toolbox.save')[0]);
-      this.$cancelBtn.show().html(_.at(view, 'toolbox.cancel')[0]);
+      this.$saveBtn.show().html(_.at(viewLocale, 'toolbox.save')[0]).prop( "disabled", false);
+      this.$cancelBtn.show().html(_.at(viewLocale, 'toolbox.cancel')[0]).show();
     }else{
       this.$saveBtn.hide();
       this.$cancelBtn.hide();
@@ -816,6 +816,13 @@ $.widget("nm.view", {
     let columns = _.cloneDeep(this.options.view.columns);
     columns = _.omitBy(columns, function(c){return !c.title || c.visible == false});
     this._doExportCsv(columns);
+  },
+
+  _onSave: function(){
+    let o = this.options, viewLocale = o.view.get(o.locale);
+    this.$saveBtn.html(`<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>${_.at(viewLocale, 'toolbox.wait')[0] || "Please wait..."}`).prop( "disabled", true);
+    this.$cancelBtn.hide();
+    this.save();
   },
 
   save: function(){

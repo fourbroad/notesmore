@@ -23,6 +23,10 @@
       position: relative;
       max-height: 400px;
       overflow-y: auto;
+
+      .item-container {
+        margin-bottom: 0px;
+      }
     }
   }
 }

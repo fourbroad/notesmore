@@ -16,6 +16,10 @@
   padding-left: $offscreen-size;
   transition: all 0.2s ease;
 
+  .profile-menu {
+    min-width: 175px;
+  }
+
   @include between($breakpoint-md, $breakpoint-xl) {
     padding-left: $collapsed-size;
   }

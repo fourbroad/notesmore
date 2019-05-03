@@ -1,5 +1,3 @@
-import 'font-awesome/scss/font-awesome.scss';
-
 // import * as $ from 'jquery';
 // import 'jquery-ui/ui/widget';
 // import 'jquery-ui/ui/data';
@@ -35,20 +33,18 @@ $.widget("nm.uploadfiles", {
   },
 
   _create: function() {
-    var o = this.options, doc = o.document;
+    var o = this.options, doc = o.document, url = _.at(doc,'upload.url')||'localhost:3000';
    
     this.$uploadFiles = $(uploadFilesHtml);
     this.$uploadFilesHeader = $('.upload-files-header', this.$uploadFiles);
     this.$uploadForm = $('form.file-upload', this.$uploadFiles)
     this.$uploadFiles.appendTo(this.element.empty());
 
-    console.log(`${doc.upload.url}/${doc.domainId}/.files`);
-
     // Initialize the jQuery File Upload widget:
     this.$uploadForm.fileupload({
       // Uncomment the following to send cross-domain cookies:
       xhrFields: {withCredentials: true},
-      url: `${doc.upload.url}/${doc.domainId}/.files`,
+      url: `${url}/${doc.domainId}/.files`,
       forceIframeTransport: o.forceIframeTransport
     });
 

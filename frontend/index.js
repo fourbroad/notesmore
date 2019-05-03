@@ -10,22 +10,11 @@
 // require('core-js/features/promise');
 
 import './index.scss';
-import 'font-awesome/scss/font-awesome.scss';
 import 'core/runtime';
 
-import moment from 'moment';
-import jsonPatch from"fast-json-patch";
+import "font-awesome/scss/font-awesome.scss";
 
-window.moment = moment;
-window.jsonPatch = jsonPatch;
-
-// var elasticsearch from'elasticsearch-browser');
-// window.esc = new elasticsearch.Client({
-//   host: 'localhost:9200',
-//   log: 'trace'
-// });
-
-var domain = document.domain, currentDomain = '.root', index;
+let domain = document.domain, currentDomain, index, url;
 index = domain.indexOf('.notesmore.com');
 if(index >= 0){
   currentDomain = domain.slice(0,index);
@@ -36,13 +25,33 @@ if(index >= 0){
   currentDomain = domain.slice(0,index);
 }
 
-if(currentDomain == 'www') currentDomain = '.root';
+if(!currentDomain || currentDomain == 'www'){
+  currentDomain = localStorage.getItem("currentDomain") || '.root';
+} 
+
+if(localStorage.getItem("environment") == "development") {
+  url = 'localhost:3000/domains';
+
+  import(/* webpackChunkName: "moment" */ 'moment').then(({default: moment}) => {
+    window.moment = moment;
+  });
+
+  import(/* webpackChunkName: "jsonPatch" */ 'fast-json-patch').then(({default: jsonPatch}) => {
+    window.jsonPatch = jsonPatch;
+  });
+
+  import(/* webpackChunkName: "elasticsearch" */ 'elasticsearch-browser').then(({default: elasticsearch}) => {
+    window.esc = new elasticsearch.Client({
+      host: 'localhost:9200',
+      log: 'trace'
+    });
+  });
+} else {
+  url = 'https://notesmore.com/domains';
+}
 
 window.runtime = $('body').runtime({
-  client: {
-//     url:'https://notesmore.com/domains'
-    url: 'localhost:3000/domains'
-  },
+  client: { url: url },
   locale: localStorage.getItem('language') || navigator.language,
   currentDomain: currentDomain
 }).runtime('instance');
@@ -56,3 +65,5 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+

@@ -134,6 +134,7 @@ const DEFAULT_ACL = {
   save: '保存',
   cancel: '取消',
   delete: '删除',
+  wait: '请稍等...',
   saveAs: '另存为...',
   saveAsView: '另存为视图...',
   exportAllCSV: '导出为CSV文件(所有字段)',

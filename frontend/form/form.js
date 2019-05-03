@@ -33,6 +33,7 @@ $.widget("nm.form", {
       'zh-CN':{
         save: "保存",
         saveAs: "另存为",
+        wait: "请稍等...",
         cancel: "取消",
         delete:　"删除"
       }
@@ -204,9 +205,9 @@ $.widget("nm.form", {
     $('i', this.$icon).removeClass().addClass(doc._meta.iconClass||'ti-file');
 
     if(this._isDirty()){
-      this.$saveBtn.html(this._i18n('save', 'Save'));
+      this.$saveBtn.html(this._i18n('save', 'Save')).prop("disabled", false);
       this.$saveBtn.show();
-      this.$cancelBtn.show().html(this._i18n('cancel', 'Cancel'));
+      this.$cancelBtn.show().html(this._i18n('cancel', 'Cancel')).show();
     }else{
       this.$saveBtn.hide();
       this.$cancelBtn.hide();
@@ -228,6 +229,8 @@ $.widget("nm.form", {
 
   _onSave: function(e){
     var o = this.options, doc = o.document;
+    this.$saveBtn.html(`<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>${this._i18n("wait","Please wait...")}`).prop( "disabled", true);
+    this.$cancelBtn.hide();
     if(o.isNew){
       this.saveAs(doc.id||uuidv4(), doc.title, ()=>{});
     }else{
