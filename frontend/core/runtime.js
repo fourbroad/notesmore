@@ -61,12 +61,18 @@ $.widget('nm.runtime',{
     this._invalidTokenListener = $.proxy(this._gotoLogin,this);
     this._tokenExpiredListener = $.proxy(this._gotoLogin,this);
 
+    this._exportStartListener = $.proxy(this._onExportStart,this);
+    this._exportProgressListener = $.proxy(this._onExportProgress,this);
+    this._exportEndListener = $.proxy(this._onExportEnd,this);
+
     client.on("connected", this._connectedListener);
     client.on("loggedIn", this._loggedInListener);
     client.on("loggedOut", this._loggedOutListener);
     client.on("tokenExpired", this._tokenExpiredListener);
     client.on("invalidToken", this._invalidTokenListener);
     client.on('updateToken', this.setToken);
+
+    client.on('exportStart', this._exportStartListener);
 
     this._on({
       "createdocument": function(event, meta){
@@ -294,12 +300,61 @@ $.widget('nm.runtime',{
     return this._decodeAnchor(anchor);
   },
 
+  _onExportStart: function(options){
+    let _this = this, nonce = options.nonce;
+
+    if(!this.$toastContainer){
+      this.$toastContainer = $('<div style="position: absolute; left: 5px; bottom: 5px; z-index: 1000"/>').appendTo('body');
+    }
+    
+    import(/* webpackChunkName: "toast" */ 'toast/toast').then(() => {
+      let $toast = $('<div/>').appendTo(_this.$toastContainer), 
+          toast = $toast.nmtoast({
+            title: options.title,
+            hint: options.hint,
+            message: options.message,
+            autohide: false
+          }).nmtoast('instance'),
+          exportProgressListener = function(options){
+            if(options.nonce == nonce){
+              toast.option({
+                title: options.title,
+                hint: options.hint,
+                message: options.message
+              });
+            }
+          },
+          exportEndListener = function(options){
+            if(options.nonce == nonce){
+              toast.option({
+                title: options.title,
+                hint: options.hint,
+                message: options.message
+              });
+              client.off('exportProgress', exportProgressListener);
+              client.off('exportEnd', exportEndListener);
+            }
+          };
+
+      client.on('exportProgress', exportProgressListener);
+      client.on('exportEnd', exportEndListener);
+
+      $toast.on('hidden.bs.toast', () => {
+        client.off('exportProgress', exportProgressListener);
+        client.off('exportEnd', exportEndListener);
+        $toast.remove();
+      })        
+    });
+  },
+
   _destroy: function(){
     client.off("connected", this._connectedListener);
     client.off("loggedIn", this._loggedInListener);
     client.off("loggedOut", this._loggedOutListener);
     client.off("tokenExpired", this._tokenExpiredListener);
     client.off("invalidToken", this._invalidTokenListener);
+
+    client.off('exportStart', this._exportStartListener);
   }
 
 });

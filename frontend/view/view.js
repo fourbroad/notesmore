@@ -1,6 +1,3 @@
-import * as $ from'jquery';
-import _ from'lodash';
-import moment from'moment';
 import jsonPatch from'fast-json-patch';
 import validate from"validate.js";
 import utils from'core/utils';
@@ -31,7 +28,7 @@ import viewHtml from'./view.html';
 $.widget("nm.view", {
 
   options:{
-    isNew: false
+    isNew: false    
   },
 
   _create: function() {
@@ -283,6 +280,7 @@ $.widget("nm.view", {
         view.findDocuments({
           from: from,
           size: size,
+          source: 'visibleColumns',
           sort: _this._buildSort(kvMap)
         }, function(err, docs){
           if(err) {
@@ -770,14 +768,28 @@ $.widget("nm.view", {
     });
   },
 
-  _doExportCsv: function(columns){
-    let o = this.options, view = this.options.view, rows = [];
+  _doExportCsv: function(options){
+    let o = this.options, columns = _.cloneDeep(this.options.view.columns), 
+        view = o.view, viewLocale = view.get(o.locale), 
+        title = `${_.at(viewLocale, 'export.export')[0] || 'Exports'} ${viewLocale.title}`,
+        client = view.getClient(), rows = [], start = +moment(), count = 0, nonce = uuidv4();
+
+    if(options.source == 'visibleColumns'){
+      columns = _.omitBy(columns, function(c){return !c.title || c.visible == false});
+    }else if(options.source == 'allColumns'){
+      columns = _.omitBy(columns, function(c){return !c.title});
+    }
+
     rows.push(_.values(_.mapValues(columns, function(c) {if(c.title) return c.title;})).join(','));
+
     function doExport(scrollId){
       let opts = {scroll:'1m'};
-      if(scrollId) opts.scrollId = scrollId;
+      if(scrollId) {
+        opts.scrollId = scrollId;
+      } else {
+        opts.source = options.source;
+      }
       view[scrollId ? 'scroll' : 'findDocuments'](opts, function(err, data){
-        console.log(data);
         if(err) return console.error(err);
         _.each(data.documents, function(doc){
           let row = _.reduce(columns, function(r, c){
@@ -796,27 +808,42 @@ $.widget("nm.view", {
         });
 
         if(data.documents.length > 0){
+          count = count + data.documents.length;
+          client.emitEvent('exportProgress', {
+            title: title, 
+            hint: moment.duration(moment()-start).asSeconds(),
+            nonce: nonce,            
+            message:`${(count*100/data.total).toFixed(2)}% ${_.at(viewLocale, 'export.completed')[0] || 'completed'} (${count}/${data.total}).`
+          });
           doExport(data.scrollId);
         } else {
-          let blob = new Blob(["\uFEFF" + rows.join('\n')],{ type: "text/plain;charset=utf-8"});
-          FileSaver.saveAs(blob, view.title + ".csv");
+          let blob = new Blob([`\uFEFF${rows.join('\n')}`],{ type: "text/plain;charset=utf-8"});
+          FileSaver.saveAs(blob, `${viewLocale.title}.csv`);
+          client.emitEvent('exportEnd', {
+            title: title, 
+            hint: moment.duration(moment()-start).asSeconds(),
+            nonce: nonce,
+            message:`${view.title}.csv ${_.at(viewLocale, 'export.hasBeenExported')[0] || 'has been exported!'}`
+          });
         }
       });
     }
 
+    client.emitEvent('exportStart', {
+      title: title,
+      hint: moment().format('HH:MM:SS'),
+      nonce: nonce,
+      message:`${_.at(viewLocale, 'export.startExporting')[0] || 'Start exporting'} ${viewLocale.title}`
+    });
     doExport();
   },
 
   _exportCsvAll: function(){
-    let columns = _.cloneDeep(this.options.view.columns);
-    columns = _.omitBy(columns, function(c){return !c.title});
-    this._doExportCsv(columns);
+    this._doExportCsv({source: 'allColumns'});
   },
 
   _exportCsvCurrent: function(){
-    let columns = _.cloneDeep(this.options.view.columns);
-    columns = _.omitBy(columns, function(c){return !c.title || c.visible == false});
-    this._doExportCsv(columns);
+    this._doExportCsv({source: 'visibleColumns'});
   },
 
   _onSave: function(){

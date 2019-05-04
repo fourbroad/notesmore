@@ -227,6 +227,8 @@ $.widget('nm.workbench', {
   _refreshSidebar: function(){
     let o = this.options, _this = this, items = _.cloneDeep(o.page.sidebarItems);
     currentDomain.mgetDocuments(items, function(err, docs){
+      if(err) return console.error(err);
+      _this.$favorites.siblings().remove();
       _.each(docs, function(doc){
         let item;
         doc = doc.get(o.locale);
