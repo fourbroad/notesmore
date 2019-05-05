@@ -1,6 +1,8 @@
 import validate from "validate.js";
 import loginHtml from './login.html';
 import './login.scss';
+import 'particles.js';
+const particles_config = require('./particles_config.json');
 
 $.widget("nm.login", {
   options: {
@@ -59,6 +61,8 @@ $.widget("nm.login", {
     // this.$signupBtn = $('.footer a', this.element);
     this.$input = $('input', this.element);
     this.$verifyCode = $('.verify-code', this.element);
+
+    particlesJS('content', particles_config);
 
     // this._getverifyCode();
 
