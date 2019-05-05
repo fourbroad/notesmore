@@ -127,7 +127,6 @@ $.widget("nm.login", {
   },
 
   _destroy() {
-    this.nest && this.nest.destroy();
     this.element.removeClass("nm-login").html('');
   },
 
