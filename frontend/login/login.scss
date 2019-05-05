@@ -7,14 +7,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba($color: #000000, $alpha: 0.4);
+    background-color: rgba($color: #333F49, $alpha: 1);
     width: 100%;
     height: 100%;
     user-select: none;
-  }
-
-  .bg-img {
-    background: url(./images/bg_nm.jpg);
   }
 
   .body {
@@ -29,8 +25,8 @@
 
     .logo {
       background: url(./images/logo_nm.png);
-      width: 247px;
-      height: 59px;
+      width: 277px;
+      height: 51px;
       margin: 35px auto;
       margin-top: 50px;
     }
@@ -42,6 +38,7 @@
         font-size: 14px;
         color: #474e53;
         border: none;
+        outline: none;
         font-weight: bold;
         flex: 1;
 
@@ -50,6 +47,9 @@
           color: #9fadb9;
           font-weight: normal;
         }
+      }
+      input:-webkit-autofill {
+        box-shadow: 0px 0px 0px 1000px white inset;
       }
 
       &.help {
@@ -106,7 +106,7 @@
 
       &.submit {
         padding-top: 4px;
-
+        padding-bottom: 50px;
         .submit-btn {
           font-size: 1rem;
           color: #fff;
