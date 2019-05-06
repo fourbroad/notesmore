@@ -1,7 +1,9 @@
 import validate from "validate.js";
+import _ from "lodash";
 import loginHtml from './login.html';
 import './login.scss';
 import 'particles.js';
+// import { Domain } from "domain";
 const particles_config = require('./particles_config.json');
 
 $.widget("nm.login", {
@@ -13,7 +15,7 @@ $.widget("nm.login", {
       'model-1': {
         username: {
           presence: {
-            message: '请输入手机号码或邮箱地址'
+            message: "请输入手机号码或邮箱地址"
           },
           // format: {
           //   pattern: /(1\d{10})|(\w+@\w+\.\w{2,3})/,
@@ -30,30 +32,32 @@ $.widget("nm.login", {
           // }
         }
       },
-      'model-2': {
-        phones: {
-          presence: {
-            message: '请输入手机号码'
-          },
-          format: {
-            pattern: /1\d{10}/,
-            message: "请输入正确的手机号码"
-          }
-        },
-        code: {
-          presence: {
-            message: '请输入短信验证码'
-          },
-          format: {
-            pattern: /\d{6}/,
-            message: "短信验证码错误"
-          }
-        }
-      }
+      // 'model-2': {
+      //   phones: {
+      //     presence: {
+      //       message: '请输入手机号码'
+      //     },
+      //     format: {
+      //       pattern: /1\d{10}/,
+      //       message: "请输入正确的手机号码"
+      //     }
+      //   },
+      //   code: {
+      //     presence: {
+      //       message: '请输入短信验证码'
+      //     },
+      //     format: {
+      //       pattern: /\d{6}/,
+      //       message: "短信验证码错误"
+      //     }
+      //   }
+      // }
     }
   },
 
   _create() {
+    let o = this.options,_this = this;
+    this.locale = o.document.get(o.locale);
 
     this._addClass('nm-login');
     this.element.html(loginHtml);
@@ -64,8 +68,34 @@ $.widget("nm.login", {
 
     particlesJS('content', particles_config);
 
-    // this._getverifyCode();
+    //设置logo
+    Domain.get(o.document.domainId,function(err,domain){
+      if(err){
+        console.error(err);
+        return;
+      }
+      if (domain['logo']) {
+        _this.element.find('.logo-img img').attr('src',domain['logo']);
+      }
+      if (domain['_i18n'] && domain['_i18n'][o.locale]) {
+        _this.element.find('.logo-big-text').text(domain['_i18n'][o.locale]['title']);
+        _this.element.find('.logo-small-text').text(domain['_i18n'][o.locale]['slogan']);
+      }
+    });
 
+    //设置校验提示语言
+    o.constraints["model-1"].username.presence.message = this._i18n('nameLogin.username.defalueError','Please enter mobile phone or email');
+    // o.constraints["model-1"].username.format.message = this._i18n('nameLogin.username.error','Please enter the correct mobile phone or email');
+    o.constraints["model-1"].password.presence.message = this._i18n('nameLogin.username.defalueError','Please enter your login password');
+    // o.constraints["model-1"].password.format.message = this._i18n('nameLogin.username.defalueError','wrong password');
+    
+    //设置输入框提示提示语言
+    this.element.find('#username').attr('placeholder',this._i18n('nameLogin.username.placeholder','Please enter mobile phone or email'));
+    this.element.find('#password').attr('placeholder',this._i18n('nameLogin.password.placeholder','Please enter your login password'));
+
+    this.element.find('.submit-btn').text(this._i18n('title','Login'));
+
+    // this._getverifyCode();
 
     // //切换到注册
     // this._on(this.$signupBtn, {
@@ -111,12 +141,7 @@ $.widget("nm.login", {
     // this._on(this.element.find('.toggle'), {
     //   'click': function (e) {
     //     let $model = $(e.currentTarget).parents('.model');
-    //     if ($model.hasClass('model-0')) {
-    //       $model.parent().addClass('login-width').find('.model-1').show();
-    //       $model.remove();
-    //     } else {
-    //       $model.hide().siblings('.model').show();
-    //     }
+    //     $model.hide().siblings('.model').show();
     //   }
     // });
 
@@ -154,13 +179,13 @@ $.widget("nm.login", {
     let inputData = validate.collectFormValues($model, {
       trim: true
     });
-    
+
     $target.addClass('ui-state-disabled');
     client.login(inputData.username, inputData.password, function (err, user) {
       $target.removeClass('ui-state-disabled');
       if (err) {
-        console.error('login-error', err.message);
-        $model.find('.verify-code .error,.password .error').addClass('show').text(err.message);
+        console.error('login-error',err.message);
+        $model.find('.verify-code .error,.password .error').addClass('show').text(self._i18n(err.message,err.message));
         return false;
       }
       runtime.option({
@@ -251,12 +276,28 @@ $.widget("nm.login", {
     if (text.length > 1) {
       text = text.slice(1);
     }
-    text = text.join('');
+    text = text.join(' ');
     if (text) {
       $error.addClass('show').text(text);
     } else {
       $error.removeClass('show').text('');
     }
+  },
+
+  /**
+   * 语言装换
+   *
+   * @param {*} path 获取参数路径
+   * @param {*} defaultValue 默认值
+   * @returns
+   */
+  _i18n(path, defaultValue) {
+    let language = this.locale,
+      result;
+    if (language) {
+      result = _.at(language, path);
+    }
+    return result[0] || defaultValue;
   }
 
 });
