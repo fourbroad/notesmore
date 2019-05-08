@@ -303,7 +303,7 @@ $.widget("nm.datetimeduedate", {
           }
         } else if(o.willYn == 'no' && o.earliest){
           if(o.locale == 'zh-CN'){
-            label = o.title + '将会在'+ o.latest + " " + this._i18n(o.unit, o.unit)　+'之后逾期' ;
+            label = o.title + '将会在'+ o.earliest + " " + this._i18n(o.unit, o.unit)　+'之后逾期' ;
           } else {
             label = o.title + this._i18n('willNotBeOverdue',' will no be overdue in ') + o.earliest + " " + this._i18n(o.unit, o.unit);
           }

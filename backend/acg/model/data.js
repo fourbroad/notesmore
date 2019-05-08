@@ -47,6 +47,17 @@ const DEFAULT_ACL = {
     order: 'desc'
   }
 }]
+  , DEFAULT_EXPORT = {
+    size: 2000    
+  }
+  , DEFAULT_I18N_EXPORT = {
+    prompt: {
+      completed: "已完成",
+      export: "导出",
+      hasBeenExported: "导出完成!",
+      startExporting: "开始导出"
+    }
+  }
   , DEFAULT_COLUMNS = [{
   sortable: false
 }, {
@@ -153,6 +164,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '数据仓库',
@@ -160,6 +172,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -177,6 +190,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '元集合',
@@ -184,6 +198,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -201,6 +216,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '页面集合',
@@ -208,6 +224,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -225,6 +242,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '视图集合',
@@ -232,6 +250,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -249,6 +268,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '表单集合',
@@ -256,6 +276,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -273,6 +294,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '行动集合',
@@ -280,6 +302,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -297,6 +320,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   upload:{
     url: 'http://localhost:3000'
   },  
@@ -307,6 +331,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -325,6 +350,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '角色集合',
@@ -332,6 +358,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -349,6 +376,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '组集合',
@@ -356,6 +384,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -373,6 +402,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '画像集合',
@@ -380,6 +410,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -398,6 +429,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '用户集合',
@@ -405,6 +437,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -422,6 +455,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '域集合',
@@ -429,6 +463,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -447,6 +482,7 @@ const DEFAULT_ACL = {
     fulltext: DEFAULT_SEARCH_FULLTEXT,
     sort: DEFAULT_SORT,
   },
+  export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
       title: '搜索文档',
@@ -454,6 +490,7 @@ const DEFAULT_ACL = {
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
       },
+      export: DEFAULT_I18N_EXPORT,
       toolbox: DEFAULT_I18N_TOOLBOX,
       contextMenu: DEFAULT_I18N_CONTEXTMENU
     }
@@ -697,6 +734,7 @@ const DEFAULT_ACL = {
       fulltext: DEFAULT_SEARCH_FULLTEXT,
       sort: DEFAULT_SORT,
     },
+    export: DEFAULT_EXPORT,
     _i18n: {
       'zh-CN': {
         title: '新文档集合',
@@ -704,6 +742,7 @@ const DEFAULT_ACL = {
         search: {
           fields: DEFAULT_I18N_SEARCH_FIELDS
         },
+        export: DEFAULT_I18N_EXPORT,
         toolbox: DEFAULT_I18N_TOOLBOX,
         contextMenu: DEFAULT_I18N_CONTEXTMENU
       }
@@ -777,6 +816,7 @@ const DEFAULT_ACL = {
       fulltext: DEFAULT_SEARCH_FULLTEXT,
       sort: DEFAULT_SORT,
     },
+    export: DEFAULT_EXPORT,
     _i18n: {
       'zh-CN': {
         title: '新视图',
@@ -784,6 +824,7 @@ const DEFAULT_ACL = {
         search: {
           fields: DEFAULT_I18N_SEARCH_FIELDS
         },
+        export: DEFAULT_I18N_EXPORT,
         toolbox: DEFAULT_I18N_TOOLBOX,
         contextMenu: DEFAULT_I18N_CONTEXTMENU
       }
@@ -1209,7 +1250,7 @@ const DEFAULT_ACL = {
   title: 'Anonymous Role',
   _i18n: {
     'zh-CN': {
-      title: '匿名用色'
+      title: '匿名角色'
     }
   },
   _meta: {

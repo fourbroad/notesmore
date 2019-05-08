@@ -248,6 +248,7 @@ $.widget("nm.view", {
       columnDefs : [{
         targets: 0,
         width: "10px",
+        class: "text-center",
         data: null,
         render: function(data, type, row, meta) {
           return '<span class="icon-holder"><i class="'+ (data._meta.iconClass||'fa fa-file-text-o')+'"></i></span>';
@@ -255,6 +256,7 @@ $.widget("nm.view", {
       }, {
         targets: -1,
         width: "30px",
+        class: "text-center",
         data: null,
         render: function(data, type, row, meta) {
           return '<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="fa fa-ellipsis-h"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>';
@@ -274,6 +276,10 @@ $.widget("nm.view", {
         },
         defaultContent:''
       }],
+//       headerCallback: function(thead, data, start, end, display) {
+//         $(thead).find(':last-child').addClass('text-center')
+//                 .html('<button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown"><i class="fa fa-columns"></i></button><ul class="dropdown-menu dropdown-menu-right"></ul>');
+//       },
       sAjaxSource: "view",
       fnServerData: function (sSource, aoData, fnCallback, oSettings ) {
         let kvMap = _this._kvMap(aoData), from = kvMap['iDisplayStart'], size = kvMap['iDisplayLength'];
@@ -771,7 +777,7 @@ $.widget("nm.view", {
   _doExportCsv: function(options){
     let o = this.options, columns = _.cloneDeep(this.options.view.columns), 
         view = o.view, viewLocale = view.get(o.locale), 
-        title = `${_.at(viewLocale, 'export.export')[0] || 'Exports'} ${viewLocale.title}`,
+        title = `${_.at(viewLocale, 'export.prompt.export')[0] || 'Exports'} ${viewLocale.title}`,
         client = view.getClient(), rows = [], start = +moment(), count = 0, nonce = uuidv4();
 
     if(options.source == 'visibleColumns'){
@@ -788,6 +794,7 @@ $.widget("nm.view", {
         opts.scrollId = scrollId;
       } else {
         opts.source = options.source;
+        opts.size = _.at(view, 'export.size')[0] || 1000;
       }
       view[scrollId ? 'scroll' : 'findDocuments'](opts, function(err, data){
         if(err) return console.error(err);
@@ -811,9 +818,9 @@ $.widget("nm.view", {
           count = count + data.documents.length;
           client.emitEvent('exportProgress', {
             title: title, 
-            hint: moment.duration(moment()-start).asSeconds(),
+            hint: `${moment.duration(moment()-start).asSeconds()}(s)`,
             nonce: nonce,            
-            message:`${(count*100/data.total).toFixed(2)}% ${_.at(viewLocale, 'export.completed')[0] || 'completed'} (${count}/${data.total}).`
+            message:`${(count*100/data.total).toFixed(2)}% ${_.at(viewLocale, 'export.prompt.completed')[0] || 'completed'} (${count}/${data.total}).`
           });
           doExport(data.scrollId);
         } else {
@@ -821,9 +828,9 @@ $.widget("nm.view", {
           FileSaver.saveAs(blob, `${viewLocale.title}.csv`);
           client.emitEvent('exportEnd', {
             title: title, 
-            hint: moment.duration(moment()-start).asSeconds(),
+            hint: `${moment.duration(moment()-start).asSeconds()}(s)`,
             nonce: nonce,
-            message:`${view.title}.csv ${_.at(viewLocale, 'export.hasBeenExported')[0] || 'has been exported!'}`
+            message:`${view.title}.csv ${_.at(viewLocale, 'export.prompt.hasBeenExported')[0] || 'has been exported!'}`
           });
         }
       });
@@ -833,7 +840,7 @@ $.widget("nm.view", {
       title: title,
       hint: moment().format('HH:MM:SS'),
       nonce: nonce,
-      message:`${_.at(viewLocale, 'export.startExporting')[0] || 'Start exporting'} ${viewLocale.title}`
+      message:`${_.at(viewLocale, 'export.prompt.startExporting')[0] || 'Start exporting'} ${viewLocale.title}`
     });
     doExport();
   },

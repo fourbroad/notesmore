@@ -316,7 +316,7 @@ $.widget('nm.workbench', {
       _this.$workbenchTitle.html(domainLocale.title || pageLocale.title);
       _this.$logoImg.attr('src', domainLocale.logo || pageLocale.logo);
       _this.$slogan.html(pageLocale.slogan || domainLocale.slogan);
-      _this.$favoritesTitle.html(_.at(o.page.get(o.locale),'favorites.title')[0]);
+      _this.$favoritesTitle.html(_.at(o.page.get(o.locale),'favorites.title')[0]||"Favorites");
     });    
 
     this._refreshProfile();

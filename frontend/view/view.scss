@@ -41,21 +41,30 @@
 //     overflow: auto;
 
     .view-table {
-      .btn {
-        border: none;
-        visibility: hidden;
-      }
 
       .table-active {
         .btn {
           visibility: visible;
         }      
       }
-    
-      tr:hover {
+
+      thead {
         .btn {
-          visibility: visible;
-        }      
+          border-color: lightgray;          
+        }
+      }
+    
+      tbody {
+        .btn {
+          border: none;
+          visibility: hidden;
+        }
+
+        tr:hover {
+          .btn {
+            visibility: visible;
+          }      
+        }
       }
 
       a:hover {
