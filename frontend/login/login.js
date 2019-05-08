@@ -56,7 +56,8 @@ $.widget("nm.login", {
   },
 
   _create() {
-    let o = this.options,_this = this;
+    let o = this.options,
+      _this = this;
     this.locale = o.document.get(o.locale);
 
     this._addClass('nm-login');
@@ -69,13 +70,13 @@ $.widget("nm.login", {
     particlesJS('content', particles_config);
 
     //设置logo
-    Domain.get(o.document.domainId,function(err,domain){
-      if(err){
+    Domain.get(o.document.domainId, function (err, domain) {
+      if (err) {
         console.error(err);
         return;
       }
       if (domain['logo']) {
-        _this.element.find('.logo-img img').attr('src',domain['logo']);
+        _this.element.find('.logo-img img').attr('src', domain['logo']);
       }
       if (domain['_i18n'] && domain['_i18n'][o.locale]) {
         _this.element.find('.logo-big-text').text(domain['_i18n'][o.locale]['title']);
@@ -84,16 +85,16 @@ $.widget("nm.login", {
     });
 
     //设置校验提示语言
-    o.constraints["model-1"].username.presence.message = this._i18n('nameLogin.username.defalueError','Please enter mobile phone or email');
+    o.constraints["model-1"].username.presence.message = this._i18n('nameLogin.username.defalueError', 'Please enter mobile phone or email');
     // o.constraints["model-1"].username.format.message = this._i18n('nameLogin.username.error','Please enter the correct mobile phone or email');
-    o.constraints["model-1"].password.presence.message = this._i18n('nameLogin.username.defalueError','Please enter your login password');
-    // o.constraints["model-1"].password.format.message = this._i18n('nameLogin.username.defalueError','wrong password');
-    
-    //设置输入框提示提示语言
-    this.element.find('#username').attr('placeholder',this._i18n('nameLogin.username.placeholder','Please enter mobile phone or email'));
-    this.element.find('#password').attr('placeholder',this._i18n('nameLogin.password.placeholder','Please enter your login password'));
+    o.constraints["model-1"].password.presence.message = this._i18n('nameLogin.password.error', 'Please enter your login password');
+    // o.constraints["model-1"].password.format.message = this._i18n('nameLogin.password.error','wrong password');
 
-    this.element.find('.submit-btn').text(this._i18n('title','Login'));
+    //设置输入框提示提示语言
+    this.element.find('#username').attr('placeholder', this._i18n('nameLogin.username.placeholder', 'Please enter mobile phone or email'));
+    this.element.find('#password').attr('placeholder', this._i18n('nameLogin.password.placeholder', 'Please enter your login password'));
+
+    this.element.find('.submit-btn').text(this._i18n('title', 'Login'));
 
     // this._getverifyCode();
 
@@ -128,7 +129,7 @@ $.widget("nm.login", {
       'change': function (e) {
         let $target = $(e.currentTarget),
           error = this._verifyData($target) || {};
-        this._showError($target, error[$target.attr('name')]);
+        this._showError($target, error[$target.attr('name')], $target.attr('name'));
       },
       'keyup': function (e) {
         if (e.keyCode == 13) {
@@ -171,7 +172,7 @@ $.widget("nm.login", {
     error && $model.find('input').each(function (i, v) {
       let $v = $(v);
       hasError = true;
-      self._showError($v, error[$v.attr('name')]);
+      self._showError($v, error[$v.attr('name')], $v.attr('name'));
     });
 
     if (hasError) return false;
@@ -184,8 +185,8 @@ $.widget("nm.login", {
     client.login(inputData.username, inputData.password, function (err, user) {
       $target.removeClass('ui-state-disabled');
       if (err) {
-        console.error('login-error',err.message);
-        $model.find('.verify-code .error,.password .error').addClass('show').text(self._i18n(err.message,err.message));
+        console.error('login-error', err.message);
+        $model.find('.verify-code .error,.password .error').addClass('show').text(self._i18n(err.message, err.message));
         return false;
       }
       runtime.option({
@@ -215,7 +216,7 @@ $.widget("nm.login", {
   //         interval, count;
 
   //       if (error['phones']) {
-  //         this._showError($('.phones', this.element), error[$('.phones', this.element).attr('name')]);
+  //         this._showError($('.phones', this.element), error[$('.phones', this.element).attr('name')],$('.phones', this.element).attr('name'));
   //         return false;
   //       }
 
@@ -269,14 +270,12 @@ $.widget("nm.login", {
    * @param {*} element jquery对象
    * @param {string} [text=''] 错误文本
    */
-  _showError(element, text = []) {
+  _showError(element, text = [], replace) {
     let $error = element.parents('.row').find('.error');
     text = text[0] || '';
-    text = text.split(' ');
-    if (text.length > 1) {
-      text = text.slice(1);
+    if (replace) {
+      text = text.replace(new RegExp(replace, 'i'), '').trim();
     }
-    text = text.join(' ');
     if (text) {
       $error.addClass('show').text(text);
     } else {
