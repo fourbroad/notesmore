@@ -1,6 +1,7 @@
 const 
   path = require('path'),
   webpack  = require('webpack'),
+  VueLoaderPlugin = require('vue-loader/lib/plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   MomentLocalesPlugin = require('moment-locales-webpack-plugin'),
   WorkboxPlugin = require('workbox-webpack-plugin'),
@@ -23,8 +24,9 @@ module.exports = {
     '@notesabc/workbench/workbench'    : path.join(__dirname, 'frontend/workbench/workbench.js')
   },
   resolve: {
-    extensions: ['.webpack-loader.js', '.web-loader.js', '.loader.js', '.js'],
+    extensions: ['*', '.js', '.vue', '.json'],
     alias: {
+      vue$: 'vue/dist/vue.esm.js',
       frontend: path.resolve(__dirname, 'frontend'),
       lib: path.resolve(__dirname, 'lib'),
       test: path.resolve(__dirname, 'test'),
@@ -58,6 +60,9 @@ module.exports = {
           outputPath: 'assets/images'
         }
       }]
+    },{
+      test:/\.vue$/,
+      use:['vue-loader']
     },{
       test: /\.(js)$/,
       exclude: /(node_modules|bower_components)/,
@@ -133,7 +138,7 @@ module.exports = {
       'window._':'lodash',
       Popper: ['popper.js', 'default']
     }),
-  
+    new VueLoaderPlugin(),
     // To strip all locales except “en”, “es-us” and “ru”
     // (“en” is built into Moment and can’t be removed)
     new MomentLocalesPlugin({
