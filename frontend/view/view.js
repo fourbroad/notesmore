@@ -783,10 +783,14 @@ $.widget("nm.view", {
   },
 
   _refreshHeader: function () {
-    let o = this.options,
-      viewLocale = o.view.get(o.locale);
+    let o = this.options, view = o.view, client = view.getClient(),
+      viewLocale = view.get(o.locale), currentUser = client.currentUser, 
+      _this = this;
+
     if (this._isDirty()) {
-      this.$saveBtn.show().html(_.at(viewLocale, 'toolbox.save')[0]).prop("disabled", false);
+      utils.checkPermission(view.domainId, currentUser.id, 'patch', view, function(err, result){
+        _this.$saveBtn.show().html(_.at(viewLocale, 'toolbox.save')[0]).prop("disabled", !result);
+      });      
       this.$cancelBtn.show().html(_.at(viewLocale, 'toolbox.cancel')[0]).show();
     } else {
       this.$saveBtn.hide();
@@ -1078,7 +1082,11 @@ $.widget("nm.view", {
       o.view.patch({
         patch: this._getPatch()
       }, function (err, view) {
-        if (err) return console.error(err);
+        if (err) {
+          _this._refreshHeader();
+          return console.error(err);
+        }
+        
         _.forOwn(o.view, function (v, k) {
           try {
             delete o.view[k]

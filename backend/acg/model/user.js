@@ -91,6 +91,19 @@ _.assign(User, {
 
     userData.password = md5.update(userData.password + secret).digest('hex');
     if(!_.at(userData, '_meta.metaId')[0]) _.set(userData, '_meta.metaId', '.meta-user');
+
+    _.merge(userData._meta, {acl: {
+      get:{
+        users:[userId]
+      },
+      patch:{
+        users:[userId]
+      }
+    }}, (obj, src)=>{
+      if(_.isArray(obj)){
+        return obj.concat(src);
+      }
+    });
     
     return createEntity(elasticsearch,authorId, Domain.ROOT, USERS, userId, userData, options).then((data) => {
       var user = new User(data);

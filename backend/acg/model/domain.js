@@ -29,11 +29,8 @@ function indexName(domainId, collectionId) {
 function createMeta(authorId, doc) {
   var _meta = doc._meta || {}
     , timestamp = new Date().getTime();
-  _meta.acl = _.merge(_.mergeWith(_.cloneDeep(DEFAULT_ACL), DEVELOPER_ACL,(objValue, srcValue)=>{
-    if (_.isArray(objValue)) {
-      return objValue.concat(srcValue);
-    }
-  }), _.at(doc, '_meta.acl')[0]);
+
+  _meta.acl = _.merge(_.cloneDeep(DEFAULT_ACL), _.at(doc, '_meta.acl')[0]);
   _meta = _.merge(_meta, {
     created: timestamp,
     updated: timestamp,
@@ -106,11 +103,15 @@ function buildMetaBatch(authorId, domainId) {
   var metas = domainId == ROOT ? METAS.concat(ROOT_METAS) : METAS;
   return _.flatMap(_.map(metas, function(meta) {
     var m = _.cloneDeep(meta);
-    m.acl = {
+    m.acl = _.mergeWith({
       create: {
         roles: ['administrator']
       }
-    };
+    }, m.acl, (obj, src) => {
+      if(_.isArray(obj)){
+        return obj.concat(src);
+      }
+    });
     m._meta = createMeta(authorId, m);
     return [{
       index: {
@@ -157,7 +158,7 @@ function buildUserBatch(authorId, authorTitle, domainId) {
     var adminProfile = {
       id: authorId,
       title: authorTitle,
-      roles: ["administrator"],
+      roles: ["administrator", "member"],
       _i18n:{
         'zh-CN':{
           title:"管理员画像"
@@ -178,6 +179,11 @@ function buildUserBatch(authorId, authorTitle, domainId) {
       },
       _meta: {
         iconClass: 'fa fa-user-circle-o',
+        acl: {
+          get: {
+            roles:['anonymous']
+          }
+        }
       }      
     };
 
@@ -215,12 +221,15 @@ function buildUserBatch(authorId, authorTitle, domainId) {
     var profile = {
       id: authorId,
       title: authorTitle,
-      roles: ["administrator"],
+      roles: ["administrator", "member"],
       _i18n:{
         'zh-CN':{
           title:"管理员画像"
         }
-      }
+      },
+      _meta: {
+        iconClass: 'fa fa-user-circle-o',
+      }      
     };
     profile._meta = createMeta(authorId, profile);
     profile._meta.metaId = '.meta-profile';

@@ -62,6 +62,13 @@ Domain.get(Domain.ROOT).catch((e)=>{
         title: '协同',
         slogan: '工作因协同而轻松.'
       }
+    },
+    _meta: {
+      acl: {
+        get:{
+          roles:['anonymous','member']
+        }
+      }
     }
   }).then(result => console.log("Root domain is initialized!")).catch(err => console.error(err));
 });
