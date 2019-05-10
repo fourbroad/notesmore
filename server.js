@@ -33,7 +33,7 @@ function normalizePort(val) {
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-app.use(cors({credentials: true, origin: 'http://localhost:8080'}));
+app.use(cors({credentials: true, origin:"*"}));
 
 // app.use(cors());
 
