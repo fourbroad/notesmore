@@ -95,6 +95,7 @@ $.widget("nm.login", {
     this.element.find('#password').attr('placeholder', this._i18n('nameLogin.password.placeholder', 'Please enter your login password'));
 
     this.element.find('.submit-btn').text(this._i18n('title', 'Login'));
+    this.element.find('.title').text(this._i18n('title', 'Login'));
 
     // this._getverifyCode();
 
