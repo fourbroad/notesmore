@@ -5,7 +5,7 @@ const axios = require('axios');
 let login_post = function (){
   
     return new Promise(function(resolve, reject){
-        axios.post("http://47.100.213.55:3000/_login",{"id":"easylink-new","password":"eweasn-ylkni"})
+        axios.post("http://47.100.213.55:3000/_login",{"id":"ah-new-system","password":"Phe9angu"})
         .then(function (response) {
             resolve(response);
             //console.log(response);
@@ -14,7 +14,7 @@ let login_post = function (){
 }
 
 let policies_post = function (toket,postData){
-  
+    //console.log(postData);
     return new Promise(function(resolve, reject){
         axios({
             method: 'post',
@@ -23,9 +23,11 @@ let policies_post = function (toket,postData){
             data:postData
         })
         .then(function (response) {
+            //console.log(response.data.items[0]);
             resolve(response);
             //console.log(response);
-          });
+          })
+        .catch(console.error);
   });
 }
 let get_policies = function (toket,startId,limit){

@@ -5,11 +5,12 @@ const axios = require('axios');
 let login_post = function (){
   
     return new Promise(function(resolve, reject){
-        axios.post("http://47.100.213.55:3000/_login",{"id":"easylink-new","password":"eweasn-ylkni"})
+        axios.post("http://47.100.213.55:3000/_login",{"id":"ah-new-system-pay","password":"aePh3voh"})
         .then(function (response) {
             resolve(response);
             //console.log(response);
-          });
+          })
+        .catch(console.error);
   });
 }
 
