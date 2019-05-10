@@ -19,8 +19,8 @@ import 'notification/notification';
 $.widget('nm.workbench', {
   options: {
     anchor:{
-      col: '.pages',
-      doc: '.dashboard'
+      col: '.collections',
+      doc: '.collections'
     },
     i18n: {
       'zh-CN':{

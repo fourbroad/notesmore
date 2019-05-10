@@ -275,7 +275,7 @@ const DEFAULT_ACL = {
     iconClass: 'fa fa-folder-o',
     acl:{
       get:{
-        roles:['members']
+        roles:['member',"administrator"]
       },
       bulk:{}
     }
@@ -546,7 +546,12 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-view',
-    iconClass: 'fa fa-search'
+    iconClass: 'fa fa-search',
+    acl:{
+      get:{
+        roles:['administrator', 'member']
+      }
+    }
   }
 }]
   , ACTIONS = [{
@@ -789,6 +794,11 @@ const DEFAULT_ACL = {
   _i18n: {
     'zh-CN': {
       title: '元文档'
+    }
+  },
+  acl:{
+    get:{
+      roles:['administrator']
     }
   },
   _meta: {

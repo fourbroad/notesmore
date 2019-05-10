@@ -1,9 +1,7 @@
 
-import Loader from 'core/loader';
 import Masonry from 'masonry-layout';
 import './new-dialog.scss';
 import newDialogHtml from './new-dialog.html';
-import uuidv4 from'uuid/v4';
 
 $.widget('nm.newdialog', {
   options: {
@@ -17,7 +15,7 @@ $.widget('nm.newdialog', {
   },
 
   _create: function(){
-    var o = this.options, self = this, client = o.client, Meta = client.Meta;
+    var o = this.options, _this = this, client = o.client, currentUser = client.currentUser, {Meta, Profile} = client;
 
     this._addClass('nm-newdialog', 'modal fade');
     this.element.html(newDialogHtml);
@@ -39,24 +37,35 @@ $.widget('nm.newdialog', {
     this.refresh();
 
     this.element.on('shown.bs.modal', function (e) {
-      $('.masonry-item', self.$metaGrid).remove();
-      Meta.find(currentDomain.id, {size:1000}, function(err, result){
-        if(err) return console.log(err);
-        var $items = _.reduce(result.metas, function(items, meta){
-          let metaLocale = meta.get(o.locale),
+      $('.masonry-item', _this.$metaGrid).remove();
+
+      Profile.get(currentDomain.id, currentUser.id, function(err, profile){
+        if(err) return console.error(err);
+        Meta.find(currentDomain.id, {size:1000}, function(err, result){
+          if(err) return console.log(err);
+          var $items = _.reduce(result.metas, function(items, meta){
+            let permissions = _.at(meta, 'acl.create')[0];
+            if (!permissions
+              || _.intersection(profile.roles, permissions.roles).length > 0 
+              || _.intersection(profile.groups, permissions.groups).length > 0 
+              || (permissions.users && permissions.users.indexOf(currentUser.id) >= 0)) {
+              let metaLocale = meta.get(o.locale),
               $item = $('<div class="masonry-item col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2">'
                       +'<div class="meta p-10 bd">'
                         +'<span class="icon-holder"><i class="'+ meta._meta.iconClass+'"></i></span>'
                         +'<h6>' + (metaLocale.title||metaLocale.id) +'</h6>'
                       +'</div>'
                     +'</div>');
-          $('.meta', $item).data('item',meta);
-          return items.add($item);
-        },$());
-
-        self.$metaGrid.append($items);
-        self.masonry.appended($items);
-        self.masonry.layout();
+              $('.meta', $item).data('item',meta);
+              items = items.add($item);
+            }
+            return items;
+          },$());
+          
+          _this.$metaGrid.append($items);
+          _this.masonry.appended($items);
+          _this.masonry.layout();
+        });
       });
     });
 
