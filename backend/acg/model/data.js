@@ -766,6 +766,7 @@ const DEFAULT_ACL = {
   id: '.meta',
   title: 'Meta',
   defaultValue: {
+    id: 'new-meta',
     title: 'New Meta',
     _i18n: {
       'zh-CN': {
@@ -806,6 +807,7 @@ const DEFAULT_ACL = {
     title: 'Collections'
   },
   defaultValue: {
+    id: 'new-collection',
     title: 'New Collection',
     columns: DEFAULT_COLUMNS,
     search: {
@@ -859,6 +861,7 @@ const DEFAULT_ACL = {
   id: '.meta-page',
   title: 'Meta-page',
   defaultValue: {
+    id: 'new-page',
     title: 'New Page',
     _i18n: {
       'zh-CN': {
@@ -901,6 +904,7 @@ const DEFAULT_ACL = {
     title: 'Views'
   },
   defaultValue: {
+    id: 'new-view',
     title: 'New View',
     collections: [],
     columns: DEFAULT_COLUMNS,
@@ -957,6 +961,7 @@ const DEFAULT_ACL = {
   id: '.meta-form',
   title: 'Meta-form',
   defaultValue: {
+    id: 'new-form',
     title: 'New Form',
     _i18n: {
       'zh-CN': {
@@ -990,6 +995,7 @@ const DEFAULT_ACL = {
   id: '.meta-action',
   title: 'Meta-action',
   defaultValue: {
+    id: 'new-action',
     title: 'New Action',
     _i18n: {
       'zh-CN': {
@@ -1028,6 +1034,7 @@ const DEFAULT_ACL = {
   id: '.meta-file',
   title: 'Meta-file',
   defaultValue: {
+    id: 'new-file',
     title: 'New File',
     _i18n: {
       'zh-CN': {
@@ -1061,6 +1068,7 @@ const DEFAULT_ACL = {
   id: '.meta-role',
   title: 'Meta-role',
   defaultValue: {
+    id: 'new-role',
     title: 'New Role',
     _i18n: {
       'zh-CN': {
@@ -1094,6 +1102,7 @@ const DEFAULT_ACL = {
   id: '.meta-group',
   title: 'Meta-group',
   defaultValue: {
+    id: 'new-group',
     title: 'New Group',
     _i18n: {
       'zh-CN': {
@@ -1167,7 +1176,7 @@ const DEFAULT_ACL = {
     title: 'Users'
   },
   defaultValue: {
-    id: 'newuser',
+    id: 'new-user',
     password: 'password',
     title: 'New User',
     _i18n: {
@@ -1207,6 +1216,7 @@ const DEFAULT_ACL = {
     title: 'Domains'
   },
   defaultValue: {
+    id: 'new-domain',
     title: 'New Domain',
     _i18n: {
       'zh-CN': {

@@ -154,7 +154,7 @@ function buildRoleBatch(authorId, domainId) {
 }
 
 function buildUserBatch(authorId, authorTitle, domainId) {
-  if (domainId == ROOT) {
+  // if (domainId == ROOT) {
     var adminProfile = {
       id: authorId,
       title: authorTitle,
@@ -217,30 +217,30 @@ function buildUserBatch(authorId, authorTitle, domainId) {
     }));
 
     return us.concat(ps);
-  } else {
-    var profile = {
-      id: authorId,
-      title: authorTitle,
-      roles: ["administrator", "member"],
-      _i18n:{
-        'zh-CN':{
-          title:"管理员画像"
-        }
-      },
-      _meta: {
-        iconClass: 'fa fa-user-circle-o',
-      }      
-    };
-    profile._meta = createMeta(authorId, profile);
-    profile._meta.metaId = '.meta-profile';
-    return [{
-      index: {
-        _index: indexName(domainId, '.profiles'),
-        _type: Document.TYPE,
-        _id: authorId
-      }
-    }, profile]
-  }
+  // } else {
+  //   var profile = {
+  //     id: authorId,
+  //     title: authorTitle,
+  //     roles: ["administrator", "member"],
+  //     _i18n:{
+  //       'zh-CN':{
+  //         title:"管理员画像"
+  //       }
+  //     },
+  //     _meta: {
+  //       iconClass: 'fa fa-user-circle-o',
+  //     }      
+  //   };
+  //   profile._meta = createMeta(authorId, profile);
+  //   profile._meta.metaId = '.meta-profile';
+  //   return [{
+  //     index: {
+  //       _index: indexName(domainId, '.profiles'),
+  //       _type: Document.TYPE,
+  //       _id: authorId
+  //     }
+  //   }, profile]
+  // }
 }
 
 function initDomain(authorId, authorTitle, domainId) {
