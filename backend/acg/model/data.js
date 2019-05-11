@@ -335,9 +335,6 @@ const DEFAULT_ACL = {
     metaId: '.meta-collection',
     iconClass: 'fa fa-folder-o',
     acl:{
-      get:{
-        roles:["member"]
-      },
       bulk:{}
     }
   }
@@ -442,7 +439,7 @@ const DEFAULT_ACL = {
   export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
-      title: '画像集合',
+      title: '身份集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -515,9 +512,6 @@ const DEFAULT_ACL = {
     metaId: '.meta-collection',
     iconClass: 'fa fa-folder-o',
     acl: {
-      get: {
-        roles:['member']
-      },
       bulk:{}
     }
   }
@@ -1151,7 +1145,7 @@ const DEFAULT_ACL = {
     roles: ['member'],
     _i18n: {
       'zh-CN': {
-        title: '新画像'
+        title: '新身份'
       }
     },
     _meta: {
@@ -1171,7 +1165,7 @@ const DEFAULT_ACL = {
   actions: ['edit'],
   _i18n: {
     'zh-CN': {
-      title: '元画像'
+      title: '元身份'
     }
   },
   _meta: {

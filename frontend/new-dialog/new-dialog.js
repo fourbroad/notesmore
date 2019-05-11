@@ -39,9 +39,9 @@ $.widget('nm.newdialog', {
     this.element.on('shown.bs.modal', function (e) {
       $('.masonry-item', _this.$metaGrid).remove();
 
-      Profile.get(currentDomain.id, currentUser.id, function(err, profile){
+      Profile.get(o.domainId, currentUser.id, function(err, profile){
         if(err) return console.error(err);
-        Meta.find(currentDomain.id, {size:1000}, function(err, result){
+        Meta.find(o.domainId, {size:1000}, function(err, result){
           if(err) return console.log(err);
           var $items = _.reduce(result.metas, function(items, meta){
             let permissions = _.at(meta, 'acl.create')[0];

@@ -3,7 +3,7 @@ import _ from "lodash";
 import loginHtml from './login.html';
 import './login.scss';
 import 'particles.js';
-// import { Domain } from "domain";
+
 const particles_config = require('./particles_config.json');
 
 $.widget("nm.login", {
@@ -70,19 +70,14 @@ $.widget("nm.login", {
     particlesJS('content', particles_config);
 
     //设置logo
-    Domain.get(o.document.domainId, function (err, domain) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      if (domain['logo']) {
-        _this.element.find('.logo-img img').attr('src', domain['logo']);
-      }
-      if (domain['_i18n'] && domain['_i18n'][o.locale]) {
-        _this.element.find('.logo-big-text').text(domain['_i18n'][o.locale]['title']);
-        _this.element.find('.logo-small-text').text(domain['_i18n'][o.locale]['slogan']);
-      }
-    });
+    if (this.locale['logo']) {
+      _this.element.find('.logo-img img').attr('src', this.locale['logo']);
+    }
+    if (this.locale['_i18n'] && this.locale['_i18n'][o.locale]) {
+      _this.element.find('.logo-big-text').text(this.locale['_i18n'][o.locale]['title']);
+      _this.element.find('.logo-small-text').text(this.locale['_i18n'][o.locale]['slogan']);
+    }
+    
 
     //设置校验提示语言
     o.constraints["model-1"].username.presence.message = this._i18n('nameLogin.username.defalueError', 'Please enter mobile phone or email');
