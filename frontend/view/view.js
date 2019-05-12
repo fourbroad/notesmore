@@ -970,9 +970,9 @@ $.widget("nm.view", {
 
   _doExportCsv: function (options) {
     let o = this.options,
-      columns = _.cloneDeep(this.options.view.columns),
       view = o.view,
       viewLocale = view.get(o.locale),
+      columns = viewLocale.columns,
       title = `${_.at(viewLocale, 'export.prompt.export')[0] || 'Exports'} ${viewLocale.title}`,
       client = view.getClient(),
       rows = [],
