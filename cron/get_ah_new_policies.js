@@ -4,35 +4,36 @@
 const axios = require('axios'); 
 let login_post = function (){
   
-    return new Promise(function(resolve, reject){
-        axios.post("http://47.100.213.55:3000/_login",{"id":"ah-new-system","password":"Phe9angu"})
-        .then(function (response) {
-            resolve(response);
-            //console.log(response);
-          });
-  });
+    //return new Promise(function(resolve, reject){
+    return axios.post("http://47.100.213.55:3000/_login",{"id":"ah-new-system","password":"Phe9angu"})
+        // .then(function (response) {
+        //     resolve(response);
+        //     //console.log(response);
+        //   });
+  //});
 }
 
 let policies_post = function (toket,postData){
     //console.log(postData);
-    return new Promise(function(resolve, reject){
-        axios({
+    //return new Promise(function(resolve, reject){
+    return  axios({
             method: 'post',
             url: 'http://47.100.213.55:3000/starr-cn/ah-new/_bulk',
             headers: {'authorization': 'Bearer '+toket},
             data:postData
         })
         .then(function (response) {
+            return response;
             //console.log(response.data.items[0]);
-            resolve(response);
+            //resolve(response);
             //console.log(response);
           })
         .catch(console.error);
-  });
+  //});
 }
 let get_policies = function (toket,startId,limit){
-    return new Promise(function(resolve, reject){
-        axios.get("http://agency.starrchina.cn/homes/esPolicies?limit="+limit+"&startId="+startId)
+    //return new Promise(function(resolve, reject){
+    return axios.get("http://agency.starrchina.cn/homes/esPolicies?limit="+limit+"&startId="+startId)
         .then(function (response) {
             
             if(response.data.length){
@@ -53,7 +54,7 @@ let get_policies = function (toket,startId,limit){
             }
             //resolve(response);
           });
-  });
+  //});
 }
 
 let login = async function(){
