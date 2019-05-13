@@ -30,8 +30,9 @@ let get_policies = function (toket,startId,limit){
     return new Promise(function(resolve, reject){
         axios.get("http://dicc.ins24.com/ah/esPoliciesHistory?limit="+limit+"&startId="+startId)
         .then(function (response) {
-            policies_post(toket,response.data);
+            
             if(response.data.length){
+                policies_post(toket,response.data);
                 if(response.data.length < limit){
                     setTimeout(() => {
                         get_policies(toket,response.data[response.data.length-1].id,limit);
