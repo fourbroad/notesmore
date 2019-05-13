@@ -41,7 +41,7 @@ $.widget("nm.form", {
   },
 
   _create: function() {
-    var o = this.options, self = this, client = o.document.getClient();
+    let o = this.options, _this = this, client = o.document.getClient();
 
     this._addClass('nm-form', 'container-fluid');
     this.element.html(formHtml);
@@ -73,12 +73,12 @@ $.widget("nm.form", {
     this.jsonEditor.clearSelection();
     this.enableChange = true;
     this.jsonEditor.getSession().on('change', function(delta) {
-      if(self.enableChange){
-        var json;
-        try { json =  JSON.parse(self.jsonEditor.getValue()); }catch(e){}
+      if(_this.enableChange){
+        let json;
+        try { json =  JSON.parse(_this.jsonEditor.getValue()); }catch(e){}
         if(json){
           o.document = o.document.replace(json);
-          self._refreshHeader();
+          _this._refreshHeader();
         }
       }
     });
@@ -96,10 +96,10 @@ $.widget("nm.form", {
   },
 
   _onFavorite: function(e) {
-    var o = this.options, doc = o.document, self = this, client = doc.getClient(), currentUser = client.currentUser, Profile = client.Profile;
+    let o = this.options, doc = o.document, _this = this, client = doc.getClient(), currentUser = client.currentUser, Profile = client.Profile;
     Profile.get(doc.domainId, currentUser.id, function(err, profile){
       if(err) return console.error(err);
-      var oldFavorites = _.cloneDeep(profile.favorites), patch,
+      let oldFavorites = _.cloneDeep(profile.favorites), patch,
           index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;});
       if(index >= 0){
         patch = [{
@@ -119,21 +119,21 @@ $.widget("nm.form", {
       }
       profile.patch({patch: patch}, function(err, profile){
         if(err) return console.error(err);
-        self._refreshFavorite(profile.favorites);
-        self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
+        _this._refreshFavorite(profile.favorites);
+        _this.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
       });
     });
   },
 
   _onDeleteSelf: function(e){
-    var doc = this.options.document, self = this, {User, Profile, Collection} = doc.getClient();
+    let doc = this.options.document, _this = this, {User, Profile, Collection} = doc.getClient();
     doc.delete(function(err, result){
       if(err) return console.error(err);
       User.get(function(err, user){
         if(err) return console.error(err);
         Profile.get(doc.domainId, user.id, function(err, profile){
           if(err) return console.error(err);
-          var index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;}),
+          let index = _.findIndex(profile.favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;}),
               oldFavorites = _.cloneDeep(profile.favorites);
           if(index >= 0){
             profile.patch({patch:[{
@@ -141,7 +141,7 @@ $.widget("nm.form", {
               path: '/favorites/'+index            
             }]}, function(err, profile){
               if(err) return console.error(err);
-              self.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
+              _this.element.trigger('favoritechanged', [profile.favorites, oldFavorites]);
             });
           }
         });
@@ -151,7 +151,7 @@ $.widget("nm.form", {
         if(err) return console.error(err);
         collection.refresh(function(err, result){
           if(err) console.error(err);
-          self.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', doc);
+          _this.$actionMoreMenu.dropdown('toggle').trigger('documentdeleted', doc);
         });
       })
     });
@@ -160,10 +160,10 @@ $.widget("nm.form", {
   },
 
   _refresh: function(){
-    var o = this.options, doc = o.document, self = this, client = doc.getClient(), currentUser = client.currentUser;
+    let o = this.options, doc = o.document, _this = this, client = doc.getClient(), currentUser = client.currentUser;
     utils.checkPermission(doc.domainId, currentUser.id, 'patch', doc, function(err, result){
       if(!result){
-        self.jsonEditor.setReadOnly(true);
+        _this.jsonEditor.setReadOnly(true);
       }
     });
     this._refreshFavorite();
@@ -172,15 +172,15 @@ $.widget("nm.form", {
   },
 
   _refreshFavorite: function(favorites){
-    var o = this.options;
+    let o = this.options;
     if(o.isNew){
       this.$favorite.hide();
     } else {
-      var self = this, doc = o.document,　client = doc.getClient(), currentUser = client.currentUser, Profile = client.Profile;
+      let _this = this, doc = o.document,　client = doc.getClient(), currentUser = client.currentUser, Profile = client.Profile;
       this.$favorite.show();
       
       function doRefreshFavorite(favorites){
-        var $i = $('i', self.$favorite).removeClass();
+        let $i = $('i', _this.$favorite).removeClass();
         if(_.find(favorites, function(f) {return f.domainId==doc.domainId&&f.collectionId==doc.collectionId&&f.id==doc.id;})){
           $i.addClass('c-red-500 fa fa-star-o');
         }else{
@@ -200,7 +200,7 @@ $.widget("nm.form", {
   },
 
   _refreshHeader: function(){
-    var o = this.options, doc = o.document,　docLocale = doc.get(o.locale);
+    let o = this.options, doc = o.document,　docLocale = doc.get(o.locale);
     this.$formTitle.html(docLocale.title||docLocale.id);    
     $('i', this.$icon).removeClass().addClass(doc._meta.iconClass||'fa fa-file-text-o');
 
@@ -228,7 +228,7 @@ $.widget("nm.form", {
   },
 
   _onSave: function(e){
-    var o = this.options, doc = o.document;
+    let o = this.options, doc = o.document;
     this.$saveBtn.html(`<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>${this._i18n("wait","Please wait...")}`).prop( "disabled", true);
     this.$cancelBtn.hide();
     if(o.isNew){
@@ -239,26 +239,28 @@ $.widget("nm.form", {
   },
 
   save: function(){
-    var o = this.options, self = this;
+    let o = this.options, _this = this;
     if(this._isDirty()){
-      o.document.patch({patch:this._getPatch()}, function(err, document){
+      o.document.patch({patch: this._getPatch()}, function(err, document){
         if(err) return console.error(err);
 
   	    _.forOwn(o.document,function(v,k){try{delete o.document[k]}catch(e){}});
         _.merge(o.document, document);
 
-        self.clone = _.cloneDeep(document);
-        self._refresh();
+        _this.clone = _.cloneDeep(document);
+
+        _this._setJsonEditorValue();
+        _this._refresh();
       });
     }
   },
 
   saveAs: function(id, title, callback){
-    var o = this.options, self = this, client = o.document.getClient(), errors = validate(this.$formTag, o.constraints);
+    let o = this.options, _this = this, client = o.document.getClient(), errors = validate(this.$formTag, o.constraints);
     if (errors) {
       console.log(errors);
     } else {
-      var doc = o.document, docInfo = _.cloneDeep(doc), domainId = doc.domainId, collectionId = doc.collectionId, params = [];
+      let doc = o.document, docInfo = _.cloneDeep(doc), domainId = doc.domainId, collectionId = doc.collectionId, params = [];
       docInfo.title = title;
       switch(collectionId){
         case '.domains':
@@ -281,16 +283,16 @@ $.widget("nm.form", {
       }
       params.push(function(err, doc){
         if(err) return console.error(err);
-        var isNew = o.isNew;
+        let isNew = o.isNew;
         o.isNew = false;
         o.actionId = 'edit';
         o.document = doc;
-        self.clone = _.cloneDeep(doc);
-        self._setJsonEditorValue();
-        self._refresh();
+        _this.clone = _.cloneDeep(doc);
+        _this._setJsonEditorValue();
+        _this._refresh();
         callback ? callback(null, true) : console.log(true);
-        self.closeIdTitleDialog();
-        self.element.trigger('documentcreated', [doc, isNew]);
+        _this.closeIdTitleDialog();
+        _this.element.trigger('documentcreated', [doc, isNew]);
       });
       
       o.document.constructor.create.apply(o.document.constructor, params);
@@ -298,19 +300,19 @@ $.widget("nm.form", {
   },
 
   _onShowSaveAsModel: function(e){
-    var o = this.options, doc = o.document;
+    let o = this.options, doc = o.document;
     this.$id.val(doc.id || uuidv4());
     this.$titleInput.val(doc.title||'');
   },
 
   _armActionMoreMenu: function(){
-    var o = this.options, self = this, doc = o.document, client = doc.getClient(), currentUser = client.currentUser;
+    let o = this.options, _this = this, doc = o.document, client = doc.getClient(), currentUser = client.currentUser;
     this.$actionMoreMenu.empty();
     $('<li class="dropdown-item save-as">'+ this._i18n('saveAs','Save as ...')+'</li>').appendTo(this.$actionMoreMenu);
 
     utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, function(err, result){
       if(result){
-        $('<li class="dropdown-item delete">' + self._i18n('delete','Delete') + '</li>').appendTo(self.$actionMoreMenu);
+        $('<li class="dropdown-item delete">' + _this._i18n('delete','Delete') + '</li>').appendTo(_this.$actionMoreMenu);
       }
     });
 
@@ -320,23 +322,23 @@ $.widget("nm.form", {
   },
 
   _onSaveAs: function(evt){
-    var o = this.options, docLocale = o.document.get(o.locale), self = this;
+    let o = this.options, docLocale = o.document.get(o.locale), _this = this;
     this.showIdTitleDialog({
       modelTitle:_.at(docLocale, 'toolbox.saveAs')[0] || 'Save as...',
       id: docLocale.id || uuidv4(), 
       title: docLocale.title || '', 
       locale: o.locale,
       submit:function(e, data){
-      self.saveAs(data.id, data.title);
+      _this.saveAs(data.id, data.title);
     }});
   },
 
   _onCancel: function(){
-    var o = this.options;
+    let o = this.options;
     if(o.isNew){
       this.element.trigger('cancelaction');
     }else{
-      var doc = o.document;
+      let doc = o.document;
    	  _.forOwn(doc,function(v,k){try{delete doc[k]}catch(e){}});
       _.merge(doc, this.clone);
       this._setJsonEditorValue();
@@ -345,22 +347,22 @@ $.widget("nm.form", {
   },
 
   _setOptions: function( options ) {
-    var o = this.options, self = this, isNew = options.isNew, document = options.document;
+    let o = this.options, _this = this, isNew = options.isNew, document = options.document;
     this._super(options);
     if(document){
       if(isNew){
-        delete self.clone;
+        delete _this.clone;
       }else{
         o.isNew = false;
-        self.clone = _.cloneDeep(document);
+        _this.clone = _.cloneDeep(document);
       }
-      self._setJsonEditorValue();
-      self._refresh();
+      _this._setJsonEditorValue();
+      _this._refresh();
     }
   },
 
   _setJsonEditorValue(){
-    var o = this.options;
+    let o = this.options;
     this.enableChange = false;
     this.jsonEditor.setValue(JSON.stringify(o.document, null, 2), -1);
     this.jsonEditor.clearSelection();
@@ -369,9 +371,9 @@ $.widget("nm.form", {
   },
 
   showIdTitleDialog: function(options){
-    var self = this;
+    let _this = this;
     import(/* webpackChunkName: "idtitle-dialog" */ 'idtitle-dialog/idtitle-dialog').then(({default: itd}) => {
-      self.idtitleDialog = $('<div/>').idtitledialog(options).idtitledialog('show').idtitledialog('instance');
+      _this.idtitleDialog = $('<div/>').idtitledialog(options).idtitledialog('show').idtitledialog('instance');
     });
     return this;
   },

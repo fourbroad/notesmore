@@ -38,7 +38,16 @@ function buildMeta(domainId, doc, authorId, metaId, options){
   return Meta.get(domainId, metaId, options).then( meta => {
     var defaultAcl = _.cloneDeep(meta.acl||{}), _meta = doc._meta || {}, timestamp = new Date().getTime();
     delete defaultAcl.create;
-    _meta.acl = _.merge(defaultAcl, _.at(doc, '_meta.acl')[0]);
+    _meta.acl = _.mergeWith(defaultAcl, {
+      get:{users:[authorId]},
+      patch:{users:[authorId]}, 
+      delete:{users:[authorId]}, 
+      patchMeta:{users:[authorId]}
+    }, _.at(doc, '_meta.acl')[0],(obj, src)=>{
+      if (_.isArray(obj)) {
+        return obj.concat(src);
+      }
+    });
     _meta.iconClass = _meta.iconClass || meta._meta.iconClass;
     _meta = _.merge(_meta, {created:timestamp, updated:timestamp, version:1});
     _meta.author = authorId;
@@ -59,8 +68,10 @@ function checkPermission(profile, permissions){
 }
 
 function createEntity(elasticsearch, authorId, domainId, collectionId, documentId, docData, options) {
-  var metaId = _.at(docData, '_meta.metaId')[0] || '.meta', index = documentHotAlias(domainId, collectionId),
-      metaIndex = _.at(options, 'metaIndex')[0], metaOpts = metaIndex ? {index: metaIndex} : null;
+  var metaId = _.at(docData, '_meta.metaId')[0] || '.meta', 
+      index = documentHotAlias(domainId, collectionId),
+      metaIndex = _.at(options, 'metaIndex')[0],
+      metaOpts = metaIndex ? {index: metaIndex} : null;
   docData.id = documentId;
   return buildMeta(domainId, docData, authorId, metaId, metaOpts).then( docData => {
     return elasticsearch.create({ index: index, type: "snapshot", id: documentId, body: docData });

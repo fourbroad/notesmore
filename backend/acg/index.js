@@ -1,6 +1,5 @@
 
 const _ = require('lodash')
-  , createError = require('http-errors')
   , model = require('./model')
   , ACL = require('./acl');
 
@@ -67,6 +66,7 @@ initSocket = function(socket) {
     checkAcl2(visitorId, Meta, domainId, metaId, 'get', null, options).then( meta => {
       return meta.get(options);
     }).then(result => callback(null, result)).catch(err => {
+      console.log(metaId);
       console.error(err);
       callback(err);
     });
@@ -276,6 +276,7 @@ initSocket = function(socket) {
     checkAcl2(visitorId, Collection, domainId, collectionId, 'get', null, options).then( collection => {
       return collection.get(options);
     }).then(result => callback(null, result)).catch(err => {
+      console.log({domainId:domainId, collectionId:collectionId});
       console.error(err);
       callback(err);
     });
@@ -551,6 +552,7 @@ initSocket = function(socket) {
     checkAcl2(visitorId, Page, domainId, pageId, 'get', null, options).then( page => {
       return page.get(options);
     }).then(result => callback(null, result)).catch(err => {
+      console.log({domainId: domainId, pageId:pageId});
       console.error(err);
       callback(err);
     });
@@ -592,6 +594,7 @@ initSocket = function(socket) {
     checkAcl2(visitorId, Action, domainId, actionId, 'get', null, options).then( action => {
       return action.get(options);
     }).then(result => callback(null, result)).catch(err => {
+      console.log({domainId: domainId, actionId:actionId});
       console.error(err);
       callback(err);
     });
@@ -735,6 +738,7 @@ initSocket = function(socket) {
     checkAcl2(visitorId, Profile, domainId, profileId, 'get', null, options).then( profile => {
       return profile.get(options);
      }).then(result => callback(null, result)).catch(err => {
+      console.error({domainId: domainId, profileId: profileId});
       console.error(err);
       callback(err);
     });

@@ -29,45 +29,47 @@
       width: 432px;
     }
 
-    .row.logo {
+    .logo {
       display: flex;
-      justify-content: center;
-      height: 54px;
-      margin-top: 40px;
-      margin-bottom: 25px;
+      height: 23px;
+      margin: 10px 15px;
       color: #333f49;
 
       .logo-img {
-        width: 54px;
+        width: 23px;
+        min-width: 23px;
         height: 100%;
         overflow: hidden;
-        img{
+
+        img {
           height: 100%;
           max-height: 100%;
           width: 100%;
           max-width: 100%;
         }
       }
-      .logo-text{
-        padding-left: 10px;
-        max-width: 298px;
+
+      .logo-big-text {
+        margin-bottom: 0px;
+        margin-top: 3px;
+        padding-left: 3px;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        padding-top: 4px;
-        .logo-big-text{
-          margin-bottom: 0px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;  
-          font-size: 28px;
-          line-height: 28px;
-        }
-        .logo-small-text{
-          white-space: nowrap;
-          font-size: 12px;
-          line-height: 12px;
-        }
+        font-size: 19px;
+        line-height: 19px;
       }
+    }
+
+    .title {
+      margin: 23px 40px 36px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      color: #333f49;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .row {
@@ -147,7 +149,7 @@
 
       &.submit {
         padding-top: 4px;
-        padding-bottom: 50px;
+        padding-bottom: 75px;
 
         .submit-btn {
           font-size: 1rem;

@@ -19,8 +19,8 @@ import 'notification/notification';
 $.widget('nm.workbench', {
   options: {
     anchor:{
-      col: '.pages',
-      doc: '.dashboard'
+      col: '.collections',
+      doc: '.collections'
     },
     i18n: {
       'zh-CN':{
@@ -96,7 +96,7 @@ $.widget('nm.workbench', {
       },
       "docctrlclick": function(e, doc) {
         let anchor = {col:doc.collectionId, doc:doc.id, act:'edit'};
-        if(doc.domainId != currentDomain.id){
+        if(doc.domainId != o.page.domainId){
           anchor.dom = doc.domainId;
         }
         this.option('anchor', anchor);
@@ -226,7 +226,7 @@ $.widget('nm.workbench', {
 
   _refreshSidebar: function(){
     let o = this.options, _this = this, items = _.cloneDeep(o.page.sidebarItems);
-    currentDomain.mgetDocuments(items, function(err, docs){
+    Domain.mgetDocuments(o.page.domainId, items, function(err, docs){
       if(err) return console.error(err);
       _this.$favorites.siblings().remove();
       _.each(docs, function(doc){
@@ -279,7 +279,7 @@ $.widget('nm.workbench', {
       $('<div/>').newdialog({
         client: o.page.getClient(),
         $anchor: this.$newDocumentBtn,
-        domain: currentDomain,
+        domainId: o.page.domainId,
         locale: o.locale
       }).newdialog('show');
     });
@@ -309,15 +309,12 @@ $.widget('nm.workbench', {
   },
 
   refresh: function(){
-    let o = this.options, page = o.page, client = page.getClient(), Domain = client.Domain, _this = this;
-    Domain.get(page.domainId, function(err, domain){
-      if(err) return console.error(err);
-      let domainLocale = domain.get(o.locale), pageLocale = page.get(o.locale);
-      _this.$workbenchTitle.html(domainLocale.title || pageLocale.title);
-      _this.$logoImg.attr('src', domainLocale.logo || pageLocale.logo);
-      _this.$slogan.html(pageLocale.slogan || domainLocale.slogan);
-      _this.$favoritesTitle.html(_.at(o.page.get(o.locale),'favorites.title')[0]||"Favorites");
-    });    
+    let o = this.options, pageLocale = o.page.get(o.locale);
+    
+    this.$workbenchTitle.html(pageLocale.title);
+    this.$logoImg.attr('src', pageLocale.logo);
+    this.$slogan.html(pageLocale.slogan);
+    this.$favoritesTitle.html(_.at(pageLocale,'favorites.title')[0]||"Favorites");
 
     this._refreshProfile();
     this._refreshSidebar();

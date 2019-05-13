@@ -25,6 +25,18 @@ _.assign(Profile, {
 
   create: function(authorId, domainId, profileId, profileData, options) {
     if(!_.at(profileData, '_meta.metaId')[0]) _.set(profileData, '_meta.metaId', '.meta-profile');
+    _.merge(profileData._meta, {acl: {
+      get:{
+        users:[profileId]
+      },
+      patch:{
+        users:[profileId]
+      }
+    }}, (obj, src)=>{
+      if(_.isArray(obj)){
+        return obj.concat(src);
+      }
+    });
     return createEntity(elasticsearch, authorId, domainId, PROFILES, profileId, profileData, options).then((data) => {
       var profile = new Profile(domainId, data);
       cache.set(uniqueId(domainId, PROFILES, profileId), profile);

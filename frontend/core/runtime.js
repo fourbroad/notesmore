@@ -51,7 +51,7 @@ $.widget('nm.runtime',{
   },
 
   _create: function(){
-    var o = this.options, self = this, token = this.getToken();
+    let o = this.options, _this = this, token = this.getToken();
 
     client.init(o.client);
 
@@ -76,7 +76,7 @@ $.widget('nm.runtime',{
 
     this._on({
       "createdocument": function(event, meta){
-        var anchor = {col:meta.collectionId, doc: meta.id, act: 'new'}
+        let anchor = {col:meta.collectionId, doc: meta.id, act: 'new'}
         if(meta.domainId != o.currentDomain){
           anchor.dom = meta.domainId
         }
@@ -89,7 +89,7 @@ $.widget('nm.runtime',{
         this.option('uriAnchor', anchor);
       },
       "history": function(event, history, override){
-        var uriAnchor = _.cloneDeep(o.uriAnchor);
+        let uriAnchor = _.cloneDeep(o.uriAnchor);
         if(uriAnchor.col == '.pages' && uriAnchor.doc == '.workbench' && $.isEmptyObject(uriAnchor._doc)){
           override = true;
         }
@@ -111,10 +111,13 @@ $.widget('nm.runtime',{
     });
 
     if(token){
-      var decodedToken = jwtDecode(token);
+      let decodedToken = jwtDecode(token);
       if((new Date().getTime()/1000) < decodedToken.exp){
         client.connect(token, function(err, user){
-          if(err) return console.error(err);
+          if(err) {
+            _this.clearToken();
+            return console.error(err); 
+          }
           $(window).trigger('hashchange');
         });
       } else {
@@ -134,9 +137,8 @@ $.widget('nm.runtime',{
   },
 
   _gotoConnected: function(user){
-    var o = this.options, anchor = this._makeAnchorMap();
+    let o = this.options, anchor = this._makeAnchorMap();
     this.setToken(client.token);
-    this._setCurrentDomain(o.currentDomain);
     if(user.id == "anonymous"){
       if(anchor.col == '.pages' && anchor.doc == '.workbench'){
         anchor = {col:'.pages', doc:'.login'};
@@ -167,63 +169,55 @@ $.widget('nm.runtime',{
   },
 
   _gotoLogin: function(){
-    var self = this;
+    let _this = this;
     this.clearToken();
     client.login(function(err, result){
-      self.option({'uriAnchor': {col:'.pages', doc:'.login'}, override: true});
+      _this.option({'uriAnchor': {col:'.pages', doc:'.login'}, override: true});
     });
   },
 
   _setUriAnchor(event, doc){
-    var o = this.options, anchor = {col:doc.collectionId, doc:doc.id};
+    let o = this.options, anchor = {col:doc.collectionId, doc:doc.id};
     if(doc.domainId != o.currentDomain){
       anchor.dom = doc.domainId;
     }
     this.option({uriAnchor:anchor, override: false});
   },
 
-  _setCurrentDomain: function(domainId){
-    client.Domain.get(domainId, function(err, domain){
-      if(err) return console.error(err);
-      window.currentDomain = domain;
-    });
-  },
-
   _setOptions: function( options) {
-    var self = this, o = this.options, override = options.override || o.override;
+    let _this = this, o = this.options, override = options.override || o.override;
     $.each(options, function(key, value) {
       if(key === "uriAnchor" && jsonPatch.compare(o.uriAnchor||{}, value).length > 0){
-        var oldAnchor = $.extend(true, {}, o.uriAnchor);
+        let oldAnchor = $.extend(true, {}, o.uriAnchor);
         function callback(err, doc){
           if(err){
             o.urlAnchor = oldAnchor;
             return console.error($.extend(err,{domainId: value.dom||o.currentDomain, collectionId: value.col, documentId:value.doc, actionId:value.act, opts:value._doc}));
           } 
-          self._setAnchor(o.uriAnchor, override);
+          _this._setAnchor(o.uriAnchor, override);
         }
 
         if(value.col == '.metas' && value.act == 'new'){
-          Loader.createDocument(client, self.element, domainId, metaId, o.locale, callback);
+          Loader.createDocument(client, _this.element, domainId, metaId, o.locale, callback);
         } else {
-          Loader.loadDocument(client, self.element, value.dom||o.currentDomain, value.col, value.doc, value.act, value._doc, o.locale, callback);
+          Loader.loadDocument(client, _this.element, value.dom||o.currentDomain, value.col, value.doc, value.act, value._doc, o.locale, callback);
         }
       }else if(key == 'currentDomain' && value != o.currentDomain){
-        var anchor = o.uriAnchor, oldDomainId = o.currentDomain;
-        Loader.loadDocument(client, self.element, value, anchor.col, anchor.doc, anchor.act, anchor._doc, o.locale, function(err, doc){
+        let anchor = o.uriAnchor, oldDomainId = o.currentDomain;
+        Loader.loadDocument(client, _this.element, value, anchor.col, anchor.doc, anchor.act, anchor._doc, o.locale, function(err, doc){
           if(err){
-            self._setOption('currentDomain', oldDomainId);
+            _this._setOption('currentDomain', oldDomainId);
             return console.log($.extend(err,{domainId: value, collectionId: anchor.col, documentId:anchor.doc, actionId:anchor.act, opts:anchor._doc}));
           }
-          self._setCurrentDomain(value);
-          self._setAnchor(o.uriAnchor);
+          _this._setAnchor(o.uriAnchor);
         });
       }
-      self._setOption( key, value );
+      _this._setOption( key, value );
     });
   },
 
   loadDocument: function(domId, colId, docId, actId, opts){
-    var anchor = {col:colId, doc:docId};
+    let anchor = {col:colId, doc:docId};
     if(domId && domId != currentDomain.id) anchor.dom = domId;
     if(actId) anchor.act = actId;
     if(!$.isEmptyObject(opts)) anchor._doc = opts;
@@ -231,7 +225,7 @@ $.widget('nm.runtime',{
   },
 
   _encodeAnchor: function(uriAnchor){
-    var anchor = _.cloneDeep(uriAnchor);
+    let anchor = _.cloneDeep(uriAnchor);
     if(anchor._doc){
       anchor._doc = _.reduce(anchor._doc, function(result, value, key) {
         result[key] = encodeURIComponent(JSON.stringify(value));
@@ -242,7 +236,7 @@ $.widget('nm.runtime',{
   },
 
   _decodeAnchor: function(uriAnchor){
-    var anchor = _.cloneDeep(uriAnchor);
+    let anchor = _.cloneDeep(uriAnchor);
     if(anchor._doc){
       anchor._doc = _.reduce(anchor._doc, function(result, value, key) {
         result[key] = JSON.parse(decodeURIComponent(value));
@@ -259,7 +253,7 @@ $.widget('nm.runtime',{
   },
 
   _setAnchor: function(uriAnchor, override){
-    var o = this.options;
+    let o = this.options;
     this.oldAnchor = this._makeAnchorMap();
     try {
       $.uriAnchor.setAnchor(this._encodeAnchor(uriAnchor), null, override);
@@ -271,27 +265,27 @@ $.widget('nm.runtime',{
   },
 
   _onHashchange: function(event){
-    var o = this.options, self = this, anchor = this._makeAnchorMap(), override = false;
+    let o = this.options, _this = this, anchor = this._makeAnchorMap(), override = false;
     User.get(function(err, user){
       if(user.id == "anonymous"){
         if($.isEmptyObject(anchor) ||(anchor.col == '.pages' && anchor.doc == '.workbench')){
           anchor = {col:'.pages', doc:'.login'};
           override = true;
         }
-        self.option({uriAnchor:anchor, override: override});
+        _this.option({uriAnchor:anchor, override: override});
       } else {
         if($.isEmptyObject(anchor)){
           anchor = {col:'.pages', doc:'.workbench'}
           override = true;
         }
-        self.option({uriAnchor: anchor, override: override});
+        _this.option({uriAnchor: anchor, override: override});
       }
     });
     return false;
   },
 
   _makeAnchorMap: function(){
-    var o = this.options, anchor;
+    let o = this.options, anchor;
 
     try {
       anchor = $.uriAnchor.makeAnchorMap();

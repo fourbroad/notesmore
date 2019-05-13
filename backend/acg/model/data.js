@@ -1,4 +1,7 @@
 const DEFAULT_ACL = {
+  get: {
+    roles: ['administrator']
+  },
   patch: {
     roles: ['administrator']
   },
@@ -179,7 +182,13 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-university'
+    iconClass: 'fa fa-university',
+    acl: {
+      get: {
+        roles: ['member']
+      },
+      bulk: {}
+    }
   }
 }, {
   id: '.metas',
@@ -205,7 +214,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      bulk: {}
+    }
   }
 }, {
   id: '.pages',
@@ -231,7 +243,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      bulk: {}
+    }
   }
 }, {
   id: '.views',
@@ -257,7 +272,13 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      get:{
+        roles:['member',"administrator"]
+      },
+      bulk:{}
+    }
   }
 }, {
   id: '.forms',
@@ -283,7 +304,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      bulk: {}
+    }
   }
 }, {
   id: '.actions',
@@ -309,7 +333,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      bulk:{}
+    }
   }
 }, {
   id: '.files',
@@ -339,7 +366,8 @@ const DEFAULT_ACL = {
   _meta: {
     metaId: '.meta-collection',
     iconClass: 'fa fa-folder-o',
-    actions: ['gridView', 'uploadFiles', 'edit']
+    actions: ['gridView', 'uploadFiles', 'edit'],
+    bulk:{}
   }
 }, {
   id: '.roles',
@@ -365,7 +393,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      bulk: {}
+    }
   }
 }, {
   id: '.groups',
@@ -391,7 +422,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      bulk: {}
+    }
   }
 }, {
   id: '.profiles',
@@ -405,7 +439,7 @@ const DEFAULT_ACL = {
   export: DEFAULT_EXPORT,
   _i18n: {
     'zh-CN': {
-      title: '画像集合',
+      title: '身份集合',
       columns: DEFAULT_I18N_COLUMNS,
       search: {
         fields: DEFAULT_I18N_SEARCH_FIELDS
@@ -417,7 +451,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      bulk: {}
+    }
   }
 }]
   , ROOT_COLLECTIONS = [{
@@ -444,7 +481,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      bulk: {}
+    }
   }
 }, {
   id: '.domains',
@@ -470,7 +510,10 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-collection',
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl: {
+      bulk:{}
+    }
   }
 }]
   , VIEWS = [{
@@ -497,7 +540,12 @@ const DEFAULT_ACL = {
   },
   _meta: {
     metaId: '.meta-view',
-    iconClass: 'fa fa-search'
+    iconClass: 'fa fa-search',
+    acl:{
+      get:{
+        roles:['administrator', 'member']
+      }
+    }
   }
 }]
   , ACTIONS = [{
@@ -515,7 +563,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-tasks'
+    iconClass: 'fa fa-tasks',
+    acl:{
+      get:{
+        roles:['member']
+      }
+    }
   }
 }, {
   id: 'edit',
@@ -532,7 +585,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-tasks'
+    iconClass: 'fa fa-tasks',
+    acl:{
+      get:{
+        roles:['member']
+      }
+    }
   }
 }, {
   id: 'gridView',
@@ -549,7 +607,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-tasks'
+    iconClass: 'fa fa-tasks',
+    acl: {
+      get: {
+        roles:['member']
+      }
+    }
   }
 }, {
   id: 'login',
@@ -566,7 +629,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-tasks'
+    iconClass: 'fa fa-tasks',
+    acl: {
+      get: {
+        roles:['anonymous']
+      }
+    }      
   }
 }, {
   id: 'signup',
@@ -600,7 +668,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-tasks'
+    iconClass: 'fa fa-tasks',
+    acl: {
+      get: {
+        roles: ['member']
+      }
+    }
   }
 }, {
   id: 'dashboard',
@@ -692,6 +765,7 @@ const DEFAULT_ACL = {
   id: '.meta',
   title: 'Meta',
   defaultValue: {
+    id: 'new-meta',
     title: 'New Meta',
     _i18n: {
       'zh-CN': {
@@ -701,7 +775,7 @@ const DEFAULT_ACL = {
     _meta:{
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -716,8 +790,18 @@ const DEFAULT_ACL = {
       title: '元文档'
     }
   },
+  acl:{
+    get:{
+      roles:['administrator']
+    }
+  },
   _meta: {
-    iconClass: 'fa fa-magic'
+    iconClass: 'fa fa-magic',
+    acl: {
+      get: {
+        roles:['member']
+      }
+    }
   }
 }, {
   id: '.meta-collection',
@@ -727,6 +811,7 @@ const DEFAULT_ACL = {
     title: 'Collections'
   },
   defaultValue: {
+    id: 'new-collection',
     title: 'New Collection',
     columns: DEFAULT_COLUMNS,
     search: {
@@ -751,9 +836,13 @@ const DEFAULT_ACL = {
       metaId: '.meta-collection',
       iconClass: 'fa fa-folder-o',
       acl: {
+        get:{
+          roles:['member']
+        },
         patchMeta: {
-          roles: [['administrator']]
-        }
+          roles: ['administrator']
+        },
+        bulk: {}
       }
     }
   },
@@ -765,12 +854,18 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-folder-o'
+    iconClass: 'fa fa-folder-o',
+    acl:{
+      get:{
+        roles:["member"]
+      }
+    }
   }
 }, {
   id: '.meta-page',
   title: 'Meta-page',
   defaultValue: {
+    id: 'new-page',
     title: 'New Page',
     _i18n: {
       'zh-CN': {
@@ -782,7 +877,7 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-columns',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -798,7 +893,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-columns'
+    iconClass: 'fa fa-columns',
+    acl: {
+      get: {
+        roles:['anonymous', 'member']
+      }
+    }      
   }
 }, {
   id: '.meta-view',
@@ -808,6 +908,7 @@ const DEFAULT_ACL = {
     title: 'Views'
   },
   defaultValue: {
+    id: 'new-view',
     title: 'New View',
     collections: [],
     columns: DEFAULT_COLUMNS,
@@ -834,25 +935,37 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-windows',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
-        }
+          roles: ['administrator']
+        },
+        bulk: {}
       }      
     }
   },
   defaultAction: 'gridView',
   actions: ['gridView', 'edit'],
+  acl:{
+    create:{
+      roles:['member']
+    }
+  },
   _i18n: {
     'zh-CN': {
       title: '元视图'
     }
   },
   _meta: {
-    iconClass: 'fa fa-windows'
+    iconClass: 'fa fa-windows',
+    acl: {
+      get: {
+        roles: ['member']
+      }
+    }
   }
 }, {
   id: '.meta-form',
   title: 'Meta-form',
   defaultValue: {
+    id: 'new-form',
     title: 'New Form',
     _i18n: {
       'zh-CN': {
@@ -864,7 +977,7 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-list-alt',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -886,6 +999,7 @@ const DEFAULT_ACL = {
   id: '.meta-action',
   title: 'Meta-action',
   defaultValue: {
+    id: 'new-action',
     title: 'New Action',
     _i18n: {
       'zh-CN': {
@@ -897,7 +1011,7 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-tasks',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -913,12 +1027,18 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-tasks'
+    iconClass: 'fa fa-tasks',
+    acl: {
+      get: {
+        roles:['member']
+      }
+    }
   }
 }, {
   id: '.meta-file',
   title: 'Meta-file',
   defaultValue: {
+    id: 'new-file',
     title: 'New File',
     _i18n: {
       'zh-CN': {
@@ -930,7 +1050,7 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-file-text-o',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -952,6 +1072,7 @@ const DEFAULT_ACL = {
   id: '.meta-role',
   title: 'Meta-role',
   defaultValue: {
+    id: 'new-role',
     title: 'New Role',
     _i18n: {
       'zh-CN': {
@@ -963,7 +1084,7 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-user-circle',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -985,6 +1106,7 @@ const DEFAULT_ACL = {
   id: '.meta-group',
   title: 'Meta-group',
   defaultValue: {
+    id: 'new-group',
     title: 'New Group',
     _i18n: {
       'zh-CN': {
@@ -996,7 +1118,7 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-users',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -1018,10 +1140,12 @@ const DEFAULT_ACL = {
   id: '.meta-profile',
   title: 'Meta-profile',
   defaultValue: {
+    id: "new-profile",
     title: 'New Profile',
+    roles: ['member'],
     _i18n: {
       'zh-CN': {
-        title: '新画像'
+        title: '新身份'
       }
     },
     _meta: {
@@ -1029,7 +1153,7 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-user-circle-o',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -1041,7 +1165,7 @@ const DEFAULT_ACL = {
   actions: ['edit'],
   _i18n: {
     'zh-CN': {
-      title: '元画像'
+      title: '元身份'
     }
   },
   _meta: {
@@ -1056,7 +1180,7 @@ const DEFAULT_ACL = {
     title: 'Users'
   },
   defaultValue: {
-    id: 'newuser',
+    id: 'new-user',
     password: 'password',
     title: 'New User',
     _i18n: {
@@ -1069,7 +1193,7 @@ const DEFAULT_ACL = {
       iconClass: 'fa fa-user-o',
       acl: {
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -1081,7 +1205,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-user-o'
+    iconClass: 'fa fa-user-o',
+    acl:{
+      get:{
+        roles:['member']
+      }
+    }
   }
 }, {
   id: '.meta-domain',
@@ -1091,6 +1220,7 @@ const DEFAULT_ACL = {
     title: 'Domains'
   },
   defaultValue: {
+    id: 'new-domain',
     title: 'New Domain',
     _i18n: {
       'zh-CN': {
@@ -1101,8 +1231,11 @@ const DEFAULT_ACL = {
       metaId: '.meta-domain',
       iconClass: 'fa fa-flag-o',
       acl: {
+        get:{
+          roles:['anonymous','member']
+        },
         patchMeta: {
-          roles: [['administrator']]
+          roles: ['administrator']
         }
       }      
     }
@@ -1114,7 +1247,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-flag-o'
+    iconClass: 'fa fa-flag-o',
+    acl: {
+      get: {
+        roles:['member']
+      }
+    }
   }
 }, ]
   , PAGES = [{
@@ -1127,7 +1265,12 @@ const DEFAULT_ACL = {
   },
   _meta: {
     iconClass: 'fa fa-columns',
-    actions: ['login']
+    actions: ['login'],
+    acl: {
+      get:{
+        roles:['anonymous']
+      }
+    }
   }
 }, {
   id: '.signup',
@@ -1172,7 +1315,12 @@ const DEFAULT_ACL = {
   },
   _meta: {
     iconClass: 'fa fa-desktop',
-    actions: ['workbench']
+    actions: ['workbench'],
+    acl: {
+      get: {
+        roles:['member']
+      }
+    }
   }
 }, {
   id: '.dashboard',
@@ -1235,6 +1383,17 @@ const DEFAULT_ACL = {
     iconClass: 'fa fa-user-circle'
   }
 }, {
+  id: 'member',
+  title: 'Member Role',
+  _i18n: {
+    'zh-CN': {
+      title: '成员'
+    }
+  },
+  _meta: {
+    iconClass: 'fa fa-user-circle'
+  }
+}, {
   id: 'developer',
   title: 'Developer',
   _i18n: {
@@ -1267,7 +1426,7 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-user-o',
+    iconClass: 'fa fa-user-o'
   }
 }
   , ANONYMOUS = {
@@ -1280,7 +1439,12 @@ const DEFAULT_ACL = {
     }
   },
   _meta: {
-    iconClass: 'fa fa-user-secret'
+    iconClass: 'fa fa-user-secret',
+    acl:{
+      get:{
+        users:['anonymous']
+      }
+    }
   }
 };
 
