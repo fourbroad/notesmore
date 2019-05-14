@@ -4,34 +4,35 @@
 const axios = require('axios'); 
 let login_post = function (){
   
-    return new Promise(function(resolve, reject){
-        axios.post("http://47.100.213.55:3000/_login",{"id":"ah-new-system-pay","password":"aePh3voh"})
-        .then(function (response) {
-            resolve(response);
-            //console.log(response);
-          })
-        .catch(console.error);
-  });
+    //return new Promise(function(resolve, reject){
+        return axios.post("http://47.100.213.55:3000/_login",{"id":"ah-new-system-pay","password":"aePh3voh"})
+        // .then(function (response) {
+        //     resolve(response);
+        //     //console.log(response);
+        //   })
+        // .catch(console.error);
+  //});
 }
 
 let policies_post = function (toket,id,postData){
-  
-    return new Promise(function(resolve, reject){
-        axios({
+    //return new Promise(function(resolve, reject){
+        return axios({
             method: 'post',
             url: 'http://47.100.213.55:3000/starr-cn/ah-new/'+id+'/_bulk',
             headers: {'authorization': 'Bearer '+toket},
             data:postData
         })
         .then(function (response) {
-            resolve(response);
-            //console.log(response);
+            return response;
+            //resolve(response);
+            //console.log(response.data);
+            
           });
-  });
+  //});
 }
 let get_policies = function (toket,startId,limit){
-    return new Promise(function(resolve, reject){
-        axios.get("http://agency.starrchina.cn/homes/esPay?limit="+limit+"&startId="+startId)
+    //return new Promise(function(resolve, reject){
+        return axios.get("http://agency.starrchina.cn/homes/esPay?limit="+limit+"&startId="+startId)
         .then(function (response) {
             if(response.data.length){
                 for (let i = 0;i<response.data.length;i++){
@@ -55,7 +56,7 @@ let get_policies = function (toket,startId,limit){
             }
             //resolve(response);
           });
-  });
+  //});
 }
 
 let login = async function(){
