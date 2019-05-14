@@ -18,7 +18,7 @@ let policies_post = function (toket,id,postData){
     //return new Promise(function(resolve, reject){
         return axios({
             method: 'post',
-            url: 'http://47.100.213.55:3000/starr-cn/ah-new/'+id+'/_bulk',
+            url: 'http://47.100.213.55:3000/starr-cn/ah-new/'+id+'/_patch',
             headers: {'authorization': 'Bearer '+toket},
             data:postData
         })
