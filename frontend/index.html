@@ -3,16 +3,17 @@
   <head>
     <title>Notesmore</title>
     <script>
-      const modernBrowser = ('fetch'in window && 'assign'in Object);
-      if (!modernBrowser) {
-        const scriptElement = document.createElement('script');
-        scriptElement.async = false;
-        scriptElement.src = '/polyfills.bundle.js';
-        document.head.appendChild(scriptElement);
-      }
+      // const modernBrowser = ('fetch'in window && 'assign'in Object);
+      // if (!modernBrowser) {
+      //   const scriptElement = document.createElement('script');
+      //   scriptElement.async = false;
+      //   scriptElement.src = '/polyfills.bundle.js';
+      //   document.head.appendChild(scriptElement);
+      // }
     </script>
-    <script type="text/javascript" src="/context.bundle.js"></script>
+    <!-- <script type="text/javascript" src="/context.bundle.js"></script> -->
   </head>
   <body>
+    <div id="app"></div>
   </body>
 </html>
