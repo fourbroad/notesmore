@@ -1,4 +1,5 @@
 const axios = require('axios'); 
+const jwtDecode = require('jwt-decode');
 let login_post = function (){
   
     // return new Promise(function(resolve, reject){
@@ -15,7 +16,7 @@ let policies_post = function (toket,postData){
         return axios({
             method: 'post',
             url: 'http://47.100.213.55:3000/starr-cn/ah-old/_bulk',
-            headers: {'authorization': 'Bearer '+toket},
+            headers: {'authorization': 'Bearer '+global.token},
             data:postData
         })
         .then(function (response) {
@@ -35,15 +36,18 @@ let get_policies = function (toket,startId,limit){
                 policies_post(toket,response.data);
                 if(response.data.length < limit){
                     setTimeout(() => {
-                        get_policies(toket,response.data[response.data.length-1].id,limit);
+                        login(response.data[response.data.length-1].id,limit);
+                        //get_policies(toket,response.data[response.data.length-1].id,limit);
                     }, 30000);
                 }else{ 
-                    get_policies(toket,response.data[response.data.length-1].id,limit); 
+                    login(response.data[response.data.length-1].id,limit);
+                    //get_policies(toket,response.data[response.data.length-1].id,limit); 
                 }
                 
             }else{
                 setTimeout(() => {
-                    get_policies(toket,response.data[response.data.length-1].id,limit);
+                    login(response.data[response.data.length-1].id,limit);
+                    //get_policies(toket,response.data[response.data.length-1].id,limit);
                 }, 30000);
                 
             }
@@ -52,9 +56,19 @@ let get_policies = function (toket,startId,limit){
 //   });
 }
 
-let login = async function(){
-    let body = await login_post();
-    //console.log(body.data);
-    get_policies(body.data,1005761691,100);
+global.token='';
+let login = async function(startId,limit){
+    if(!global.token){
+        let body = await login_post();
+        global.token=body.data;
+    }else{
+        //console.log(jwtDecode(global.token));
+        let decodedToken = jwtDecode(global.token), time = new Date().getTime()/1000;
+        if(((time - decodedToken.iat) > (decodedToken.exp-decodedToken.iat)*2/3)) {
+            let bodyData = await login_post();
+            global.token=bodyData.data;
+        }
+    }
+    get_policies(global.token,startId,limit);
 }
-login();
+login(0,100);
