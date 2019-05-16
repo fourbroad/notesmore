@@ -49,8 +49,10 @@ let get_policies = function (toket,startId,limit){
                         //get_policies(toket,response.data[response.data.length-1].id,limit);
                     }, 30000);
                 }else{
-                    login(response.data[response.data.length-1].id,limit);
-                    //get_policies(toket,response.data[response.data.length-1].id,limit);  
+                    setTimeout(() => {
+                        login(response.data[response.data.length-1].id,limit);
+                        //get_policies(toket,response.data[response.data.length-1].id,limit);
+                    }, global.sleepTime);  
                 }
                 
             }else{
@@ -65,12 +67,19 @@ let get_policies = function (toket,startId,limit){
   //});
 }
 global.token='';
+global.sleepTime=5000;
 let login = async function(startId,limit){
+    let currentHour= new Date().getHours();
+    if(currentHour > 6){
+        limit=50;
+        global.sleepTime=10000;
+    }else{
+        global.sleepTime=5000;
+    }
     if(!global.token){
         let body = await login_post();
         global.token=body.data;
     }else{
-        //console.log(jwtDecode(global.token));
         let decodedToken = jwtDecode(global.token), time = new Date().getTime()/1000;
         if(((time - decodedToken.iat) > (decodedToken.exp-decodedToken.iat)*2/3)) {
             let bodyData = await login_post();
@@ -80,4 +89,3 @@ let login = async function(startId,limit){
     get_policies(global.token,startId,limit);
 }
 login(0,100);
-//policies_post('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhaC1vbGQtc3lzdGVtLXBheSIsImlhdCI6MTU1NzgyMDYzNywiZXhwIjoxNTU3ODI0MjM3fQ.57kXRxU2NcakYDkqE879o0QQMRvDQePpVjSd6zbw4M0',1005535769,'{"id":5910887,"targetId":1005535769,"patch":[{"op":"add","path":"/policyStatus","value":"expired"},{"op":"add","path":"/issueTime","value":1483496842000},{"op":"add","path":"/paymentInfo/id","value":28966},{"op":"add","path":"/paymentInfo/billNum","value":"101710160559"},{"op":"add","path":"/paymentInfo/amount","value":150},{"op":"add","path":"/paymentInfo/payType","value":"alipay"},{"op":"add","path":"/paymentInfo/payTime","value":1483459200000},{"op":"add","path":"/updateTime","value":1483496842000}],"type":"pay","creatTime":1483496842000}');
