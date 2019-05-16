@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './app'
 import store from 'store/index'
 import router from 'router/index'
+import client from 'lib/client'
 
 // import ElementUI from 'element-ui'
 // import 'element-ui/lib/theme-chalk/index.css'
@@ -21,6 +22,51 @@ import router from 'router/index'
 
 Vue.config.productionTip = false
 
+let domain = document.domain,
+  currentDomain, index, url;
+index = domain.indexOf('.notesmore.com');
+if (index >= 0) {
+  currentDomain = domain.slice(0, index);
+}
+
+index = domain.indexOf('.notesmore.cn');
+if (index >= 0) {
+  currentDomain = domain.slice(0, index);
+}
+
+if (!currentDomain || currentDomain == 'www') {
+  currentDomain = localStorage.getItem("currentDomain") || '.root';
+}
+
+if (localStorage.getItem("environment") == "development") {
+  url = 'localhost:3000/domains';
+
+  import( /* webpackChunkName: "moment" */ 'moment').then(({
+    default: moment
+  }) => {
+    window.moment = moment;
+  });
+
+  import( /* webpackChunkName: "jsonPatch" */ 'fast-json-patch').then(({
+    default: jsonPatch
+  }) => {
+    window.jsonPatch = jsonPatch;
+  });
+
+  import( /* webpackChunkName: "elasticsearch" */ 'elasticsearch-browser').then(({
+    default: elasticsearch
+  }) => {
+    window.esc = new elasticsearch.Client({
+      host: 'localhost:9200',
+      log: 'trace'
+    });
+  });
+} else {
+  url = 'https://notesmore.com/domains';
+}
+
+store.state.currentDomainId = currentDomain;
+
 router.beforeEach((to, from, next) => {
   if (!store.state.token) {
     if (
@@ -34,18 +80,35 @@ router.beforeEach((to, from, next) => {
       })
     }
   } else {
-    if (!store.state.permission.permissionList) {
-      store.dispatch('permission/FETCH_PERMISSION').then(() => {
-        next({
-          path: to.path
+    function doNext() {
+      if (!store.state.permission.permissionList) {
+        store.dispatch('permission/FETCH_PERMISSION').then(() => {
+          next({
+            path: to.path
+          })
         })
-      })
-    } else {
-      if (to.path !== '/login') {
-        next()
       } else {
-        next(from.fullPath)
+        if (to.path !== '/login') {
+          next()
+        } else {
+          next(from.fullPath)
+        }
       }
+    }
+
+    if (client.isConnected()) {
+      doNext();
+    } else {
+      client.connect(store.state.token, (err, user) => {
+        if (err) {
+          console.err(err);
+          next({
+            path: '/login'
+          })
+        } else {
+          doNext();
+        }
+      });
     }
   }
 })
@@ -60,6 +123,8 @@ new Vue({
   el: '#app',
   router,
   store,
-  components: { App },
+  components: {
+    App
+  },
   template: '<App/>'
 })

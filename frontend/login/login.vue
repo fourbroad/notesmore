@@ -67,8 +67,8 @@ export default {
   methods: {
     async login() {
       let _this = this;
-      client.login(this.username, this.password, (err, token) => {
-        _this.$store.commit("LOGIN_IN", token);
+      client.login(this.username, this.password, (err, user) => {
+        _this.$store.commit("LOGIN_IN", client.getToken());
         _this.$router.replace("/");
       });
     }

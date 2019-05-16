@@ -1,6 +1,12 @@
 <template>
-  <div class="workbench">
-    <div class="sidebar">
+  <div class="workbench" :class="{'is-collapsed':isSidebarNavCollapse}">
+    <div class="loading" v-if="loading">
+      Loading...
+    </div>
+    <div v-if="error" class="error">
+      {{ error }}
+    </div>
+    <div class="sidebar" v-if="page">
       <div class="sidebar-inner">
         <div class="sidebar-logo p-0">
           <div class="peers ai-c fxw-nw">
@@ -14,7 +20,7 @@
                           class="mt-1"
                           width="40px"
                           height="40px"
-                          src="images/logo.png"
+                          src="./images/logo.png"
                           alt="Logo"
                         >
                       </div>
@@ -25,8 +31,8 @@
                   <div class="container d-flex h-100">
                     <div class="row justify-content-center align-self-center">
                       <div>
-                        <h4 class="workbench-title mb-0"></h4>
-                        <small class="slogan"></small>
+                        <h4 class="workbench-title mb-0">{{page.title}}</h4>
+                        <small class="slogan">{{page.slogan}}</small>
                       </div>
                     </div>
                   </div>
@@ -34,7 +40,7 @@
               </div>
             </div>
             <div class="peer">
-              <div class="mobile-toggle sidebar-toggle">
+              <div class="mobile-toggle sidebar-toggle" @click.prevent="toggleNavCollapse">
                 <a href class="td-n">
                   <i class="fa fa-arrow-circle-o-left"></i>
                 </a>
@@ -59,12 +65,12 @@
         </ul>
       </div>
     </div>
-    <div class="page-container">
+    <div class="page-container" v-if="page">
       <div class="header navbar">
         <div class="header-container">
           <ul class="nav-left">
             <li>
-              <a id="sidebar-toggle" class="sidebar-toggle">
+              <a id="sidebar-toggle" class="sidebar-toggle" @click="toggleNavCollapse">
                 <i class="fa fa-bars"></i>
               </a>
             </li>
@@ -80,6 +86,7 @@
             </li>
           </ul>
           <ul class="nav-right mr-3">
+            <li is="notification"></li>
             <li>
               <a
                 class="dropdown-toggle no-after peers fxw-nw ai-c lh-1 pr-1"
@@ -106,7 +113,7 @@
                   </a>
                 </li>
                 <li role="separator" class="divider"></li>
-                <li class="sign-off">
+                <li class="sign-off" @click="loginOut">
                   <a href="javascript:void(0)" class="d-b td-n pY-5 text-dark">
                     <i class="fa fa-power-off mR-10"></i>
                     <span class="label">Logout</span>
@@ -132,29 +139,75 @@
 </template>
 
 <script>
-import 'perfect-scrollbar/css/perfect-scrollbar.css';
+import { mapState } from "vuex";
+import client from "lib/client";
 
-import $ from 'jquery';
-import _ from 'lodash';
-import Loader from 'core/loader';
+import $ from "jquery";
+import _ from "lodash";
+import Loader from "core/loader";
 import jsonPatch from "fast-json-patch";
-import workbenchHtml from './workbench.html';
 
-import PerfectScrollbar from 'perfect-scrollbar';
+import "perfect-scrollbar/css/perfect-scrollbar.css";
+import PerfectScrollbar from "perfect-scrollbar";
 
-import 'bootstrap';
-import 'jquery-ui/ui/widget';
-import 'jquery-ui/ui/data';
-import 'notification/notification';
+import notification from "notification/notification.vue";
+
+const { Page } = client;
 
 export default {
   data() {
-    return {};
+    return {
+      loading: false,
+      page: null,
+      error: null,
+    };
   },
-  computed: {},
-  components: {}
+  components: {
+    notification
+  },
+  created () {
+    // 组件创建完后获取数据，此时 data 已经被 observed 了
+    this.fetchData()
+  },
+  watch: {
+    // 如果路由有变化，会再次执行该方法
+    '$route': 'fetchData'
+  },  
+  computed: {
+    ...mapState(["isSidebarNavCollapse", "crumbList", "currentDomainId"])
+  },
+  methods: {
+    toggleNavCollapse() {
+      this.$store.commit("toggleNavCollapse");
+    },
+    loginOut() {
+      this.$store.commit("LOGIN_OUT");
+      // 防止切换角色时addRoutes重复添加路由导致出现警告
+      window.location.reload();
+    },
+    fetchData () {
+      this.error = this.post = null
+      this.loading = true
+      Page.get(this.currentDomainId, '.workbench', (err, page)=>{
+        this.loading = false
+        if (err) {
+          this.error = err.toString()
+        } else {
+          this.page = page
+        }
+      })
+    }
+  }
 };
 </script>
 
-<style src="./workbench.scss" lang="scss" scoped>
+<style lang="scss">
+// <style lang="scss" scoped>
+@import "assets/scss/settings/index";
+@import "assets/scss/tools/mixins/index";
+
+@import "scss/sidebar";
+@import "scss/topbar";
+@import "scss/pageContainer";
+@import "scss/footer";
 </style>

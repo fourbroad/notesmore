@@ -10,9 +10,9 @@ const
 
 module.exports = {
   entry: {
+//      polyfills                         : path.join(__dirname, 'frontend/polyfills.js'),
        main                               : path.join(__dirname, 'frontend/main.js'),
     // index                              : path.join(__dirname, 'frontend/index.js'),
-//      polyfills                         : path.join(__dirname, 'frontend/polyfills.js'),
     // '@notesabc/calendar/calendar'      : path.join(__dirname, 'frontend/calendar/calendar.js'),
     // '@notesabc/im/im'                  : path.join(__dirname, 'frontend/im/im.js'),
     // '@notesabc/dashboard/dashboard'    : path.join(__dirname, 'frontend/dashboard/dashboard.js'),

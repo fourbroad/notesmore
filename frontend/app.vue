@@ -5,10 +5,15 @@
 </template>
 
 <script>
+import 'bootstrap';
+import "font-awesome/scss/font-awesome.scss";
+
 export default {
   name: "App"
 };
 </script>
 
-<style src="./index.scss" lang="scss">
+<style lang="scss">
+@import '~bootstrap/scss/bootstrap';
+@import 'assets/index';
 </style>

@@ -1,12 +1,21 @@
+import jwtDecode from 'jwt-decode';
+
 export default {
   get token() {
-    return localStorage.getItem('token')
+    let token = localStorage.getItem('token');
+    if (token) {
+      let decodedToken = jwtDecode(token),
+        time = new Date().getTime() / 1000;
+      if (time < decodedToken.exp) {
+        return token;
+      }
+    }
+    return null;
   },
   set token(value) {
     localStorage.setItem('token', value)
   },
-  /* 导航菜单是否折叠 */
   isSidebarNavCollapse: false,
-  /* 面包屑导航列表 */
+  currentDomainId: null,
   crumbList: []
 }

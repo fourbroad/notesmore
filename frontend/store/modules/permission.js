@@ -6,6 +6,8 @@ import router, { DynamicRoutes } from 'router/index'
 import { recursionRouter, setDefaultRoute } from 'utils/recursion-router'
 import dynamicRouter from 'router/dynamic-router'
 
+const { Action } = client;
+
 export default {
   namespaced: true,
   state: {
@@ -32,7 +34,10 @@ export default {
     }
   },
   actions: {
-    async FETCH_PERMISSION({ commit, state }) {
+    async FETCH_PERMISSION({state, commit, rootState}) {
+      Action.find(rootState.currentDomainId, {size:1000}, (err, data)=>{
+        console.log(data);
+      });
       // let permissionList = await fetchPermission()
 
       // 根据权限筛选出我们设置好的路由并加入到path=''的children
