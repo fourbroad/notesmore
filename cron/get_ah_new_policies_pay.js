@@ -48,8 +48,10 @@ let get_policies = function (toket,startId,limit){
                         //get_policies(toket,response.data[response.data.length-1].id,limit);
                     }, 30000);
                 }else{
-                    login(response.data[response.data.length-1].id,limit);
-                    //get_policies(toket,response.data[response.data.length-1].id,limit);
+                    setTimeout(() => {
+                        login(response.data[response.data.length-1].id,limit);
+                        //get_policies(toket,response.data[response.data.length-1].id,limit);
+                    }, global.sleepTime);
                 }
                 
             }else{
@@ -65,12 +67,19 @@ let get_policies = function (toket,startId,limit){
 }
 
 global.token='';
+global.sleepTime=5000;
 let login = async function(startId,limit){
+    let currentHour= new Date().getHours();
+    if(currentHour > 6){
+        limit=50;
+        global.sleepTime=10000;
+    }else{
+        global.sleepTime=5000;
+    }
     if(!global.token){
         let body = await login_post();
         global.token=body.data;
     }else{
-        //console.log(jwtDecode(global.token));
         let decodedToken = jwtDecode(global.token), time = new Date().getTime()/1000;
         if(((time - decodedToken.iat) > (decodedToken.exp-decodedToken.iat)*2/3)) {
             let bodyData = await login_post();
