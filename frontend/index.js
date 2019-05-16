@@ -1,4 +1,3 @@
-
 // __webpack_public_path__ = myRuntimePublicPath;
 
 // require('core-js/features/object/define-property');
@@ -14,33 +13,40 @@ import 'core/runtime';
 
 import "font-awesome/scss/font-awesome.scss";
 
-let domain = document.domain, currentDomain, index, url;
+let domain = document.domain,
+  currentDomain, index, url;
 index = domain.indexOf('.notesmore.com');
-if(index >= 0){
-  currentDomain = domain.slice(0,index);
+if (index >= 0) {
+  currentDomain = domain.slice(0, index);
 }
 
 index = domain.indexOf('.notesmore.cn');
-if(index >= 0){
-  currentDomain = domain.slice(0,index);
+if (index >= 0) {
+  currentDomain = domain.slice(0, index);
 }
 
-if(!currentDomain || currentDomain == 'www'){
+if (!currentDomain || currentDomain == 'www') {
   currentDomain = localStorage.getItem("currentDomain") || '.root';
-} 
+}
 
-if(localStorage.getItem("environment") == "development") {
+if (localStorage.getItem("environment") == "development") {
   url = 'localhost:3000/domains';
 
-  import(/* webpackChunkName: "moment" */ 'moment').then(({default: moment}) => {
+  import( /* webpackChunkName: "moment" */ 'moment').then(({
+    default: moment
+  }) => {
     window.moment = moment;
   });
 
-  import(/* webpackChunkName: "jsonPatch" */ 'fast-json-patch').then(({default: jsonPatch}) => {
+  import( /* webpackChunkName: "jsonPatch" */ 'fast-json-patch').then(({
+    default: jsonPatch
+  }) => {
     window.jsonPatch = jsonPatch;
   });
 
-  import(/* webpackChunkName: "elasticsearch" */ 'elasticsearch-browser').then(({default: elasticsearch}) => {
+  import( /* webpackChunkName: "elasticsearch" */ 'elasticsearch-browser').then(({
+    default: elasticsearch
+  }) => {
     window.esc = new elasticsearch.Client({
       host: 'localhost:9200',
       log: 'trace'
@@ -51,7 +57,9 @@ if(localStorage.getItem("environment") == "development") {
 }
 
 window.runtime = $('body').runtime({
-  client: { url: url },
+  client: {
+    url: url
+  },
   locale: localStorage.getItem('language') || navigator.language,
   currentDomain: currentDomain
 }).runtime('instance');
@@ -65,5 +73,3 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
-
-

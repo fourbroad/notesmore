@@ -10,18 +10,19 @@ const
 
 module.exports = {
   entry: {
-    index                              : path.join(__dirname, 'frontend/index.js'),
 //      polyfills                         : path.join(__dirname, 'frontend/polyfills.js'),
-    '@notesabc/calendar/calendar'      : path.join(__dirname, 'frontend/calendar/calendar.js'),
-    '@notesabc/im/im'                  : path.join(__dirname, 'frontend/im/im.js'),
-    '@notesabc/dashboard/dashboard'    : path.join(__dirname, 'frontend/dashboard/dashboard.js'),
-    '@notesabc/email/email'            : path.join(__dirname, 'frontend/email/email.js'),
-    '@notesabc/form/form'              : path.join(__dirname, 'frontend/form/form.js'),
-    '@notesabc/login/login'            : path.join(__dirname, 'frontend/login/login.js'),
-    '@notesabc/signup/signup'          : path.join(__dirname, 'frontend/signup/signup.js'),
-    '@notesabc/uploadfiles/uploadfiles': path.join(__dirname, 'frontend/uploadfiles/uploadfiles.js'),
-    '@notesabc/view/view'              : path.join(__dirname, 'frontend/view/view.js'),
-    '@notesabc/workbench/workbench'    : path.join(__dirname, 'frontend/workbench/workbench.js')
+       main                               : path.join(__dirname, 'frontend/main.js'),
+    // index                              : path.join(__dirname, 'frontend/index.js'),
+    // '@notesabc/calendar/calendar'      : path.join(__dirname, 'frontend/calendar/calendar.js'),
+    // '@notesabc/im/im'                  : path.join(__dirname, 'frontend/im/im.js'),
+    // '@notesabc/dashboard/dashboard'    : path.join(__dirname, 'frontend/dashboard/dashboard.js'),
+    // '@notesabc/email/email'            : path.join(__dirname, 'frontend/email/email.js'),
+    // '@notesabc/form/form'              : path.join(__dirname, 'frontend/form/form.js'),
+    // '@notesabc/login/login'            : path.join(__dirname, 'frontend/login/login.js'),
+    // '@notesabc/signup/signup'          : path.join(__dirname, 'frontend/signup/signup.js'),
+    // '@notesabc/uploadfiles/uploadfiles': path.join(__dirname, 'frontend/uploadfiles/uploadfiles.js'),
+    // '@notesabc/view/view'              : path.join(__dirname, 'frontend/view/view.js'),
+    // '@notesabc/workbench/workbench'    : path.join(__dirname, 'frontend/workbench/workbench.js')
   },
   resolve: {
     extensions: ['*', '.js', '.vue', '.json'],
@@ -144,20 +145,20 @@ module.exports = {
     new MomentLocalesPlugin({
       localesToKeep: ['es-us', 'zh-cn'],
     }),
-//     new HtmlWebpackPlugin({
-//       template: path.join(__dirname, 'frontend/index.html'),
-//       path: path.join(__dirname, 'dist'),
-//       filename: 'index.html',
-//       inject: true,
-//       minify: {
-//         collapseWhitespace: true,
-//         minifyCSS: true,
-//         minifyJS: true,
-//         removeComments: true,
-//         useShortDoctype: true
-//       },
-//     }),
-    new HtmlWebpackPlugin({title: "Notesmore"}),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, 'frontend/index.html'),
+      path: path.join(__dirname, 'dist'),
+      filename: 'index.html',
+      inject: true,
+      minify: {
+        collapseWhitespace: true,
+        minifyCSS: true,
+        minifyJS: true,
+        removeComments: true,
+        useShortDoctype: true
+      },
+    }),
+    // new HtmlWebpackPlugin({title: "Notesmore"}),
 //     new HtmlWebpackIncludeAssetsPlugin({
 //       assets: ['context.bundle.js'],
 //       append: false

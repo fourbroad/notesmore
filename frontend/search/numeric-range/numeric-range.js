@@ -114,7 +114,7 @@ $.widget("nm.numericrange", {
 
     this.$lowestLabel.html(this._i18n('lowestLabel','Lowest value'));
     this.$lowestInput.attr('placeholder', this._i18n('lowestPlaceholder','Lowest value'));
-    this.$highestLabel.html(this._i18n('lowestLabel','Highest value'));
+    this.$highestLabel.html(this._i18n('highestLabel','Highest value'));
     this.$highestInput.attr('placeholder', this._i18n('highestPlaceholder','Highest value'));
     this.$updateBtn.html(this._i18n('update','Update'));
     this.$resetBtn.html(this._i18n('reset','Reset'));

@@ -83,6 +83,8 @@
     "uuid": "^3.3.2",
     "validate.js": "^0.12.0",
     "vue": "^2.6.10",
+    "vue-router": "^3.0.6",
+    "vuex": "^3.1.1",
     "webhdfs": "^1.2.0"
   },
   "devDependencies": {
@@ -112,6 +114,7 @@
     "@babel/preset-env": "^7.4.4",
     "@babel/runtime": "^7.4.4",
     "@babel/runtime-corejs2": "^7.4.4",
+    "autoprefixer": "^9.5.1",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
     "case-sensitive-paths-webpack-plugin": "^2.1.2",
