@@ -11,7 +11,9 @@ const
 module.exports = {
   entry: {
 //      polyfills                         : path.join(__dirname, 'frontend/polyfills.js'),
-       main                               : path.join(__dirname, 'frontend/main.js'),
+     main                               : path.join(__dirname, 'frontend/main.js'),
+     '@notesmore/im/im'                 : path.join(__dirname, 'frontend/im/im.vue')
+       
     // index                              : path.join(__dirname, 'frontend/index.js'),
     // '@notesabc/calendar/calendar'      : path.join(__dirname, 'frontend/calendar/calendar.js'),
     // '@notesabc/im/im'                  : path.join(__dirname, 'frontend/im/im.js'),

@@ -1,11 +1,7 @@
 <template>
   <div class="workbench" :class="{'is-collapsed':isSidebarNavCollapse}">
-    <div class="loading" v-if="loading">
-      Loading...
-    </div>
-    <div v-if="error" class="error">
-      {{ error }}
-    </div>
+    <div class="loading" v-if="loading">Loading...</div>
+    <div v-if="error" class="error">{{ error }}</div>
     <div class="sidebar" v-if="page">
       <div class="sidebar-inner">
         <div class="sidebar-logo p-0">
@@ -49,6 +45,14 @@
           </div>
         </div>
         <ul class="sidebar-menu scrollable pT-30 pos-r">
+          <li class="nav-item" v-for="item in sidebarItems" :key="item.id" @click="$router.push(`/${item.collectionId}/${item.id}`)">
+            <a class="sidebar-link document">
+              <span class="icon-holder">
+                <i :class="[item.iconClass, item.iconColor]"></i>
+              </span>
+              <span class="title">{{item.title}}</span>
+            </a>
+          </li>
           <li class="favorites nav-item dropdown">
             <a class="dropdown-toggle sidebar-link document">
               <span class="icon-holder">
@@ -139,42 +143,43 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-import client from "lib/client";
+import { mapState } from "vuex"
 
-import $ from "jquery";
-import _ from "lodash";
-import Loader from "core/loader";
-import jsonPatch from "fast-json-patch";
+import _ from "lodash"
+import Loader from "core/loader"
+import jsonPatch from "fast-json-patch"
 
-import "perfect-scrollbar/css/perfect-scrollbar.css";
-import PerfectScrollbar from "perfect-scrollbar";
+import "perfect-scrollbar/css/perfect-scrollbar.css"
+import PerfectScrollbar from "perfect-scrollbar"
 
-import notification from "notification/notification.vue";
-
-const { Page } = client;
+import notification from "notification/notification.vue"
 
 export default {
   data() {
     return {
       loading: false,
-      page: null,
       error: null,
+      page: null,
+      sidebarItems: []
     };
   },
+  props:['document'],
   components: {
     notification
   },
-  created () {
-    // 组件创建完后获取数据，此时 data 已经被 observed 了
-    this.fetchData()
+  created() {
+    this.fetchData();
   },
-  watch: {
-    // 如果路由有变化，会再次执行该方法
-    '$route': 'fetchData'
-  },  
+  // watch: {
+  //   $route: "fetchData"
+  // },
   computed: {
-    ...mapState(["isSidebarNavCollapse", "crumbList", "currentDomainId"])
+    ...mapState([
+      "isSidebarNavCollapse",
+      "crumbList",
+      "currentDomainId",
+      "locale"
+    ])
   },
   methods: {
     toggleNavCollapse() {
@@ -182,20 +187,44 @@ export default {
     },
     loginOut() {
       this.$store.commit("LOGIN_OUT");
-      // 防止切换角色时addRoutes重复添加路由导致出现警告
-      window.location.reload();
+      window.location.reload(); // 防止切换用户时时addRoutes重复添加路由导致出现警告
     },
-    fetchData () {
-      this.error = this.post = null
-      this.loading = true
-      Page.get(this.currentDomainId, '.workbench', (err, page)=>{
-        this.loading = false
+    getSidebarItems(items) {
+      let { Domain } = this.$client
+      Domain.mgetDocuments(this.currentDomainId, items, (err, docs) => {
+        if (err) return (this.error = err.toString);
+        
+        let sidebarItems = []
+        _.each(docs, doc => {
+          let item
+          doc = doc.get(this.locale)
+          item = _.filter(items, function(i) {
+            return i.collectionId == doc.collectionId && i.id == doc.id;
+          })
+          sidebarItems.push(
+            _.merge(item[0], {
+              iconClass: doc._meta.iconClass || "fa fa-file-text-o",
+              title: doc.title
+            })
+          )
+        })
+        this.sidebarItems = sidebarItems
+      });
+    },
+    fetchData() {
+      let { Page } = this.$client
+
+      this.error = this.post = null;
+      this.loading = true;
+      Page.get(this.currentDomainId, ".workbench", (err, page) => {
+        this.loading = false;
         if (err) {
-          this.error = err.toString()
+          this.error = err.toString();
         } else {
-          this.page = page
+          this.page = page;
+          this.getSidebarItems(page.sidebarItems);
         }
-      })
+      });
     }
   }
 };

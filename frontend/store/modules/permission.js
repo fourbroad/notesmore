@@ -35,40 +35,12 @@ export default {
   },
   actions: {
     async FETCH_PERMISSION({state, commit, rootState}) {
-      Action.find(rootState.currentDomainId, {size:1000}, (err, data)=>{
-        console.log(data);
-      });
-      // let permissionList = await fetchPermission()
-
-      // 根据权限筛选出我们设置好的路由并加入到path=''的children
-      // let routes = recursionRouter(permissionList, dynamicRouter)
       let routes = dynamicRouter;
-      let MainContainer = DynamicRoutes.find(v => v.path === '')
-      let children = MainContainer.children
-      children.push(...routes)
+      // setDefaultRoute([routes.find(v => v.path === '')])
 
-      // 生成左侧导航菜单
-      // commit('SET_MENU', children)
-
-      
-      // 为所有有children的菜单路由设置第一个children为默认路由
-      // 主要是供面包屑用，防止点击面包屑后进入某个路由下的 '' 路由,比如/manage/
-      // 而我们的路由是
-      // [
-      //   /manage/menu1,
-      //   /manage/menu2
-      // ]
-      
-      setDefaultRoute([MainContainer])
-
-      // 初始路由
       let initialRoutes = router.options.routes
-
-      // 动态添加路由
-      router.addRoutes(DynamicRoutes)
-
-      // 完整的路由表
-      commit('SET_PERMISSION', [...initialRoutes, ...DynamicRoutes])
+      router.addRoutes(routes)
+      commit('SET_PERMISSION', [...initialRoutes, ...routes])
     }
   }
 }

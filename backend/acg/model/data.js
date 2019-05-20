@@ -62,8 +62,6 @@ const DEFAULT_ACL = {
     }
   }
   , DEFAULT_COLUMNS = [{
-  sortable: false
-}, {
   title: 'Id',
   name: 'id',
   type: 'keyword',
@@ -90,10 +88,8 @@ const DEFAULT_ACL = {
   title: 'Updated',
   name: '_meta.updated',
   type: 'date'
-}, {
-  sortable: false
 }]
-  , DEFAULT_I18N_COLUMNS = [{}, {
+  , DEFAULT_I18N_COLUMNS = [{
   title: '唯一标识'
 }, {
   title: '标题'
@@ -105,7 +101,7 @@ const DEFAULT_ACL = {
   title: '创建日期'
 }, {
   title: '更新日期'
-}, {}]
+}]
   , DEFAULT_SEARCH_FIELDS = [{
   title: 'Id',
   name: 'id',
@@ -635,6 +631,30 @@ const DEFAULT_ACL = {
         roles:['anonymous']
       }
     }      
+  }
+}, {
+  id: 'forbidden',
+  title: 'Forbidden',
+  plugin: { },
+  _i18n: {
+    'zh-CN': {
+      title: '禁止访问'
+    }
+  },
+  _meta: {
+    iconClass: 'fa fa-tasks'
+  }
+}, {
+  id: 'notFound',
+  title: 'Not Found',
+  plugin: { },
+  _i18n: {
+    'zh-CN': {
+      title: '访问页面不存在'
+    }
+  },
+  _meta: {
+    iconClass: 'fa fa-tasks'
   }
 }, {
   id: 'signup',
@@ -1271,6 +1291,30 @@ const DEFAULT_ACL = {
         roles:['anonymous']
       }
     }
+  }
+}, {
+  id: '.403',
+  title: 'Forbidden',
+  _i18n: {
+    'zh-CN': {
+      title: '禁止访问'
+    }
+  },
+  _meta: {
+    iconClass: 'fa fa-columns',
+    actions: ['forbidden']
+  }
+}, {
+  id: '.notFound',
+  title: 'Not Found',
+  _i18n: {
+    'zh-CN': {
+      title: '访问页面不存在'
+    }
+  },
+  _meta: {
+    iconClass: 'fa fa-columns',
+    actions: ['notFound']
   }
 }, {
   id: '.signup',

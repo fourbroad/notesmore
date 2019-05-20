@@ -1,72 +1,57 @@
+import _ from 'lodash'
+import loader from 'loader/loader'
 
-const dashboard = () => import('dashboard/dashboard.vue')
-const calendar = () => import('calendar/calendar.vue')
-const im = () => import('im/im.vue')
-const email = () => import('email/email.vue')
+function buildRoute(routeData) {
+  let c = routeData.component,
+    route = {
+      name: routeData.id,
+      path: routeData.path,
+      component: loader
+    };
 
-const dynamicRoutes = [{
-  path: '/dashboard',
-  component: dashboard,
-  name: 'dashboard',
-  meta: {
-    name: '仪表盘',
-    icon: 'icon-email'
-  }
-}, {
-  path: '/calendar',
-  component: calendar,
-  name: 'calendar',
-  meta: {
-    name: '日历',
-    icon: 'icon-email'
-  }
-}, {
-  path: '/im',
-  component: im,
-  name: 'im',
-  meta: {
-    name: '即时通讯',
-    icon: 'icon-email'
-  }
-}, {
-  path: '/email',
-  component: email,
-  name: 'email',
-  meta: {
-    name: '电子邮箱',
-    icon: 'icon-email'
-  }
-  // }, {
-  //   path: '/:collection',
-  //   component: view,
-  //   name: 'form',
-  //   meta: {
-  //     name: '视图',
-  //     icon: 'icon-email'
-  //   },
-  //   children: [{
-  //     path: ':document',
-  //     name: 'document',
-  //     component: form,
-  //     meta: {
-  //       name: '表单',
-  //       icon: 'icon-quit'
-  //     }
-  //   }]
-}]
+  if (routeData.redirect) route.redirect = routeData.redirect;
+  if (routeData.meta) route.meta = routeData.meta;
 
-const routes = [{
+  if(routeData.id == 'workbench'){
+    route.component = () => import('workbench/workbench.vue');
+  }
+  
+  return route;
+}
+
+function recursion(routeData, allRouteData) {
+  let routes = [];  
+  _.each(routeData, (pd) => {
+    let parent = buildRoute(pd),
+    children = _.filter(allRouteData, function (cd) {
+      return cd.parent == pd.id;
+    });
+
+    if (children.length > 0) {
+      parent.children = recursion(children, _.differenceWith(allRouteData, children, _.isEqual));
+    }
+
+    routes.push(parent);
+  });
+
+  return routes;
+}
+
+function buildRoutes(routeData) {
+  let rootData = _.filter(routeData, function (r) {
+    return !r.parent;
+  });
+  return recursion(rootData, _.differenceWith(routeData, rootData, _.isEqual));
+}
+
+const routes = buildRoutes([{
   id: 'workbench',
   path: '',
   title: 'Workbench',
-  redirect: 'welcome',
-  plugin: {
-    name: '@notesmore/workbench',
-    js: '@notesabc/workbench/workbench.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'workbench'
-    }
+  redirect: '.pages/.dashboard',
+  meta: {
+    collectionId: '.pages',
+    documentId: '.workbench'
   },
   _meta: {
     iconClass: 'fa fa-tasks'
@@ -78,15 +63,12 @@ const routes = [{
   }
 }, {
   id: 'welcome',
-  path: '/',
+  path: 'welcome',
   title: 'Welcome',
-  plugin: {
-    name: '@notesmore/welcome',
-    js: '@notesabc/welcome/welcome.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'welcome'
-    }
+  parent: 'workbench',
+  meta: {
+    collectionId: '.pages',
+    documentId: '.welcome'
   },
   _meta: {
     iconClass: 'fa fa-tasks'
@@ -98,15 +80,12 @@ const routes = [{
   }
 }, {
   id: 'dashboard',
-  path: '/dashboard',
+  path: 'dashboard',
   title: 'Dashboard',
-  plugin: {
-    name: '@notesmore/dashboard',
-    js: '@notesabc/dashboard/dashboard.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'dashboard'
-    }
+  parent: 'workbench',
+  meta: {
+    collectionId: '.pages',
+    documentId: '.dashboard'
   },
   _meta: {
     iconClass: 'fa fa-tasks'
@@ -120,13 +99,10 @@ const routes = [{
   id: 'calendar',
   path: '/calendar',
   title: 'Calendar',
-  plugin: {
-    name: '@notesmore/calendar',
-    js: '@notesabc/calendar/calendar.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'calendar'
-    }
+  parent: 'workbench',
+  meta: {
+    collectionId: '.pages',
+    documentId: '.calendar'
   },
   _meta: {
     iconClass: 'fa fa-tasks'
@@ -140,13 +116,10 @@ const routes = [{
   id: 'im',
   path: '/im',
   title: 'IM',
-  plugin: {
-    name: '@notesmore/im',
-    js: '@notesabc/im/im.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'im'
-    }
+  parent: 'workbench',
+  meta: {
+    collectionId: '.pages',
+    documentId: '.im'
   },
   _meta: {
     iconClass: 'fa fa-tasks'
@@ -157,16 +130,13 @@ const routes = [{
     }
   }
 }, {
-  id: 'email',
-  path: '/email',
-  title: 'Email',
-  plugin: {
-    name: '@notesmore/email',
-    js: '@notesabc/email/email.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'email'
-    }
+  id: 'emails',
+  path: '/emails',
+  title: 'Emails',
+  parent: 'workbench',
+  meta: {
+    collectionId: '.pages',
+    documentId: '.emails'
   },
   _meta: {
     iconClass: 'fa fa-tasks'
@@ -177,93 +147,10 @@ const routes = [{
     }
   }
 }, {
-  id: 'collection',
-  path: '/.collections/:collectionId',
-  title: 'Collection',
-  plugin: {
-    name: '@notesmore/collection',
-    js: '@notesabc/collection/collection.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'collection'
-    }
-  },
-  _meta: {
-    iconClass: 'fa fa-tasks'
-  },
-  _i18n: {
-    'zh-CN': {
-      title: '文档集合'
-    }
-  }
-}, {
-  id: 'view',
-  path: '/.views/:viewId',
-  title: 'View',
-  plugin: {
-    name: '@notesmore/view',
-    js: '@notesabc/view/view.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'view'
-    }
-  },
-  _meta: {
-    iconClass: 'fa fa-tasks'
-  },
-  _i18n: {
-    'zh-CN': {
-      title: '视图'
-    }
-  }
-}, {
-  id: 'page',
-  path: '/.pages/:pageId',
-  title: 'Page',
-  plugin: {
-    name: '@notesmore/page',
-    js: '@notesabc/page/page.bundle.js',
-    options: {
-      collectionId: '.pages',
-      documentId: 'view'
-    }
-  },
-  _meta: {
-    iconClass: 'fa fa-tasks'
-  },
-  _i18n: {
-    'zh-CN': {
-      title: '页面'
-    }
-  }
-}, {
-  id: 'form',
-  path: '/.forms/:formId',
-  title: 'Form',
-  plugin: {
-    name: '@notesmore/form',
-    js: '@notesabc/form/form.bundle.js',
-    options: {
-      collectionId: '.form',
-      documentId: 'form'
-    }
-  },
-  _meta: {
-    iconClass: 'fa fa-tasks'
-  },
-  _i18n: {
-    'zh-CN': {
-      title: '表单'
-    }
-  }
-}, {
   id: 'loader',
-  path: '/:collectionId/:documentId(/:_op)?',
+  path: '/:collectionId/:documentId/:actionId?',
   title: 'Loader',
-  component: {
-    name: 'loader',
-    loadMode: 'inline' // inline, webpack, customize
-  },
+  parent: 'workbench',
   _meta: {
     iconClass: 'fa fa-tasks'
   },
@@ -272,6 +159,34 @@ const routes = [{
       title: '加载器'
     }
   }
-}]
+}, {
+  id: '403',
+  path: '/403',
+  title: '403',
+  meta: {
+    collectionId: '.pages',
+    documentId: '.403',
+    actionId: 'forbidden'
+  },
+  _i18n: {
+    'zh-CN': {
+      title: '禁止访问'
+    }
+  }
+}, {
+  id: 'all',
+  path: '*',
+  title: 'All',
+  meta: {
+    collectionId: '.pages',
+    documentId: '.notFound',
+    actionId: 'notFound'
+  },
+  _i18n: {
+    'zh-CN': {
+      title: '访问页面不存在'
+    }
+  }
+}]);
 
-export default dynamicRoutes
+export default routes;

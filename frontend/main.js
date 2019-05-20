@@ -119,12 +119,12 @@ router.afterEach((to, from, next) => {
   store.commit('permission/SET_CURRENT_MENU', to.name)
 })
 
+Vue.use(client)
+
 new Vue({
   el: '#app',
   router,
   store,
-  components: {
-    App
-  },
+  components: { App },
   template: '<App/>'
 })
