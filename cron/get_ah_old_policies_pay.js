@@ -57,7 +57,7 @@ let get_policies = function (toket,startId,limit){
                 
             }else{
                 setTimeout(() => {
-                    login(response.data[response.data.length-1].id,limit);
+                    login(startId,limit);
                     //get_policies(toket,response.data[response.data.length-1].id,limit);
                 }, 30000);
                 
