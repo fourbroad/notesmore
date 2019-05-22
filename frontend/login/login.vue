@@ -21,7 +21,7 @@
               @change="verifyData"
             >
           </div>
-          <p class="error" :class="{show:validate.username.isShow,abc:true}">{{validate.username.errorText}}</p>
+          <p class="error" :class="{show:validate.username.isShow}">{{validate.username.errorText}}</p>
         </div>
         <div class="row password">
           <div class="input-box">
@@ -50,7 +50,6 @@
 import particles_config from "./particles_config.json";
 import client from "lib/client";
 import validatejs from "validate.js";
-import _ from "lodash";
 import "particles.js";
 
 export default {
