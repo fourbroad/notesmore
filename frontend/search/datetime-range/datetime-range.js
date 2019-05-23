@@ -375,7 +375,7 @@ $.widget("nm.datetimerange", {
           o.latest = value.latest = lv;
         }
         break;
-        default:          
+        default:
       }
 
       this._refreshButton();

@@ -180,115 +180,281 @@
 import { mapState } from "vuex";
 import * as $ from "jquery";
 import validate from "validate.js";
-import { setTimeout } from "timers";
+import "jquery-datetimepicker";
+import "jquery-datetimepicker/jquery.datetimepicker.css";
+
+const isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/,
+  isoMessage = "^Date range must comply with ISO 8609 specifications";
 
 const constraints = {
-  lowestInput: {
-    numericality: function(
-      value,
-      attributes,
-      attributeName,
-      options,
-      constraints
-    ) {
-      if (!attributes.highestInput) return null;
-      return { lessThanOrEqualTo: Number(attributes.highestInput) };
+  lEarliest: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0
     }
   },
-  highestInput: {
-    numericality: function(
-      value,
-      attributes,
-      attributeName,
-      options,
-      constraints
-    ) {
-      if (!attributes.lowestInput) return null;
-      return { greaterThanOrEqualTo: Number(attributes.lowestInput) };
+  bfLatest: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0
+    }
+  },
+  btEarliest: {
+    datetime: true
+  },
+  btLatest: {
+    datetime: true
+  },
+  rEarliest: {
+    presence: false,
+    format: {
+      pattern: isoRegex,
+      message: isoMessage
+    }
+  },
+  rLatest: {
+    presence: false,
+    format: {
+      pattern: isoRegex,
+      message: isoMessage
     }
   }
 };
 
+validate.extend(validate.validators.datetime, {
+  parse: function(value, options) {
+    return +moment(value);
+  },
+
+  format: function(value, options) {
+    var format = options.dateOnly ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm:ss";
+    return moment(value).format(format);
+  }
+});
+
 export default {
-  name: "NumericRange",
+  name: "DatetimeRange",
   data() {
     return {
       errors: {},
-      lowestInput: this.lowestValue,
-      highestInput: this.highestValue
+      option: this.range.option,
+      lUnit: this.range.unit, 
+      bfUnit: this.range.unit,
+      lEarliest: this.range.earliest,
+      bfLatest: this.range.latest,
+      btEarliest: this.range.earliest,
+      btLatest: this.range.latest,
+      rEarliest: this.range.earliest,
+      rLatest: this.range.latest
     };
   },
   props: {
     name: String,
     title: String,
-    lowestValue: Number,
-    highestValue: Number
+    range: Object
+    // option: String,
+    // unit: {
+    //   type: String,
+    //   default: 'minutes' // minutes, hours, days, weeks, months
+    // },
+    // earliest: Number,
+    // latest: Number
   },
   i18n: {
     messages: {
       en: {
         all: "All",
-        lowestLabel: "Lowest Value",
-        lowestPlaceholder: "Lowest value",
-        highestLabel: "Highest Value",
-        highestPlaceholder: "Highest value"
+        withinLast: "Within the last",
+        moreThan: "More than",
+        ago: "ago",
+        between: "Between",
+        and: "and",
+        inRange: "In range",
+        to: "to",
+        minutes: "minutes",
+        hours: "hours",
+        days: "days",
+        weeks: "weeks",
+        months: "months",
+        iso8601:
+          "P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond"
       },
       cn: {
         all: "全部",
-        lowestLabel: "最小值",
-        lowestPlaceholder: "最小值",
-        highestLabel: "最大值",
-        highestPlaceholder: "最大值"
+        withinLast: "最近",
+        moreThan: "超过",
+        ago: "之前",
+        between: "从",
+        and: "到",
+        inRange: "从",
+        to: "到",
+        minutes: "分钟",
+        hours: "小时",
+        days: "天",
+        weeks: "周",
+        months: "月",
+        iso8601: "P:期间, Y:年, M:月, D:日, T:时间, H:小时, M:分钟, S:秒",
+        constraints: {
+          lEarliest: {
+            numericality: {
+              message: "请输入大于0的整数"
+            }
+          },
+          bfLatest: {
+            numericality: {
+              message: "请输入大于0的整数"
+            }
+          },
+          rEarliest: {
+            format: {
+              message: "日期范围必须符合ISO 8609规范"
+            }
+          },
+          rLatest: {
+            format: {
+              message: "日期范围必须符合ISO 8609规范"
+            }
+          }
+        }
       }
     }
   },
   mounted() {
-    this.debouncedUpdateLowest = _.debounce(this.updateLowest, 500);
-    this.debouncedUpdateHighest = _.debounce(this.updateHighest, 500);
+    console.log(this.$i18n.getLocaleMessage("cn"));
+    // this.debouncedUpdateLowest = _.debounce(this.updateLowest, 500);
+    // this.debouncedUpdateHighest = _.debounce(this.updateHighest, 500);
+    let _this = this;
+    this.$btEarliest.datetimepicker({
+      format: "YYYY-MM-DD HH:mm:ss",
+      onShow: function(ct) {
+        this.setOptions({
+          maxDate: _this.$btLatest.val() ? _this.$btLatest.val() : false
+        });
+      }
+    });
+    this.$btLatest.datetimepicker({
+      format: "YYYY-MM-DD HH:mm:ss",
+      onShow: function(ct) {
+        this.setOptions({
+          minDate: _this.$btEarliest.val() ? _this.$btEarliest.val() : false
+        });
+      }
+    });
   },
   computed: {
     buttonText() {
-      var label = "";
-      if (this.lowestValue && this.highestValue) {
-        label = this.title + ":" + this.lowestValue + "-" + this.highestValue;
-      } else if (this.lowestValue) {
-        label = this.title + ">=" + this.lowestValue;
-      } else if (this.highestValue) {
-        label = this.title + "<=" + this.highestValue;
-      } else {
-        label = this.title + ":" + this.$t("all");
+      let label = `${this.title}:${this.$t("all")}`;
+      switch (this.option) {
+        case "latest":
+          if (this.earliest) {
+            label = `${this.title}${this.$t("withinLast")}${this.earliest} ${this.$t(this.unit)}`;
+          }
+          break;
+        case "before":
+          if (this.latest) {
+            label = `${this.title}${this.$t("moreThan")}${this.latest} ${this.$t(this.unit)}${this.$t("ago")}`;
+          }
+          break;
+        case "between":
+          if (this.earliest && this.latest) {
+            label = `${this.title}:${moment(this.earliest).format("YYYY-MM-DD")}~${moment(this.latest).format("YYYY-MM-DD")}`;
+          } else if (this.earliest) {
+            label = `${this.title}>=${moment(this.earliest).format("YYYY-MM-DD")}`;
+          } else if (this.latest) {
+            label = `${this.title}<=${moment(this.latest).format("YYYY-MM-DD")}`;
+          } else {
+            label = `${this.title}:${this.$t("all")}`;
+          }
+          break;
+        case "range":          {
+            var now = moment(),
+              earliest,
+              latest;
+            if (this.earliest && this.latest) {
+              earliest = now.clone().add(moment.duration(this.earliest)).format("YYYY-MM-DD");
+              latest = now.clone().add(moment.duration(this.latest)).format("YYYY-MM-DD");
+              label = `${this.title}:${earliest}~${latest}`;
+            } else if (this.earliest) {
+              label = `${this.title}>=${now.clone().add(moment.duration(this.earliest)).format("YYYY-MM-DD")}`;
+            } else if (this.latest) {
+              label = `${this.title}<=${now.clone().add(moment.duration(this.latest)).format("YYYY-MM-DD")}`;
+            }
+          }
+          break;
+        default:
+          break;
       }
       return label;
+    },
+    constraints() {
+    //   _.merge(o.constraints, _.at(o, "i18n." + this.locale + ".constraints")[0]);
     },
     $form() {
       return $(this.$el).find("form");
     },
+    $btEarliest() {
+      return this.$form.find('input[name="btEarliest"]');
+    },
+    $btLatest() {
+      return this.$form.find('input[name="btLatest"]');
+    },
     ...mapState(["currentDomainId", "locale"])
   },
   watch: {
-    lowestInput(newValue, oldValue) {
-      this.errors = validate(this.$data, constraints) || {};
-      if (_.isEmpty(this.errors)) {
-        this.debouncedUpdateLowest();
-      }
+    lUnit(newValue, oldValue) {
+      this.updateRange();
     },
-    highestInput(newValue, oldValue) {
-      this.errors = validate(this.$data, constraints) || {};
-      if (_.isEmpty(this.errors)) {
-        this.debouncedUpdateHighest();
-      }
+    bfUnit(newValue, oldValue) {
+      this.updateRange();
+    },
+    lEarliest(newValue, oldValue) {
+      this.debouncedUpdateRange();
+    },
+    bfLatest(newValue, oldValue) {
+      this.debouncedUpdateRange();
+    },
+    btEarliest(newValue, oldValue) {
+      this.debouncedUpdateRange();
+    },
+    btLatest(newValue, oldValue) {
+      this.debouncedUpdateRange();
+    },
+    rEarliest(newValue, oldValue) {
+      this.debouncedUpdateRange();
+    },
+    rLatest(newValue, oldValue) {
+      this.debouncedUpdateRange();
     }
   },
   methods: {
-    updateLowest() {
-      this.$emit("update:lowestValue", this.lowestInput);
-    },
-    updateHighest() {
-      this.$emit("update:highestValue", this.highestInput);
+    updateRange() {
+      switch(this.option){
+        case 'latest':
+          this.$emit("update:range", {option: this.option, unit: this.lUnit, earliest: this.lEarliest});
+          break;
+        case 'before':
+          this.$emit("update:range", {option: this.option, unit: this.bfUnit, latest: this.bfLatest});
+          break;
+        case 'between':
+          this.$emit("update:range", {option: this.option, earliest: this.btEarliest, latest: this.btLatest});
+          break;
+        case 'range':
+          this.$emit("update:range", {option: this.option, earliest: this.rEarliest, latest: this.rLatest});
+          break;
+        default:
+      }
     },
     onClearClick() {
-      this.lowestInput = undefined;
-      this.highestInput = undefined;
+      this.lUnit = undefined;
+      this.bfUnit = undefined;
+      this.lEarliest = undefined;
+      this.bfLatest = undefined;
+      this.btEarliest = undefined;
+      this.btLatest = undefined;
+      this.rEarliest = undefined;
+      this.rLatest = undefined;
     }
   }
 };

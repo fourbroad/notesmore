@@ -54,7 +54,6 @@
 import { mapState } from "vuex";
 import * as $ from "jquery";
 import validate from "validate.js";
-import { setTimeout } from "timers";
 
 const constraints = {
   lowestInput: {

@@ -54,6 +54,13 @@
               :lowestValue.sync="getSearchField(sf.name).lowestValue"
               :highestValue.sync="getSearchField(sf.name).highestValue"
             ></NumericRange>
+            <DatetimeRange
+              v-if="sf.type=='datetimeRange'"
+              :key="sf.name"
+              :name="sf.name"
+              :title="sf.title"
+              :range.sync="getSearchField(sf.name).range"
+            ></DatetimeRange>
           </template>
           <FullTextSearch :keyword="document.search.fulltext.keyword"></FullTextSearch>
           <SearchSetting :fields="i18n_searchFields"></SearchSetting>
@@ -217,6 +224,7 @@ import SearchSetting from "./components/SearchSetting.vue";
 import Keywords from "search/keywords/keywords.vue";
 import ContainsText from "search/contains-text/contains-text.vue";
 import NumericRange from "search/numeric-range/numeric-range.vue";
+import DatetimeRange from "search/datetime-range/datetime-range.vue";
 import FullTextSearch from "search/full-text/full-text-search";
 
 import _ from "lodash";
@@ -446,7 +454,7 @@ export default {
       }
     }
   },
-  components: { ColumnSetting, Keywords, ContainsText, NumericRange, FullTextSearch, SearchSetting}
+  components: { ColumnSetting, Keywords, ContainsText, NumericRange, DatetimeRange, FullTextSearch, SearchSetting}
 };
 </script>
 
