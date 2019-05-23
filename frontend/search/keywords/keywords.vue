@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="dropdown btn-group mr-1">
     <button
-      class="btn btn-outline-secondary dropdown-toggle"
+      class="btn btn-outline-secondary dropdown-toggle btn-sm"
       type="button"
       data-toggle="dropdown"
       aria-haspopup="true"
@@ -18,7 +18,7 @@
         >
         <div class="input-group-prepend">
           <span class="input-group-text" id="inputGroup-sizing-sm">
-            <i class="fa" :class="[filter==''?'fa-search':'fa-times']"></i>
+            <i class="fa" :class="[filter==''?'fa-search':'fa-times']" @click="filter=''"></i>
           </span>
         </div>
       </div>
@@ -27,11 +27,15 @@
         class="clear-selected-items px-2"
         v-if="filter==''"
         :class="{disabled:selectedItems.length<=0}"
+        @click="onClearClick"
       >Clear selected items</a>
       <div class="item-container-wrapper mT-5">
         <ul class="item-container fa-ul">
           <li v-for="item in items" :key="item.value" @click="onItemClick(item)">
-            <i class="fa-li fa" :class="{'fa-check-square-o': multi && item.checked, 'fa-check-circle-o': !multi && item.checked, 'fa-square-o': multi && !item.checked,'fa-circle-o': !multi && !item.checked }"></i>
+            <i
+              class="fa-li fa"
+              :class="{'fa-check-square-o': multi && item.checked, 'fa-check-circle-o': !multi && item.checked, 'fa-square-o': multi && !item.checked,'fa-circle-o': !multi && !item.checked }"
+            ></i>
             {{item.value}}
           </li>
         </ul>
@@ -95,7 +99,8 @@ export default {
     $el.on("show.bs.dropdown", () => {
       this.filter = "";
       this.items = [];
-      this.debouncedFetchWords();
+      // this.debouncedFetchWords();
+      this.fetchWords();
     });
     this.debouncedFetchWords = _.debounce(this.fetchWords, 500);
   },
@@ -119,7 +124,8 @@ export default {
   },
   watch: {
     filter: function(newFilter, oldFilter) {
-      this.debouncedFetchWords();
+      // this.debouncedFetchWords();
+      this.fetchWords();
     }
   },
   methods: {
@@ -129,9 +135,37 @@ export default {
       this.fetchItems(this.name, filter, (err, items) => {
         this.loading = false;
         if (err) return (this.error = err.toString());
-        this.items = _.reduce(this.selectedItems.concat(
-          _.differenceWith(items, this.selectedItems, _.isEqual)
-        ),(objs, item)=>{objs.push({value:item}); return objs;},[]);
+        if (this.filter == "") {
+          let sis = _.reduce(
+            this.selectedItems,
+            (sis, si) => {
+              sis.push({ value: si, checked: true });
+              return sis;
+            },
+            []
+          );
+          this.items = _.reduce(
+            _.differenceWith(items, this.selectedItems, _.isEqual),
+            (is, item) => {
+              is.push({ value: item });
+              return is;
+            },
+            sis
+          );
+        }else{
+          let selectedItems = this.selectedItems;
+          this.items = _.reduce(items,
+            (is, item) => {
+              if(_.indexOf(selectedItems, item)>=0){
+                is.push({ value: item, checked:true });
+              }else{
+                is.push({ value: item });
+              }
+              return is;
+            },
+            []
+          );
+        }
         this.ps.update();
       });
     },
@@ -156,6 +190,10 @@ export default {
           _.differenceWith(this.selectedItems, [item.value], _.isEqual)
         );
       }
+    },
+    onClearClick() {
+      this.$emit("update:selectedItems", []);
+      this.fetchWords();
     }
   }
 };
