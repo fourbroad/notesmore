@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './app'
 import store from 'store/index'
 import router from 'router/index'
+import VueI18n from 'vue-i18n'
 import client from 'lib/client'
 
 // import ElementUI from 'element-ui'
@@ -120,11 +121,17 @@ router.afterEach((to, from, next) => {
 })
 
 Vue.use(client)
+Vue.use(VueI18n)
+
+const i18n = new VueI18n({ locale: 'cn'});
 
 new Vue({
   el: '#app',
   router,
   store,
-  components: { App },
+  i18n,
+  components: {
+    App
+  },
   template: '<App/>'
 })

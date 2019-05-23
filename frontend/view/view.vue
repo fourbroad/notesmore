@@ -6,7 +6,7 @@
           <span class="icon mR-5">
             <i :class="document._meta.iconClass || 'fa fa-file-text-o'"></i>
           </span>
-          <h4 class="c-grey-900 d-ib">{{title}}</h4>
+          <h4 class="c-grey-900 d-ib">{{i18n_title}}</h4>
           <span class="favorite mL-10" @click="onFavoriteClick()">
             <i class="fa fa-star-o" :class="{'c-red-500': isFavorite}"></i>
           </span>
@@ -30,15 +30,22 @@
     <div class="row">
       <div class="col-md-12">
         <div class="search-container mB-10">
-          <template v-for="sf in document.search.fields">
+          <template v-for="sf in i18n_searchFields">
             <Keywords
               v-if="sf.type=='keywords'"
               :key="sf.name"
               :name="sf.name"
               :title="sf.title"
-              v-bind:selectedItems.sync="sf.selectedItems"
+              :selectedItems.sync="getSearchField(sf.name).selectedItems"
               :fetchItems="distinctQuery"
             ></Keywords>
+            <containsText
+              v-if="sf.type=='containsText'"
+              :key="sf.name"
+              :name="sf.name"
+              :title="sf.title"
+              :containsText.sync="getSearchField(sf.name).containsText"
+            ></containsText>
           </template>
         </div>
       </div>
@@ -55,11 +62,11 @@
                 <th></th>
                 <th
                   scope="col"
-                  v-for="(column, colIndex) in columns"
+                  v-for="(column, colIndex) in i18n_columns"
                   :key="keyColumn(column,colIndex)"
                 >{{renderHeaderCell(column, colIndex)}}</th>
                 <th>
-                  <ColumnSetting :columns="columns"></ColumnSetting>
+                  <ColumnSetting :columns="i18n_columns"></ColumnSetting>
                 </th>
               </tr>
             </thead>
@@ -70,7 +77,7 @@
                     <i :class="[doc._meta.iconClass || 'fa fa-file-text-o']"></i>
                   </span>
                 </td>
-                <td v-for="(column, col) in columns" :key="keyCell(doc, column, row, col)">
+                <td v-for="(column, col) in document.columns" :key="keyCell(doc, column, row, col)">
                   <a
                     href="javascript:void(0)"
                     v-if="column.defaultLink"
@@ -196,6 +203,7 @@ import { mapState } from "vuex";
 
 import ColumnSetting from "./components/ColumnSetting";
 import Keywords from "search/keywords/keywords.vue";
+import ContainsText from "search/contains-text/contains-text.vue";
 
 import _ from "lodash";
 import jsonPatch from "fast-json-patch";
@@ -241,23 +249,20 @@ export default {
     }
   },
   computed: {
-    view() {
-      return this.document;
+    localeDoc() {
+      return this.document.get(this.locale);
     },
-    localeView() {
-      return this.view.get(this.locale);
+    i18n_searchFields() {
+      return this.localeDoc.search.fields;
     },
-    searchFields() {
-      return this.localeView.search.fields;
+    i18n_columns() {
+      return this.localeDoc.columns;
     },
-    columns() {
-      return this.localeView.columns;
-    },
-    title() {
-      return this.localeView.title;
+    i18n_title() {
+      return this.localeDoc.title;
     },
     sort() {
-      return this.view.search.sort || [];
+      return this.document.search.sort || [];
     },
     currentPage() {
       return Math.ceil((this.from + 1) / this.size);
@@ -345,7 +350,7 @@ export default {
       this.fetchDocuments((pageNo - 1) * this.size);
     },
     fetchDocuments(from) {
-      this.view.findDocuments(
+      this.document.findDocuments(
         {
           from: from != undefined ? from : this.from,
           size: this.size,
@@ -361,13 +366,15 @@ export default {
       );
     },
     distinctQuery(field, filter, callback) {
-      this.view.distinctQuery(
+      this.document.distinctQuery(
         field,
         {
           include: filter,
           size: 200
         },
-        (err, data)=>{callback(err, data&&data.values)}
+        (err, data) => {
+          callback(err, data && data.values);
+        }
       );
     },
     renderHeaderCell(column, colIndex) {
@@ -390,6 +397,11 @@ export default {
     },
     keyCell(doc, column, row, col) {
       return doc.id + "#" + (column.name || col);
+    },
+    getSearchField(name) {
+      return _.filter(this.document.search.fields, f => {
+        return f.name == name;
+      })[0];
     },
     at(object, path) {
       if (!object || !path) return;
@@ -426,7 +438,7 @@ export default {
       }
     }
   },
-  components: { ColumnSetting, Keywords }
+  components: { ColumnSetting, Keywords, ContainsText }
 };
 </script>
 
