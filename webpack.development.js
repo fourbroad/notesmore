@@ -5,6 +5,7 @@ const
   common = require('./webpack.common.js'),
   cssNext = require('postcss-cssnext'),
   DashboardPlugin = require('webpack-dashboard/plugin');
+  MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = merge(common, {
   mode: 'development',
@@ -43,7 +44,7 @@ module.exports = merge(common, {
     rules:[{
       test: /\.(sa|sc|c)ss$/,
       use: [{
-        loader: 'style-loader',
+        loader:MiniCssExtractPlugin.loader
       },{
         loader: 'css-loader',
         options: {

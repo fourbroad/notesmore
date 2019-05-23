@@ -47,7 +47,7 @@ let get_policies = function (toket,startId,limit){
                     setTimeout(() => {
                         login(response.data[response.data.length-1].id,limit);
                         //get_policies(toket,response.data[response.data.length-1].id,limit);
-                    }, 30000);
+                    }, 60000);
                 }else{
                     setTimeout(() => {
                         login(response.data[response.data.length-1].id,limit);
@@ -57,9 +57,9 @@ let get_policies = function (toket,startId,limit){
                 
             }else{
                 setTimeout(() => {
-                    login(response.data[response.data.length-1].id,limit);
+                    login(startId,limit);
                     //get_policies(toket,response.data[response.data.length-1].id,limit);
-                }, 30000);
+                }, 60000);
                 
             }
             //resolve(response);
@@ -72,9 +72,9 @@ let login = async function(startId,limit){
     let currentHour= new Date().getHours();
     if(currentHour > 6){
         limit=50;
-        global.sleepTime=10000;
+        global.sleepTime=15000;
     }else{
-        global.sleepTime=5000;
+        global.sleepTime=10000;
     }
     if(!global.token){
         let body = await login_post();

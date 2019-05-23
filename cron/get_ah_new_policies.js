@@ -53,7 +53,7 @@ let get_policies = function (toket,startId,limit){
                 
             }else{
                 setTimeout(() => {
-                    login(response.data[response.data.length-1].id,limit);
+                    login(startId,limit);
                     //get_policies(toket,response.data[response.data.length-1].id,limit);
                 }, 30000);
                 
@@ -85,4 +85,4 @@ let login = async function(startId,limit){
     }
     get_policies(global.token,startId,limit);
 }
-login(0,100);
+login(685633,100);
