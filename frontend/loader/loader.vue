@@ -8,7 +8,6 @@
 
 <script>
 import { mapState } from "vuex"
-import client from "lib/client"
 
 const components = {
   workbench: () => import('workbench/workbench.vue'),
@@ -20,8 +19,6 @@ const components = {
   notFound: () => import('errors/404'),
   forbidden: () => import('errors/403')
 }
-
-const { Meta, Domain, Collection, View, Page, Form, Role, Group, User, Document, Action } = client
 
 export default {
   data() {
@@ -50,7 +47,7 @@ export default {
   },
   methods: {
     _doLoadDocument(doc, actionId) {
-      let domId = this.currentDomainId, metaId = _.at(doc, "_meta.metaId")[0] || ".meta"
+      let domId = this.currentDomainId, metaId = _.at(doc, "_meta.metaId")[0] || ".meta", {Meta, Action} = this.$client
       Meta.get(domId, metaId, (err, meta) => {
         if (err) return this.error = err.toString()
 
@@ -71,7 +68,8 @@ export default {
         collectionId = params.collectionId || meta.collectionId,
         documentId = params.documentId || meta.documentId,
         actionId = params.actionId || meta.actionId,
-        domId = this.currentDomainId
+        domId = this.currentDomainId,
+        { Meta, Domain, Collection, View, Page, Form, Role, Group, User, Document, Action } = this.$client
 
       this.error = this.post = null
       this.loading = true
