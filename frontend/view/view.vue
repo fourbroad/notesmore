@@ -39,14 +39,24 @@
               :selectedItems.sync="getSearchField(sf.name).selectedItems"
               :fetchItems="distinctQuery"
             ></Keywords>
-            <containsText
+            <ContainsText
               v-if="sf.type=='containsText'"
               :key="sf.name"
               :name="sf.name"
               :title="sf.title"
               :containsText.sync="getSearchField(sf.name).containsText"
-            ></containsText>
+            ></ContainsText>
+            <NumericRange
+              v-if="sf.type=='numericRange'"
+              :key="sf.name"
+              :name="sf.name"
+              :title="sf.title"
+              :lowestValue.sync="getSearchField(sf.name).lowestValue"
+              :highestValue.sync="getSearchField(sf.name).highestValue"
+            ></NumericRange>
           </template>
+          <FullTextSearch :keyword="document.search.fulltext.keyword"></FullTextSearch>
+          <SearchSetting :fields="i18n_searchFields"></SearchSetting>
         </div>
       </div>
     </div>
@@ -202,25 +212,23 @@
 import { mapState } from "vuex";
 
 import ColumnSetting from "./components/ColumnSetting";
+import SearchSetting from "./components/SearchSetting.vue";
+
 import Keywords from "search/keywords/keywords.vue";
 import ContainsText from "search/contains-text/contains-text.vue";
+import NumericRange from "search/numeric-range/numeric-range.vue";
+import FullTextSearch from "search/full-text/full-text-search";
 
 import _ from "lodash";
 import jsonPatch from "fast-json-patch";
 import validate from "validate.js";
 import FileSaver from "file-saver";
 
-// import ColumnSetting from "./components/ColumnSetting.vue";
-
 // const PerfectScrollbar from'perfect-scrollbar')
 // import 'perfect-scrollbar/css/perfect-scrollbar.css')
 
-// import "search/keywords/keywords";
-// import "search/numeric-range/numeric-range";
 // import "search/datetime-range/datetime-range";
 // import "search/datetime-duedate/datetime-duedate";
-// import "search/contains-text/contains-text";
-// import "search/full-text/full-text";
 
 export default {
   data() {
@@ -438,7 +446,7 @@ export default {
       }
     }
   },
-  components: { ColumnSetting, Keywords, ContainsText }
+  components: { ColumnSetting, Keywords, ContainsText, NumericRange, FullTextSearch, SearchSetting}
 };
 </script>
 

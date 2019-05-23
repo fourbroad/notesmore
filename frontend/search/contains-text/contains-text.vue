@@ -56,17 +56,11 @@ export default {
       en: {
         all: "All",
         contains: "contains",
-        update: "Update",
-        reset: "Reset",
-        cancel: "Cancel",
         containsTextPlaceholder: "contains text"
       },
       cn: {
         all: "全部",
         contains: "包含",
-        update: "更新",
-        reset: "清除",
-        cancel: "取消",
         containsTextPlaceholder: "包含文本"
       }
     }

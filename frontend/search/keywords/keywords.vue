@@ -82,7 +82,7 @@ export default {
     },
     selectedItems: {
       type: Array,
-      default: function() {
+      default() {
         return new Array();
       }
     },
@@ -123,13 +123,13 @@ export default {
     ...mapState(["currentDomainId", "locale"])
   },
   watch: {
-    filter: function(newFilter, oldFilter) {
+    filter(newFilter, oldFilter) {
       // this.debouncedFetchWords();
       this.fetchWords();
     }
   },
   methods: {
-    fetchWords: function() {
+    fetchWords() {
       let filter = this.filter == "" ? ".*" : ".*" + this.filter + ".*";
       this.loading = true;
       this.fetchItems(this.name, filter, (err, items) => {

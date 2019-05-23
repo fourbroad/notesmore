@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="dropdown btn-group">
     <button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown">
       <i class="fa fa-ellipsis-h"></i>
     </button>
