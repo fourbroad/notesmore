@@ -29,8 +29,22 @@
     </div>
     <div class="row">
       <div class="col-md-12">
-        <div class="search-container mB-10"></div>
+        <div class="search-container mB-10">
+          <template v-for="sf in document.search.fields">
+            <Keywords
+              v-if="sf.type=='keywords'"
+              :key="sf.name"
+              :name="sf.name"
+              :title="sf.title"
+              v-bind:selectedItems.sync="sf.selectedItems"
+              :fetchItems="distinctQuery"
+            ></Keywords>
+          </template>
+        </div>
       </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">显示第{{from+1}}至{{from+documents.length}}项结果，共{{total}}项</div>
     </div>
     <div class="row">
       <div class="col-md-12">
@@ -57,7 +71,11 @@
                   </span>
                 </td>
                 <td v-for="(column, col) in columns" :key="keyCell(doc, column, row, col)">
-                  <a href="javascript:void(0)" v-if="column.defaultLink" @click="$router.push(`/${doc.collectionId}/${doc.id}`)">{{renderCell(doc, column, row, col)}}</a>
+                  <a
+                    href="javascript:void(0)"
+                    v-if="column.defaultLink"
+                    @click="$router.push(`/${doc.collectionId}/${doc.id}`)"
+                  >{{renderCell(doc, column, row, col)}}</a>
                   <span v-if="!column.defaultLink">{{renderCell(doc, column, row, col)}}</span>
                 </td>
                 <td>
@@ -78,11 +96,20 @@
     </div>
     <div class="row">
       <div class="col-md-6">显示第{{from+1}}至{{from+documents.length}}项结果，共{{total}}项</div>
-      <div class="col-md-6">
+      <div class="col-md-12">
         <nav aria-label="Page navigation">
           <ul class="pagination justify-content-end">
-            <li class="page-item" :class="{disabled:currentPage==1}" @click="goToPage(currentPage - 1)">
-              <a class="page-link" href="javascript:void(0)" tabindex="-1" :aria-disabled="currentPage==1?true:null">Previous</a>
+            <li
+              class="page-item"
+              :class="{disabled:currentPage==1}"
+              @click="goToPage(currentPage - 1)"
+            >
+              <a
+                class="page-link"
+                href="javascript:void(0)"
+                tabindex="-1"
+                :aria-disabled="currentPage==1?true:null"
+              >Previous</a>
             </li>
             <li
               class="page-item"
@@ -142,11 +169,20 @@
               v-if="totalPage >= 7"
               :class="{active:currentPage==7}"
               :aria-current="currentPage == 7 ? 'page': null"
-              @click="goToPage(7)">
+              @click="goToPage(7)"
+            >
               <a class="page-link" href="javascript:void(0)">7</a>
             </li>
-            <li class="page-item" :class="{disabled:currentPage==totalPage}" @click="goToPage(currentPage+1)">
-              <a class="page-link" href="javascript:void(0)" :aria-disabled="currentPage==totalPage?true:null">Next</a>
+            <li
+              class="page-item"
+              :class="{disabled:currentPage==totalPage}"
+              @click="goToPage(currentPage+1)"
+            >
+              <a
+                class="page-link"
+                href="javascript:void(0)"
+                :aria-disabled="currentPage==totalPage?true:null"
+              >Next</a>
             </li>
           </ul>
         </nav>
@@ -159,6 +195,7 @@
 import { mapState } from "vuex";
 
 import ColumnSetting from "./components/ColumnSetting";
+import Keywords from "search/keywords/keywords.vue";
 
 import _ from "lodash";
 import jsonPatch from "fast-json-patch";
@@ -192,15 +229,15 @@ export default {
   },
   props: ["document"],
   created() {
-    this.clone = _.cloneDeep(this.document)
-    this.refreshFavorite()
-    this.fetchDocuments()
+    this.clone = _.cloneDeep(this.document);
+    this.refreshFavorite();
+    this.fetchDocuments();
   },
-  watch:{
-    document(){
-    this.clone = _.cloneDeep(this.document)
-    this.refreshFavorite()
-    this.fetchDocuments()
+  watch: {
+    document() {
+      this.clone = _.cloneDeep(this.document);
+      this.refreshFavorite();
+      this.fetchDocuments();
     }
   },
   computed: {
@@ -303,9 +340,9 @@ export default {
       });
     },
     goToPage(pageNo) {
-      if(pageNo < 1) pageNo = 1
-      if(pageNo > this.totalPage) pageNo = this.totalPage
-      this.fetchDocuments((pageNo-1) * this.size);
+      if (pageNo < 1) pageNo = 1;
+      if (pageNo > this.totalPage) pageNo = this.totalPage;
+      this.fetchDocuments((pageNo - 1) * this.size);
     },
     fetchDocuments(from) {
       this.view.findDocuments(
@@ -317,10 +354,20 @@ export default {
         },
         (err, docs) => {
           if (err) return (this.error = err.toString());
-          this.from = from != undefined ? from : this.from
+          this.from = from != undefined ? from : this.from;
           this.total = docs.total;
           this.documents = docs.documents;
         }
+      );
+    },
+    distinctQuery(field, filter, callback) {
+      this.view.distinctQuery(
+        field,
+        {
+          include: filter,
+          size: 200
+        },
+        (err, data)=>{callback(err, data&&data.values)}
       );
     },
     renderHeaderCell(column, colIndex) {
@@ -379,7 +426,7 @@ export default {
       }
     }
   },
-  components: { ColumnSetting }
+  components: { ColumnSetting, Keywords }
 };
 </script>
 

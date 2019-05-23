@@ -1,5 +1,5 @@
 <template>
-  <th>
+  <div>
     <button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown">
       <i class="fa fa-columns"></i>
     </button>
@@ -13,7 +13,7 @@
         ></ItemSelector>
       </ul>
     </div>
-  </th>
+  </div>
 </template>
 
 <script>
@@ -58,5 +58,4 @@ export default {
 .item-container {
   position: relative;
 }
-
 </style>
