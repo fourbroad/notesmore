@@ -54,6 +54,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.search-item {
+  font-size: 0.8rem;
+  padding-bottom: 5px;
+  margin-right: 2px;
+}
+
 .input-group {
   display: inline-flex;
   width: fit-content;

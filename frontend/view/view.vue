@@ -11,8 +11,8 @@
             <i class="fa fa-star-o" :class="{'c-red-500': isFavorite}"></i>
           </span>
           <div class="actions btn-group float-right">
-            <button type="button" class="save btn btn-primary btn-sm">Save</button>
-            <button type="button" class="cancel btn btn-sm">Cancel</button>
+            <button type="button" v-if="isNew||isDirty" @click="onSaveClick" class="save btn btn-primary btn-sm">Save</button>
+            <button type="button" v-if="isNew||isDirty" @click="onCancelClick" class="cancel btn btn-sm">Cancel</button>
             <button
               type="button"
               class="more btn btn-outline-secondary btn-sm btn-light"
@@ -36,7 +36,7 @@
               :key="sf.name"
               :name="sf.name"
               :title="sf.title"
-              :selectedItems.sync="getSearchField(sf.name).selectedItems"
+              :selectedItems.sync="getSearchField(sf.name).values"
               :fetchItems="distinctQuery"
             ></Keywords>
             <ContainsText
@@ -51,8 +51,7 @@
               :key="sf.name"
               :name="sf.name"
               :title="sf.title"
-              :lowestValue.sync="getSearchField(sf.name).lowestValue"
-              :highestValue.sync="getSearchField(sf.name).highestValue"
+              :range.sync = "getSearchField(sf.name).range"
             ></NumericRange>
             <DatetimeRange
               v-if="sf.type=='datetimeRange'"
@@ -73,7 +72,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="table-responsive">
-          <table class="table table-striped table-hover">
+          <table class="view-table table table-striped table-hover table-sm">
             <thead>
               <tr>
                 <th></th>
@@ -235,15 +234,14 @@ import FileSaver from "file-saver";
 // const PerfectScrollbar from'perfect-scrollbar')
 // import 'perfect-scrollbar/css/perfect-scrollbar.css')
 
-// import "search/datetime-range/datetime-range";
 // import "search/datetime-duedate/datetime-duedate";
 
 export default {
   data() {
     return {
       error: null,
+      clone: _.cloneDeep(this.document),
       isNew: false,
-      clone: null,
       isFavorite: false,
       from: 0,
       size: 10,
@@ -253,23 +251,43 @@ export default {
   },
   props: ["document"],
   created() {
-    this.clone = _.cloneDeep(this.document);
     this.refreshFavorite();
     this.fetchDocuments();
   },
   watch: {
-    document() {
-      this.clone = _.cloneDeep(this.document);
-      this.refreshFavorite();
-      this.fetchDocuments();
+    document:{
+      handler(newValue, oldValue) {
+        this.refreshFavorite();
+        console.log(arguments);
+        this.fetchDocuments();
+      },
+      deep: true
+    },
+    'document.search':{
+      handler(newValue, oldValue) {
+        this.fetchDocuments();
+      },
+      deep:true
     }
   },
   computed: {
+    patch(){
+      return jsonPatch.compare(this.clone, this.document);
+    },
+    isDirty(){
+      return this.patch.length > 0;
+    },
     localeDoc() {
       return this.document.get(this.locale);
     },
+    searchFields() {
+      return this.document.search.fields;
+    },
     i18n_searchFields() {
       return this.localeDoc.search.fields;
+    },
+    columns(){
+      return this.document.columns;
     },
     i18n_columns() {
       return this.localeDoc.columns;
@@ -394,7 +412,7 @@ export default {
       );
     },
     renderHeaderCell(column, colIndex) {
-      return column.title || "#";
+      return column.title;
     },
     renderCell(doc, column, row, col) {
       let localeDoc = doc.get(this.locale),
@@ -418,6 +436,30 @@ export default {
       return _.filter(this.document.search.fields, f => {
         return f.name == name;
       })[0];
+    },
+    onSaveClick(){
+      this.document.patch({patch: this.patch}, (err, view) => {
+        if (err) return this.error = err.toString();
+        this.replace(this.clone, view);
+        this.replace(this.document, view);
+      });
+    },
+    onCancelClick(){
+      this.replace(this.document, this.clone);
+    },
+    replace(source, target){
+       // erase all current keys from data
+       Object.keys(source).forEach(key => {
+         if(key != 'id'){
+           source[key] = null
+         }
+      });
+       // set all properties from newdata into data
+      Object.entries(_.cloneDeep(target)).forEach(entry => {
+        if(entry[0] != 'id'){
+          this.$set(source, entry[0], entry[1])
+        }
+      });
     },
     at(object, path) {
       if (!object || !path) return;
@@ -454,7 +496,15 @@ export default {
       }
     }
   },
-  components: { ColumnSetting, Keywords, ContainsText, NumericRange, DatetimeRange, FullTextSearch, SearchSetting}
+  components: {
+    ColumnSetting,
+    Keywords,
+    ContainsText,
+    NumericRange,
+    DatetimeRange,
+    FullTextSearch,
+    SearchSetting
+  }
 };
 </script>
 
@@ -481,53 +531,38 @@ export default {
   }
 }
 
-.search-container {
-  .search-item {
-    padding-bottom: 5px;
-    margin-right: 2px;
+.view-table {
+  .table-active {
+    .btn {
+      visibility: visible;
+    }
   }
-  .btn {
-    border-color: lightgray;
-    max-width: 260px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+  th, td {
+    vertical-align: middle;
   }
-}
 
-.dataTables_wrapper {
-  position: relative;
-  //     overflow: auto;
+  thead {
+    .btn {
+      border-color: lightgray;
+    }
+  }
 
-  .view-table {
-    .table-active {
+  tbody {
+    .btn {
+      border: none;
+      visibility: hidden;
+    }
+
+    tr:hover {
       .btn {
         visibility: visible;
       }
     }
+  }
 
-    thead {
-      .btn {
-        border-color: lightgray;
-      }
-    }
-
-    tbody {
-      .btn {
-        border: none;
-        visibility: hidden;
-      }
-
-      tr:hover {
-        .btn {
-          visibility: visible;
-        }
-      }
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
+  a:hover {
+    text-decoration: underline;
   }
 }
 </style>

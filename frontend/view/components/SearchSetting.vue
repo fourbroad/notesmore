@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdown btn-group">
+  <div class="search-item dropdown btn-group">
     <button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown">
       <i class="fa fa-ellipsis-h"></i>
     </button>
@@ -44,13 +44,20 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .search-item {
-  display: inline-flex;
-  width: fit-content;
-  vertical-align: middle;
-  border-radius: 0.2rem;
+  font-size: 0.8rem;
+  padding-bottom: 5px;
+  margin-right: 2px;
+}
+.btn {
+  border-color: lightgray;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-container {
+  font-size: 0.9rem;
   position: relative;
 }
 </style>

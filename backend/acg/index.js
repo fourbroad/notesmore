@@ -117,7 +117,10 @@ initSocket = function(socket) {
     let visitorId = socket.handshake.query.visitorId;
     checkAcl1(visitorId, User, userId || visitorId, 'get', null, options).then( user => {
       return user.get(options);
-    }).then(result => callback(null, result)).catch(err => {
+    }).then(result => {
+      console.log(result);
+      callback(null, result);
+    }).catch(err => {
       console.error(err);
       callback(err);
     });

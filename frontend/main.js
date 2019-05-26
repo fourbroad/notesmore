@@ -1,9 +1,12 @@
+import client from 'lib/client'
+
 import Vue from 'vue'
 import App from './app'
 import store from 'store/index'
 import router from 'router/index'
+import dynamicRoutes from 'router/dynamic-router'
+
 import VueI18n from 'vue-i18n'
-import client from 'lib/client'
 
 // import ElementUI from 'element-ui'
 // import 'element-ui/lib/theme-chalk/index.css'
@@ -22,6 +25,9 @@ import client from 'lib/client'
 // Vue.use(ElementUI)
 
 Vue.config.productionTip = false
+
+Vue.use(client)
+Vue.use(VueI18n)
 
 let domain = document.domain,
   currentDomain, index, url;
@@ -82,11 +88,11 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     function doNext() {
-      if (!store.state.permission.permissionList) {
-        store.dispatch('permission/FETCH_PERMISSION').then(() => {
-          next({
-            path: to.path
-          })
+      if (!store.state.dynamicRoutes) {
+        router.addRoutes(dynamicRoutes);
+        store.state.dynamicRoutes = dynamicRoutes;
+        next({
+          path: to.path
         })
       } else {
         if (to.path !== '/login') {
@@ -119,9 +125,6 @@ router.afterEach((to, from, next) => {
   store.commit('setCrumbList', routerList)
   store.commit('permission/SET_CURRENT_MENU', to.name)
 })
-
-Vue.use(client)
-Vue.use(VueI18n)
 
 const i18n = new VueI18n({ locale: 'cn'});
 

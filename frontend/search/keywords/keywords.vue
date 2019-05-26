@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdown btn-group mr-1">
+  <div class="search-item dropdown btn-group mr-1">
     <button
       class="btn btn-outline-secondary dropdown-toggle btn-sm"
       type="button"
@@ -152,13 +152,14 @@ export default {
             },
             sis
           );
-        }else{
+        } else {
           let selectedItems = this.selectedItems;
-          this.items = _.reduce(items,
+          this.items = _.reduce(
+            items,
             (is, item) => {
-              if(_.indexOf(selectedItems, item)>=0){
-                is.push({ value: item, checked:true });
-              }else{
+              if (_.indexOf(selectedItems, item) >= 0) {
+                is.push({ value: item, checked: true });
+              } else {
                 is.push({ value: item });
               }
               return is;
@@ -200,7 +201,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.search-item {
+  font-size: 0.8rem;
+  padding-bottom: 5px;
+  margin-right: 2px;
+}
+.btn {
+  border-color: lightgray;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .dropdown-menu {
+  font-size: 0.9rem;
   min-width: 220px;
 
   input {

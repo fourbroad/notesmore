@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdown btn-group mr-1">
+  <div class="search-item dropdown btn-group mr-1">
     <button
       class="btn btn-outline-secondary btn-sm dropdown-toggle"
       type="button"
@@ -15,7 +15,7 @@
             id="contains-text"
             type="text"
             name="containsText"
-            v-model="text"
+            v-model.trim="text"
             class="contains-text form-control form-control-sm"
             　placeholder="Contains text"
           >
@@ -95,7 +95,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.search-item {
+  font-size: 0.8rem;
+  padding-bottom: 5px;
+  margin-right: 2px;
+}
+.btn {
+  border-color: lightgray;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .dropdown-menu {
+  font-size: 0.9rem;
   min-width: 220px;
 
   a.disabled {

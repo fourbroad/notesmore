@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import 'bootstrap';
+import "bootstrap";
 import "font-awesome/scss/font-awesome.scss";
 
 export default {
@@ -14,6 +14,10 @@ export default {
 </script>
 
 <style lang="scss">
-@import '~bootstrap/scss/bootstrap';
-@import 'assets/index';
+@import "~bootstrap/scss/bootstrap";
+@import "assets/index";
+
+#app {
+  font-size: 0.9rem;
+}
 </style>

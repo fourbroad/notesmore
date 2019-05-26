@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdown btn-group mr-1">
+  <div class="search-item dropdown btn-group mr-1">
     <button
       class="btn btn-outline-secondary btn-sm dropdown-toggle"
       type="button"
@@ -17,7 +17,7 @@
             class="form-control form-control-sm"
             :class="{'is-invalid':errors.lowestInput&&errors.lowestInput.length > 0}"
             name="lowestInput"
-            v-model.number.trim="lowestInput"
+            v-model.trim.number="lowestInput"
             placeholder="Lowest value"
           >
           <div class="invalid-feedback">
@@ -32,7 +32,7 @@
             class="form-control form-control-sm"
             :class="{'is-invalid':errors.highestInput&&errors.highestInput.length > 0}"
             name="highestInput"
-            v-model.number.trim="highestInput"
+            v-model.trim.number="highestInput"
             placeholder="Highest value"
           >
           <div class="invalid-feedback">
@@ -42,7 +42,7 @@
         <a
           href="javascript:void(0)"
           class="px-2"
-          :class="{disabled:lowestInput==undefined&&highestInput==undefined}"
+          :class="{disabled:lowestInput==''&&highestInput==''}"
           @click="onClearClick"
         >Clear all values</a>
       </form>
@@ -64,7 +64,7 @@ const constraints = {
       options,
       constraints
     ) {
-      if (!attributes.highestInput) return null;
+      if (!attributes.highestInput || value == '') return null;
       return { lessThanOrEqualTo: Number(attributes.highestInput) };
     }
   },
@@ -76,7 +76,7 @@ const constraints = {
       options,
       constraints
     ) {
-      if (!attributes.lowestInput) return null;
+      if (!attributes.lowestInput || value=='') return null;
       return { greaterThanOrEqualTo: Number(attributes.lowestInput) };
     }
   }
@@ -87,15 +87,19 @@ export default {
   data() {
     return {
       errors: {},
-      lowestInput: this.lowestValue,
-      highestInput: this.highestValue
+      lowestInput: this.range.lowestValue !=  undefined ? this.range.lowestValue : '',
+      highestInput: this.range.highestValue !=  undefined ? this.range.highestValue : ''
     };
   },
   props: {
     name: String,
     title: String,
-    lowestValue: Number,
-    highestValue: Number
+    range:{
+      type:Object,
+      default(){
+        return {}
+      }
+    }
   },
   i18n: {
     messages: {
@@ -116,18 +120,17 @@ export default {
     }
   },
   mounted() {
-    this.debouncedUpdateLowest = _.debounce(this.updateLowest, 500);
-    this.debouncedUpdateHighest = _.debounce(this.updateHighest, 500);
+    this.debouncedUpdateRange = _.debounce(this.updateRange, 500);
   },
   computed: {
     buttonText() {
-      var label = "";
-      if (this.lowestValue && this.highestValue) {
-        label = this.title + ":" + this.lowestValue + "-" + this.highestValue;
-      } else if (this.lowestValue) {
-        label = this.title + ">=" + this.lowestValue;
-      } else if (this.highestValue) {
-        label = this.title + "<=" + this.highestValue;
+      var label = "", lowestValue = this.range.lowestValue, highestValue = this.range.highestValue;
+      if (lowestValue && highestValue) {
+        label = this.title + ":" + lowestValue + "-" + highestValue;
+      } else if (lowestValue) {
+        label = this.title + ">=" + lowestValue;
+      } else if (highestValue) {
+        label = this.title + "<=" + highestValue;
       } else {
         label = this.title + ":" + this.$t("all");
       }
@@ -142,33 +145,55 @@ export default {
     lowestInput(newValue, oldValue) {
       this.errors = validate(this.$data, constraints) || {};
       if (_.isEmpty(this.errors)) {
-        this.debouncedUpdateLowest();
+        this.debouncedUpdateRange();
       }
     },
     highestInput(newValue, oldValue) {
       this.errors = validate(this.$data, constraints) || {};
       if (_.isEmpty(this.errors)) {
-        this.debouncedUpdateHighest();
+        this.debouncedUpdateRange();
       }
     }
   },
   methods: {
-    updateLowest() {
-      this.$emit("update:lowestValue", this.lowestInput);
-    },
-    updateHighest() {
-      this.$emit("update:highestValue", this.highestInput);
+    updateRange(){
+      if(this.lowestInput != '' || this.highestInput != ''){
+        let range = {};
+        if(this.lowestInput != ''){
+          range.lowestValue = this.lowestInput;
+        }
+        if(this.highestInput != ''){
+          range.highestValue = this.highestInput;
+        }
+        this.$emit('update:range', range);
+      } else {
+        this.$emit('update:range', undefined);
+      }     
     },
     onClearClick() {
-      this.lowestInput = undefined;
-      this.highestInput = undefined;
+      this.lowestInput = '';
+      this.highestInput = '';
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+.search-item {
+  font-size: 0.8rem;
+  padding-bottom: 5px;
+  margin-right: 2px;
+}
+.btn {
+  border-color: lightgray;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .dropdown-menu {
+  font-size: 0.9rem;
   min-width: 220px;
 
   a.disabled {
