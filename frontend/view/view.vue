@@ -32,7 +32,7 @@
         <div class="search-container mB-10">
           <template v-for="sf in i18n_searchFields">
             <Keywords
-              v-if="sf.type=='keywords'"
+              v-if="sf.type=='keywords'&&(sf.visible == undefined || sf.visible)"
               :key="sf.name"
               :name="sf.name"
               :title="sf.title"
@@ -40,29 +40,42 @@
               :fetchItems="distinctQuery"
             ></Keywords>
             <ContainsText
-              v-if="sf.type=='containsText'"
+              v-if="sf.type=='containsText'&&(sf.visible == undefined || sf.visible)"
               :key="sf.name"
               :name="sf.name"
               :title="sf.title"
               :containsText.sync="getSearchField(sf.name).containsText"
             ></ContainsText>
             <NumericRange
-              v-if="sf.type=='numericRange'"
+              v-if="sf.type=='numericRange'&&(sf.visible == undefined || sf.visible)"
               :key="sf.name"
               :name="sf.name"
               :title="sf.title"
               :range.sync = "getSearchField(sf.name).range"
             ></NumericRange>
             <DatetimeRange
-              v-if="sf.type=='datetimeRange'"
+              v-if="sf.type=='datetimeRange'&&(sf.visible == undefined || sf.visible)"
               :key="sf.name"
               :name="sf.name"
               :title="sf.title"
               :range.sync="getSearchField(sf.name).range"
             ></DatetimeRange>
           </template>
-          <FullTextSearch :keyword="document.search.fulltext.keyword"></FullTextSearch>
-          <SearchSetting :fields="i18n_searchFields"></SearchSetting>
+          <FullTextSearch :keyword.sync="document.search.fulltext.keyword"></FullTextSearch>
+          <!-- <SearchSetting :fields="i18n_searchFields"></SearchSetting> -->
+          <div class="search-item dropdown btn-group">
+            <button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown">
+              <i class="fa fa-ellipsis-h"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <ul class="item-container fa-ul mx-1 mb-0">
+                <li class="dropdown-item px-2" v-for="sf in i18n_searchFields" :key="sf.name" @click.stop.prevent="onSearchConfigurationItemClick(sf.name)" >
+                  <i class="fa-li fa" v-bind:class="{'fa-square-o': sf.visible==false, 'fa-check-square-o': sf.visible==undefined||sf.visible}"></i>
+                    {{sf.title }}
+                  </li>
+              </ul>
+            </div>
+          </div>          
         </div>
       </div>
     </div>
@@ -75,38 +88,54 @@
           <table class="view-table table table-striped table-hover table-sm">
             <thead>
               <tr>
-                <th></th>
-                <th
-                  scope="col"
-                  v-for="(column, colIndex) in i18n_columns"
-                  :key="keyColumn(column,colIndex)"
-                >{{renderHeaderCell(column, colIndex)}}</th>
-                <th>
-                  <ColumnSetting :columns="i18n_columns"></ColumnSetting>
+                <th class="text-center" width="46px"></th>
+                <template v-for="(column, colIndex) in i18n_columns">
+                  <th
+                    scope="col"
+                    v-if="column.visible==undefined||column.visible"
+                    :key="keyColumn(column,colIndex)">
+                    {{renderHeaderCell(column, colIndex)}}
+                  </th>
+                </template>
+                <th class="text-center" width="46px">
+                  <div class="column-configuration">
+                    <button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown">
+                      <i class="fa fa-columns"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                      <ul class="item-container fa-ul mx-1 mb-0">
+                        <li class="dropdown-item px-2" v-for="col in i18n_columns" :key="col.name" @click.stop.prevent="onColumnConfigurationItemClick(col.name)">
+                          <i class="fa-li fa" v-bind:class="{'fa-square-o': col.visible==false, 'fa-check-square-o': col.visible==undefined||col.visible}"></i>
+                            {{col.title }}
+                          </li>                        
+                      </ul>
+                    </div>
+                  </div>
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(doc, row) in documents" :key="keyRow(doc, row)">
-                <td>
+                <td class="text-center" width="46px">
                   <span class="icon-holder">
                     <i :class="[doc._meta.iconClass || 'fa fa-file-text-o']"></i>
                   </span>
                 </td>
-                <td v-for="(column, col) in document.columns" :key="keyCell(doc, column, row, col)">
-                  <a
-                    href="javascript:void(0)"
-                    v-if="column.defaultLink"
-                    @click="$router.push(`/${doc.collectionId}/${doc.id}`)"
-                  >{{renderCell(doc, column, row, col)}}</a>
-                  <span v-if="!column.defaultLink">{{renderCell(doc, column, row, col)}}</span>
-                </td>
-                <td>
+                <template v-for="(column, col) in document.columns">
+                  <td :key="keyCell(doc, column, row, col)" v-if="column.visible==undefined||column.visible">
+                    <a
+                      href="javascript:void(0)"
+                      v-if="column.defaultLink"
+                      @click="$router.push(`/${doc.collectionId}/${doc.id}`)"
+                    >{{renderCell(doc, column, row, col)}}</a>
+                    <span v-if="!column.defaultLink">{{renderCell(doc, column, row, col)}}</span>
+                  </td>
+                </template>
+                <td class="text-center" width="46px">
                   <button
                     type="button"
                     class="btn btn-outline-secondary btn-sm btn-light"
-                    data-toggle="dropdown"
-                  >
+                    data-toggle="dropdown">
                     <i class="fa fa-ellipsis-h"></i>
                   </button>
                   <ul class="dropdown-menu dropdown-menu-right"></ul>
@@ -217,9 +246,6 @@
 <script>
 import { mapState } from "vuex";
 
-import ColumnSetting from "./components/ColumnSetting";
-import SearchSetting from "./components/SearchSetting.vue";
-
 import Keywords from "search/keywords/keywords.vue";
 import ContainsText from "search/contains-text/contains-text.vue";
 import NumericRange from "search/numeric-range/numeric-range.vue";
@@ -242,7 +268,6 @@ export default {
       error: null,
       clone: _.cloneDeep(this.document),
       isNew: false,
-      isFavorite: false,
       from: 0,
       size: 10,
       total: 0,
@@ -251,18 +276,9 @@ export default {
   },
   props: ["document"],
   created() {
-    this.refreshFavorite();
     this.fetchDocuments();
   },
   watch: {
-    document:{
-      handler(newValue, oldValue) {
-        this.refreshFavorite();
-        console.log(arguments);
-        this.fetchDocuments();
-      },
-      deep: true
-    },
     'document.search':{
       handler(newValue, oldValue) {
         this.fetchDocuments();
@@ -304,79 +320,17 @@ export default {
     totalPage() {
       return Math.ceil(this.total / this.size);
     },
-    ...mapState(["currentDomainId", "locale"])
+    isFavorite(){
+      let { domainId, collectionId, id } = this.document,
+        index = _.findIndex(this.profile.favorites, f => _.isEqual(f, {domainId:domainId, collectionId:collectionId, id: id}));
+      return index >= 0;
+    },
+    ...mapState(["currentDomainId", "profile", "locale"])
   },
   methods: {
-    refreshFavorite() {
-      let { Profile, currentUser } = this.$client;
-      Profile.get(
-        this.currentDomainId,
-        currentUser.id,
-        { refresh: true },
-        (err, profile) => {
-          if (err) return (this.error = err.toString());
-          let { domainId, collectionId, id } = this.document;
-          this.isFavorite = !!_.find(profile.favorites, f => {
-            return (
-              f.domainId == domainId &&
-              f.collectionId == collectionId &&
-              f.id == id
-            );
-          });
-        }
-      );
-    },
     onFavoriteClick() {
-      let { Profile, currentUser } = this.$client,
-        { domainId, collectionId, id } = this.document;
-      Profile.get(domainId, currentUser.id, (err, profile) => {
-        if (err) return (this.error = err.toString());
-        let oldFavorites = _.cloneDeep(profile.favorites),
-          patch,
-          index = _.findIndex(profile.favorites, f => {
-            return (
-              f.domainId == domainId &&
-              f.collectionId == collectionId &&
-              f.id == id
-            );
-          });
-        if (index >= 0) {
-          patch = [
-            {
-              op: "remove",
-              path: "/favorites/" + index
-            }
-          ];
-        } else {
-          patch = [
-            profile.favorites
-              ? {
-                  op: "add",
-                  path: "/favorites/-",
-                  value: {
-                    domainId: domainId,
-                    collectionId: collectionId,
-                    id: id
-                  }
-                }
-              : {
-                  op: "add",
-                  path: "/favorites",
-                  value: [
-                    {
-                      domainId: domainId,
-                      collectionId: collectionId,
-                      id: id
-                    }
-                  ]
-                }
-          ];
-        }
-        profile.patch({ patch: patch }, (err, profile) => {
-          if (err) return (this.error = err.toString());
-          this.isFavorite = !this.isFavorite;
-        });
-      });
+      let { domainId, collectionId, id } = this.document
+      this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
     },
     goToPage(pageNo) {
       if (pageNo < 1) pageNo = 1;
@@ -437,6 +391,11 @@ export default {
         return f.name == name;
       })[0];
     },
+    getColumn(name) {
+      return _.filter(this.document.columns, c => {
+        return c.name == name;
+      })[0];
+    },
     onSaveClick(){
       this.document.patch({patch: this.patch}, (err, view) => {
         if (err) return this.error = err.toString();
@@ -460,6 +419,14 @@ export default {
           this.$set(source, entry[0], entry[1])
         }
       });
+    },
+    onSearchConfigurationItemClick(fieldName){
+      let field = this.getSearchField(fieldName), visible = field.visible == undefined || field.visible;
+      this.$set(field, 'visible', !visible)
+    },
+    onColumnConfigurationItemClick(columnName){
+      let col = this.getColumn(columnName), visible = col.visible == undefined || col.visible;
+      this.$set(col, 'visible', !visible)
     },
     at(object, path) {
       if (!object || !path) return;
@@ -497,13 +464,11 @@ export default {
     }
   },
   components: {
-    ColumnSetting,
     Keywords,
     ContainsText,
     NumericRange,
     DatetimeRange,
-    FullTextSearch,
-    SearchSetting
+    FullTextSearch
   }
 };
 </script>
@@ -531,24 +496,61 @@ export default {
   }
 }
 
-.view-table {
-  .table-active {
-    .btn {
-      visibility: visible;
-    }
+.search-item {
+  font-size: 0.8rem;
+  padding-bottom: 5px;
+  margin-right: 2px;
+
+  .btn {
+    border-color: lightgray;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
+  .item-container {
+    font-size: 0.9rem;
+    position: relative;
+
+    li > i {
+      position: relative;
+      left: 0px;
+      top: 0px;
+      width: auto;
+    }
+  }  
+}
+
+
+.view-table {
   th, td {
     vertical-align: middle;
   }
 
-  thead {
-    .btn {
-      border-color: lightgray;
+  .column-configuration{
+    .btn.btn-outline-secondary {
+      border-color: lightgray !important;
     }
+    .item-container {
+      position: relative;
+      font-size: 0.9rem;
+
+      li > i {
+        position: relative;
+        left: 0px;
+        top: 0px;
+        width: auto;
+      }
+    }    
   }
 
   tbody {
+    .table-active {
+      .btn {
+        visibility: visible;
+      }
+    }
     .btn {
       border: none;
       visibility: hidden;

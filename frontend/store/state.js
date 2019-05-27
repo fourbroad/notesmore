@@ -1,3 +1,4 @@
+import client from 'lib/client'
 import jwtDecode from 'jwt-decode';
 
 export default {
@@ -46,8 +47,14 @@ export default {
   set locale(value) {
     localStorage.setItem('locale', value)
   },
+  
+  get currentUser(){
+    return client.currentUser;
+  },
 
+  favorites: [],
+  favoritesOpened: false,
+  profile: null,
   isSidebarNavCollapse: false,
-  currentDomainId: null,
-  crumbList: []
+  currentDomainId: null
 }

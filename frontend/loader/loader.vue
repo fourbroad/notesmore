@@ -1,6 +1,6 @@
 <template>
   <div>
-    <component :is="component" :document="document"></component>
+    <component :is="component" :document="document" :key="document.collectionId+'~'+document.id"></component>
     <div class="loading" v-if="loading">Loading...</div>
     <div v-if="error" class="error">{{ error }}</div>
   </div>

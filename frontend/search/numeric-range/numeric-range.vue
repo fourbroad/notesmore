@@ -10,7 +10,7 @@
     <div class="dropdown-menu px-1">
       <form class="px-2">
         <div class="form-group">
-          <label for="lowestInput">Lowest value</label>
+          <label for="lowestInput">{{$t('lowestLabel')}}</label>
           <input
             id="lowestInput"
             type="number"
@@ -18,14 +18,13 @@
             :class="{'is-invalid':errors.lowestInput&&errors.lowestInput.length > 0}"
             name="lowestInput"
             v-model.trim.number="lowestInput"
-            placeholder="Lowest value"
-          >
+            :placeholder="$t('lowestPlaceholder')">
           <div class="invalid-feedback">
             <span v-for="(error, index) in errors.lowestInput" :key="index">{{error}}</span>
           </div>
         </div>
         <div class="form-group">
-          <label for="highestInput">Highest value</label>
+          <label for="highestInput">{{$t('highestLabel')}}</label>
           <input
             id="highestInput"
             type="number"
@@ -33,8 +32,7 @@
             :class="{'is-invalid':errors.highestInput&&errors.highestInput.length > 0}"
             name="highestInput"
             v-model.trim.number="highestInput"
-            placeholder="Highest value"
-          >
+            :placeholder="$t('highestPlaceholder')">
           <div class="invalid-feedback">
             <span v-for="(error, index) in errors.highestInput" :key="index">{{error}}</span>
           </div>
@@ -44,7 +42,7 @@
           class="px-2"
           :class="{disabled:lowestInput==''&&highestInput==''}"
           @click="onClearClick"
-        >Clear all values</a>
+        >{{$t('clearAll')}}</a>
       </form>
     </div>
   </div>
@@ -57,25 +55,13 @@ import validate from "validate.js";
 
 const constraints = {
   lowestInput: {
-    numericality: function(
-      value,
-      attributes,
-      attributeName,
-      options,
-      constraints
-    ) {
+    numericality(value, attributes, attributeName, options, constraints) {
       if (!attributes.highestInput || value == '') return null;
       return { lessThanOrEqualTo: Number(attributes.highestInput) };
     }
   },
   highestInput: {
-    numericality: function(
-      value,
-      attributes,
-      attributeName,
-      options,
-      constraints
-    ) {
+    numericality(value, attributes, attributeName, options, constraints) {
       if (!attributes.lowestInput || value=='') return null;
       return { greaterThanOrEqualTo: Number(attributes.lowestInput) };
     }
@@ -108,14 +94,16 @@ export default {
         lowestLabel: "Lowest Value",
         lowestPlaceholder: "Lowest value",
         highestLabel: "Highest Value",
-        highestPlaceholder: "Highest value"
+        highestPlaceholder: "Highest value",
+        clearAll: "Clear all values"
       },
       cn: {
         all: "全部",
         lowestLabel: "最小值",
         lowestPlaceholder: "最小值",
         highestLabel: "最大值",
-        highestPlaceholder: "最大值"
+        highestPlaceholder: "最大值",
+        clearAll: "清除所有值"
       }
     }
   },

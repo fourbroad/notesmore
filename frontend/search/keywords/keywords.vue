@@ -28,7 +28,7 @@
         v-if="filter==''"
         :class="{disabled:selectedItems.length<=0}"
         @click="onClearClick"
-      >Clear selected items</a>
+      >{{$t('clearLink')}}</a>
       <div class="item-container-wrapper mT-5">
         <ul class="item-container fa-ul">
           <li v-for="item in items" :key="item.value" @click="onItemClick(item)">
@@ -49,7 +49,7 @@
         <div
           class="enter-hint px-2 text-muted font-italic"
           v-if="items.length>=100"
-        >Enter more content to narrow your selection...</div>
+        >{{$t('enterHint')}}</div>
       </div>
     </div>
   </div>
@@ -88,6 +88,20 @@ export default {
     },
     fetchItems: Function
   },
+  i18n: {
+    messages: {
+      en: {
+        all: "全部",
+        clearLink: "清除已选择项目",
+        enterHint: "输入更多内容,　可以缩小选择范围..."
+      },
+      cn: {
+        all: "全部",
+        clearLink: "清除已选择项目",
+        enterHint: "输入更多内容,　可以缩小选择范围..."
+      }
+    }
+  },
   mounted() {
     let $el = $(this.$el),
       $itemContainerWrapper = $(".item-container-wrapper", $el);
@@ -116,9 +130,9 @@ export default {
           ""
         );
       } else {
-        label = this.title + ": all";
+        label = `${this.title} : ${this.$t('all')}`;
       }
-      return label == "" ? "Please select a " + this.title : label;
+      return label;
     },
     ...mapState(["currentDomainId", "locale"])
   },

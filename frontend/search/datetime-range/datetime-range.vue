@@ -22,8 +22,9 @@
           <div class="input-group input-group-sm col-auto px-0" @click="option='latest'">
             <input
               type="text"
-              class="form-control"
               name="lEarliest"
+              class="form-control"
+              :class="{'is-invalid':errors.lEarliest&&errors.lEarliest.length > 0}"
               ref="lEarliest"
               style="max-width:50px"
               v-model="lEarliest"
@@ -42,7 +43,9 @@
                 <option value="months">{{$t('months')}}</option>
               </select>
             </div>
-            <div class="invalid-feedback"></div>
+            <div class="invalid-feedback">
+              <span v-for="(error, index) in errors.lEarliest" :key="index">{{error}}</span>
+            </div>
           </div>
         </div>
         <div class="form-row mb-3">
@@ -56,7 +59,15 @@
             <span class="moreThan">{{$t('moreThan')}}</span>
           </div>
           <div class="input-group input-group-sm before col-auto px-0" @click="option='before'">
-            <input type="text" class="form-control" name="bfLatest" ref="bfLatest" v-model="bfLatest" style="max-width:50px" :disabled="option!='before'">
+            <input 
+              type="text" 
+              name="bfLatest" 
+              class="form-control" 
+              :class="{'is-invalid':errors.bfLatest&&errors.bfLatest.length > 0}"
+              ref="bfLatest" 
+              v-model="bfLatest" 
+              style="max-width:50px" 
+              :disabled="option!='before'">
             <div class="input-group-append">
               <select
                 class="bf-unit custom-select custom-select-sm border-left-0 rounded-right"
@@ -70,7 +81,9 @@
                 <option value="months">{{$t('months')}}</option>
               </select>
             </div>
-            <div class="invalid-feedback"></div>
+            <div class="invalid-feedback">
+              <span v-for="(error, index) in errors.bfLatest" :key="index">{{error}}</span>              
+            </div>
           </div>
           <div class="col-auto pt-1" @click="option='before'">
             <span class="ago">{{$t('ago')}}</span>
@@ -87,25 +100,45 @@
             <span class="between">{{$t('between')}}</span>
           </div>
           <div class="input-group input-group-sm bt col-auto px-0" @click="option='between'">
-            <input type="text" class="form-control" name="btEarliest" v-model="btEarliest" ref="btEarliest" autocomplete="off" :disabled="option!='between'">
+            <input 
+              type="text" 
+              name="btEarliest" 
+              class="form-control" 
+              :class="{'is-invalid':errors.btEarliest&&errors.btEarliest.length > 0}"
+              v-model="btEarliest" 
+              ref="btEarliest" 
+              autocomplete="off" 
+              :disabled="option!='between'">
             <div class="input-group-append">
               <span class="input-group-text btEarliest-icon" @click="$refs.btEarliest.focus()">
                 <i class="fa fa-calendar"></i>
               </span>
             </div>
-            <div class="invalid-feedback"></div>
+            <div class="invalid-feedback">
+              <span v-for="(error, index) in errors.btEarliest" :key="index">{{error}}</span>
+            </div>
           </div>
           <div class="col-auto pt-1" @click="option='between'">
             <span class="and">{{$t('and')}}</span>
           </div>
           <div class="input-group input-group-sm bt col-auto" @click="option='between'">
-            <input type="text" class="form-control" name="btLatest" ref="btLatest" v-model="btLatest" autocomplete="off" :disabled="option!='between'">
+            <input 
+              type="text" 
+              name="btLatest" 
+              class="form-control" 
+              :class="{'is-invalid':errors.btLatest&&errors.btLatest.length > 0}"
+              ref="btLatest" 
+              v-model="btLatest" 
+              autocomplete="off" 
+              :disabled="option!='between'">
             <div class="input-group-append">
               <span class="input-group-text btLatest-icon" @click="$refs.btLatest.focus()">
                 <i class="fa fa-calendar"></i>
               </span>
             </div>
-            <div class="invalid-feedback"></div>
+            <div class="invalid-feedback">
+              <span v-for="(error, index) in errors.btLatest" :key="index">{{error}}</span>
+            </div>
           </div>
         </div>
         <div class="form-row">
@@ -121,15 +154,17 @@
           <div class="col-auto px-0" @click="option='range'">
             <input
               type="text"
-              class="form-control form-control-sm"
               name="rEarliest"
+              class="form-control form-control-sm"
+              :class="{'is-invalid':errors.rEarliest&&errors.rEarliest.length > 0}"
               ref="rEarliest"
               v-model.trim="rEarliest"
               placeholder="- P1Y2M3DT4H5M6S"
               style="max-width: 132px;"
-              :disabled="option!='range'"
-            >
-            <div class="invalid-feedback" style="max-width: 132px;"></div>
+              :disabled="option!='range'">
+            <div class="invalid-feedback" style="max-width: 132px;">
+              <span v-for="(error, index) in errors.rEarliest" :key="index">{{error}}</span>
+            </div>
           </div>
           <div class="col-auto pt-1" @click="option='range'">
             <span class="to">{{$t('to')}}</span>
@@ -137,23 +172,24 @@
           <div class="col-auto px-0" @click="option='range'">
             <input
               type="text"
-              class="form-control form-control-sm"
               name="rLatest"
+              class="form-control form-control-sm"
+              :class="{'is-invalid':errors.rLatest&&errors.rLatest.length > 0}"
               ref="rLatest"
               v-model.trim="rLatest"
               placeholder="P1Y2M3DT4H5M6S"
               style="max-width: 132px;"
               :disabled="option!='range'"
             >
-            <div class="invalid-feedback" style="max-width: 132px;"></div>
+            <div class="invalid-feedback" style="max-width: 132px;">
+              <span v-for="(error, index) in errors.rLatest" :key="index">{{error}}</span>
+            </div>
           </div>
         </div>
         <div class="form-row mb-3" @click="option='range'">
           <small class="col-auto form-text text-muted ml-4">
             <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601:&nbsp</a>
-            <span
-              class="iso8601"
-            >{{$t('iso8601')}}</span>
+            <span class="iso8601">{{$t('iso8601')}}</span>
           </small>
         </div>
         <a
@@ -232,12 +268,12 @@ export default {
       option: this.range.option,
       lUnit: this.range.unit||'minutes', 
       bfUnit: this.range.unit||'minutes',
-      lEarliest: this.range.earliest,
-      bfLatest: this.range.latest,
-      btEarliest: this.range.earliest,
-      btLatest: this.range.latest,
-      rEarliest: this.range.sEarliest,
-      rLatest: this.range.sLatest
+      lEarliest: this.range.earliest||'',
+      bfLatest: this.range.latest||'',
+      btEarliest: this.range.earliest||'',
+      btLatest: this.range.latest||'',
+      rEarliest: this.range.sEarliest||'',
+      rLatest: this.range.sLatest||''
     };
   },
   props: {
@@ -287,22 +323,22 @@ export default {
         constraints: {
           lEarliest: {
             numericality: {
-              message: "请输入大于0的整数"
+              message: "^请输入大于0的整数"
             }
           },
           bfLatest: {
             numericality: {
-              message: "请输入大于0的整数"
+              message: "^请输入大于0的整数"
             }
           },
           rEarliest: {
             format: {
-              message: "日期范围必须符合ISO 8609规范"
+              message: "^日期范围必须符合ISO 8609规范"
             }
           },
           rLatest: {
             format: {
-              message: "日期范围必须符合ISO 8609规范"
+              message: "^日期范围必须符合ISO 8609规范"
             }
           }
         },
@@ -311,32 +347,34 @@ export default {
     }
   },
   mounted() {
-    console.log(this.$i18n.getLocaleMessage("cn"));
-
     this.debouncedUpdateRange = _.debounce(this.updateRange, 500);
 
-    let _this = this;
+    let vm = this;
     $.datetimepicker.setDateFormatter('moment');
+    if(this.$i18n.locale == 'cn'){
+      $.datetimepicker.setLocale('ch');        
+    }
+
     this.$btEarliest.datetimepicker({
       format: "YYYY-MM-DD HH:mm:ss",
       onShow(ct) {
         this.setOptions({
-          maxDate: _this.$btLatest.val() ? _this.$btLatest.val() : false
+          maxDate: vm.$btLatest.val() ? vm.$btLatest.val() : false
         });
       },
       onChangeDateTime(dp,$input){
-        _this.btEarliest = $input.val();
+        vm.btEarliest = $input.val();
       }      
     });
     this.$btLatest.datetimepicker({
       format: "YYYY-MM-DD HH:mm:ss",
       onShow: function(ct) {
         this.setOptions({
-          minDate: _this.$btEarliest.val() ? _this.$btEarliest.val() : false
+          minDate: vm.$btEarliest.val() ? vm.$btEarliest.val() : false
         });
       },
       onChangeDateTime(dp,$input){
-        _this.btLatest = $input.val();
+        vm.btLatest = $input.val();
       }      
     });
   },
@@ -387,7 +425,7 @@ export default {
       return label;
     },
     constraints() {
-    //   _.merge(o.constraints, _.at(o, "i18n." + this.locale + ".constraints")[0]);
+      return _.merge(_.cloneDeep(constraints), _.at(this.$i18n.getLocaleMessage(this.$i18n.locale),'constraints')[0]);
     },
     $form() {
       return $(this.$el).find("form");
@@ -404,17 +442,17 @@ export default {
     option(newValue, oldValue) {
       this.updateRange();
     },
-    lUnit(newValue, oldValue) {
-      this.updateRange();
-    },
-    bfUnit(newValue, oldValue) {
-      this.updateRange();
-    },
     lEarliest(newValue, oldValue) {
       this.debouncedUpdateRange();
     },
+    lUnit(newValue, oldValue) {
+      this.updateRange();
+    },
     bfLatest(newValue, oldValue) {
       this.debouncedUpdateRange();
+    },
+    bfUnit(newValue, oldValue) {
+      this.updateRange();
     },
     btEarliest(newValue, oldValue) {
       this.debouncedUpdateRange();
@@ -433,50 +471,74 @@ export default {
     updateRange() {
       switch(this.option){
         case 'latest':
-          if(this.lEarliest != undefined){
-            this.$emit("update:range", {option: this.option, unit: this.lUnit, earliest: this.lEarliest});
+          if(this.lEarliest != ''){
+            let data = {lEarliest: this.lEarliest};
+            this.errors = validate(data, this.constraints) || {};
+            if (_.isEmpty(this.errors)) {
+              this.$emit("update:range", {option: this.option, unit: this.lUnit, earliest: this.lEarliest});
+            }
           }else{
+            this.errors = {};
             this.$emit("update:range", undefined);
           }
           break;
         case 'before':
-          if(this.bfLatest != undefined){
-            this.$emit("update:range", {option: this.option, unit: this.bfUnit, latest: this.bfLatest});
+          if(this.bfLatest != ''){
+            let data = {bfLatest: this.bfLatest};
+            this.errors = validate(data, this.constraints) || {};
+            if (_.isEmpty(this.errors)) {
+              this.$emit("update:range", {option: this.option, unit: this.bfUnit, latest: this.bfLatest});
+            }
           }else{
+            this.errors = {};
             this.$emit("update:range", undefined);
           }
           break;
         case 'between':
-          if(this.btEarliest != undefined || this.btLatest != undefined){
-            let range = {option: this.option}
-            if(this.btEarliest != undefined) range.earliest = +moment(this.btEarliest);
-            if(this.btLatest != undefined) range.latest = +moment(this.btLatest);
-            this.$emit("update:range", range);
-
+          if(this.btEarliest != '' || this.btLatest != ''){
+            let data = {};
+            if(this.btEarliest != '') data.btEarliest = this.btEarliest;
+            if(this.btLatest != '') data.btLatest = this.btLatest;
+            this.errors = validate(data, this.constraints) || {};
+            if (_.isEmpty(this.errors)) {
+              let range = {option: this.option}
+              if(this.btEarliest != '') range.earliest = +moment(this.btEarliest);
+              if(this.btLatest != '') range.latest = +moment(this.btLatest);
+              this.$emit("update:range", range);
+              }
           }else{
+            this.errors = {};
             this.$emit("update:range", undefined);
           }
           break;
         case 'range':
-          if(this.rEarliest != undefined || this.rLatest != undefined){
-            let range = {option: this.option}
-            if(this.rEarliest != '') range.sEarliest = this.rEarliest;
-            if(this.rLatest != '') range.sLatest = this.rLatest;
-            this.$emit("update:range", range);
+          if(this.rEarliest != '' || this.rLatest != ''){
+            let data = {};
+            if(this.rEarliest != '') data.rEarliest = this.rEarliest;
+            if(this.rLatest != '') data.rLatest = this.rLatest;
+            this.errors = validate(data, this.constraints) || {};
+            if (_.isEmpty(this.errors)) {
+              let range = {option: this.option}
+              if(this.rEarliest != '') range.sEarliest = this.rEarliest;
+              if(this.rLatest != '') range.sLatest = this.rLatest;
+              this.$emit("update:range", range);
+            }
           }else{
+            this.errors = {};
             this.$emit("update:range", undefined);
           }
           break;
         default:
+          this.errors = {};
           this.$emit("update:range", undefined);
       }
     },
     onClearClick() {
       this.option = undefined;
-      this.lEarliest = undefined;
-      this.bfLatest = undefined;
-      this.btEarliest = undefined;
-      this.btLatest = undefined;
+      this.lEarliest = '';
+      this.bfLatest = '';
+      this.btEarliest = '';
+      this.btLatest = '';
       this.rEarliest = '';
       this.rLatest = '';
     }

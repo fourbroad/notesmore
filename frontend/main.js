@@ -121,9 +121,7 @@ router.beforeEach((to, from, next) => {
 })
 
 router.afterEach((to, from, next) => {
-  var routerList = to.matched
-  store.commit('setCrumbList', routerList)
-  store.commit('permission/SET_CURRENT_MENU', to.name)
+  // store.commit('permission/SET_CURRENT_MENU', to.name)
 })
 
 const i18n = new VueI18n({ locale: 'cn'});

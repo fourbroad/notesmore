@@ -17,7 +17,7 @@
             name="containsText"
             v-model.trim="text"
             class="contains-text form-control form-control-sm"
-            　placeholder="Contains text"
+            :placeholder="$t('containsTextPlaceholder')"
           >
           <small class="remark　form-text text-muted"></small>
         </div>
@@ -26,7 +26,7 @@
           class="clear-contains-text px-2"
           :class="{disabled:text==''}"
           @click="text=''"
-        >Clear contains text</a>
+        >{{$t('clearContainsText')}}</a>
       </form>
     </div>
   </div>
@@ -56,12 +56,14 @@ export default {
       en: {
         all: "All",
         contains: "contains",
-        containsTextPlaceholder: "contains text"
+        containsTextPlaceholder: "contains text",
+        clearContainsText: "Clear contains text"
       },
       cn: {
         all: "全部",
         contains: "包含",
-        containsTextPlaceholder: "包含文本"
+        containsTextPlaceholder: "包含文本",
+        clearContainsText: "清除包含文本"
       }
     }
   },

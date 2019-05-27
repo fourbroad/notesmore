@@ -48,11 +48,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.search-item {
-  display: inline-flex;
-  width: fit-content;
-  vertical-align: middle;
-  border-radius: 0.2rem;
+.btn.btn-outline-secondary {
+  border-color: lightgray !important;
 }
 
 .item-container {

@@ -27,8 +27,8 @@
                   <div class="container d-flex h-100">
                     <div class="row justify-content-center align-self-center">
                       <div>
-                        <h4 class="workbench-title mb-0">{{page.title}}</h4>
-                        <small class="slogan">{{page.slogan}}</small>
+                        <h4 class="workbench-title mb-0">{{localePage.title}}</h4>
+                        <small class="slogan">{{localePage.slogan}}</small>
                       </div>
                     </div>
                   </div>
@@ -53,18 +53,27 @@
               <span class="title">{{item.title}}</span>
             </a>
           </li>
-          <li class="favorites nav-item dropdown">
-            <a class="dropdown-toggle sidebar-link document">
+          <li class="favorites nav-item dropdown" :class="{open:favoritesOpened}">
+            <a class="dropdown-toggle sidebar-link document" @click="favoritesOpened = !favoritesOpened">
               <span class="icon-holder">
                 <i class="c-red-500 fa fa-star-o"></i>
               </span>
-              <span class="title">Favorites</span>
-              <span class="badge badge-pill badge-info mT-10"></span>
+              <span class="title">{{localePage.favorites.title}}</span>
+              <span class="badge badge-pill badge-info mT-10">{{(localeFavorites && localeFavorites.length)||0}}</span>
               <span class="arrow">
                 <i class="fa fa-angle-right"></i>
               </span>
             </a>
-            <ul class="favorite-item-container dropdown-menu"></ul>
+            <ul class="favorite-item-container dropdown-menu">
+              <li class="nav-item" v-for="favorite in localeFavorites" :key="favorite.id" @click="$router.push(`/${favorite.collectionId}/${favorite.id}`)">
+                <a class="sidebar-link document">
+                  <span class="icon-holder">
+                    <i :class="[favorite._meta.iconClass||'fa fa-file-text-o']"></i>
+                  </span>
+                  <span class="title">{{favorite.title}}</span>
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
       </div>
@@ -83,7 +92,7 @@
                 <i class="fa fa-file-o"></i>
               </a>
             </li>
-            <li class="search-box">
+            <li class="search-box" @click="$router.push('/.views/.searchDocuments')">
               <a class="search-toggle">
                 <i class="search-icon fa fa-search"></i>
               </a>
@@ -106,21 +115,21 @@
                   >
                 </div>
                 <div class="peer">
-                  <span class="nickname fsz-sm">Please sign-in</span>
+                  <span class="nickname fsz-sm">{{nickname}}</span>
                 </div>
               </a>
               <ul class="profile-menu dropdown-menu fsz-sm">
                 <li class="profile">
                   <a href="javascript:void(0)" class="d-b td-n pY-5 text-dark">
                     <i class="fa fa-user-circle-o mR-10"></i>
-                    <span class="label">Profile</span>
+                    <span class="label">{{$t('profile')}}</span>
                   </a>
                 </li>
                 <li role="separator" class="divider"></li>
                 <li class="sign-off" @click="loginOut">
                   <a href="javascript:void(0)" class="d-b td-n pY-5 text-dark">
                     <i class="fa fa-power-off mR-10"></i>
-                    <span class="label">Logout</span>
+                    <span class="label">{{$t('logout')}}</span>
                   </a>
                 </li>
               </ul>
@@ -143,7 +152,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex"
+import { mapState, mapGetters} from "vuex"
 
 import _ from "lodash"
 import Loader from "core/loader"
@@ -163,23 +172,50 @@ export default {
       sidebarItems: []
     };
   },
-  props:['document'],
+  i18n: {
+    messages: {
+      en: {
+        pleaseSignIn:"Please sign-in",
+        profile: "Profile",
+        logout: "Logout"
+      },
+      cn: {
+        pleaseSignIn:"请登录",
+        profile: "设置",
+        logout: "退出登录"
+      }
+    }
+  },  
   components: {
     notification
   },
   created() {
     this.fetchData();
   },
-  // watch: {
-  //   $route: "fetchData"
-  // },
   computed: {
+    nickname(){
+      return this.localeCurrentUser ? (this.localeCurrentUser.title || this.localeCurrentUser.id) : this.$t('pleaseSignIn');
+    },
+    localePage(){
+      return this.page.get(this.locale);
+    },
+    favoritesOpened:{
+      get(){
+        return this.$store.state.favoritesOpened;
+      },
+      set(opened){
+        this.$store.commit('SET_FAVORITESOPENED', opened);
+      }
+    },
     ...mapState([
       "isSidebarNavCollapse",
-      "crumbList",
       "currentDomainId",
-      "locale"
-    ])
+      "locale",
+    ]),
+    ...mapGetters([
+      "localeFavorites",
+      "localeCurrentUser"
+    ])    
   },
   methods: {
     toggleNavCollapse() {
@@ -212,19 +248,16 @@ export default {
       });
     },
     fetchData() {
-      let { Page } = this.$client
-
+      let {Domain, Page, Profile, currentUser} = this.$client
       this.error = this.post = null;
       this.loading = true;
       Page.get(this.currentDomainId, ".workbench", (err, page) => {
         this.loading = false;
-        if (err) {
-          this.error = err.toString();
-        } else {
-          this.page = page;
-          this.getSidebarItems(page.sidebarItems);
-        }
+        if (err) return this.error = err.toString();
+        this.page = page;
+        this.getSidebarItems(page.sidebarItems);
       });
+      this.$store.dispatch('FETCH_FAVORITES');
     }
   }
 };
