@@ -1,6 +1,6 @@
 <template>
   <div>
-    <component :is="component" :document="document" :key="document.collectionId+'~'+document.id"></component>
+    <component :is="component" :actionId="actionId" :document="document" :isNew="isNew" :key="document.collectionId+'~'+document.id"></component>
     <div class="loading" v-if="loading">Loading...</div>
     <div v-if="error" class="error">{{ error }}</div>
   </div>
@@ -16,6 +16,8 @@ const components = {
   im: () => import('im/im.vue'),
   email: () => import('email/email.vue'),
   gridView: () => import('view/view.vue'),
+  edit: () => import('form/form.vue'),
+  new: () => import('form/form.vue'),
   notFound: () => import('errors/404'),
   forbidden: () => import('errors/403')
 }
@@ -25,7 +27,9 @@ export default {
     return {
       loading: false,
       component: null,
+      actionId: '',
       document: {},
+      isNew: false,
       key: null,
       error: null
     };
@@ -57,7 +61,8 @@ export default {
         actionId = actionId || defaultAction || actions[0]
         Action.get(domId, actionId, (err, action) => {
           if (err) return this.error = err.toString()
-          this.component = components[action.id]
+          this.component = components[actionId]
+          this.actionId = actionId;
           this.document = doc
           this.loading = false
         });
@@ -69,10 +74,16 @@ export default {
         documentId = params.documentId || meta.documentId,
         actionId = params.actionId || meta.actionId,
         domId = this.currentDomainId,
-        { Meta, Domain, Collection, View, Page, Form, Role, Group, User, Document, Action } = this.$client
+        { Meta, Domain, Collection, View, Page, Form, Role, Profile, Group, User, Document, Action } = this.$client
+
+      this.loading = true
+
+      if(actionId == 'new'){
+        return this.createDocument(domId, documentId);
+      }
 
       this.error = this.post = null
-      this.loading = true
+      this.isNew = false;
 
       switch (collectionId) {
         case ".metas":
@@ -117,6 +128,12 @@ export default {
             this._doLoadDocument(role, actionId)
           })
           break
+        case ".profiles":
+          Profile.get(domId, documentId, (err, profile) => {
+            if (err) return (this.error = err.toString())
+            this._doLoadDocument(profile, actionId)
+          })
+          break
         case ".groups":
           Group.get(domId, documentId, (err, group) => {
             if (err) return (this.error = err.toString())
@@ -141,6 +158,58 @@ export default {
             this._doLoadDocument(doc, actionId)
           })
       }
+    },
+    createDocument(domainId, metaId){
+      let { Meta, Domain, Collection, View, Page, Form, Role, Profile, Group, User, Document, Action } = this.$client;
+      Meta.get(domainId, metaId, (err, meta)=>{
+        let collectionId = meta.container.id, doc, docData = {};
+        _.merge(docData, {_meta: {metaId: metaId, iconClass:meta._meta.iconClass}}, _.cloneDeep(meta.defaultValue));
+        switch(collectionId){
+          case '.metas':
+            doc = new Meta(domainId, docData, true);
+            break;
+          case '.domains':
+            doc = new Domain(docData, true);
+            break;
+          case '.collections':
+            doc = new Collection(domainId, docData, true);
+            break;
+          case '.views':
+            doc = new View(domainId, docData, true);
+            break;
+          case '.pages':
+            doc = new Page(domainId, docData, true);
+            break;
+          case '.forms':
+            doc = new Form(domainId, docData, true);
+            break;
+          case '.roles':
+            doc = new Role(domainId, docData, true);
+            break;
+          case '.profiles':
+            doc = new Profile(domainId, docData, true);
+            break;
+          case '.groups':
+            doc = new Group(domainId, docData, true);
+            break;
+          case '.users':
+            doc = new User(docData, true);
+            break;
+          case '.actions':
+            doc = new Action(domainId, docData, true);
+            break;
+          default:
+            doc = new Document(domainId, collectionId, docData, true);
+        }
+
+        Action.get(domainId, 'new', (err, action)=>{
+          if (err) return this.error = err.toString()
+          this.component = components[action.id]
+          this.document = doc
+          this.isNew = true;
+          this.loading = false
+        });
+      });
     }
   }
 }

@@ -2,6 +2,7 @@
   <div class="workbench" :class="{'is-collapsed':isSidebarNavCollapse}">
     <div class="loading" v-if="loading">Loading...</div>
     <div v-if="error" class="error">{{ error }}</div>
+    <NewDialog :opened.sync="openNewDialog"></NewDialog>
     <div class="sidebar" v-if="page">
       <div class="sidebar-inner">
         <div class="sidebar-logo p-0">
@@ -12,13 +13,7 @@
                   <div class="container h-100">
                     <div class="row h-100 align-items-center justify-content-center">
                       <div class="col align-items-center">
-                        <img
-                          class="mt-1"
-                          width="40px"
-                          height="40px"
-                          src="./images/logo.png"
-                          alt="Logo"
-                        >
+                        <img class="mt-1" width="40px" height="40px" src="./images/logo.png" alt="Logo">
                       </div>
                     </div>
                   </div>
@@ -87,7 +82,7 @@
                 <i class="fa fa-bars"></i>
               </a>
             </li>
-            <li class="new-document">
+            <li class="new-document" @click="openNewDialog = !openNewDialog">
               <a>
                 <i class="fa fa-file-o"></i>
               </a>
@@ -101,18 +96,9 @@
           <ul class="nav-right mr-3">
             <li is="notification"></li>
             <li>
-              <a
-                class="dropdown-toggle no-after peers fxw-nw ai-c lh-1 pr-1"
-                data-toggle="dropdown"
-              >
+              <a class="dropdown-toggle no-after peers fxw-nw ai-c lh-1 pr-1" data-toggle="dropdown">
                 <div class="peer mR-10">
-                  <img
-                    class="avatar w-2r bdrs-50p"
-                    width="32px"
-                    height="32px"
-                    src="./images/run.png"
-                    alt
-                  >
+                  <img class="avatar w-2r bdrs-50p" width="32px" height="32px" src="./images/run.png" alt>
                 </div>
                 <div class="peer">
                   <span class="nickname fsz-sm">{{nickname}}</span>
@@ -120,7 +106,7 @@
               </a>
               <ul class="profile-menu dropdown-menu fsz-sm">
                 <li class="profile">
-                  <a href="javascript:void(0)" class="d-b td-n pY-5 text-dark">
+                  <a href="javascript:void(0)" class="d-b td-n pY-5 text-dark" @click="$router.push(`/.profiles/${profile.id}`)">
                     <i class="fa fa-user-circle-o mR-10"></i>
                     <span class="label">{{$t('profile')}}</span>
                   </a>
@@ -154,8 +140,9 @@
 <script>
 import { mapState, mapGetters} from "vuex"
 
+import NewDialog from "new-dialog/new-dialog.vue";
+
 import _ from "lodash"
-import Loader from "core/loader"
 import jsonPatch from "fast-json-patch"
 
 import "perfect-scrollbar/css/perfect-scrollbar.css"
@@ -169,7 +156,8 @@ export default {
       loading: false,
       error: null,
       page: null,
-      sidebarItems: []
+      sidebarItems: [],
+      openNewDialog: false
     };
   },
   i18n: {
@@ -186,9 +174,6 @@ export default {
       }
     }
   },  
-  components: {
-    notification
-  },
   created() {
     this.fetchData();
   },
@@ -211,11 +196,12 @@ export default {
       "isSidebarNavCollapse",
       "currentDomainId",
       "locale",
+      "profile"
     ]),
     ...mapGetters([
       "localeFavorites",
       "localeCurrentUser"
-    ])    
+    ])
   },
   methods: {
     toggleNavCollapse() {
@@ -259,6 +245,9 @@ export default {
       });
       this.$store.dispatch('FETCH_FAVORITES');
     }
+  },
+  components: {
+    notification, NewDialog
   }
 };
 </script>

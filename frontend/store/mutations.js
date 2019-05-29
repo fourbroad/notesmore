@@ -19,5 +19,8 @@ export default {
   },
   SET_FAVORITESOPENED(state, opened){
     state.favoritesOpened = opened
-  }
+  },
+  SET_METAS(state, metas) {
+    state.metas = metas
+  },
 }

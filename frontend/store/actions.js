@@ -32,8 +32,7 @@ export default {
     }
   },
   async TOGGLE_FAVORITE({state, commit, dispatch, rootState}, favorite) {
-    let profile = state.profile, patch,
-      oldFavorites = _.cloneDeep(profile.favorites),
+    let {profile} = state, patch,
       index = _.findIndex(profile.favorites, f => _.isEqual(f, favorite));
       if (index >= 0) {
         patch = [{
@@ -66,5 +65,35 @@ export default {
           dispatch('FETCH_FAVORITES');
         });
       });
+  },
+  async FETCH_METAS({state, commit, dispatch, rootState}) {
+    let {Meta, currentUser} = client, {profile, currentDomainId} = state;
+    function fetchMetas(profile){
+      return new Promise((resolve, reject) => {
+        Meta.find(currentDomainId, {size:1000}, (err, result) => {
+          if(err) return reject(err);
+          let metas = _.reduce(result.metas, (metas, meta) => {
+            let permissions = _.at(meta, 'acl.create')[0];
+            if (!permissions
+              || _.intersection(profile.roles, permissions.roles).length > 0 
+              || _.intersection(profile.groups, permissions.groups).length > 0 
+              || (permissions.users && permissions.users.indexOf(currentUser.id) >= 0)) {
+              metas.push(meta);
+            }
+            return metas;
+          },[]);
+          commit('SET_METAS', metas);
+          resolve(metas);
+        });
+      });
+    }
+
+    if(profile){
+      return fetchMetas(profile);
+    }else{
+      return dispatch('FETCH_PROFILE').then((profile)=>{
+        return fetchMetas(profile);
+      });
+    }    
   }
 }

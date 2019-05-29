@@ -11,18 +11,62 @@
             <i class="fa fa-star-o" :class="{'c-red-500': isFavorite}"></i>
           </span>
           <div class="actions btn-group float-right">
-            <button type="button" v-if="isNew||isDirty" @click="onSaveClick" class="save btn btn-primary btn-sm">Save</button>
-            <button type="button" v-if="isNew||isDirty" @click="onCancelClick" class="cancel btn btn-sm">Cancel</button>
+            <button type="button" v-if="isNew||isDirty" @click="onSaveClick" class="save btn btn-primary btn-sm">{{$t('save')}}</button>
+            <button type="button" v-if="isNew||isDirty" @click="onCancelClick" class="cancel btn btn-sm">{{$t('cancel')}}</button>
             <button
               type="button"
               class="more btn btn-outline-secondary btn-sm btn-light"
-              data-toggle="dropdown"
-            >
+              data-toggle="dropdown">
               <i class="fa fa-ellipsis-h"></i>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li class="dropdown-item save-as">Save as ...</li>
+                <li class="dropdown-item save-as" @click="onSaveAsClick">{{$t('saveAs')}}</li>
+                <div class="dropdown-divider"></div>
+                <li class="dropdown-item export-csv-all">{{$t('exportAllCSV')}}</li>
+                <li class="dropdown-item export-csv-current">{{$t('exportCurrentCSV')}}</li>
+                <div class="dropdown-divider"></div>
+                <template v-for="act in localeActions">
+                  <li class="dropdown-item" v-if="act.id!=actionId" @click="onActionClick(act)" :key="act.collectionId+'~'+act.id">
+                    {{act.title}}
+                  </li>
+                </template>
+                <div class="dropdown-divider" v-if="deleteable"></div>
+                <li class="dropdown-item delete" v-if="deleteable" @click="onDeleteSelf">{{$t('delete')}}</li>
               </ul>
             </button>
+            <div class="modal fade" id="save-as" ref="saveAs" tabindex="-1" role="dialog" aria-labelledby="save-as" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">{{$t('save')}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form class="id-title">
+                      <div class="form-group">
+                        <label for="id">{{$t('id')}}</label>
+                        <input type="text" class="form-control" name="id" v-model="saveAsId" aria-describedby="docHelp">
+                        <span class="messages"></span>
+                      </div>
+                      <div class="form-group">
+                        <label for="title">{{$t('title')}}</label>
+                        <input type="text" class="form-control" name="title" v-model="saveAsTitle" aria-describedby="docHelp">
+                        <span class="messages"></span>
+                      </div>
+                      <button type="submit" class="btn btn-primary d-none" @click="onSaveAsSubmit">{{$t('submit')}}</button>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="cancel btn btn-secondary" data-dismiss="modal">{{$t('cancel')}}</button>
+                    <button type="button" class="submit btn btn-primary" @click="onSaveAsSubmit" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Please wait...">
+                      <span v-if="wait" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true">{{$t('wait')}}</span>
+                      <span v-if="!wait">{{$t('submit')}}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>            
           </div>
         </div>
       </div>
@@ -115,7 +159,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(doc, row) in documents" :key="keyRow(doc, row)">
+              <tr v-for="(doc, row) in documents" :class="{'table-active':isActive(doc)}" @click="setActive(doc)" :key="keyRow(doc, row)">
                 <td class="text-center" width="46px">
                   <span class="icon-holder">
                     <i :class="[doc._meta.iconClass || 'fa fa-file-text-o']"></i>
@@ -135,10 +179,16 @@
                   <button
                     type="button"
                     class="btn btn-outline-secondary btn-sm btn-light"
-                    data-toggle="dropdown">
+                    data-toggle="dropdown" @click="setActive(doc)">
                     <i class="fa fa-ellipsis-h"></i>
                   </button>
-                  <ul class="dropdown-menu dropdown-menu-right"></ul>
+                  <ul class="dropdown-menu dropdown-menu-right">
+                    <template v-for="act in localeRowActions">
+                      <li class="dropdown-item" @click="onRowActionClick(doc, act)" :key="act.collectionId+'~'+act.id">
+                        {{act.title}}
+                      </li>
+                    </template>                    
+                  </ul>
                 </td>
               </tr>
             </tbody>
@@ -252,10 +302,12 @@ import NumericRange from "search/numeric-range/numeric-range.vue";
 import DatetimeRange from "search/datetime-range/datetime-range.vue";
 import FullTextSearch from "search/full-text/full-text-search";
 
-import _ from "lodash";
+import utils from 'core/utils';
+
 import jsonPatch from "fast-json-patch";
 import validate from "validate.js";
 import FileSaver from "file-saver";
+import uuidv4 from "uuid/v4";
 
 // const PerfectScrollbar from'perfect-scrollbar')
 // import 'perfect-scrollbar/css/perfect-scrollbar.css')
@@ -266,17 +318,56 @@ export default {
   data() {
     return {
       error: null,
+      saveAsId: '',
+      saveAsTitle:'',
+      wait: false,
+      actions: [],
+      deleteable: false,
+      activeRow:null,
+      rowActions:[],
       clone: _.cloneDeep(this.document),
       isNew: false,
       from: 0,
-      size: 10,
+      size: 15,
       total: 0,
       documents: []
     };
   },
-  props: ["document"],
+  props: ["document","actionId"],
+  i18n: {
+    messages: {
+      en:{
+        id: "ID",
+        title: "title",
+        save: "Save",
+        saveAs: "Save as...",
+        wait: "Please wait...",
+        cancel: "Cancel",
+        delete: "Delete",
+        submit: "Submit",
+        exportAllCSV: "Exports CSV (All Fields)",
+        exportCurrentCSV: "Exports CSV (Current Fields)" 
+      },
+      cn: {
+        id: "唯一标识",
+        title: "标题",
+        save: "保存",
+        saveAs: "另存为...",
+        wait: "请稍等...",
+        cancel: "取消",
+        delete: "删除",
+        submit: "提交",
+        exportAllCSV: "导出为CSV文件（所有字段）",
+        exportCurrentCSV: "导出为CSV文件（当前字段）" 
+      }
+    }
+  },  
   created() {
     this.fetchDocuments();
+    this.fetchActions(this.document).then((actions)=>{
+      this.actions = actions;
+    });
+    this.checkPermission();
   },
   watch: {
     'document.search':{
@@ -295,6 +386,18 @@ export default {
     },
     localeDoc() {
       return this.document.get(this.locale);
+    },
+    localeActions(){
+      return _.reduce(this.actions, (acts, act)=>{
+        acts.push(act.get(this.locale));
+        return acts;
+      }, []);
+    },
+    localeRowActions(){
+      return _.reduce(this.rowActions, (acts, act)=>{
+        acts.push(act.get(this.locale));
+        return acts;
+      }, []);
     },
     searchFields() {
       return this.document.search.fields;
@@ -325,9 +428,22 @@ export default {
         index = _.findIndex(this.profile.favorites, f => _.isEqual(f, {domainId:domainId, collectionId:collectionId, id: id}));
       return index >= 0;
     },
+    $saveAs(){
+      return $(this.$refs.saveAs);
+    },    
     ...mapState(["currentDomainId", "profile", "locale"])
   },
   methods: {
+    isActive(doc){
+      return this.activeRow == doc;
+    },
+    setActive(doc){
+      this.rowActions = [];
+      this.fetchActions(doc).then((actions)=>{
+        this.rowActions = actions;
+      });
+      this.activeRow = doc;
+    },
     onFavoriteClick() {
       let { domainId, collectionId, id } = this.document
       this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
@@ -403,9 +519,34 @@ export default {
         this.replace(this.document, view);
       });
     },
+    onSaveAsClick(){
+      this.saveAsId = uuidv4();
+      this.saveAsTitle = '';
+      this.$saveAs.modal('show');
+    }, 
+    onSaveAsSubmit(){
+      this.saveAs(this.saveAsId, this.saveAsTitle).then(()=>{
+        this.$saveAs.modal('hide');
+        this.$router.replace(`/.views/${this.saveAsId}`);
+      });
+    },
     onCancelClick(){
       this.replace(this.document, this.clone);
     },
+    saveAs(id, title){
+      let {View} = this.$client, view = _.cloneDeep(this.document);
+      view.title = title;
+      delete view._meta;
+      if (this.document.collectionId == '.collections') {
+        view.collections = [this.document.id];
+      }
+      return new Promise((resolve, reject)=>{
+        View.create(this.currentDomainId, id, view, (err, view) => {
+          if (err) return reject(err);
+          resolve(view);
+        });
+      });
+    },    
     replace(source, target){
        // erase all current keys from data
        Object.keys(source).forEach(key => {
@@ -428,29 +569,68 @@ export default {
       let col = this.getColumn(columnName), visible = col.visible == undefined || col.visible;
       this.$set(col, 'visible', !visible)
     },
+    fetchActions(doc){
+      let {Meta, Action} = this.$client;
+      function armItems(domainId, actIds) {
+        return new Promise((resolve, reject)=>{
+          Action.mget(domainId, actIds, (err, result) => {
+            if (err) return reject(err);
+            resolve(result.actions);
+          });
+        });
+      }
+      if (doc._meta.actions) {
+        return armItems(doc.domainId, doc._meta.actions);
+      } else {
+        return new Promise((resolve, reject)=>{
+          Meta.get(doc.domainId, doc._meta.metaId||'.meta', (err, meta) => {
+            if (err) return reject(err);
+            resolve(armItems(doc.domainId, meta.actions));
+          });
+        });
+      }
+    },
+    checkPermission(){
+      let {currentUser} = this.$client, doc = this.document;
+      return new Promise((resolve, reject)=>{
+        utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, (err, result) => {
+          if(err) return reject(err);
+          this.deleteable = result;
+        });
+      });
+    },
+    onActionClick(act){
+      this.$router.push(`/${this.document.collectionId}/${this.document.id}/${act.id}`);
+    },
+    onRowActionClick(doc, act){
+      this.$router.push(`/${doc.collectionId}/${doc.id}/${act.id}`);
+    },
+    onDeleteSelf(){
+      let {currentUser} = this.$client, { domainId, collectionId, id } = this.document;
+      return new Promise((resolve, reject)=>{
+        this.document.delete((err, result) => {
+          if (err) return reject(err);
+          if(this.isFavorite)
+            this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
+          this.$router.go(-1);
+          resolve(result);
+        });
+      });
+    },
     at(object, path) {
       if (!object || !path) return;
       if (_.isString(path)) path = path.split(".");
       if (_.isArray(object)) {
         if (path.length == 1) {
-          return _.reduce(
-            object,
-            function(r, v, k) {
+          return _.reduce(object, (r, v, k) => {
               if (v[path[0]]) r.push(v[path[0]]);
               return r;
-            },
-            []
-          );
+            }, []);
         } else {
-          return this.at(
-            _.reduce(
-              object,
-              function(r, v, k) {
+          return this.at(_.reduce(object, (r, v, k) => {
                 if (v[path[0]]) r.push(v[path[0]]);
                 return r;
-              },
-              []
-            ),
+              }, []),
             _drop[path]
           );
         }
@@ -488,6 +668,10 @@ export default {
   .favorite {
     font-size: 16px;
     vertical-align: super;
+  }
+
+  .dropdown-item {
+    font-size: 0.875rem;
   }
 
   .btn {

@@ -7,7 +7,7 @@ import uuidv4 from 'uuid/v4';
 import Loader from 'core/loader';
 import formHtml from './form.html';
 import ace from 'brace'; 
-import utils from 'core/utils';;
+import utils from 'core/utils';
 
 import './form.scss';
 import 'bootstrap';
