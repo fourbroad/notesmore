@@ -1,8 +1,13 @@
 <template>
-  <div class="workbench" :class="{'is-collapsed':isSidebarNavCollapse}">
+  <div 
+    class="workbench" 
+    :class="{'is-collapsed':isSidebarNavCollapse}">
     <div class="loading" v-if="loading">Loading...</div>
     <div v-if="error" class="error">{{ error }}</div>
     <NewDialog :opened.sync="openNewDialog"></NewDialog>
+    <div class="toast-container" style="position: absolute; left: 5px; bottom: 5px; z-index: 10000">
+      <Toast v-for="toast in toasts" :title="toast.title" :hint="toast.hint" :message="toast.message" :autohide="false" :key="toast.nonce"></Toast>
+    </div>
     <div class="sidebar" v-if="page">
       <div class="sidebar-inner">
         <div class="sidebar-logo p-0">
@@ -124,7 +129,7 @@
         </div>
       </div>
       <main class="main bgc-grey-100">
-        <div class="main-container pos-r">
+        <div ref="mainContainer" class="main-container pos-r">
           <div id="mainContent">
             <router-view></router-view>
           </div>
@@ -141,8 +146,8 @@
 import { mapState, mapGetters} from "vuex"
 
 import NewDialog from "new-dialog/new-dialog.vue";
+import Toast from "toast/toast.vue";
 
-import _ from "lodash"
 import jsonPatch from "fast-json-patch"
 
 import "perfect-scrollbar/css/perfect-scrollbar.css"
@@ -156,6 +161,7 @@ export default {
       loading: false,
       error: null,
       page: null,
+      ps: null,
       sidebarItems: [],
       openNewDialog: false
     };
@@ -177,6 +183,9 @@ export default {
   created() {
     this.fetchData();
   },
+  updated() {
+    this.ps = new PerfectScrollbar(this.$refs.mainContainer, {suppressScrollX:true, wheelPropagation: true});
+  },
   computed: {
     nickname(){
       return this.localeCurrentUser ? (this.localeCurrentUser.title || this.localeCurrentUser.id) : this.$t('pleaseSignIn');
@@ -196,7 +205,8 @@ export default {
       "isSidebarNavCollapse",
       "currentDomainId",
       "locale",
-      "profile"
+      "profile",
+      "toasts"
     ]),
     ...mapGetters([
       "localeFavorites",
@@ -247,7 +257,7 @@ export default {
     }
   },
   components: {
-    notification, NewDialog
+    notification, NewDialog, Toast
   }
 };
 </script>

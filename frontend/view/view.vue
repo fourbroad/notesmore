@@ -21,8 +21,8 @@
               <ul class="dropdown-menu dropdown-menu-right">
                 <li class="dropdown-item save-as" @click="onSaveAsClick">{{$t('saveAs')}}</li>
                 <div class="dropdown-divider"></div>
-                <li class="dropdown-item export-csv-all">{{$t('exportAllCSV')}}</li>
-                <li class="dropdown-item export-csv-current">{{$t('exportCurrentCSV')}}</li>
+                <li class="dropdown-item export-csv-all" @click="exportCsv('allColumns')">{{$t('exportAllCSV')}}</li>
+                <li class="dropdown-item export-csv-current" @click="exportCsv('visibleColumns')">{{$t('exportCurrentCSV')}}</li>
                 <div class="dropdown-divider"></div>
                 <template v-for="act in localeActions">
                   <li class="dropdown-item" v-if="act.id!=actionId" @click="onActionClick(act)" :key="act.collectionId+'~'+act.id">
@@ -30,7 +30,7 @@
                   </li>
                 </template>
                 <div class="dropdown-divider" v-if="deleteable"></div>
-                <li class="dropdown-item delete" v-if="deleteable" @click="onDeleteSelf">{{$t('delete')}}</li>
+                <li class="dropdown-item delete" v-if="deleteable" @click="deleteSelf">{{$t('delete')}}</li>
               </ul>
             </button>
             <div class="modal fade" id="save-as" ref="saveAs" tabindex="-1" role="dialog" aria-labelledby="save-as" aria-hidden="true">
@@ -104,6 +104,13 @@
               :title="sf.title"
               :range.sync="getSearchField(sf.name).range"
             ></DatetimeRange>
+            <DatetimeDuedate
+              v-if="sf.type=='datetimeDuedate'&&(sf.visible == undefined || sf.visible)"
+              :key="sf.name"
+              :name="sf.name"
+              :title="sf.title"
+              :range.sync="getSearchField(sf.name).range"
+            ></DatetimeDuedate>            
           </template>
           <FullTextSearch :keyword.sync="document.search.fulltext.keyword"></FullTextSearch>
           <!-- <SearchSetting :fields="i18n_searchFields"></SearchSetting> -->
@@ -187,7 +194,8 @@
                       <li class="dropdown-item" @click="onRowActionClick(doc, act)" :key="act.collectionId+'~'+act.id">
                         {{act.title}}
                       </li>
-                    </template>                    
+                    </template>
+                    <li class="dropdown-item delete" v-if="rowDeleteable" @click="deleteRow(doc)">{{$t('delete')}}</li>
                   </ul>
                 </td>
               </tr>
@@ -300,6 +308,7 @@ import Keywords from "search/keywords/keywords.vue";
 import ContainsText from "search/contains-text/contains-text.vue";
 import NumericRange from "search/numeric-range/numeric-range.vue";
 import DatetimeRange from "search/datetime-range/datetime-range.vue";
+import DatetimeDuedate from "search/datetime-duedate/datetime-duedate.vue";
 import FullTextSearch from "search/full-text/full-text-search";
 
 import utils from 'core/utils';
@@ -308,11 +317,6 @@ import jsonPatch from "fast-json-patch";
 import validate from "validate.js";
 import FileSaver from "file-saver";
 import uuidv4 from "uuid/v4";
-
-// const PerfectScrollbar from'perfect-scrollbar')
-// import 'perfect-scrollbar/css/perfect-scrollbar.css')
-
-// import "search/datetime-duedate/datetime-duedate";
 
 export default {
   data() {
@@ -325,6 +329,7 @@ export default {
       deleteable: false,
       activeRow:null,
       rowActions:[],
+      rowDeleteable: false,
       clone: _.cloneDeep(this.document),
       isNew: false,
       from: 0,
@@ -443,6 +448,7 @@ export default {
         this.rowActions = actions;
       });
       this.activeRow = doc;
+      this.checkRowDeleteable(doc);
     },
     onFavoriteClick() {
       let { domainId, collectionId, id } = this.document
@@ -599,13 +605,23 @@ export default {
         });
       });
     },
+    checkRowDeleteable(row){
+      let {currentUser} = this.$client;
+      return new Promise((resolve, reject)=>{
+        utils.checkPermission(row.domainId, currentUser.id, 'delete', row, (err, result) => {
+          if(err) return reject(err);
+          this.rowDeleteable = result;
+          resolve(result);
+        });
+      });
+    },
     onActionClick(act){
       this.$router.push(`/${this.document.collectionId}/${this.document.id}/${act.id}`);
     },
     onRowActionClick(doc, act){
       this.$router.push(`/${doc.collectionId}/${doc.id}/${act.id}`);
     },
-    onDeleteSelf(){
+    deleteSelf(){
       let {currentUser} = this.$client, { domainId, collectionId, id } = this.document;
       return new Promise((resolve, reject)=>{
         this.document.delete((err, result) => {
@@ -617,6 +633,106 @@ export default {
         });
       });
     },
+    deleteRow(doc){
+      let {Collection} = this.$client;
+      return new Promise((resolve, reject)=>{
+        doc.delete((err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        });
+      }).then(()=>{
+        return new Promise((resolve, reject)=>{
+          Collection.get(doc.domainId, doc.collectionId, (err, collection) => {
+            if (err) return reject(err);
+            resolve(collection);
+          })
+        });
+      }).then((collection)=>{
+        return new Promise((resolve, reject)=>{
+          collection.refresh((err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+          });
+        });
+      }).then(()=>{
+        this.fetchDocuments();
+      });
+    },
+    exportCsv(source) {
+      let doc = this.document, localeDoc = this.localeDoc, columns = localeDoc.columns,
+        title = `${_.at(localeDoc, 'export.prompt.export')[0] || 'Exports'} ${localeDoc.title}`,
+        rows = [], start = +moment(), count = 0, nonce = uuidv4();
+
+      if (source == 'visibleColumns') {
+        columns = _.omitBy(columns, function (c) {
+          return !c.title || c.visible == false
+        });
+      } else if (source == 'allColumns') {
+        columns = _.omitBy(columns, function (c) {
+          return !c.title
+        });
+      }
+
+      rows.push(_.values(_.mapValues(columns, function (c) {
+        if (c.title) return c.title;
+      })).join(','));
+
+      let doExport = (scrollId) => {
+        let opts = {scroll: '1m'};
+        if (scrollId) {
+          opts.scrollId = scrollId;
+        } else {
+          opts.source = source;
+          opts.size = _.at(doc, 'export.size')[0] || 1000;
+        }
+        doc[scrollId ? 'scroll' : 'findDocuments'](opts, (err, data) => {
+          if (err) return console.error(err);
+          _.each(data.documents, (doc) => {
+            let row = _.reduce(columns, (r, c) => {
+              let d = utils.get(doc.get(this.locale), c.name);
+              if (c.type == 'date') {
+                let date = moment(d);
+                d = (date && date.isValid()) ? date.format('YYYY-MM-DD HH:mm:ss') : '';
+              }
+              if (_.isArray(d)) {
+                d = '\"' + d.toString() + '\"';
+              }
+              r.push(d);
+              return r;
+            }, []);
+            rows.push(row.join(','));
+          });
+
+          if (data.documents.length > 0) {
+            count = count + data.documents.length;
+            this.$store.commit('UPDATE_TOAST', {
+              title: title,
+              hint: `${moment.duration(moment()-start).asSeconds()}(s)`,
+              nonce: nonce,
+              message: `${(count*100/data.total).toFixed(2)}% ${_.at(localeDoc, 'export.prompt.completed')[0] || 'completed'} (${count}/${data.total}).`
+            });
+            doExport(data.scrollId);
+          } else {
+            let blob = new Blob([`\uFEFF${rows.join('\n')}`], { type: "text/plain;charset=utf-8" });
+            FileSaver.saveAs(blob, `${localeDoc.title}.csv`);
+            this.$store.commit('UPDATE_TOAST', {
+              title: title,
+              hint: `${moment.duration(moment()-start).asSeconds()}(s)`,
+              nonce: nonce,
+              message: `${localeDoc.title}.csv ${_.at(localeDoc, 'export.prompt.hasBeenExported')[0] || 'has been exported!'}`
+            });
+          }
+        });
+      }
+
+      this.$store.commit('ADD_TOAST', {
+        title: title,
+        hint: moment().format('HH:MM:SS'),
+        nonce: nonce,
+        message: `${_.at(localeDoc, 'export.prompt.startExporting')[0] || 'Start exporting'} ${localeDoc.title}`
+      });
+      doExport();
+    },    
     at(object, path) {
       if (!object || !path) return;
       if (_.isString(path)) path = path.split(".");
@@ -648,6 +764,7 @@ export default {
     ContainsText,
     NumericRange,
     DatetimeRange,
+    DatetimeDuedate,
     FullTextSearch
   }
 };
@@ -744,6 +861,10 @@ export default {
       .btn {
         visibility: visible;
       }
+    }
+
+    .dropdown-menu{
+      font-size: 0.9rem;
     }
   }
 

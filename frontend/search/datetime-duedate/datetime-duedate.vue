@@ -5,72 +5,47 @@
       type="button"
       data-toggle="dropdown"
       aria-haspopup="true"
-      aria-expanded="false"
-    >{{buttonText}}</button>
+      aria-expanded="false">
+      {{buttonText}}
+    </button>
     <div class="dropdown-menu px-1">
       <form class="px-2">
-        <div class="form-row mb-3 mt-2">
+        <div class="form-row mb-3">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" :id="name+'-latest'" name="radio-stacked" value="latest" v-model="option">
-              <label class="custom-control-label" :for="name+'-latest'"></label>
+              <input type="radio" :id="name+'-overdue'" class="custom-control-input" name="radio-stacked" value="overdue" v-model="option">
+              <label class="custom-control-label" :for="name+'-overdue'"></label>
             </div>
           </div>
-          <div class="col-auto pt-1 pl-0" @click="option='latest'">
-            <span class="withinLast">{{$t('withinLast')}}</span>
-          </div>
-          <div class="input-group input-group-sm col-auto px-0" @click="option='latest'">
-            <input
-              type="text"
-              name="lEarliest"
-              class="form-control"
-              :class="{'is-invalid':errors.lEarliest&&errors.lEarliest.length > 0}"
-              ref="lEarliest"
-              style="max-width:50px"
-              v-model="lEarliest"
-              :disabled="option!='latest'">
-            <div class="input-group-append">
-              <select
-                class="l-unit custom-select custom-select-sm border-left-0 rounded-right"
-                v-model="lUnit"
-                :disabled="option!='latest'">
-                <option value="minutes" selected>{{$t('minutes')}}</option>
-                <option value="hours">{{$t('hours')}}</option>
-                <option value="days">{{$t('days')}}</option>
-                <option value="weeks">{{$t('weeks')}}</option>
-                <option value="months">{{$t('months')}}</option>
-              </select>
-            </div>
-            <div class="invalid-feedback">
-              <span v-for="(error, index) in errors.lEarliest" :key="index">{{error}}</span>
-            </div>
+          <div class="col-auto pt-1 pl-0" @click="option='overdue'">
+            <span class="overdue">{{$t('overdue')}}</span>
           </div>
         </div>
         <div class="form-row mb-3">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" :id="name+'-before'" name="radio-stacked" value="before" v-model="option">
-              <label class="custom-control-label" :for="name+'-before'"></label>
+              <input type="radio" :id="name+'-overdue-more'" class="custom-control-input" name="radio-stacked" value="overdue_more" v-model="option">
+              <label class="custom-control-label" :for="name+'-overdue-more'"></label>
             </div>
           </div>
-          <div class="col-auto pt-1 pl-0" @click="option='before'">
-            <span class="moreThan">{{$t('moreThan')}}</span>
+          <div class="col-auto pt-1 pl-0" @click="option='overdue_more'">
+            <span class="overdueMore">{{$t('overdueMore')}}</span>
           </div>
-          <div class="input-group input-group-sm before col-auto px-0" @click="option='before'">
+          <div class="input-group input-group-sm before col-auto px-0" @click="option='overdue_more'">
             <input 
               type="text" 
-              name="bfLatest" 
+              name="odMore" 
               class="form-control" 
-              :class="{'is-invalid':errors.bfLatest&&errors.bfLatest.length > 0}"
-              ref="bfLatest" 
-              v-model="bfLatest" 
-              style="max-width:50px" 
-              :disabled="option!='before'">
+              :class="{'is-invalid':errors.odMore&&errors.odMore.length > 0}"
+              ref="odMore"
+              style="max-width:50px"
+              v-model="odMore"
+              :disabled="option!='overdue_more'">
             <div class="input-group-append">
-              <select
-                class="bf-unit custom-select custom-select-sm border-left-0 rounded-right"
-                v-model="bfUnit"
-                :disabled="option!='before'">
+              <select 
+                class="o-unit custom-select custom-select-sm border-left-0 rounded-right" 
+                v-model="oUnit"
+                :disabled="option!='overdue_more'">
                 <option value="minutes" selected>{{$t('minutes')}}</option>
                 <option value="hours">{{$t('hours')}}</option>
                 <option value="days">{{$t('days')}}</option>
@@ -79,17 +54,70 @@
               </select>
             </div>
             <div class="invalid-feedback">
-              <span v-for="(error, index) in errors.bfLatest" :key="index">{{error}}</span>              
+              <span v-for="(error, index) in errors.odMore" :key="index">{{error}}</span>
             </div>
-          </div>
-          <div class="col-auto pt-1" @click="option='before'">
-            <span class="ago">{{$t('ago')}}</span>
           </div>
         </div>
         <div class="form-row mb-3">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" :id="name+'-between'" name="radio-stacked" value="between" v-model="option">
+              <input :id="name+'-expire-yn'" type="radio" class="custom-control-input" name="radio-stacked" value="expire_yn" v-model="option">
+              <label class="custom-control-label" :for="name+'-expire-yn'"></label>
+            </div>
+          </div>
+          <div class="col-auto pt-1 pl-0" @click="option='expire_yn'">
+            <span class="inNext">{{$t('inNext')}}</span>
+          </div>
+          <div class="input-group input-group-sm before col-auto px-0" @click="option='expire_yn'">
+            <input 
+              type="text" 
+              name="expireYn" 
+              class="form-control" 
+              :class="{'is-invalid':errors.expireYn&&errors.expireYn.length > 0}"
+              ref="expireYn" 
+              v-model="expireYn" 
+              style="max-width:50px" 
+              :disabled="option!='expire_yn'">
+            <div class="input-group-append">
+              <select 
+                class="e-unit custom-select custom-select-sm border-left-0 rounded-right"
+                v-model="eUnit"
+                :disabled="option!='expire_yn'">
+                <option value="minutes" selected>{{$t('minutes')}}</option>
+                <option value="hours">{{$t('hours')}}</option>
+                <option value="days">{{$t('days')}}</option>
+                <option value="weeks">{{$t('weeks')}}</option>
+                <option value="months">{{$t('months')}}</option>
+              </select>
+            </div>
+            <div class="invalid-feedback">
+              <span v-for="(error, index) in errors.expireYn" :key="index">{{error}}</span>              
+            </div>
+          </div>
+          <div class="col-auto pt-1" v-if="locale=='zh-CN'">
+            <span>之内</span>
+          </div>
+          <div class="col-auto">
+            <select 
+              class="will-yn custom-select custom-select-sm"
+              v-model="willYn"
+              :disabled="option!='expire_yn'">
+              <option value="yes" selected>{{$t('willBeOverdue')}}</option>
+              <option value="no">{{$t('willNotBeOverdue')}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row mb-3">
+          <div class="col-auto pt-1 pr-0">
+            <div class="custom-control custom-radio">
+              <input
+                type="radio"
+                class="custom-control-input"
+                :id="name+'-between'"
+                name="radio-stacked"
+                value="between"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-between'"></label>
             </div>
           </div>
@@ -97,14 +125,14 @@
             <span class="between">{{$t('between')}}</span>
           </div>
           <div class="input-group input-group-sm bt col-auto px-0" @click="option='between'">
-            <input 
-              type="text" 
-              name="btEarliest" 
-              class="form-control" 
+            <input
+              type="text"
+              name="btEarliest"
+              class="form-control"
               :class="{'is-invalid':errors.btEarliest&&errors.btEarliest.length > 0}"
-              v-model="btEarliest" 
-              ref="btEarliest" 
-              autocomplete="off" 
+              v-model="btEarliest"
+              ref="btEarliest"
+              autocomplete="off"
               :disabled="option!='between'">
             <div class="input-group-append">
               <span class="input-group-text btEarliest-icon" @click="$refs.btEarliest.focus()">
@@ -119,15 +147,16 @@
             <span class="and">{{$t('and')}}</span>
           </div>
           <div class="input-group input-group-sm bt col-auto" @click="option='between'">
-            <input 
-              type="text" 
-              name="btLatest" 
-              class="form-control" 
+            <input
+              type="text"
+              name="btLatest"
+              class="form-control"
               :class="{'is-invalid':errors.btLatest&&errors.btLatest.length > 0}"
-              ref="btLatest" 
-              v-model="btLatest" 
-              autocomplete="off" 
-              :disabled="option!='between'">
+              ref="btLatest"
+              v-model="btLatest"
+              autocomplete="off"
+              :disabled="option!='between'"
+            >
             <div class="input-group-append">
               <span class="input-group-text btLatest-icon" @click="$refs.btLatest.focus()">
                 <i class="fa fa-calendar"></i>
@@ -141,7 +170,14 @@
         <div class="form-row">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" :id="name+'-range'" name="radio-stacked" value="range" v-model="option">
+              <input
+                type="radio"
+                class="custom-control-input"
+                :id="name+'-range'"
+                name="radio-stacked"
+                value="range"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-range'"></label>
             </div>
           </div>
@@ -158,7 +194,8 @@
               v-model.trim="rEarliest"
               placeholder="- P1Y2M3DT4H5M6S"
               style="max-width: 132px;"
-              :disabled="option!='range'">
+              :disabled="option!='range'"
+            >
             <div class="invalid-feedback" style="max-width: 132px;">
               <span v-for="(error, index) in errors.rEarliest" :key="index">{{error}}</span>
             </div>
@@ -210,14 +247,14 @@ const isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0
   isoMessage = "^Date range must comply with ISO 8609 specifications";
 
 const constraints = {
-  lEarliest: {
+  odMore:{
     presence: false,
     numericality: {
       onlyInteger: true,
       greaterThan: 0
     }
   },
-  bfLatest: {
+  expireYn:{
     presence: false,
     numericality: {
       onlyInteger: true,
@@ -258,28 +295,29 @@ validate.extend(validate.validators.datetime, {
 });
 
 export default {
-  name: "DatetimeRange",
+  name: "DatetimeDuedate",
   data() {
     return {
       errors: {},
       option: this.range.option,
-      lUnit: this.range.unit||'minutes', 
-      bfUnit: this.range.unit||'minutes',
-      lEarliest: this.range.earliest||'',
-      bfLatest: this.range.latest||'',
-      btEarliest: this.range.earliest||'',
-      btLatest: this.range.latest||'',
-      rEarliest: this.range.sEarliest||'',
-      rLatest: this.range.sLatest||''
+      oUnit: this.range.unit || "minutes",
+      eUnit: this.range.unit || "minutes",
+      odMore: this.range.latest || "",
+      willYn: this.range.willYn || "yes",
+      expireYn: this.range.willYn ? (this.range.latest || "") : (this.range.earliest||""),
+      btEarliest: this.range.earliest || "",
+      btLatest: this.range.latest || "",
+      rEarliest: this.range.sEarliest || "",
+      rLatest: this.range.sLatest || ""
     };
   },
   props: {
     name: String,
     title: String,
     range: {
-      type:Object,
+      type: Object,
       default() {
-        return {}
+        return {};
       }
     }
   },
@@ -287,9 +325,11 @@ export default {
     messages: {
       en: {
         all: "All",
-        withinLast: "Within the last",
-        moreThan: "More than",
-        ago: "ago",
+        overdue: "Overdue",
+        overdueMore: "Overdue for more than",
+        inNext: "In next",
+        willBeOverdue: "将会逾期",
+        willNotBeOverdue: "不会逾期",
         between: "Between",
         and: "and",
         inRange: "In range",
@@ -299,14 +339,17 @@ export default {
         days: "days",
         weeks: "weeks",
         months: "months",
-        iso8601: "P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond",
+        iso8601:
+          "P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond",
         clearAll: "Clear all options"
       },
       cn: {
         all: "全部",
-        withinLast: "最近",
-        moreThan: "超过",
-        ago: "之前",
+        overdue: "已逾期",
+        overdueMore: "逾期超过",
+        inNext: "在未来",
+        willBeOverdue: "将会逾期",
+        willNotBeOverdue: "不会逾期",
         between: "从",
         and: "到",
         inRange: "从",
@@ -318,23 +361,23 @@ export default {
         months: "月",
         iso8601: "P:期间, Y:年, M:月, D:日, T:时间, H:小时, M:分钟, S:秒",
         constraints: {
-          lEarliest: {
-            numericality: {
+          odMore:{
+            numericality:{
               message: "^请输入大于0的整数"
             }
           },
-          bfLatest: {
-            numericality: {
+          expireYn:{
+            numericality:{
               message: "^请输入大于0的整数"
             }
           },
-          rEarliest: {
-            format: {
+          rEarliest:{
+            format:{
               message: "^日期范围必须符合ISO 8609规范"
             }
           },
-          rLatest: {
-            format: {
+          rLatest:{
+            format:{
               message: "^日期范围必须符合ISO 8609规范"
             }
           }
@@ -347,9 +390,9 @@ export default {
     this.debouncedUpdateRange = _.debounce(this.updateRange, 500);
 
     let vm = this;
-    $.datetimepicker.setDateFormatter('moment');
-    if(this.$i18n.locale == 'cn'){
-      $.datetimepicker.setLocale('ch');        
+    $.datetimepicker.setDateFormatter("moment");
+    if (this.$i18n.locale == "cn") {
+      $.datetimepicker.setLocale("ch");
     }
 
     this.$btEarliest.datetimepicker({
@@ -359,9 +402,9 @@ export default {
           maxDate: vm.$btLatest.val() ? vm.$btLatest.val() : false
         });
       },
-      onChangeDateTime(dp,$input){
+      onChangeDateTime(dp, $input) {
         vm.btEarliest = $input.val();
-      }      
+      }
     });
     this.$btLatest.datetimepicker({
       format: "YYYY-MM-DD HH:mm:ss",
@@ -370,25 +413,43 @@ export default {
           minDate: vm.$btEarliest.val() ? vm.$btEarliest.val() : false
         });
       },
-      onChangeDateTime(dp,$input){
+      onChangeDateTime(dp, $input) {
         vm.btLatest = $input.val();
-      }      
+      }
     });
   },
   computed: {
     buttonText() {
       let label = `${this.title}:${this.$t("all")}`;
-      let option = this.range.option, earliest = this.range.earliest, latest = this.range.latest, unit = this.range.unit,
-        rEarliest = this.range.sEarliest, rLatest = this.range.sLatest;
+      let option = this.range.option,
+        willYn = this.range.willYn,
+        earliest = this.range.earliest,
+        latest = this.range.latest,
+        unit = this.range.unit,
+        rEarliest = this.range.sEarliest,
+        rLatest = this.range.sLatest;
       switch (option) {
-        case "latest":
-          if (earliest) {
-            label = `${this.title}${this.$t("withinLast")}${earliest}${this.$t(unit)}`;
+        case 'overdue':
+          label = `${this.title}${this.$t("overdue")}`;
+          break;
+        case 'overdue_more':
+          if(latest){
+            label = `${this.title}${this.$t("overdueMore")}${latest}${this.$t(unit)}`;
           }
           break;
-        case "before":
-          if (latest) {
-            label = `${this.title}${this.$t("moreThan")}${latest}${this.$t(unit)}${this.$t("ago")}`;
+        case 'expire_yn':
+          if(willYn == 'yes' && latest){
+            if(this.locale == 'zh-CN'){
+              label = `${this.title}将会在${latest}${this.$t(unit)}之内逾期`;
+            } else {
+              label = `${this.title}${this.$t('willBeOverdue')}${latest}${this.$t(unit)}`;
+            }
+          } else if(willYn == 'no' && earliest){
+            if(this.locale == 'zh-CN'){
+              label = `${this.title}将会在${earliest}${this.$t(unit)}之后逾期`;
+            } else {
+              label = `${this.title}${this.$t('willNotBeOverdue')}${earliest}${this.$t(unit)}`;
+            }
           }
           break;
         case "between":
@@ -402,7 +463,8 @@ export default {
             label = `${this.title}:${this.$t("all")}`;
           }
           break;
-        case "range":{
+        case "range":
+          {
             let now = moment();
             if (rEarliest && rLatest) {
               let earliestTmp, latestTmp;
@@ -422,7 +484,8 @@ export default {
       return label;
     },
     constraints() {
-      return _.merge(_.cloneDeep(constraints), _.at(this.$i18n.getLocaleMessage(this.$i18n.locale),'constraints')[0]);
+      return _.merge(_.cloneDeep(constraints),_.at(this.$i18n.getLocaleMessage(this.$i18n.locale), "constraints")[0]
+      );
     },
     $form() {
       return $(this.$el).find("form");
@@ -439,16 +502,19 @@ export default {
     option(newValue, oldValue) {
       this.updateRange();
     },
-    lEarliest(newValue, oldValue) {
+    odMore(newValue, oldValue) {
       this.debouncedUpdateRange();
     },
-    lUnit(newValue, oldValue) {
+    oUnit(newValue, oldValue) {
       this.updateRange();
     },
-    bfLatest(newValue, oldValue) {
+    willYn(newValue, oldValue) {
       this.debouncedUpdateRange();
     },
-    bfUnit(newValue, oldValue) {
+    expireYn(newValue, oldValue) {
+      this.debouncedUpdateRange();
+    },
+    eUnit(newValue, oldValue) {
       this.updateRange();
     },
     btEarliest(newValue, oldValue) {
@@ -466,61 +532,75 @@ export default {
   },
   methods: {
     updateRange() {
-      switch(this.option){
-        case 'latest':
-          if(this.lEarliest != ''){
-            let data = {lEarliest: this.lEarliest};
-            this.errors = validate(data, this.constraints) || {};
-            if (_.isEmpty(this.errors)) {
-              this.$emit("update:range", {option: this.option, unit: this.lUnit, earliest: this.lEarliest});
+      switch (this.option) {
+        case 'overdue':
+          this.$emit('update:range',{option: this.option});
+          break;
+        case 'overdue_more':
+          if(this.odMore != ""){
+            let data = {odMore: this.odMore};
+            this.errors = validate(data, this.constraints)||{};
+            if(_.isEmpty(this.errors)){
+              this.$emit('update:range',{
+                option: this.option,
+                unit: this.oUnit,
+                latest: this.odMore
+              });
             }
           }else{
             this.errors = {};
-            this.$emit("update:range", undefined);
+            this.$emit('update:range',undefined);
           }
           break;
-        case 'before':
-          if(this.bfLatest != ''){
-            let data = {bfLatest: this.bfLatest};
-            this.errors = validate(data, this.constraints) || {};
-            if (_.isEmpty(this.errors)) {
-              this.$emit("update:range", {option: this.option, unit: this.bfUnit, latest: this.bfLatest});
-            }
-          }else{
-            this.errors = {};
-            this.$emit("update:range", undefined);
-          }
-          break;
-        case 'between':
-          if(this.btEarliest != '' || this.btLatest != ''){
-            let data = {};
-            if(this.btEarliest != '') data.btEarliest = this.btEarliest;
-            if(this.btLatest != '') data.btLatest = this.btLatest;
-            this.errors = validate(data, this.constraints) || {};
-            if (_.isEmpty(this.errors)) {
-              let range = {option: this.option}
-              if(this.btEarliest != '') range.earliest = +moment(this.btEarliest);
-              if(this.btLatest != '') range.latest = +moment(this.btLatest);
-              this.$emit("update:range", range);
+        case 'expire_yn':
+          if(this.expireYn!=""){
+            let data = {expireYn: this.expireYn};
+            this.errors = validate(data, this.constraints)||{};
+            if(_.isEmpty(this.errors)){
+              let range = {option: this.option, willYn: this.willYn, unit: this.eUnit}
+              if(this.willYn == 'yes'){
+                range.latest = this.expireYn
+              } else {
+                range.earliest = this.expireYn
               }
+              this.$emit('update:range', range)
+            }
           }else{
+            this.errors = {};
+            this.$emit('update:range',undefined);
+          }
+          break;
+        case "between":
+          if (this.btEarliest != "" || this.btLatest != "") {
+            let data = {};
+            if (this.btEarliest != "") data.btEarliest = this.btEarliest;
+            if (this.btLatest != "") data.btLatest = this.btLatest;
+            this.errors = validate(data, this.constraints) || {};
+            if (_.isEmpty(this.errors)) {
+              let range = { option: this.option };
+              if (this.btEarliest != "")
+                range.earliest = +moment(this.btEarliest);
+              if (this.btLatest != "") range.latest = +moment(this.btLatest);
+              this.$emit("update:range", range);
+            }
+          } else {
             this.errors = {};
             this.$emit("update:range", undefined);
           }
           break;
-        case 'range':
-          if(this.rEarliest != '' || this.rLatest != ''){
+        case "range":
+          if (this.rEarliest != "" || this.rLatest != "") {
             let data = {};
-            if(this.rEarliest != '') data.rEarliest = this.rEarliest;
-            if(this.rLatest != '') data.rLatest = this.rLatest;
+            if (this.rEarliest != "") data.rEarliest = this.rEarliest;
+            if (this.rLatest != "") data.rLatest = this.rLatest;
             this.errors = validate(data, this.constraints) || {};
             if (_.isEmpty(this.errors)) {
-              let range = {option: this.option}
-              if(this.rEarliest != '') range.sEarliest = this.rEarliest;
-              if(this.rLatest != '') range.sLatest = this.rLatest;
+              let range = { option: this.option };
+              if (this.rEarliest != "") range.sEarliest = this.rEarliest;
+              if (this.rLatest != "") range.sLatest = this.rLatest;
               this.$emit("update:range", range);
             }
-          }else{
+          } else {
             this.errors = {};
             this.$emit("update:range", undefined);
           }
@@ -532,12 +612,12 @@ export default {
     },
     onClearClick() {
       this.option = undefined;
-      this.lEarliest = '';
-      this.bfLatest = '';
-      this.btEarliest = '';
-      this.btLatest = '';
-      this.rEarliest = '';
-      this.rLatest = '';
+      this.odMore = "";
+      this.expireYn = "";
+      this.btEarliest = "";
+      this.btLatest = "";
+      this.rEarliest = "";
+      this.rLatest = "";
     }
   }
 };
@@ -559,7 +639,7 @@ export default {
 
 .dropdown-menu {
   font-size: 0.9rem;
-  
+
   form {
     width: 504px;
     .form-row {
@@ -603,11 +683,10 @@ export default {
         }
       }
     }
-    
+
     a.disabled {
       color: #c3c3c3;
     }
-
   }
 }
 

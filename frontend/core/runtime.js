@@ -337,7 +337,7 @@ $.widget('nm.runtime',{
         client.off('exportProgress', exportProgressListener);
         client.off('exportEnd', exportEndListener);
         $toast.remove();
-      })        
+      });
     });
   },
 

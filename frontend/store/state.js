@@ -56,6 +56,7 @@ export default {
   favoritesOpened: false,
   profile: null,
   metas:[],
+  toasts: [],
   isSidebarNavCollapse: false,
   currentDomainId: null
 }
