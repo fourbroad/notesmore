@@ -1,4 +1,4 @@
-import client from 'lib/client'
+import client from 'api/client'
 import jwtDecode from 'jwt-decode';
 
 export default {

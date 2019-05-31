@@ -12,7 +12,7 @@ module.exports = {
   entry: {
 //      polyfills                         : path.join(__dirname, 'frontend/polyfills.js'),
      main                               : path.join(__dirname, 'frontend/main.js'),
-     '@notesmore/im/im'                 : path.join(__dirname, 'frontend/im/im.vue')
+    //  '@notesmore/im/im'                 : path.join(__dirname, 'frontend/im/im.vue')
        
     // index                              : path.join(__dirname, 'frontend/index.js'),
     // '@notesabc/calendar/calendar'      : path.join(__dirname, 'frontend/calendar/calendar.js'),
@@ -32,13 +32,7 @@ module.exports = {
       vue$: 'vue/dist/vue.esm.js',
       frontend: path.resolve(__dirname, 'frontend'),
       lib: path.resolve(__dirname, 'lib'),
-      test: path.resolve(__dirname, 'test'),
-      'jquery-ui/ui/widget': 'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
-      'canvas-to-blob': 'blueimp-canvas-to-blob/js/canvas-to-blob.js',
-      'load-image': 'blueimp-load-image/js/load-image.js',
-      'load-image-exif': 'blueimp-load-image/js/load-image-exif.js',
-      'load-image-meta': 'blueimp-load-image/js/load-image-meta.js',
-      'load-image-scale': 'blueimp-load-image/js/load-image-scale.js'
+      test: path.resolve(__dirname, 'test')
     },    
     modules: [
       path.join(__dirname, 'frontend'), 

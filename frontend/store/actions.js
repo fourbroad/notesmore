@@ -1,5 +1,4 @@
-import client from 'lib/client'
-import _ from 'lodash'
+import client from 'api/client'
 
 export default {
   async FETCH_PROFILE({state, commit, rootState}) {

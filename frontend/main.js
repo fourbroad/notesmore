@@ -1,7 +1,7 @@
-import client from 'lib/client'
+import client from 'api/client'
 
 import Vue from 'vue'
-import App from './app'
+import App from 'components/app'
 import store from 'store/index'
 import router from 'router/index'
 import dynamicRoutes from 'router/dynamic-router'

@@ -1,5 +1,4 @@
-import _ from 'lodash'
-import loader from 'loader/loader'
+import loader from 'components/loader'
 
 function buildRoute(routeData) {
   let c = routeData.component,
@@ -13,7 +12,7 @@ function buildRoute(routeData) {
   if (routeData.meta) route.meta = routeData.meta;
 
   if(routeData.id == 'workbench'){
-    route.component = () => import('workbench/workbench.vue');
+    route.component = () => import('components/workbench');
   }
   
   return route;
