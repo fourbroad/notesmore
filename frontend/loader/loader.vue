@@ -18,7 +18,7 @@ const components = {
   gridView: () => import('view/view.vue'),
   edit: () => import('form/form.vue'),
   new: () => import('form/form.vue'),
-  uploadFiles:()=> import('uploadfiles/uploadfiles.vue'),
+  uploadFiles:()=> import('components/file-upload.vue'),
   notFound: () => import('errors/404'),
   forbidden: () => import('errors/403')
 }

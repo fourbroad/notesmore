@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
+    "@xkeshi/image-compressor": "^0.5.3",
     "blueimp-canvas-to-blob": "^3.14.0",
     "blueimp-file-upload": "^9.30.0",
     "blueimp-gallery": "^2.33.0",
@@ -39,9 +40,11 @@
     "brace": "^0.11.1",
     "busboy": "^0.3.0",
     "chart.js": "^2.7.2",
+    "compressorjs": "^1.0.5",
     "config": "^3.1.0",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
+    "cropperjs": "^1.5.1",
     "datatables.net": "^1.10.19",
     "datatables.net-bs4": "^1.10.19",
     "easy-pie-chart": "^2.1.7",
@@ -85,6 +88,7 @@
     "vue": "^2.6.10",
     "vue-i18n": "^8.11.2",
     "vue-router": "^3.0.6",
+    "vue-upload-component": "^2.8.20",
     "vuex": "^3.1.1",
     "webhdfs": "^1.2.0"
   },

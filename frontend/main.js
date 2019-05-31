@@ -24,6 +24,19 @@ import VueI18n from 'vue-i18n'
 
 // Vue.use(ElementUI)
 
+Vue.filter('formatSize', function (size) {
+  if (size > 1024 * 1024 * 1024 * 1024) {
+    return (size / 1024 / 1024 / 1024 / 1024).toFixed(2) + ' TB'
+  } else if (size > 1024 * 1024 * 1024) {
+    return (size / 1024 / 1024 / 1024).toFixed(2) + ' GB'
+  } else if (size > 1024 * 1024) {
+    return (size / 1024 / 1024).toFixed(2) + ' MB'
+  } else if (size > 1024) {
+    return (size / 1024).toFixed(2) + ' KB'
+  }
+  return size.toString() + ' B'
+})
+
 Vue.config.productionTip = false
 
 Vue.use(client)
