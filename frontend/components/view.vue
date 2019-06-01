@@ -211,87 +211,35 @@
             <li
               class="page-item"
               :class="{disabled:currentPage==1}"
-              @click="goToPage(currentPage - 1)"
-            >
+              @click="goToPage(currentPage - 1)">
               <a
                 class="page-link"
                 href="javascript:void(0)"
                 tabindex="-1"
-                :aria-disabled="currentPage==1?true:null"
-              >Previous</a>
+                :aria-disabled="currentPage==1?true:null">{{$t('previous')}}</a>
             </li>
-            <li
-              class="page-item"
-              :class="{active:currentPage==1}"
-              :aria-current="currentPage == 1 ? 'page': null"
-              @click="goToPage(1)"
-            >
-              <a class="page-link" href="javascript:void(0)">1</a>
-            </li>
-            <li
-              class="page-item"
-              v-if="totalPage >= 2"
-              :class="{active:currentPage==2}"
-              :aria-current="currentPage == 2 ? 'page': null"
-              @click="goToPage(2)"
-            >
-              <a class="page-link" href="javascript:void(0)">2</a>
-            </li>
-            <li
-              class="page-item"
-              v-if="totalPage >= 3"
-              :class="{active:currentPage==3}"
-              :aria-current="currentPage == 3 ? 'page': null"
-              @click="goToPage(3)"
-            >
-              <a class="page-link" href="javascript:void(0)">3</a>
-            </li>
-            <li
-              class="page-item"
-              v-if="totalPage >= 4"
-              :class="{active:currentPage==4}"
-              :aria-current="currentPage == 4 ? 'page': null"
-              @click="goToPage(4)"
-            >
-              <a class="page-link" href="javascript:void(0)">4</a>
-            </li>
-            <li
-              class="page-item"
-              v-if="totalPage >= 5"
-              :class="{active:currentPage==5}"
-              :aria-current="currentPage == 5 ? 'page': null"
-              @click="goToPage(5)"
-            >
-              <a class="page-link" href="javascript:void(0)">5</a>
-            </li>
-            <li
-              class="page-item"
-              v-if="totalPage >= 6"
-              :class="{active:currentPage==6}"
-              :aria-current="currentPage == 6 ? 'page': null"
-              @click="goToPage(6)"
-            >
-              <a class="page-link" href="javascript:void(0)">6</a>
-            </li>
-            <li
-              class="page-item"
-              v-if="totalPage >= 7"
-              :class="{active:currentPage==7}"
-              :aria-current="currentPage == 7 ? 'page': null"
-              @click="goToPage(7)"
-            >
-              <a class="page-link" href="javascript:void(0)">7</a>
-            </li>
+            <template v-for="pageBtn in pageBtns">
+              <li
+                :key="pageBtn.btnNo"
+                class="page-item"
+                :class="{active:pageBtn.active, disabled: pageBtn.disabled}"
+                :aria-current="pageBtn.active ? 'page': null"                
+                @click="pageBtn.pageNo?goToPage(pageBtn.pageNo):null">
+                <a 
+                  class="page-link" 
+                  href="javascript:void(0)"
+                  :aria-disabled="pageBtn.disabled">{{pageBtn.label}}</a>
+              </li>
+            </template>
             <li
               class="page-item"
               :class="{disabled:currentPage==totalPage}"
-              @click="goToPage(currentPage+1)"
-            >
+              @click="goToPage(currentPage+1)">
               <a
                 class="page-link"
                 href="javascript:void(0)"
                 :aria-disabled="currentPage==totalPage?true:null"
-              >Next</a>
+              >{{$t('next')}}</a>
             </li>
           </ul>
         </nav>
@@ -301,7 +249,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import {mapState} from "vuex";
 
 import Keywords from "./search/keywords";
 import ContainsText from "./search/contains-text";
@@ -334,7 +282,10 @@ export default {
       from: 0,
       size: 15,
       total: 0,
-      documents: []
+      documents: [],
+      previous:{},
+      next:{},
+      pageBtns:[]
     };
   },
   props: ["document","actionId"],
@@ -349,6 +300,8 @@ export default {
         cancel: "Cancel",
         delete: "Delete",
         submit: "Submit",
+        previous: "Previous",
+        next: "Next",
         exportAllCSV: "Exports CSV (All Fields)",
         exportCurrentCSV: "Exports CSV (Current Fields)" 
       },
@@ -361,6 +314,8 @@ export default {
         cancel: "取消",
         delete: "删除",
         submit: "提交",
+        previous: "上页",
+        next: "下页",
         exportAllCSV: "导出为CSV文件（所有字段）",
         exportCurrentCSV: "导出为CSV文件（当前字段）" 
       }
@@ -467,12 +422,94 @@ export default {
           sort: this.sort
         },
         (err, docs) => {
-          if (err) return (this.error = err.toString());
+          if (err) return this.error = err.toString();
           this.from = from != undefined ? from : this.from;
           this.total = docs.total;
           this.documents = docs.documents;
+          this.updatePagination();
         }
       );
+    },
+    updatePagination(){
+      if(this.totalPage <= 7){
+        this.pageBtns = _.times(this.totalPage, (btnNo)=>{
+          let btn = {
+            btnNo: btnNo,
+            pageNo: btnNo+1,
+            label: `${btnNo+1}`
+          }          
+          return btn;
+        });
+      } else {
+        this.pageBtns = _.times(7, (btnNo)=>{
+          let btn = {
+            btnNo: btnNo,
+            pageNo: btnNo+1,
+            label: `${btnNo+1}`
+          }
+          if(this.currentPage <= 4){
+            if(btnNo == 5){
+              delete btn.pageNo;
+              btn.label = '...'
+              btn.disabled = true
+            }
+            if(btnNo == 6){
+              btn.pageNo = this.totalPage
+              btn.label = `${this.totalPage}`
+              if(this.totalPage*this.size >= 10000){
+                btn.disabled = true
+              }
+            }
+          } else {
+            if(btnNo == 1){
+              delete btn.pageNo;
+              btn.label = '...'
+              btn.disabled = true
+            }
+            if(this.currentPage<this.totalPage-3){
+              if(btnNo == 2){
+                btn.pageNo = this.currentPage - 1 
+                btn.label = `${btn.pageNo}`
+              } else if(btnNo == 3){
+                btn.pageNo = this.currentPage
+                btn.label = `${btn.pageNo}`
+              } else if(btnNo == 4){
+                btn.pageNo = this.currentPage + 1
+                btn.label = `${btn.pageNo}`
+              } else if(btnNo == 5){
+                delete btn.pageNo;
+                btn.label = '...'
+                btn.disabled = true
+              }               
+            } else {
+              if(btnNo == 2){
+                btn.pageNo = this.totalPage - 4 
+                btn.label = `${btn.pageNo}`
+              } else if(btnNo == 3){
+                btn.pageNo = this.totalPage - 3
+                btn.label = `${btn.pageNo}`
+              } else if(btnNo == 4){
+                btn.pageNo = this.totalPage - 2
+                btn.label = `${btn.pageNo}`
+              } else if(btnNo == 5){
+                btn.pageNo = this.totalPage - 1
+                btn.label = `${btn.pageNo}`
+              }               
+            }
+            if(btnNo == 6){
+              btn.pageNo = this.totalPage
+              btn.label = `${btn.pageNo}`
+              if(this.totalPage*this.size >= 10000){
+                btn.disabled = true
+              }
+            }
+          }
+          if(btn.pageNo == this.currentPage){
+            btn.active = true;
+          }
+          return btn;
+        });
+      }      
     },
     distinctQuery(field, filter, callback) {
       this.document.distinctQuery(

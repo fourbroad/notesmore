@@ -1,3 +1,5 @@
+// __webpack_public_path__ = myRuntimePublicPath;
+
 import client from 'api/client'
 
 import Vue from 'vue'
@@ -8,10 +10,16 @@ import dynamicRoutes from 'router/dynamic-router'
 
 import VueI18n from 'vue-i18n'
 
+require('core-js/features/object/define-property');
+require('core-js/features/object/create');
+require('core-js/features/object/assign');
+require('core-js/features/array/for-each');
+require('core-js/features/array/index-of');
+require('core-js/features/function/bind');
+require('core-js/features/promise');
+
 // import ElementUI from 'element-ui'
 // import 'element-ui/lib/theme-chalk/index.css'
-
-// import './styles/index.scss'
 
 // import axios from './config/httpConfig'
 // import * as globalFilter from './filters/filters'
@@ -42,22 +50,7 @@ Vue.config.productionTip = false
 Vue.use(client)
 Vue.use(VueI18n)
 
-let domain = document.domain,
-  currentDomain, index, url;
-index = domain.indexOf('.notesmore.com');
-if (index >= 0) {
-  currentDomain = domain.slice(0, index);
-}
-
-index = domain.indexOf('.notesmore.cn');
-if (index >= 0) {
-  currentDomain = domain.slice(0, index);
-}
-
-if (!currentDomain || currentDomain == 'www') {
-  currentDomain = localStorage.getItem("currentDomain") || '.root';
-}
-
+let url;
 if (localStorage.getItem("environment") == "development") {
   url = 'localhost:3000/domains';
 
@@ -85,28 +78,21 @@ if (localStorage.getItem("environment") == "development") {
   url = 'https://notesmore.com/domains';
 }
 
-store.state.currentDomainId = currentDomain;
+client.init({url:url});
 
 router.beforeEach((to, from, next) => {
   if (!store.state.token) {
-    if (
-      to.matched.length > 0 &&
-      !to.matched.some(record => record.meta.requiresAuth)
-    ) {
+    if (to.matched.length > 0 && !to.matched.some(record => record.meta.requiresAuth)) {
       next()
     } else {
-      next({
-        path: '/login'
-      })
+      next({path: '/login'})
     }
   } else {
     function doNext() {
       if (!store.state.dynamicRoutes) {
         router.addRoutes(dynamicRoutes);
         store.state.dynamicRoutes = dynamicRoutes;
-        next({
-          path: to.path
-        })
+        next({path: to.path})
       } else {
         if (to.path !== '/login') {
           next()
@@ -121,10 +107,7 @@ router.beforeEach((to, from, next) => {
     } else {
       client.connect(store.state.token, (err, user) => {
         if (err) {
-          console.err(err);
-          next({
-            path: '/login'
-          })
+          next({ path: '/login' })
         } else {
           doNext();
         }

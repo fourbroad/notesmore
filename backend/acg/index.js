@@ -17,7 +17,7 @@ initSocket = function(socket) {
       User.verify(token).then( visitorId  => {
         _.merge(socket.handshake.query, {visitorId: visitorId});
         next();
-      }).catch((e) => {
+      }).catch(e => {
         next(e);
         setTimeout(()=>{socket.disconnect();}, 1000);
       });
@@ -114,14 +114,10 @@ initSocket = function(socket) {
   });
 
   socket.on('getUser', function(userId, options, callback){
-    console.log(arguments)
     let visitorId = socket.handshake.query.visitorId;
     checkAcl1(visitorId, User, userId || visitorId, 'get', null, options).then( user => {
       return user.get(options);
-    }).then(result => {
-      console.log(result)
-      callback(null, result)
-    }).catch(err => {
+    }).then(result => callback(null, result)).catch(err => {
       console.error(err);
       callback(err);
     });

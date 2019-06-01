@@ -1,5 +1,3 @@
-import  _  from 'lodash';
-
 var showErrorsForInput, showErrors, clearErrors, clearInputError, checkPermission, get;
 
 showErrorsForInput = function($input, errors) {

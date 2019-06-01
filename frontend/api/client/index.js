@@ -14,7 +14,6 @@ import Document from './document';
 import Collection from './collection';
 import jwtDecode from 'jwt-decode';
 import EventEmitter from 'events';
-import { makeError } from './utils';
 import io from 'socket.io-client';
 
 const eventEmitter = new EventEmitter();
@@ -108,8 +107,7 @@ const client = {
     });
 
     socket.on('error', function(err){
-      console.log(err);
-      self.emitEvent(err);        
+      self.emitEvent(err);
     });
   },
 
@@ -148,6 +146,7 @@ const client = {
     this._doConnect(token, function(err, user){
       if (err) return callback ? callback(err) : console.error(err);
       callback? callback(null, user) : console.log(user);
+      _.merge(self.socket.io.opts.query, {token: token});
       self.emitEvent('connected', user);
     });
   },

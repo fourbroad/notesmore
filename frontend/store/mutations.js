@@ -5,7 +5,10 @@ export default {
     state.token = token
   },
   LOGIN_OUT(state) {
-    state.token = ''
+    state.token = null
+  },
+  CLEAR_TOKEN(state){
+    state.token = null
   },
   toggleNavCollapse(state) {
     state.isSidebarNavCollapse = !state.isSidebarNavCollapse

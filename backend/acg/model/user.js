@@ -39,7 +39,7 @@ _.assign(User, {
         if(userId == 'anonymous'){
           return resolve(userId);
         } else {
-          redis.get(SESSION_PREFIX + userId,function(err, data){
+          redis.get(SESSION_PREFIX + userId, function(err, data){
             if(err || token != (data && data.token)){
               return reject(createError(406, "invalidToken"));
             }

@@ -206,7 +206,8 @@ export default {
       "currentDomainId",
       "locale",
       "profile",
-      "toasts"
+      "toasts",
+      "isConnected"
     ]),
     ...mapGetters([
       "localeFavorites",

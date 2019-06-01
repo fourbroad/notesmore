@@ -13,8 +13,12 @@ export default {
   },
   async FETCH_FAVORITES({state, dispatch, commit, rootState}) {
     let {Domain} = client;
+
     function fetchFavorites(ids){
       return new Promise((resolve, reject)=>{
+        if(_.isEmpty(ids)){
+          return resolve([]);
+        }
         Domain.mgetDocuments(state.currentDomainId, ids, (err, favorites)=>{
           if(err) return reject(err);
           commit('SET_FAVORITES', favorites);
