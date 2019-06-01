@@ -777,7 +777,7 @@ export default {
           return _.reduce(object, (r, v, k) => {
               if (v[path[0]]) r.push(v[path[0]]);
               return r;
-            }, []);
+            }, []).toString();
         } else {
           return this.at(_.reduce(object, (r, v, k) => {
                 if (v[path[0]]) r.push(v[path[0]]);
