@@ -130,7 +130,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-12">显示第{{from+1}}至{{from+documents.length}}项结果，共{{total}}项</div>
+      <div class="col-md-12">{{$t('tableHint',{start:from+1, end:from+documents.length, total:total})}}</div>
     </div>
     <div class="row">
       <div class="col-md-12">
@@ -143,8 +143,10 @@
                   <th
                     scope="col"
                     v-if="column.visible==undefined||column.visible"
-                    :key="keyColumn(column,colIndex)">
+                    :key="keyColumn(column,colIndex)" 
+                    @click="onColumnHeaderClick(column.name)">
                     {{renderHeaderCell(column, colIndex)}}
+                    <i class="fa" :class="{'fa-sort':column.sortable&&!column.order, 'fa-sort-desc':column.order=='desc', 'fa-sort-asc': column.order=='asc'}"></i>
                   </th>
                 </template>
                 <th class="text-center" width="46px">
@@ -176,7 +178,7 @@
                     <a
                       href="javascript:void(0)"
                       v-if="column.defaultLink"
-                      @click="$router.push(`/${doc.collectionId}/${doc.id}`)"
+                      @click="onDefaultLinkClick($event, doc)"
                     >{{renderCell(doc, column, row, col)}}</a>
                     <span v-if="!column.defaultLink">{{renderCell(doc, column, row, col)}}</span>
                   </td>
@@ -204,8 +206,19 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-6">显示第{{from+1}}至{{from+documents.length}}项结果，共{{total}}项</div>
-      <div class="col-md-12">
+      <div class="col-md-6">
+        <span>{{$t('pageSettingPrefix')}}</span>
+        <select class="custom-select custom-select-sm page-setting" style="display:inline;width:62px" v-model="size">
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <span>{{$t('pageSettingSuffix')}}</span>
+      </div>
+      <div class="col-md-6">
         <nav aria-label="Page navigation">
           <ul class="pagination justify-content-end">
             <li
@@ -302,6 +315,9 @@ export default {
         submit: "Submit",
         previous: "Previous",
         next: "Next",
+        tableHint: "Showing {start} to {end} of {total} entries",
+        pageSettingPrefix: "Show",
+        pageSettingSuffix: "entries",
         exportAllCSV: "Exports CSV (All Fields)",
         exportCurrentCSV: "Exports CSV (Current Fields)" 
       },
@@ -316,6 +332,9 @@ export default {
         submit: "提交",
         previous: "上页",
         next: "下页",
+        tableHint: "第{start}至{end}项，共{total}项",
+        pageSettingPrefix: "每页显示",
+        pageSettingSuffix: "项",
         exportAllCSV: "导出为CSV文件（所有字段）",
         exportCurrentCSV: "导出为CSV文件（当前字段）" 
       }
@@ -329,12 +348,22 @@ export default {
     this.checkPermission();
   },
   watch: {
-    'document.search':{
+    searchFields:{
       handler(newValue, oldValue) {
         this.fetchDocuments();
       },
       deep:true
-    }
+    },
+    columns:{
+      handler(newValue, oldValue) {
+        this.fetchDocuments();
+      },
+      deep:true
+    },
+    size(){
+      this.fetchDocuments();
+    },
+    
   },
   computed: {
     patch(){
@@ -372,9 +401,6 @@ export default {
     },
     i18n_title() {
       return this.localeDoc.title;
-    },
-    sort() {
-      return this.document.search.sort || [];
     },
     currentPage() {
       return Math.ceil((this.from + 1) / this.size);
@@ -418,15 +444,15 @@ export default {
         {
           from: from != undefined ? from : this.from,
           size: this.size,
-          source: "visibleColumns",
-          sort: this.sort
+          source: "visibleColumns"
         },
         (err, docs) => {
           if (err) return this.error = err.toString();
           this.from = from != undefined ? from : this.from;
           this.total = docs.total;
           this.documents = docs.documents;
-          this.updatePagination();
+          this.updatePagination()
+          this.$emit('resize')
         }
       );
     },
@@ -565,7 +591,14 @@ export default {
       this.saveAsId = uuidv4();
       this.saveAsTitle = '';
       this.$saveAs.modal('show');
-    }, 
+    },
+    onDefaultLinkClick(evt, doc){
+      let path = `/${doc.collectionId}/${doc.id}`
+      if(evt.ctrlKey){
+        path = `/${doc.collectionId}/${doc.id}/edit`
+      }
+      this.$router.push(path)
+    },
     onSaveAsSubmit(){
       this.saveAs(this.saveAsId, this.saveAsTitle).then(()=>{
         this.$saveAs.modal('hide');
@@ -656,6 +689,18 @@ export default {
     },
     onRowActionClick(doc, act){
       this.$router.push(`/${doc.collectionId}/${doc.id}/${act.id}`);
+    },
+    onColumnHeaderClick(columnName){
+      let column = _.filter(this.columns, c=>c.name==columnName)[0]
+      if(column&&column.sortable){
+        if(!column.order){
+          this.$set(column, 'order', 'asc');
+        } else if(column.order == 'asc'){
+          column.order = 'desc'          
+        } else {
+          this.$delete(column, 'order')
+        }
+      }
     },
     deleteSelf(){
       let {currentUser} = this.$client, { domainId, collectionId, id } = this.document;
@@ -807,6 +852,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.view-container {
+  padding: 30px;
+}
+
 .view-header {
   border-bottom: 1px solid lightgray;
 
@@ -847,7 +896,7 @@ export default {
   }
 
   .item-container {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     position: relative;
 
     li > i {
@@ -863,6 +912,9 @@ export default {
 .view-table {
   th, td {
     vertical-align: middle;
+    .fa-sort{
+      color:darkgray;
+    }
   }
 
   .column-configuration{
@@ -871,7 +923,7 @@ export default {
     }
     .item-container {
       position: relative;
-      font-size: 0.9rem;
+      font-size: 0.875rem;
 
       li > i {
         position: relative;
@@ -900,7 +952,7 @@ export default {
     }
 
     .dropdown-menu{
-      font-size: 0.9rem;
+      font-size: 0.875rem;
     }
   }
 

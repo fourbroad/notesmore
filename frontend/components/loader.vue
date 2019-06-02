@@ -1,7 +1,13 @@
 <template>
-  <div>
+  <div v-on:resize="console.log('~~~~~~~~~~~~~~~~~~~~~~~~~')">
     <component :is="component" :actionId="actionId" :document="document" :isNew="isNew" :key="document.collectionId+'~'+document.id"></component>
-    <div class="loading" v-if="loading">Loading...</div>
+    <div class="container" v-if="loading">
+      <div class="row loading">
+        <div class="spinner-grow m-auto" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    </div>
     <div v-if="error" class="error">{{ error }}</div>
   </div>
 </template>
@@ -37,6 +43,9 @@ export default {
   },
   created() {
     this.loadDocument(this.$route)
+    this.$on('resize', ()=>{
+      console.log('resize~~~~~~~~~~~~~~~~~~~~~~~~~')
+    })
   },
   computed: {
     ...mapState(["currentDomainId", "locale"])
@@ -54,18 +63,21 @@ export default {
     _doLoadDocument(doc, actionId) {
       let domId = this.currentDomainId, metaId = _.at(doc, "_meta.metaId")[0] || ".meta", {Meta, Action} = this.$client
       Meta.get(domId, metaId, (err, meta) => {
-        if (err) return this.error = err.toString()
+        if (err) {
+          this.loading = false
+          return this.error = err.toString()
+        }
 
         let actions, defaultAction, plugin, pluginName
         actions = _.union(doc._meta.actions, meta.actions)
         defaultAction = doc._meta.defaultAction || meta.defaultAction
-        actionId = actionId || defaultAction || actions[0]
+        actionId = actionId || defaultAction || actions[0] || 'edit'
         Action.get(domId, actionId, (err, action) => {
+          this.loading = false
           if (err) return this.error = err.toString()
           this.component = components[actionId]
           this.actionId = actionId;
           this.document = doc
-          this.loading = false
         });
       });
     },
@@ -89,73 +101,109 @@ export default {
       switch (collectionId) {
         case ".metas":
           Meta.get(domId, documentId, (err, meta) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(meta, actionId)
           });
           break
         case ".domains":
           Domain.get(documentId, (err, domain) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(domain, actionId)
           })
           break
         case ".collections":
           Collection.get(domId, documentId, (err, col) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(col, actionId)
           });
           break
         case ".views":
           View.get(domId, documentId, (err, view) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(view, actionId)
           })
           break
         case ".pages":
           Page.get(domId, documentId, (err, page) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(page, actionId)
           })
           break
         case ".forms":
           Form.get(domId, documentId, (err, form) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(form, actionId)
           })
           break
         case ".roles":
           Role.get(domId, documentId, (err, role) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(role, actionId)
           })
           break
         case ".profiles":
           Profile.get(domId, documentId, (err, profile) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(profile, actionId)
           })
           break
         case ".groups":
           Group.get(domId, documentId, (err, group) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(group, actionId)
           })
           break
         case ".users":
           User.get(documentId, (err, user) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(user, actionId)
           })
           break
         case ".actions":
           Action.get(domId, documentId, (err, action) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(action, actionId)
           })
           break
         default:
           Document.get(domId, collectionId, documentId, (err, doc) => {
-            if (err) return (this.error = err.toString())
+            if (err) {
+              this.loading = false
+              return this.error = err.toString()
+            }
             this._doLoadDocument(doc, actionId)
           })
       }
@@ -217,4 +265,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  .loading{
+    height: calc(100vh - 126px);
+  }
 </style>

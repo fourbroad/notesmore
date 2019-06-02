@@ -6,7 +6,7 @@
           <span class="icon mR-5">
             <i :class="document._meta.iconClass || 'fa fa-file-text-o'"></i>
           </span>
-          <h4 class="c-grey-900">{{i18n_title}}</h4>
+          <h4 class="c-grey-900">{{i18n_title||document.id}}</h4>
           <span class="favorite mL-10" @click="onFavoriteClick()">
             <i class="fa fa-star-o" :class="{'c-red-500': isFavorite}"></i>
           </span>
@@ -20,6 +20,14 @@
               <i class="fa fa-ellipsis-h"></i>
               <ul class="dropdown-menu dropdown-menu-right">
                 <li class="dropdown-item save-as" @click="onSaveAsClick">{{$t('saveAs')}}</li>
+                <div class="dropdown-divider" v-if="localeActions.length>0"></div>
+                <template v-for="act in localeActions">
+                  <li class="dropdown-item" v-if="act.id!=actionId" @click="onActionClick(act)" :key="act.collectionId+'~'+act.id">
+                    {{act.title}}
+                  </li>
+                </template>
+                <div class="dropdown-divider" v-if="deleteable"></div>
+                <li class="dropdown-item delete" v-if="deleteable" @click="deleteSelf">{{$t('delete')}}</li>
               </ul>
             </button>
             <div class="modal fade" id="save-as" ref="saveAs" tabindex="-1" role="dialog" aria-labelledby="save-as" aria-hidden="true">
@@ -82,6 +90,8 @@ export default {
     return {
       error: null,
       clone: _.cloneDeep(this.document),
+      deleteable:false,
+      actions: [],      
       saveAsId: '',
       saveAsTitle:'',
       jsonEditor: null,
@@ -91,6 +101,7 @@ export default {
   },
   props: {
     document: Object,
+    actionId: String,
     isNew : {
       type: Boolean,
       default: false
@@ -120,6 +131,12 @@ export default {
       }
     }
   },
+  created(){
+    this.fetchActions(this.document).then((actions)=>{
+      this.actions = actions;
+    });
+    this.checkPermission();
+  },  
   mounted() {
     let {currentUser} = this.$client;
     this.jsonEditor = ace.edit(this.$refs.formContent);
@@ -169,6 +186,12 @@ export default {
           })
         );
       return index >= 0;
+    },
+    localeActions(){
+      return _.reduce(this.actions, (acts, act)=>{
+        acts.push(act.get(this.locale));
+        return acts;
+      }, []);
     },
     $saveAs(){
       return $(this.$refs.saveAs);
@@ -252,12 +275,45 @@ export default {
         this.setJsonEditorValue();
       }
     },
+    onActionClick(act){
+      this.$router.push(`/${this.document.collectionId}/${this.document.id}/${act.id}`);
+    },
     setJsonEditorValue(){
       this.enableChange = false;
       this.jsonEditor.setValue(JSON.stringify(this.document, null, 2), -1);
       this.jsonEditor.clearSelection();
       this.jsonEditor.focus();
       this.enableChange = true;
+    },
+    fetchActions(doc){
+      let {Meta, Action} = this.$client;
+      function armItems(domainId, actIds) {
+        return new Promise((resolve, reject)=>{
+          Action.mget(domainId, actIds, (err, result) => {
+            if (err) return reject(err);
+            resolve(result.actions);
+          });
+        });
+      }
+      if (doc._meta.actions) {
+        return armItems(doc.domainId, doc._meta.actions);
+      } else {
+        return new Promise((resolve, reject)=>{
+          Meta.get(doc.domainId, doc._meta.metaId||'.meta', (err, meta) => {
+            if (err) return reject(err);
+            resolve(armItems(doc.domainId, meta.actions));
+          });
+        });
+      }
+    },
+    checkPermission(){
+      let {currentUser} = this.$client, doc = this.document;
+      return new Promise((resolve, reject)=>{
+        utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, (err, result) => {
+          if(err) return reject(err);
+          this.deleteable = result;
+        });
+      });
     },
     replace(source, target) {
       Object.keys(source).forEach(key => {
@@ -280,7 +336,7 @@ export default {
 @import "~jsoneditor/dist/jsoneditor.css";
 
 .form {
-  height: calc(100vh - 250px);
+  height: calc(100vh - 252px);
 
   .form-header {
     border-bottom: 1px solid lightgray;
@@ -298,6 +354,10 @@ export default {
     .favorite {
       font-size: 16px;
       vertical-align: super;
+    }
+    
+    .dropdown-item {
+      font-size: 0.875rem;
     }
 
     .btn {

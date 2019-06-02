@@ -2,7 +2,13 @@
   <div 
     class="workbench" 
     :class="{'is-collapsed':isSidebarNavCollapse}">
-    <div class="loading" v-if="loading">Loading...</div>
+    <div class="container" v-if="loading">
+      <div class="row loading">
+        <div class="spinner-grow m-auto" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    </div>
     <div v-if="error" class="error">{{ error }}</div>
     <NewDialog :opened.sync="openNewDialog"></NewDialog>
     <div class="toast-container" style="position: absolute; left: 5px; bottom: 5px; z-index: 10000">
@@ -70,7 +76,7 @@
                   <span class="icon-holder">
                     <i :class="[favorite._meta.iconClass||'fa fa-file-text-o']"></i>
                   </span>
-                  <span class="title">{{favorite.title}}</span>
+                  <span class="title">{{favorite.title||favorite.id}}</span>
                 </a>
               </li>
             </ul>
@@ -182,6 +188,10 @@ export default {
   },  
   created() {
     this.fetchData();
+    this.$on('resize', ()=>{
+      console.log('resize~~~~~~~~~~~~~~~~~~~~~~~~~')
+      this.ps.update()
+    })
   },
   updated() {
     this.ps = new PerfectScrollbar(this.$refs.mainContainer, {suppressScrollX:true, wheelPropagation: true});
@@ -272,4 +282,9 @@ export default {
 @import "scss/topbar";
 @import "scss/pageContainer";
 @import "scss/footer";
+
+.loading{
+  height: 100vh;
+}
+
 </style>

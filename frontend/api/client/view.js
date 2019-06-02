@@ -351,6 +351,18 @@ inherits(View, Document, {
     if(options && options.source){
       buildOpts.source = options.source;
     }
+
+    var sort = _.reduce(this.columns, (sort, c)=>{
+      if(c.order){
+        sort.push({[c.name]:{order:c.order}})
+      }
+      return sort
+    },[]);
+
+    if(!_.isEmpty(sort)){
+      options.sort = sort
+    }
+
     client.emit('findViewDocuments', domainId, viewId, this._buildQuery(buildOpts), options, function(err, data) {
       if (err) return callback ? callback(err) : console.error(err);
       _this._buildEntities(data);
