@@ -34,7 +34,7 @@ let policies_post = function (toket,id,postData){
 let get_policies = function (toket,startId,limit){
     //return new Promise(function(resolve, reject){
         return axios.get("http://agency.starrchina.cn/homes/esCorrect?limit="+limit+"&startId="+startId)
-        .then(function (response) {console.log(response);
+        .then(function (response) {
             if(response.data.length){
                 for (let i = 0;i<response.data.length;i++){
                     policies_post(toket,response.data[i].targetId,response.data[i]);
