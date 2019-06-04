@@ -85,4 +85,4 @@ let login = async function(startId,limit){
     }
     get_policies(global.token,startId,limit);
 }
-login(43761,100);
+login(0,100);
