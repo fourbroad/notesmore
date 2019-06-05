@@ -12,7 +12,6 @@
         <div class="row user-name">
           <div class="input-box">
             <input
-              class
               type="text"
               id="username"
               name="username"
@@ -107,7 +106,7 @@ export default {
       }
       this.logging = true;
       client.login(this.username, this.password, (err, user) => {
-        this.logging = false;
+        _this.logging = false;
         if (err) {
           console.error(err);
           _this.showError('password',[err]);
