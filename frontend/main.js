@@ -120,7 +120,7 @@ router.afterEach((to, from, next) => {
   // store.commit('permission/SET_CURRENT_MENU', to.name)
 })
 
-const i18n = new VueI18n({ locale: 'cn'});
+const i18n = new VueI18n({ locale: store.state.locale});
 
 new Vue({
   el: '#app',
