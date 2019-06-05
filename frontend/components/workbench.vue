@@ -64,7 +64,7 @@
               <span class="icon-holder">
                 <i class="c-red-500 fa fa-star-o"></i>
               </span>
-              <span class="title">{{localePage.favorites.title}}</span>
+              <span class="title">{{localePage.favorites&&localePage.favorites.title}}</span>
               <span class="badge badge-pill badge-info mT-10">{{(localeFavorites && localeFavorites.length)||0}}</span>
               <span class="arrow">
                 <i class="fa fa-angle-right"></i>

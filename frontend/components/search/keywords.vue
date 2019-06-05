@@ -91,9 +91,9 @@ export default {
   i18n: {
     messages: {
       en: {
-        all: "全部",
-        clearLink: "清除已选择项目",
-        enterHint: "输入更多内容,　可以缩小选择范围..."
+        all: "All",
+        clearLink: "Clear selected items",
+        enterHint: "Enter more content to narrow your selection..."
       },
       cn: {
         all: "全部",
