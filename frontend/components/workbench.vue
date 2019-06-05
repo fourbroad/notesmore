@@ -188,8 +188,7 @@ export default {
   },  
   created() {
     this.fetchData();
-    this.$on('resize', ()=>{
-      console.log('resize~~~~~~~~~~~~~~~~~~~~~~~~~')
+    $(window).on('resize', () => {
       this.ps.update()
     })
   },
@@ -265,6 +264,9 @@ export default {
         this.getSidebarItems(page.sidebarItems);
       });
       this.$store.dispatch('FETCH_FAVORITES');
+    },
+    onResize(){
+      console.log(arguments);
     }
   },
   components: {

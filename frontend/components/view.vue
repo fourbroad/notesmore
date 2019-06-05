@@ -452,9 +452,11 @@ export default {
           this.total = docs.total;
           this.documents = docs.documents;
           this.updatePagination()
-          this.$emit('resize')
+          setTimeout(()=>{
+            window.dispatchEvent(new Event('resize'))
+          },1000);
         }
-      );
+      )
     },
     updatePagination(){
       if(this.totalPage <= 7){
@@ -463,6 +465,9 @@ export default {
             btnNo: btnNo,
             pageNo: btnNo+1,
             label: `${btnNo+1}`
+          }
+          if(btn.pageNo == this.currentPage){
+            btn.active = true;
           }          
           return btn;
         });
