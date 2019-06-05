@@ -1,5 +1,5 @@
 <template>
-  <div class="full-container">
+  <div class="im-container full-container">
     <div class="peers fxw-nw pos-r">
       <!-- Sidebar -->
       <div class="peer bdR" id="chat-sidebar">

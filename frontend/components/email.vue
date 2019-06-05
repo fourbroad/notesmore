@@ -1,5 +1,5 @@
 <template>
-  <div class="full-container">
+  <div class="email-container full-container">
     <div class="email-app">
       <div class="email-side-nav remain-height ov-h">
         <div class="h-100 layers">

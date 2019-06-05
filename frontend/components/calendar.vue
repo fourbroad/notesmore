@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid">
+  <div class="calendar-container container-fluid">
     <div class="row">
       <div class="col-md-8">
         <div id="full-calendar"></div>
@@ -287,4 +287,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.calendar-container{
+  padding: 30px;
+}
 </style>
