@@ -88,10 +88,6 @@ module.exports = merge(common, {
   },  
   plugins: [
     new CopyWebpackPlugin([{
-      from : path.join(__dirname, 'frontend/context/static'),
-      to   : path.join(__dirname, 'dist/context/static')
-    }]),
-    new CopyWebpackPlugin([{
       from : path.join(__dirname, 'frontend/favicon.ico'),
       to   : path.join(__dirname, 'dist/favicon.ico')
     }]),
