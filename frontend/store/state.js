@@ -44,7 +44,7 @@ export default {
   },
 
   get locale() {
-    return localStorage.getItem('locale') || navigator.language
+    return localStorage.getItem('locale') || (navigator.language == 'zh-CN' ? 'cn': 'en')
   },
   set locale(value) {
     localStorage.setItem('locale', value)
