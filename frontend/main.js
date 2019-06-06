@@ -9,7 +9,6 @@ import router from 'router/index'
 import dynamicRoutes from 'router/dynamic-router'
 
 import VueI18n from 'vue-i18n'
-import {VueMasonryPlugin} from 'vue-masonry';
 
 require('core-js/features/object/define-property');
 require('core-js/features/object/create');
@@ -51,7 +50,6 @@ Vue.config.productionTip = false
 
 Vue.use(client)
 Vue.use(VueI18n)
-Vue.use(VueMasonryPlugin)
 
 let url;
 if (localStorage.getItem("environment") == "development") {

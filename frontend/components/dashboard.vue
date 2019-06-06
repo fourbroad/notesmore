@@ -1,5 +1,5 @@
 <template>
-  <div class="row gap-20 masonry pos-r">
+  <div class="row gap-20 masonry pos-r m-20">
     <div class="masonry-sizer col-md-6"></div>
     <div class="masonry-item w-100">
       <div class="row gap-20">

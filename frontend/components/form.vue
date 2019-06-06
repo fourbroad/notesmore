@@ -136,7 +136,14 @@ export default {
       this.actions = actions;
     });
     this.checkPermission();
-  },  
+  },
+  watch:{
+    document(){
+      this.clone = _.cloneDeep(this.document);
+      this.setJsonEditorValue();
+      this.checkPermission();
+    }
+  },
   mounted() {
     let {currentUser} = this.$client;
     this.jsonEditor = ace.edit(this.$refs.formContent);
