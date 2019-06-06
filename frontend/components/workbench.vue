@@ -189,6 +189,7 @@ export default {
   created() {
     this.fetchData();
     $(window).on('resize', () => {
+      this.$refs.mainContainer.scrollTop = 0
       this.ps.update()
     })
   },

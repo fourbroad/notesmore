@@ -4,7 +4,7 @@ const
   merge = require('webpack-merge'),
   common = require('./webpack.common.js'),
   cssNext = require('postcss-cssnext'),
-  DashboardPlugin = require('webpack-dashboard/plugin');
+  DashboardPlugin = require('webpack-dashboard/plugin'),
   MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = merge(common, {

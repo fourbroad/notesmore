@@ -452,9 +452,7 @@ export default {
           this.total = docs.total;
           this.documents = docs.documents;
           this.updatePagination()
-          setTimeout(()=>{
-            window.dispatchEvent(new Event('resize'))
-          },1000);
+          window.dispatchEvent(new Event('resize'))
         }
       )
     },

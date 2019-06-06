@@ -1,5 +1,5 @@
 <template>
-  <div v-on:resize="console.log('~~~~~~~~~~~~~~~~~~~~~~~~~')">
+  <div>
     <component :is="component" :actionId="actionId" :document="document" :isNew="isNew" :key="document.collectionId+'~'+document.id"></component>
     <div class="container" v-if="loading">
       <div class="row loading">
@@ -43,16 +43,13 @@ export default {
   },
   created() {
     this.loadDocument(this.$route)
-    this.$on('resize', ()=>{
-      console.log('resize~~~~~~~~~~~~~~~~~~~~~~~~~')
-    })
   },
   computed: {
     ...mapState(["currentDomainId", "locale"])
   },
   watch: {
     $route(){
-     this.loadDocument(this.$route)
+     this.loadDocument(this.$route)     
     }
   },
   beforeRouteUpdate(to, from, next){
@@ -78,6 +75,7 @@ export default {
           this.component = components[actionId]
           this.actionId = actionId;
           this.document = doc
+          window.dispatchEvent(new Event('resize'))
         });
       });
     },
@@ -257,6 +255,7 @@ export default {
           this.document = doc
           this.isNew = true;
           this.loading = false
+          window.dispatchEvent(new Event('resize'))
         });
       });
     }
