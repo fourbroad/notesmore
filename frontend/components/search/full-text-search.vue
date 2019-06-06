@@ -43,6 +43,9 @@ export default {
   watch: {
     text(newText, oldText) {
       this.debouncedUpdateKeyword();
+    },
+    keyword(){
+      this.text = this.keyword
     }
   },
   methods: {

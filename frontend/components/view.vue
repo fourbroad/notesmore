@@ -348,7 +348,7 @@ export default {
     this.checkPermission();
   },
   watch: {
-    searchFields:{
+    'document.search':{
       handler(newValue, oldValue) {
         this.fetchDocuments();
       },

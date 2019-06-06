@@ -11,11 +11,12 @@
             <i class="fa fa-star-o" :class="{'c-red-500': isFavorite}"></i>
           </span>
           <div class="actions btn-group float-right">
-            <button type="button" v-if="isNew||isDirty" @click="onSaveClick" class="save btn btn-primary btn-sm">
-              <span v-if="wait" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true">{{$t('wait')}}</span>
+            <button type="button" v-if="isNew||isDirty" @click="onSaveClick" class="save btn btn-primary btn-sm" :disabled="wait">
+              <span v-if="wait" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+              <span v-if="wait">{{$t('wait')}}</span>
               <span v-if="!wait">{{$t('save')}}</span>
             </button>
-            <button type="button" v-if="isNew||isDirty" @click="onCancelClick" class="cancel btn btn-sm">{{$t('cancel')}}</button>
+            <button type="button" v-if="!wait&&(isNew||isDirty)" @click="onCancelClick" class="cancel btn btn-sm">{{$t('cancel')}}</button>
             <button type="button" class="more btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown">
               <i class="fa fa-ellipsis-h"></i>
               <ul class="dropdown-menu dropdown-menu-right">
@@ -55,9 +56,10 @@
                     </form>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="cancel btn btn-secondary" data-dismiss="modal">{{$t('cancel')}}</button>
+                    <button type="button" class="cancel btn btn-secondary" data-dismiss="modal" :disabled="wait">{{$t('cancel')}}</button>
                     <button type="button" class="submit btn btn-primary" @click="onSaveAsSubmit" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Please wait...">
-                      <span v-if="wait" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true">{{$t('wait')}}</span>
+                      <span v-if="wait" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                      <span v-if="wait">{{$t('wait')}}</span>
                       <span v-if="!wait">{{$t('submit')}}</span>
                     </button>
                   </div>
@@ -217,7 +219,9 @@ export default {
     onSaveClick() {
       if(this.isNew){
         let id = this.document.id||uuidv4();
+        this.wait = true
         this.saveAs(id, this.document.title).then(()=>{
+          this.wait = false
           this.$router.replace(`/${this.document.collectionId}/${id}`);
         });
       } else{
@@ -235,7 +239,9 @@ export default {
       this.$saveAs.modal('show');
     },
     onSaveAsSubmit(){
+      this.wait = true;
       this.saveAs(this.saveAsId, this.saveAsTitle).then(()=>{
+        this.wait = false;
         this.$saveAs.modal('hide');
         this.$router.replace(`/${this.document.collectionId}/${this.saveAsId}`);
       });
