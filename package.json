@@ -6,7 +6,6 @@
   "scripts": {
     "build": "webpack --config=webpack.production.js --progress",
     "analyse": "webpack --config=webpack.production.js --profile --json > stats.json",
-    "context": "webpack --config=webpack.context.js --progress",
     "watch": "webpack --watch --progress",
     "start": "webpack-dev-server --config=webpack.development.js --progress",
     "http-server": "http-server dist",
