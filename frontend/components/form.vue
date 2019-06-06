@@ -285,6 +285,18 @@ export default {
       this.jsonEditor.focus();
       this.enableChange = true;
     },
+    deleteSelf(){
+      let {currentUser} = this.$client, { domainId, collectionId, id } = this.document;
+      return new Promise((resolve, reject)=>{
+        this.document.delete((err, result) => {
+          if (err) return reject(err);
+          if(this.isFavorite)
+            this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
+          this.$router.go(-1);
+          resolve(result);
+        });
+      });
+    },
     fetchActions(doc){
       let {Meta, Action} = this.$client;
       function armItems(domainId, actIds) {

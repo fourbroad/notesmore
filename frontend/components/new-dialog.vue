@@ -9,9 +9,9 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="row gap-20 masonry pos-r" ref="masonry">
+          <div v-masonry class="row gap-20 masonry pos-r" transition-duration="0.3s" item-selector=".masonry-item" column-width=".masonry-sizer" ref="masonry">
             <div class="masonry-sizer pos-a col-2"></div>
-            <div v-for="meta in localeMetas" :key="meta.collectionId+'~'+meta.id" class="masonry-item col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2 ml-auto mr-auto">
+            <div v-masonry-tile v-for="meta in localeMetas" :key="meta.collectionId+'~'+meta.id" class="masonry-item col-6 col-sm-5 col-md-4 col-lg-3 col-xl-2 ml-auto mr-auto">
               <div class="meta p-10 bd" 
                 :class="{selected:selectedMeta.collectionId==meta.collectionId&&selectedMeta.id==meta.id}" 
                 @click="selectedMeta={collectionId:meta.collectionId, id:meta.id}">
@@ -32,8 +32,6 @@
 
 <script>
 import {mapState, mapGetters} from "vuex";
-
-import Masonry from 'masonry-layout';
 
 export default {
   name: "NewDialog",
@@ -71,20 +69,13 @@ export default {
     }
 
     this.$dialog.on('shown.bs.modal', (e) => {
-      this.masonry.layout();
+      this.$store.dispatch('FETCH_METAS');
     });
 
     this.$dialog.on('hidden.bs.modal', (e) => {
       this.$emit('update:opened', false);
     });
 
-    this.$store.dispatch('FETCH_METAS').then(()=>{
-      this.masonry = new Masonry(this.$refs.masonry, {
-        itemSelector: '.masonry-item',
-        columnWidth: '.masonry-sizer',
-        percentPosition: true,
-      });
-    });
   },
   computed: {
     $dialog(){
