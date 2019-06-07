@@ -11,12 +11,13 @@ export default {
       });
     });
   },
+
   async FETCH_FAVORITES({state, dispatch, commit, rootState}) {
     let {Domain} = client;
-
     function fetchFavorites(ids){
       return new Promise((resolve, reject)=>{
         if(_.isEmpty(ids)){
+          commit('SET_FAVORITES', []);
           return resolve([]);
         }
         Domain.mgetDocuments(state.currentDomainId, ids, (err, favorites)=>{
@@ -34,40 +35,40 @@ export default {
       });
     }
   },
+
   async TOGGLE_FAVORITE({state, commit, dispatch, rootState}, favorite) {
-    let {profile} = state, patch,
-      index = _.findIndex(profile.favorites, f => _.isEqual(f, favorite));
-      if (index >= 0) {
-        patch = [{
-          op: 'remove',
-          path: '/favorites/' + index
-        }];
-      } else {
-        patch = [!_.isEmpty(profile.favorites) ? {
-          op: 'add',
-          path: '/favorites/-',
-          value: {
-            domainId: favorite.domainId,
-            collectionId: favorite.collectionId,
-            id: favorite.id
-          }
-        } : {
-          op: 'add',
-          path: '/favorites',
-          value: [{
-            domainId: favorite.domainId,
-            collectionId: favorite.collectionId,
-            id: favorite.id
-          }]
-        }];
-      }
-      return new Promise((resolve, reject)=>{
-        profile.patch({ patch: patch }, (err, profile) => {
-          if (err) return reject(err);
-          commit('SET_PROFILE', profile);
-          dispatch('FETCH_FAVORITES');
-        });
+    let {profile} = state, patch, index = _.findIndex(profile.favorites, f => _.isEqual(f, favorite));
+    if (index >= 0) {
+      patch = [{
+        op: 'remove',
+        path: '/favorites/' + index
+      }];
+    } else {
+      patch = [!_.isEmpty(profile.favorites) ? {
+        op: 'add',
+        path: '/favorites/-',
+        value: {
+          domainId: favorite.domainId,
+          collectionId: favorite.collectionId,
+          id: favorite.id
+        }
+      } : {
+        op: 'add',
+        path: '/favorites',
+        value: [{
+          domainId: favorite.domainId,
+          collectionId: favorite.collectionId,
+          id: favorite.id
+        }]
+      }];
+    }
+    return new Promise((resolve, reject)=>{
+      profile.patch({ patch: patch }, (err, profile) => {
+        if (err) return reject(err);
+        commit('SET_PROFILE', profile);
+        dispatch('FETCH_FAVORITES');
       });
+    });
   },
   async FETCH_METAS({state, commit, dispatch, rootState}) {
     let {Meta, currentUser} = client, {profile, currentDomainId} = state;

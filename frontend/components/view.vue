@@ -361,6 +361,7 @@ export default {
       deep:true
     },
     size(){
+      this.from = 0;
       this.fetchDocuments();
     },
     
