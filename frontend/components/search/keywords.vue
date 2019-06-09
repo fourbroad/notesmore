@@ -146,40 +146,27 @@ export default {
     fetchWords() {
       let filter = this.filter == "" ? ".*" : ".*" + this.filter + ".*";
       this.loading = true;
-      this.fetchItems(this.name, filter, (err, items) => {
+      this.fetchItems(this.name, filter).then(items => {
         this.loading = false;
-        if (err) return (this.error = err.toString());
         if (this.filter == "") {
-          let sis = _.reduce(
-            this.selectedItems,
-            (sis, si) => {
-              sis.push({ value: si, checked: true });
-              return sis;
-            },
-            []
-          );
-          this.items = _.reduce(
-            _.differenceWith(items, this.selectedItems, _.isEqual),
-            (is, item) => {
-              is.push({ value: item });
-              return is;
-            },
-            sis
-          );
+          let sis = _.reduce(this.selectedItems, (sis, si) => {
+            sis.push({ value: si, checked: true });
+            return sis;
+          },[]);
+          this.items = _.reduce(_.differenceWith(items, this.selectedItems, _.isEqual), (is, item) => {
+            is.push({ value: item });
+            return is;
+          },sis);
         } else {
           let selectedItems = this.selectedItems;
-          this.items = _.reduce(
-            items,
-            (is, item) => {
-              if (_.indexOf(selectedItems, item) >= 0) {
-                is.push({ value: item, checked: true });
-              } else {
-                is.push({ value: item });
-              }
-              return is;
-            },
-            []
-          );
+          this.items = _.reduce(items, (is, item) => {
+            if (_.indexOf(selectedItems, item) >= 0) {
+              is.push({ value: item, checked: true });
+            } else {
+              is.push({ value: item });
+            }
+            return is;
+          },[]);
         }
         this.ps.update();
       });
@@ -215,11 +202,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.search-item {
-  font-size: 0.8rem;
-  padding-bottom: 5px;
-  margin-right: 2px;
-}
 .btn {
   border-color: lightgray;
   max-width: 260px;
@@ -229,7 +211,7 @@ export default {
 }
 
 .dropdown-menu {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   min-width: 220px;
 
   input {

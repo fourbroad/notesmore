@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import {inherits, uniqueId, makeError} from './utils';
-import jsonPatch from 'fast-json-patch';
+import {inherits, makeError} from './utils';
 import uuidv4 from 'uuid/v4';
 import Meta from './meta';
 import Collection from './collection';
@@ -26,122 +25,73 @@ export default function View(domainId, viewData, isNew) {
 
 _.assign(View, {
   
-  init: function(config) {
+  init(config) {
     client = config.client;
     return View;
   },
 
-  create: function(domainId, id, viewRaw, options, callback){
+  create(domainId, id, viewRaw, options){
     if(arguments.length == 2 && typeof arguments[1] == 'object'){
-      viewRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-      callback = viewRaw;
       viewRaw = id;
       id = uuidv4();
     } else if(arguments.length == 3 && typeof arguments[1] == 'object' && typeof arguments[2] == 'object'){
       options = viewRaw;
       viewRaw = id;
       id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[1] == 'object' && typeof arguments[2] == 'function'){
-      callback = viewRaw;
-      viewRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[1] == 'object'){
-      callback = options;
-      options = viewRaw;
-      viewRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[1] == 'string' && typeof arguments[3] == 'function'){
-      callback = options
-      options = undefined;
     }
-
-    client.emit('createView', domainId, id, viewRaw, options, function(err, viewData) {
-      if(err) return callback ? callback(err) : console.error(err);
-
-      let view = new View(domainId, viewData);
-      callback ? callback(null, view) : console.log(view);
-    });    
+    return client.emit('createView', domainId, id, viewRaw, options).then(viewData => new View(domainId, viewData));
   },
 
-  get: function(domainId, id, options, callback){
+  get(domainId, id, options){
   　if(arguments.length < 2){
-  　	let err = makeError(400, 'parameterError', 'Parameters is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-  　  callback = options;
-  　  options = undefined;
-  　}
- 
-    client.emit('getView', domainId, id, options, function(err, viewData) {
-      if(err) return callback ? callback(err) : console.error(err);
-      
-      let view = new View(domainId, viewData);
-      callback ? callback(null, view) : console.log(view);
-    });
+      return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!'));
+  　} 
+    return client.emit('getView', domainId, id, options).then(viewData => new View(domainId, viewData));
   },
 
-  find: function(domainId, query, options, callback) {
+  find(domainId, query, options) {
     if(arguments.length < 1 || (arguments.length >= 1 && typeof arguments[0] != 'string')){
-      let err = makeError(400, 'argumentsError', 'Arguments is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-    } else if(arguments.length == 3 && typeof arguments[2]=='function'){
-  	  callback = options;
-  	  options = undefined;
-  	}
-  	  	
-    client.emit('findViews', domainId, query, options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-       
-      data.views = _.reduce(data.documents, function(r, v, k){
+      return Promise.reject(makeError(400, 'argumentsError', 'Arguments is incorrect!'));
+    }  	  	
+    return client.emit('findViews', domainId, query, options).then(data => {
+      data.views = _.reduce(data.documents, (r, v) => {
       	let index = v._meta.index.split('~');
       	r.push(new View(index[0], v));
       	return r;
       }, []);
 
       delete data.documents;
-
-	  callback ? callback(null, data) : console.log(data);
-	});
+      return data;
+  	});
   }
 
 });
 
 inherits(View, Document, {
 
-  _create: function(domainId, collectionId, viewData){
+  _create(domainId, collectionId, viewData){
     return new View(domainId, viewData);
   },
 
-  getClient: function(){
+  getClient(){
    	return client;
   },
 
-  getClass: function(){
+  getClass(){
   	return View;
   },
 
-  saveAs: function(id, title, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = id;
-      id = uuidv4();
-      title = newView.title;
-    } else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      callback = title;
-      title = id;
+  saveAs(id, title){
+    if(arguments.length == 0){
       id = uuidv4();
     }
-
   	let newView = _.cloneDeep(this), opts = {};
-
-   	newView.title = title;
+   	newView.title = title||newView.title;
    	delete newView.id;
-
-	View.create(this.domainId, id, newView, callback);
+    return View.create(this.domainId, id, newView);
   },
 
-  _buildDatetimeRange: function(searchColumn){
+  _buildDatetimeRange(searchColumn){
     let earliest, latest, range = searchColumn.range, rangeClause = {};
     switch(range && range.option){
       case 'overdue':
@@ -205,13 +155,13 @@ inherits(View, Document, {
     return rangeClause;
   },  
 
-  _buildQuery: function(options){
-    let _this = this, source, body = {body:{}}, bool = _.reduce(this.search.fields, function(bool, sf){
+  _buildQuery(options){
+    let _this = this, source, body = {body:{}}, bool = _.reduce(this.search.fields, (bool, sf) => {
       switch(sf.type){
         case 'keywords':
           if(!_.isEmpty(sf.values)){
             bool.must = bool.must || [];
-            bool.must.push(_.reduce(sf.values, function(bool, value){
+            bool.must.push(_.reduce(sf.values, (bool, value) => {
               let term = {};
               term[sf.name+'.keyword'] = value;
               bool.bool.should.push({term:term});
@@ -294,65 +244,61 @@ inherits(View, Document, {
     return body;
   },
 
-  _buildEntities: function(data){
-      data.documents = _.reduce(data.documents, function(r, v, k){
-        let indices = v._meta.index.split('~'), domainId = indices[0], collectionId = indices[1];
-        switch (collectionId) {
-        case '.domains':
-          r.push(new Domain(v));
-          break;
-        case '.metas':
-          r.push(new Meta(domainId, v));
-          break;
-        case '.collections':
-          r.push(new Collection(domainId, v));
-          break;
-        case '.views':
-          r.push(new View(domainId, v));
-          break;
-        case '.pages':
-          r.push(new Page(domainId, v));
-          break;
-        case '.actions':
-          r.push(new Action(domainId, v));
-          break;
-        case '.forms':
-          r.push(new Form(domainId, v));
-          break;
-        case '.roles':
-          r.push(new Role(domainId, v));
-          break;
-        case '.groups':
-          r.push(new Group(domainId, v));
-          break;
-        case '.profiles':
-          r.push(new Profile(domainId, v));
-          break;
-        case '.files':
-          r.push(new File(domainId, v));
-          break;
-        case '.users':
-          r.push(new User(v));
-          break;
-        default:
-          r.push(new Document(domainId, collectionId, v));
-        }
-        return r;
-      },[]);    
+  _buildEntities(data){
+    data.documents = _.reduce(data.documents, (r, v) => {
+      let indices = v._meta.index.split('~'), domainId = indices[0], collectionId = indices[1];
+      switch (collectionId) {
+      case '.domains':
+        r.push(new Domain(v));
+        break;
+      case '.metas':
+        r.push(new Meta(domainId, v));
+        break;
+      case '.collections':
+        r.push(new Collection(domainId, v));
+        break;
+      case '.views':
+        r.push(new View(domainId, v));
+        break;
+      case '.pages':
+        r.push(new Page(domainId, v));
+        break;
+      case '.actions':
+        r.push(new Action(domainId, v));
+        break;
+      case '.forms':
+        r.push(new Form(domainId, v));
+        break;
+      case '.roles':
+        r.push(new Role(domainId, v));
+        break;
+      case '.groups':
+        r.push(new Group(domainId, v));
+        break;
+      case '.profiles':
+        r.push(new Profile(domainId, v));
+        break;
+      case '.files':
+        r.push(new File(domainId, v));
+        break;
+      case '.users':
+        r.push(new User(v));
+        break;
+      default:
+        r.push(new Document(domainId, collectionId, v));
+      }
+      return r;
+    },[]); 
+    return data;   
   },
 
-  findDocuments: function(options, callback) {
-  	if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-  	}
-
-    const domainId = this.domainId, _this = this, buildOpts = {}, viewId = this.id, client = this.getClient();
+  findDocuments(options) {
+    let buildOpts = {};
     if(options && options.source){
       buildOpts.source = options.source;
     }
 
-    var sort = _.reduce(this.columns, (sort, c)=>{
+    let sort = _.reduce(this.columns, (sort, c)=>{
       if(c.order){
         sort.push({[c.name]:{order:c.order}})
       }
@@ -363,47 +309,24 @@ inherits(View, Document, {
       options.sort = sort
     }
 
-    client.emit('findViewDocuments', domainId, viewId, this._buildQuery(buildOpts), options, function(err, data) {
-      if (err) return callback ? callback(err) : console.error(err);
-      _this._buildEntities(data);
-      callback ? callback(null, data) : console.log(data);
-    });
+    return this.getClient().emit('findViewDocuments', this.domainId, this.id, this._buildQuery(buildOpts), options)
+                           .then(data => this._buildEntities(data));
   },
 
-  distinctQuery: function(field, options, callback) {
-    this.getClient().emit('distinctQueryView', this.domainId, this.id, field, options, function(err, data) {
-      if (err) return callback ? callback(err) : console.error(err);
-      callback(null, data);      
-    });
+  distinctQuery(field, options) {
+    return this.getClient().emit('distinctQueryView', this.domainId, this.id, field, options);
   },
 
-  scroll: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    let _this = this;
-    client.emit('scroll', options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-      _this._buildEntities(data);
-	  callback ? callback(null, data) : console.log(data);
-    });
+  scroll(options){
+    return this.getClient().emit('scroll', options).then(data => this._buildEntities(data));
   },  
 
-  clearScroll: function(params, options, callback){
-  	Document.clearScroll.apply(this, arguments);
+  clearScroll(params, options){
+  	return Document.clearScroll.apply(this, arguments);
   },
 
-  refresh: function(options, callback) {
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-    this.getClient().emit('refreshView', this.domainId, this.id, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, result) : console.log(result);
-	});
+  refresh(options) {
+    return this.getClient().emit('refreshView', this.domainId, this.id, options);
   }
 
 });

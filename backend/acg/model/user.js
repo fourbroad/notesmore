@@ -41,7 +41,7 @@ _.assign(User, {
         } else {
           redis.get(SESSION_PREFIX + userId, function(err, data){
             if(err || token != (data && data.token)){
-              return reject(createError(406, "invalidToken"));
+              return reject(createError(406, "InvalidTokenError"));
             }
               
             return resolve(userId);

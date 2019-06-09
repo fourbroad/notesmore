@@ -10,6 +10,12 @@ export default {
   CLEAR_TOKEN(state){
     state.token = null
   },
+  SET_CURRENTUSER(state, currentUser){
+    state.currentUser = currentUser;
+  },
+  CLEAR_CURRENTUSER(state){
+    state.currentUser = null;
+  },
   toggleNavCollapse(state) {
     state.isSidebarNavCollapse = !state.isSidebarNavCollapse
   },

@@ -17,181 +17,140 @@ import EventEmitter from 'events';
 import io from 'socket.io-client';
 
 const eventEmitter = new EventEmitter();
-
-const client = {
-     
+const client = {     
   options: {
     url: 'localhost:3000/domains',
     updateToken: true
   },
 
-  on: function(){
+  on(){
     return eventEmitter.on.apply(eventEmitter, arguments);
   },
 
-  off: function(){
+  off(){
     return eventEmitter.off.apply(eventEmitter, arguments);
   },
 
-  once: function(){
+  once(){
     return eventEmitter.once.apply(eventEmitter, arguments);
   },
 
-  emitEvent: function(){
+  emitEvent(){
     return eventEmitter.emit.apply(eventEmitter, arguments);
   },
 
-  addListener: function(){
+  addListener(){
     return eventEmitter.addListener.apply(eventEmitter, arguments);
   },
 
-  removeListener: function(){
+  removeListener(){
     return eventEmitter.removeListener.apply(eventEmitter, arguments);
   },
 
-  init: function(options){
+  connect(options){
     _.merge(this.options, options);
+    let {url, token} = this.options;
+    return this.initSocket(url, token);
   },
 
-  emit: function() {
-    var o = this.options, self = this, token = this.token;
-    if(!this.isExpired()){
-      if(this.socket.connected){
-        this.socket.emit.apply(this.socket, arguments);
-        var decodedToken = jwtDecode(token), time = new Date().getTime()/1000;
-        if(o.updateToken && ((time - decodedToken.iat) > (decodedToken.exp-decodedToken.iat)*2/3)) {
-          this.socket.emit('updateToken', (err, token) => {
-            if(token){
-              self.token = token;
-              self._checkExpired(token);
-              self.emitEvent('updateToken', token);
-            }
-          });
-        }
+  initSocket(url, token){
+    return new Promise((resolve, reject)=>{
+      if(token){
+        this.socket = io.connect(url, {query:{token: token}});
+        this.socket.on('connect', () =>{
+          this.token = token;
+          this._checkExpired(token);
+          resolve(true);
+        });
       }else{
-        this._doConnect(token, () => {
-          self.socket.emit.apply(self.socket, arguments);
-        });        
+        this.socket = io.connect(url);
+        this.socket.on('connect', () =>{
+          resolve(true);
+        });
       }
-    } else {
-      this.emitEvent('tokenExpired');
-    }
+  
+      this.socket.on('TokenExpiredError', ()=>{
+        this.emitEvent('TokenExpiredError');
+      });
+
+      this.socket.on('InvalidTokenError', ()=>{
+        this.emitEvent('InvalidTokenError');
+      });
+  
+      this.socket.on('error', (err) => {
+        this.emitEvent(err);
+      });
+    });
   },
 
-  getToken: function(){
+  emit() {
+    if(this.isTokenValid()){
+      let o = this.options, token = this.token, decodedToken = jwtDecode(token), time = new Date().getTime()/1000;
+      if(o.updateToken && ((time - decodedToken.iat) > (decodedToken.exp-decodedToken.iat)*2/3)) {
+        this.socket.emit('updateToken', (err, token) => {
+          if(token){
+            this.token = token;
+            _.merge(this.socket.io.opts.query, {token: token});
+            this._checkExpired(token);
+            this.emitEvent('updateToken', token);
+          }
+        });
+      }
+    }
+    return new Promise((resolve, reject)=>{
+      let args = _.values(arguments);
+      args.push(function(){
+        let response = _.values(arguments);
+        if(response[0]) reject(response[0]);
+        response.shift();
+        resolve.apply(null, response);
+      });
+      this.socket.emit.apply(this.socket, args);
+    });
+  },
+
+  getToken(){
     return this.token;
   },
 
-  _checkExpired: function(token){
-    var self = this;
+  _checkExpired(token){
     if(this.interval){
       clearInterval(this.interval);
       delete this.interval;      
     } 
-    this.interval = setTimeout(function(){
-      delete self.interval;
-      self.emitEvent('tokenExpired');
+    this.interval = setTimeout(()=>{
+      delete this.interval;
+      this.emitEvent('tokenExpired');
     }, (jwtDecode(token).exp*1000) - new Date().getTime() + 100);
   },
 
-  _initSocket(socket){
-    var self = this;
-    socket.on('TokenExpiredError', function(){
-      if(self.isExpired()){
-        self.emitEvent('tokenExpired');
-      }
-    });
-
-    socket.on('invalidToken', function(){
-      self.emitEvent('invalidToken');
-    });
-
-    socket.on('error', function(err){
-      self.emitEvent(err);
-    });
+  isTokenValid(){
+    var token = this.token, decodedToken, time = new Date().getTime()/1000, valid = false;
+    try{
+      decodedToken = jwtDecode(token);
+      valid = time >= decodedToken.exp;
+    } catch(e) {}
+    return valid;
   },
 
-  _doConnect: function(token, callback){
-    var o = this.options, self = this;
-    this.socket = io.connect(o.url, {
-      query: {
-        token: token
-      }
-    });
-
-    this.socket.on('connect', function() {
-      self.token = token;
-      self._checkExpired(token);
-      User.get(function(err, user){
-        if (err) return callback ? callback(err) : console.error(err);
-        self.currentUser = user;
-        callback? callback(null, user) : console.log(user);
-      });
-    });
-
-    this._initSocket(this.socket);
-  },
-
-  isExpired: function(){
-    var token = this.token, decodedToken = jwtDecode(token), time = new Date().getTime()/1000;
-    return time >= decodedToken.exp;
-  },
-
-  isConnected: function(){
+  isConnected(){
     return this.socket && this.socket.connected;
   },
 
-  connect: function(token, callback) {
-    var self = this;
-    this._doConnect(token, function(err, user){
-      if (err) return callback ? callback(err) : console.error(err);
-      callback? callback(null, user) : console.log(user);
-      _.merge(self.socket.io.opts.query, {token: token});
-      self.emitEvent('connected', user);
+  login(userId, password) {
+    return this.emit('login', userId, password).then(token => {
+      _.merge(this.socket.io.opts.query, {token: token});
+      this.token = token;
+      this._checkExpired(token);
+      return token;
     });
   },
 
-  login: function(userId, password, callback) {
-    var o = this.options, self = this, socket;
-    if (arguments.length == 0) {
-      userId = 'anonymous',
-      password = 'anonymous'; 
-    } else if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = userId;
-      userId = 'anonymous',
-      password = 'anonymous'; 
-    }
-
-    this.socket = io.connect(o.url);
-    this.socket.on('connect', function() {
-      self.socket.emit('login', userId, password, function(err, token) {
-        if (err) return callback ? callback(err) : console.error(err);
-        _.merge(self.socket.io.opts.query, {token: token});
-
-        self.token = token;
-        self._checkExpired(token);
-        User.get(function(err, user){
-          if (err) return callback ? callback(err) : console.error(err);
-          self.currentUser = user;
-          callback? callback(null, user) : console.log(user);
-          self.emitEvent('loggedIn', user);
-        });
-      });
-    });
-
-    this._initSocket(this.socket);
-  },
-
-  logout: function(callback){
-    var self = this;
-    User.get(function(err, user){
-      if (err) return callback ? callback(err) : console.error(err);
-      self.emit('logout', function(err, result){
-        if (err) return callback ? callback(err) : console.error(err);
-        delete self.token;
-        callback? callback(null, result) : console.log(result);
-        self.emitEvent('loggedOut', user);
-      });
+  logout(){
+    return this.emit('logout').then(()=>{
+      delete this.socket.io.opts.query.token;
+      delete this.token;
+      this.emitEvent('loggedOut');
     });
   }
 

@@ -19,7 +19,7 @@ initSocket = function(socket) {
         next();
       }).catch(e => {
         next(e);
-        setTimeout(()=>{socket.disconnect();}, 1000);
+        // setTimeout(()=>{socket.disconnect();}, 1000);
       });
     } else {
       next();
@@ -36,7 +36,9 @@ initSocket = function(socket) {
   socket.on('logout', function(callback){
     let visitorId = socket.handshake.query.visitorId;
     User.logout(visitorId).then( result => {
-      setTimeout(() => { socket.disconnect(); }, 3000);
+      delete socket.handshake.query.visitorId;
+      delete socket.handshake.query.token;
+      // setTimeout(() => { socket.disconnect(); }, 3000);
       return visitorId + " has logged out";
     }).then(result => callback(null, result)).catch(err => {
       console.error(err);

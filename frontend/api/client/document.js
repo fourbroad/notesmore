@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import uuidv4 from 'uuid/v4';
-import Domain from './domain';
 import jsonPatch from 'fast-json-patch';
-import {inherits, uniqueId, makeError} from './utils';
+import {makeError} from './utils';
 
 
 var client;
@@ -25,7 +24,6 @@ export default function Document(domainId, collectionId, docData, isNew) {
 
   _.assign(this, docData);
 
-  var self = this;
   Object.defineProperties(this, {
     id: {
       value: docData.id,
@@ -38,266 +36,156 @@ export default function Document(domainId, collectionId, docData, isNew) {
 
 _.assign(Document, {
   
-  init: function(config) {
+  init(config) {
     client = config.client;
     return Document;
   },
 
-  create: function(domainId, collectionId, id, docRaw, options, callback){
+  create(domainId, collectionId, id, docRaw, options){
     if(arguments.length == 3 && typeof arguments[2] == 'object'){
-      docRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[3] == 'function'){
-      callback = docRaw;
       docRaw = id;
       id = uuidv4();
     } else if(arguments.length == 4 && typeof arguments[2] == 'object' && typeof arguments[3] == 'object'){
       options = docRaw;
       docRaw = id;
       id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[2] == 'object' && typeof arguments[3] == 'function'){
-      callback = docRaw;
-      docRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 5 && typeof arguments[2] == 'object'){
-      callback = options;
-      options = docRaw;
-      docRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 5 && typeof arguments[2] == 'string' && typeof arguments[4] == 'function'){
-      callback = options
-      options = undefined;
     }
       	
-    client.emit('createDocument', domainId, collectionId, id, docRaw, options, function(err, docData) {
-      if(err) return callback ? callback(err) : console.error(err);
-
-      var document = new Document(domainId, collectionId, docData);
-      callback ? callback(null, document) : console.log(document);
-    });
+    return client.emit('createDocument', domainId, collectionId, id, docRaw, options).then(docData => new Document(domainId, collectionId, docData));
   },
 
-  get: function(domainId, collectionId, id, options, callback){
+  get(domainId, collectionId, id, options){
   　if(arguments.length < 3){
-  　	var err = makeError(400, 'parameterError', 'Parameters is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 4 && typeof arguments[3] == 'function'){
-  　  callback = options;
-  　  options = undefined;
+      return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!'));
   　}
-  	
-    client.emit('getDocument', domainId, collectionId, id, options, function(err, docData) {
-      if(err) return callback ? callback(err) : console.error(err);
-      
-      var document = new Document(domainId, collectionId, docData);
-      callback ? callback(null, document) : console.log(document);
-    });
+    return client.emit('getDocument', domainId, collectionId, id, options).then(docData => new Document(domainId, collectionId, docData));
   },
 
-  mget: function(domainId, collectionId, ids, options, callback){
+  mget(domainId, collectionId, ids, options){
   　if(arguments.length < 3){
-  　	var err = makeError(400, 'parameterError', 'Parameters is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 4 && typeof arguments[3] == 'function'){
-  　  callback = options;
-  　  options = undefined;
+      return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!'));
   　}
-
   　if(_.isEmpty(ids)){
-  　  return callback(null, {total:0, offset:0, documents:[]});
+  　  return Promise.resolve({total:0, offset:0, documents:[]});
   　}
-  　  	
-    this.find(domainId, collectionId, {
+    return this.find(domainId, collectionId, {
       body:{
-        query: { bool: {should: _.reduce(ids, function(result, id, index){
+        query: { bool: {should: _.reduce(ids, (result, id)=>{
           result.push({term: {'id.keyword': id}});
           return result;        	
         },[])}}
       },
       size:100
-    }, options, callback);
+    }, options);
   },
 
-  find: function(domainId, collectionId, query, options, callback) {
+  find(domainId, collectionId, query, options) {
     if(arguments.length < 1 || (arguments.length >= 1 && typeof arguments[0] != 'string')){
-      var err = makeError(400, 'argumentsError', 'Arguments is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-    } else if(arguments.length == 4 && typeof arguments[3]=='function'){
-  	  callback = options;
-  	  options = undefined;
-  	}
-
-    client.emit('findDocuments', domainId, collectionId, query, options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-       
-      data.documents =_.reduce(data.documents, function(r, v, k){
+      return Promise.reject(makeError(400, 'argumentsError', 'Arguments is incorrect!'));
+    }
+    return client.emit('findDocuments', domainId, collectionId, query, options).then( data => {
+      data.documents =_.reduce(data.documents, (r, v)=>{
       	var index = v._meta.index.split('~');
       	r.push(new Document(index[0], index[1], v));
       	return r;
       }, []); 
-      
-	  callback ? callback(null, data) : console.log(data);
-	});
+      return data;
+	  });
   },
 
-  scroll: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    client.emit('scroll', options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-      
-      data.documents =_.reduce(data.documents, function(r, v, k){
+  scroll(options){
+    return client.emit('scroll', options).then(data => {
+      data.documents =_.reduce(data.documents, (r, v)=>{
       	var index = v._meta.index.split('~');
       	r.push(new Document(index[0], index[1], v));
       	return r;
-      }, []); 
-      
-	  callback ? callback(null, data) : console.log(data);
+      }, []);
+      return data;
     });
   },
 
-  clearScroll: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    client.emit('clearScroll', options, function(err, result) {
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, result) : console.log(result);
-    });
+  clearScroll(options){
+    return client.emit('clearScroll', options);
   }
 
 });
 
 _.assign(Document.prototype, {
 
-  _create: function(domainId, collectionId, docData){
+  _create(domainId, collectionId, docData){
     return new Document(domainId, collectionId, docData);
   },
 
-  getClient: function(){
+  getClient(){
    	return client;
   },
 
-  getClass: function(){
+  getClass(){
   	return Document;  	
   },
 
-  get: function(locale) {
+  get(locale) {
     let data = _.cloneDeep(this);
     return this._create(this.domainId, this.collectionId, _.merge(data, data._i18n && data._i18n[locale]));
   },
 
-  saveAs: function(id, title, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = id;
-      id = uuidv4();
-      title = newDoc.title;
-    } else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      title = id;
-      callback = title;
+  saveAs(id, title){
+    if(arguments.length == 0){
       id = uuidv4();
     }
 
     var newDoc = jsonPatch.deepClone(this), opts = {};
-
-   	newDoc.title = title;
-   	delete newDoc.id;
-	
-	Document.create(this.domainId, this.collectionId, id, newDoc, opts, callback);
+   	newDoc.title = title||newDoc.title;
+    delete newDoc.id;
+    return Document.create(this.domainId, this.collectionId, id, newDoc, opts);
   },
 
-  replace: function(doc){
+  replace(doc){
     return this._create(this.domainId, this.collectionId, doc);
   },
 
-  value: function(path){
+  value(path){
   	return jsonPatch.getValueByPointer(this, path);  	
   },
 
-  is: function(path, value){
+  is(path, value){
   	var errors = jsonPatch.validate([{op:'test', path: path, value:value}], this);
   	return !(errors && errors.length > 0)
   },
 
-  patch: function(patch, options, callback){
-    if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      callback = options;
-      options = undefined;
-    }
+  patch(patch, options){
+    return this.getClient().emit('patchDocument', this.domainId, this.collectionId, this.id, patch, options)
+                 .then(docData => this._create(this.domainId, this.collectionId, docData));
+  },
 
-    var self = this;
-    client.emit('patchDocument', this.domainId, this.collectionId, this.id, patch, options, function(err, docData) {
-      if(err) return callback ? callback(err) : console.error(err);
+  delete(options) {
+    return this.getClient().emit('deleteDocument', this.domainId, this.collectionId, this.id, options);
+  },
 
-      var newDocument = self._create(self.domainId, self.collectionId, docData);
-      callback ? callback(null, newDocument): console.log(newDocument);
+  getEvents(options){
+    return this.getClient().emit('getEvents', this.domainId, this.collectionId, this.id, options);
+  },
+
+  getMeta() {
+    return this._meta;
+  },
+
+  patchMeta(metaPatch, options) {
+    return this.getClient().emit('patchDocumentMeta', this.domainId, this.collectionId, this.id, metaPatch, options).then(metaData => {
+      this._meta = metaData;
+      return metaData;
     });
   },
 
-  delete: function(options, callback) {
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-  	var client = this.getClient();
-    client.emit('deleteDocument', this.domainId, this.collectionId, this.id, options, function(err, result) {
-      if(err) return callback ? callback(err) : console.error(err);
-	  callback ? callback(null, result) : console.log(result);
-	});
-  },
-
-  getEvents: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-  	var client = this.getClient(), self = this;
-    client.emit('getEvents', this.domainId, this.collectionId, this.id, options, function(err, evtData){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, evtData): console.log(evtData);
+  clearAclSubject(method, rgu, subjectId, options) {
+    this.getClient().emit('clearAclSubject', this.domainId, this.collectionId, this.id, method, rgu, subjectId, options).then(metaData => {
+      this._meta = metaData;
+      return metaData;
     });
   },
 
-  getMeta: function(callback) {
-    callback ? callback(null, this._meta) : console.log(this._meta);
-  },
-
-  patchMeta: function(metaPatch, options, callback) {
-    if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    var self = this, client = this.getClient();
-    client.emit('patchDocumentMeta', this.domainId, this.collectionId, this.id, metaPatch, options, function(err, metaData) {
-      if(err) return callback ? callback(err) : console.error(err);
-      self._meta = metaData;
-      callback ? callback(null, metaData): console.log(metaData);
-    });
-  },
-
-  clearAclSubject: function(method, rgu, subjectId, options, callback) {
-    if(arguments.length == 4 && typeof arguments[3] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-  	var self = this, client = this.getClient(), acl = this._meta.acl;
-    client.emit('clearAclSubject', this.domainId, this.collectionId, this.id, method, rgu, subjectId, options, function(err, metaData){
-      if(err) return callback ? callback(err) : console.error(err);
-      self._meta = metaData;
-      callback ? callback(null, acl): console.log(acl);
-    });
-  },
-
-  getMetaId: function(callback) {
-  	var metaId = this._meta.metaId;
-    callback ? callback(null, metaId) : console.log(metaId);
+  getMetaId() {
+    return this._meta.metaId;
   }
 
 });

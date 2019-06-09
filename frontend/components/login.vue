@@ -47,7 +47,6 @@
 
 <script>
 import particles_config from "./particles_config.json";
-import client from "api/client";
 import validatejs from "validate.js";
 import "particles.js";
 
@@ -102,18 +101,17 @@ export default {
       if (error) {
         this.showError('username',validatejs.single(this.username, this.constraints.username));
         this.showError('password',validatejs.single(this.password, this.constraints.password));
-        return false;
+        return Promise.reject(false);
       }
       this.logging = true;
-      client.login(this.username, this.password, (err, user) => {
+      return this.$client.login(this.username, this.password).then(token => {
         _this.logging = false;
-        if (err) {
-          console.error(err);
-          _this.showError('password',[err]);
-          return false;
-        }
-        _this.$store.commit("LOGIN_IN", client.getToken());
+        _this.$store.commit("LOGIN_IN", token);
         _this.$router.replace("/");
+      }).catch(err=>{
+        console.error(err);
+        this.showError('password',[err]);
+        return false;
       });
     },
 

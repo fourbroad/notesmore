@@ -55,21 +55,15 @@ let url;
 if (localStorage.getItem("environment") == "development") {
   url = 'localhost:3000/domains';
 
-  import( /* webpackChunkName: "moment" */ 'moment').then(({
-    default: moment
-  }) => {
+  import( /* webpackChunkName: "moment" */ 'moment').then(({default: moment}) => {
     window.moment = moment;
   });
 
-  import( /* webpackChunkName: "jsonPatch" */ 'fast-json-patch').then(({
-    default: jsonPatch
-  }) => {
+  import( /* webpackChunkName: "jsonPatch" */ 'fast-json-patch').then(({default: jsonPatch}) => {
     window.jsonPatch = jsonPatch;
   });
 
-  import( /* webpackChunkName: "elasticsearch" */ 'elasticsearch-browser').then(({
-    default: elasticsearch
-  }) => {
+  import( /* webpackChunkName: "elasticsearch" */ 'elasticsearch-browser').then(({default: elasticsearch}) => {
     window.esc = new elasticsearch.Client({
       host: 'localhost:9200',
       log: 'trace'
@@ -79,7 +73,7 @@ if (localStorage.getItem("environment") == "development") {
   url = 'https://notesmore.com/domains';
 }
 
-client.init({url:url});
+// client.init({url:url});
 
 router.beforeEach((to, from, next) => {
   if (!store.state.token) {
@@ -106,13 +100,9 @@ router.beforeEach((to, from, next) => {
     if (client.isConnected()) {
       doNext();
     } else {
-      client.connect(store.state.token, (err, user) => {
-        if (err) {
-          next({ path: '/login' })
-        } else {
-          doNext();
-        }
-      });
+      client.connect({token:store.state.token})
+            .then(()=>doNext())
+            .catch(e=>next({ path: '/login' }));
     }
   }
 })

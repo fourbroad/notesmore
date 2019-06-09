@@ -97,11 +97,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.search-item {
-  font-size: 0.8rem;
-  padding-bottom: 5px;
-  margin-right: 2px;
-}
 .btn {
   border-color: lightgray;
   max-width: 260px;
@@ -111,7 +106,7 @@ export default {
 }
 
 .dropdown-menu {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   min-width: 220px;
 
   a.disabled {

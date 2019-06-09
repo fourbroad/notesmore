@@ -192,6 +192,7 @@ export default {
       this.$refs.mainContainer.scrollTop = 0
       this.ps.update()
     })
+    this.$store.dispatch('FETCH_CURRENTUSER')
   },
   updated() {
     this.ps = new PerfectScrollbar(this.$refs.mainContainer, {suppressScrollX:true, wheelPropagation: true});
@@ -217,7 +218,8 @@ export default {
       "locale",
       "profile",
       "toasts",
-      "isConnected"
+      "isConnected",
+      "currentUser"
     ]),
     ...mapGetters([
       "localeFavorites",
@@ -234,14 +236,12 @@ export default {
     },
     getSidebarItems(items) {
       let { Domain } = this.$client
-      Domain.mgetDocuments(this.currentDomainId, items, (err, docs) => {
-        if (err) return (this.error = err.toString);
-        
+      Domain.mgetDocuments(this.currentDomainId, items).then(docs => {
         let sidebarItems = []
         _.each(docs, doc => {
           let item
           doc = doc.get(this.locale)
-          item = _.filter(items, function(i) {
+          item = _.filter(items, (i) => {
             return i.collectionId == doc.collectionId && i.id == doc.id;
           })
           sidebarItems.push(
@@ -258,16 +258,12 @@ export default {
       let {Domain, Page, Profile, currentUser} = this.$client
       this.error = this.post = null;
       this.loading = true;
-      Page.get(this.currentDomainId, ".workbench", (err, page) => {
+      Page.get(this.currentDomainId, ".workbench").then(page => {
         this.loading = false;
-        if (err) return this.error = err.toString();
         this.page = page;
         this.getSidebarItems(page.sidebarItems);
       });
       this.$store.dispatch('FETCH_FAVORITES');
-    },
-    onResize(){
-      console.log(arguments);
     }
   },
   components: {

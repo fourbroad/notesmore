@@ -20,6 +20,13 @@ export default {
     }
   },
 
+  get acgUrl(){
+    return localStorage.getItem('acgUrl')||'https://notesmore.com/domains';
+  },
+  set acgUrl(url){
+    localStorage.setItem('acgUrl', url);
+  },
+
   get currentDomainId() {
     let domain = document.domain, currentDomainId, index
     index = domain.indexOf('.notesmore.com');
@@ -50,14 +57,10 @@ export default {
     localStorage.setItem('locale', value)
   },
   
-  get currentUser(){
-    return client.currentUser;
-  },
-
   get isConnected(){
     return client.isConnected();
   },
-
+  currentUser: null,
   favorites: [],
   favoritesOpened: false,
   profile: null,

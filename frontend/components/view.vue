@@ -271,7 +271,7 @@ import DatetimeRange from "./search/datetime-range";
 import DatetimeDuedate from "./search/datetime-duedate";
 import FullTextSearch from "./search/full-text-search";
 
-import utils from 'core/utils';
+import utils from 'utils/utils';
 
 import jsonPatch from "fast-json-patch";
 import validate from "validate.js";
@@ -362,9 +362,8 @@ export default {
     },
     size(){
       this.from = 0;
-      this.fetchDocuments();
-    },
-    
+      this.fetchDocuments().then(()=>window.dispatchEvent(new Event('resize')));
+    }
   },
   computed: {
     patch(){
@@ -417,7 +416,7 @@ export default {
     $saveAs(){
       return $(this.$refs.saveAs);
     },    
-    ...mapState(["currentDomainId", "profile", "locale"])
+    ...mapState(["currentDomainId", "profile", "locale","currentUser"])
   },
   methods: {
     isActive(doc){
@@ -441,19 +440,15 @@ export default {
       this.fetchDocuments((pageNo - 1) * this.size);
     },
     fetchDocuments(from) {
-      this.document.findDocuments(
-        {
-          from: from != undefined ? from : this.from,
-          size: this.size,
-          source: "visibleColumns"
-        },
-        (err, docs) => {
-          if (err) return this.error = err.toString();
+      return this.document.findDocuments({
+        from: from != undefined ? from : this.from,
+        size: this.size,
+        source: "visibleColumns"
+      }).then(docs => {
           this.from = from != undefined ? from : this.from;
           this.total = docs.total;
           this.documents = docs.documents;
           this.updatePagination()
-          window.dispatchEvent(new Event('resize'))
         }
       )
     },
@@ -542,16 +537,10 @@ export default {
       }      
     },
     distinctQuery(field, filter, callback) {
-      this.document.distinctQuery(
-        field,
-        {
-          include: filter,
-          size: 200
-        },
-        (err, data) => {
-          callback(err, data && data.values);
-        }
-      );
+      return this.document.distinctQuery(field,{
+        include: filter,
+        size: 200
+      }).then(data => data.values);
     },
     renderHeaderCell(column, colIndex) {
       return column.title;
@@ -585,8 +574,7 @@ export default {
       })[0];
     },
     onSaveClick(){
-      this.document.patch({patch: this.patch}, (err, view) => {
-        if (err) return this.error = err.toString();
+      this.document.patch({patch: this.patch}).then(view => {
         this.replace(this.clone, view);
         this.replace(this.document, view);
       });
@@ -619,12 +607,7 @@ export default {
       if (this.document.collectionId == '.collections') {
         view.collections = [this.document.id];
       }
-      return new Promise((resolve, reject)=>{
-        View.create(this.currentDomainId, id, view, (err, view) => {
-          if (err) return reject(err);
-          resolve(view);
-        });
-      });
+      return View.create(this.currentDomainId, id, view);
     },    
     replace(source, target){
        // erase all current keys from data
@@ -649,43 +632,27 @@ export default {
       this.$set(col, 'visible', !visible)
     },
     fetchActions(doc){
-      let {Meta, Action} = this.$client;
+      let {Meta, Action} = this.$client, {domainId, _meta} = doc;
       function armItems(domainId, actIds) {
-        return new Promise((resolve, reject)=>{
-          Action.mget(domainId, actIds, (err, result) => {
-            if (err) return reject(err);
-            resolve(result.actions);
-          });
-        });
+        return Action.mget(domainId, actIds).then(result => result.actions);
       }
-      if (doc._meta.actions) {
-        return armItems(doc.domainId, doc._meta.actions);
+      if (_meta.actions) {
+        return Action.mget(domainId, _meta.actions).then(result => result.actions);
       } else {
-        return new Promise((resolve, reject)=>{
-          Meta.get(doc.domainId, doc._meta.metaId||'.meta', (err, meta) => {
-            if (err) return reject(err);
-            resolve(armItems(doc.domainId, meta.actions));
-          });
-        });
+        return Meta.get(domainId, _meta.metaId||'.meta').then(meta => Action.mget(domainId, meta.actions).then(result => result.actions));
       }
     },
     checkPermission(){
-      let {currentUser} = this.$client, doc = this.document;
-      return new Promise((resolve, reject)=>{
-        utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, (err, result) => {
-          if(err) return reject(err);
-          this.deleteable = result;
-        });
+      let doc = this.document;
+      return utils.checkPermission(doc.domainId, this.currentUser.id, 'delete', doc).then(result => {
+        this.deleteable = result;
+        return result;
       });
     },
     checkRowDeleteable(row){
-      let {currentUser} = this.$client;
-      return new Promise((resolve, reject)=>{
-        utils.checkPermission(row.domainId, currentUser.id, 'delete', row, (err, result) => {
-          if(err) return reject(err);
-          this.rowDeleteable = result;
-          resolve(result);
-        });
+      return utils.checkPermission(row.domainId, this.currentUser.id, 'delete', row).then(result => {
+        this.rowDeleteable = result;
+        return result;
       });
     },
     onActionClick(act){
@@ -707,41 +674,19 @@ export default {
       }
     },
     deleteSelf(){
-      let {currentUser} = this.$client, { domainId, collectionId, id } = this.document;
-      return new Promise((resolve, reject)=>{
-        this.document.delete((err, result) => {
-          if (err) return reject(err);
-          if(this.isFavorite)
-            this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
-          this.$router.go(-1);
-          resolve(result);
-        });
+      let { domainId, collectionId, id } = this.document;
+      return this.document.delete().then(result => {
+        if(this.isFavorite) this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
+        this.$router.go(-1);
+        return result;
       });
     },
     deleteRow(doc){
       let {Collection} = this.$client;
-      return new Promise((resolve, reject)=>{
-        doc.delete((err, result) => {
-          if (err) return reject(err);
-          resolve(result);
-        });
-      }).then(()=>{
-        return new Promise((resolve, reject)=>{
-          Collection.get(doc.domainId, doc.collectionId, (err, collection) => {
-            if (err) return reject(err);
-            resolve(collection);
-          })
-        });
-      }).then((collection)=>{
-        return new Promise((resolve, reject)=>{
-          collection.refresh((err, result) => {
-            if (err) return reject(err);
-            resolve(result);
-          });
-        });
-      }).then(()=>{
-        this.fetchDocuments();
-      });
+      return doc.delete()
+                .then(()=>Collection.get(doc.domainId, doc.collectionId))
+                .then((collection)=>collection.refresh())
+                .then(()=>this.fetchDocuments());
     },
     exportCsv(source) {
       let doc = this.document, localeDoc = this.localeDoc, columns = localeDoc.columns,
@@ -749,16 +694,16 @@ export default {
         rows = [], start = +moment(), count = 0, nonce = uuidv4();
 
       if (source == 'visibleColumns') {
-        columns = _.omitBy(columns, function (c) {
+        columns = _.omitBy(columns, (c) => {
           return !c.title || c.visible == false
         });
       } else if (source == 'allColumns') {
-        columns = _.omitBy(columns, function (c) {
+        columns = _.omitBy(columns, (c) => {
           return !c.title
         });
       }
 
-      rows.push(_.values(_.mapValues(columns, function (c) {
+      rows.push(_.values(_.mapValues(columns, (c) => {
         if (c.title) return c.title;
       })).join(','));
 
@@ -770,8 +715,7 @@ export default {
           opts.source = source;
           opts.size = _.at(doc, 'export.size')[0] || 1000;
         }
-        doc[scrollId ? 'scroll' : 'findDocuments'](opts, (err, data) => {
-          if (err) return console.error(err);
+        doc[scrollId ? 'scroll' : 'findDocuments'](opts).then(data => {
           _.each(data.documents, (doc) => {
             let row = _.reduce(columns, (r, c) => {
               let d = utils.get(doc.get(this.locale), c.name);
@@ -887,7 +831,7 @@ export default {
 }
 
 .search-item {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   padding-bottom: 5px;
   margin-right: 2px;
 
@@ -900,7 +844,6 @@ export default {
   }
 
   .item-container {
-    font-size: 0.875rem;
     position: relative;
 
     li > i {

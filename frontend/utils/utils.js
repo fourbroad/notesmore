@@ -31,21 +31,13 @@ clearInputError = function($input){
   $input.parent().find('.invalid-feedback, .valid-feedback').empty();
 }
 
-checkPermission = function(domainId, userId, method, doc, callback) {
-  const client = doc.getClient(), Profile = client.Profile, permissions = _.at(doc, '_meta.acl.'+method)[0];
-
-  if (!permissions)
-    return callback ? callback(null, true) : console.log(true);
-
-  Profile.get(domainId, userId, function(err, profile) {
-    if(err) return callback ? callback(err) : console.error(err);
-    if (_.intersection(profile.roles, permissions.roles).length > 0 
-    || _.intersection(profile.groups, permissions.groups).length > 0 
-    || (permissions.users && permissions.users.indexOf(userId) >= 0)) {
-      return callback ? callback(null, true) : console.log(true);
-    } else {
-      return callback ? callback(null, false) : console.log(false);
-    }
+checkPermission = function(domainId, userId, method, doc) {
+  let client = doc.getClient(), {Profile} = client, permissions = _.at(doc, '_meta.acl.'+method)[0];
+  if (!permissions) return Promise.resolve(true);
+  return Profile.get(domainId, userId).then(profile => {
+    return _.intersection(profile.roles, permissions.roles).length > 0
+           || _.intersection(profile.groups, permissions.groups).length > 0
+           || (permissions.users && permissions.users.indexOf(userId) >= 0);
   });
 }
 

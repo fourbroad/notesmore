@@ -226,7 +226,7 @@ export default {
   data() {
     return {};
   },
-  mounted: function(){
+  mounted(){
     const date = new Date();
     const d = date.getDate();
     const m = date.getMonth();

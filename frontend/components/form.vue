@@ -80,7 +80,7 @@ import { mapState } from "vuex";
 import validate from "validate.js";
 import jsonPatch from "fast-json-patch";
 import uuidv4 from "uuid/v4";
-import utils from 'core/utils';
+import utils from 'utils/utils';
 
 import ace from "brace";
 import "brace/mode/json";
@@ -134,7 +134,7 @@ export default {
     }
   },
   created(){
-    this.fetchActions(this.document).then((actions)=>{
+    this.$store.dispatch("FETCH_ACTIONS", this.document).then((actions)=>{
       this.actions = actions;
     });
     this.checkPermission();
@@ -147,7 +147,6 @@ export default {
     }
   },
   mounted() {
-    let {currentUser} = this.$client;
     this.jsonEditor = ace.edit(this.$refs.formContent);
     this.jsonEditor.$blockScrolling = Infinity
     this.jsonEditor.setTheme('ace/theme/iplastic');
@@ -166,7 +165,7 @@ export default {
       }
     });
     this.jsonEditor.focus();
-    utils.checkPermission(this.currentDomainId, currentUser.id, 'patch', this.document, (err, result) => {
+    utils.checkPermission(this.currentDomainId, this.currentUser.id, 'patch', this.document, (err, result) => {
       if(!result){
         this.jsonEditor.setReadOnly(true);
       }
@@ -205,7 +204,7 @@ export default {
     $saveAs(){
       return $(this.$refs.saveAs);
     },
-    ...mapState(["currentDomainId", "profile", "locale"])
+    ...mapState(["currentDomainId", "profile", "locale", "currentUser"])
   },
   methods: {
     onFavoriteClick() {
@@ -247,38 +246,28 @@ export default {
       });
     },
     saveAs(id, title){
-      return new Promise((resolve, reject)=>{
-        let docInfo = _.cloneDeep(this.document), {domainId, collectionId} = this.document, params = [];
-        docInfo.title = title;
-        switch(collectionId){
-          case '.domains':
-          case '.users':
-            params = [id, docInfo];
-            break;
-          case '.collections':
-          case '.actions':
-          case '.forms':
-          case '.groups':
-          case '.metas':
-          case '.pages':
-          case '.profiles':
-          case '.roles':
-          case '.views':
-            params = [domainId, id, docInfo];
-            break;
-          default:
-            params = [domainId, collectionId, id, docInfo];
-        }
-        params.push((err, doc)=>{
-          if(err) {
-            this.error = err;
-            return reject(err);
-          }
-          resolve(doc);
-        });
-      
-        this.document.constructor.create.apply(this.document.constructor, params);
-      });
+      let docInfo = _.cloneDeep(this.document), {domainId, collectionId} = this.document, params = [];
+      docInfo.title = title;
+      switch(collectionId){
+        case '.domains':
+        case '.users':
+          params = [id, docInfo];
+          break;
+        case '.collections':
+        case '.actions':
+        case '.forms':
+        case '.groups':
+        case '.metas':
+        case '.pages':
+        case '.profiles':
+        case '.roles':
+        case '.views':
+          params = [domainId, id, docInfo];
+          break;
+        default:
+          params = [domainId, collectionId, id, docInfo];
+      }
+      return this.document.constructor.create.apply(this.document.constructor, params);
     },
     onCancelClick() {
       if(this.isNew){
@@ -299,45 +288,16 @@ export default {
       this.enableChange = true;
     },
     deleteSelf(){
-      let {currentUser} = this.$client, { domainId, collectionId, id } = this.document;
-      return new Promise((resolve, reject)=>{
-        this.document.delete((err, result) => {
-          if (err) return reject(err);
-          if(this.isFavorite)
-            this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
-          this.$router.go(-1);
-          resolve(result);
-        });
+      let { domainId, collectionId, id } = this.document;
+      this.document.delete().then(()=>{
+        if(this.isFavorite) this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
+        this.$router.go(-1);
       });
     },
-    fetchActions(doc){
-      let {Meta, Action} = this.$client;
-      function armItems(domainId, actIds) {
-        return new Promise((resolve, reject)=>{
-          Action.mget(domainId, actIds, (err, result) => {
-            if (err) return reject(err);
-            resolve(result.actions);
-          });
-        });
-      }
-      if (doc._meta.actions) {
-        return armItems(doc.domainId, doc._meta.actions);
-      } else {
-        return new Promise((resolve, reject)=>{
-          Meta.get(doc.domainId, doc._meta.metaId||'.meta', (err, meta) => {
-            if (err) return reject(err);
-            resolve(armItems(doc.domainId, meta.actions));
-          });
-        });
-      }
-    },
     checkPermission(){
-      let {currentUser} = this.$client, doc = this.document;
-      return new Promise((resolve, reject)=>{
-        utils.checkPermission(doc.domainId, currentUser.id, 'delete', doc, (err, result) => {
-          if(err) return reject(err);
-          this.deleteable = result;
-        });
+      let doc = this.document;
+      return utils.checkPermission(doc.domainId, this.currentUser.id, 'delete', doc).then( result => {
+        this.deleteable = result;
       });
     },
     replace(source, target) {

@@ -15,74 +15,35 @@ export default function Profile(domainId, profileData, isNew) {
 
 _.assign(Profile, {
   
-  init: function(config) {
+  init(config) {
     client = config.client;
     return Profile;
   },
 
-  create: function(domainId, id, profileRaw, options, callback){
+  create(domainId, id, profileRaw, options){
     if(arguments.length == 2 && typeof arguments[1] == 'object'){
-      profileRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-      callback = profileRaw;
       profileRaw = id;
       id = uuidv4();
     } else if(arguments.length == 3 && typeof arguments[1] == 'object' && typeof arguments[2] == 'object'){
       options = profileRaw;
       profileRaw = id;
       id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[1] == 'object' && typeof arguments[2] == 'function'){
-      callback = profileRaw;
-      profileRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[1] == 'object'){
-      callback = options;
-      options = profileRaw;
-      profileRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[1] == 'string' && typeof arguments[3] == 'function'){
-      callback = options
-      options = undefined;
-    }
-  	
-    client.emit('createProfile', domainId, id, profileRaw, options, function(err, profileData) {
-      if(err) return callback ? callback(err) : console.error(err);
-
-      var profile = new Profile(domainId, profileData);
-      callback ? callback(null, profile) : console.log(profile);
-    });    
+    }  	
+    return client.emit('createProfile', domainId, id, profileRaw, options).then(profileData => new Profile(domainId, profileData));
   },
 
-  get: function(domainId, id, options, callback){
+  get(domainId, id, options){
   　if(arguments.length < 2){
-  　	var err = makeError(400, 'argumentsError', 'Arguments is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-  　  callback = options;
-  　  options = undefined;
+      return Promise.reject(makeError(400, 'argumentsError', 'Arguments is incorrect!'))
   　}
-
-    client.emit('getProfile', domainId, id, options, function(err, profileData) {
-      if(err) return callback ? callback(err) : console.error(err);
-      
-      var profile = new Profile(domainId, profileData);
-      callback ? callback(null, profile) : console.log(profile);
-    });
+    return client.emit('getProfile', domainId, id, options).then(profileData => new Profile(domainId, profileData));
   },
 
-  find: function(domainId, query, options, callback) {
+  find(domainId, query, options) {
     if(arguments.length < 1 || (arguments.length >= 1 && typeof arguments[0] != 'string')){
-      var err = makeError(400, 'argumentsError', 'Arguments is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-    } else if(arguments.length == 3 && typeof arguments[2]=='function'){
-  	  callback = options;
-  	  options = undefined;
-  	}
-  	  	  	
-    client.emit('findProfiles', domainId, query, options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-       
+      return Promise.reject(makeError(400, 'argumentsError', 'Arguments is incorrect!'))
+    }  	  	  	
+    return client.emit('findProfiles', domainId, query, options).then(data => {
       data.profile = _.reduce(data.documents, function(r, v, k){
       	var index = v._meta.index.split('~');
       	r.push(new Profile(index[0], v));
@@ -90,44 +51,34 @@ _.assign(Profile, {
       }, []);
 
       delete data.documents;
-
-	  callback ? callback(null, data) : console.log(data);
-	});
+      return data;
+	  });
   }
 
 });
 
 inherits(Profile, Document, {
 
-  _create: function(domainId, collectionId, profileData){
+  _create(domainId, collectionId, profileData){
     return new Profile(domainId, profileData);
   },
 
-  getClient: function(){
+  getClient(){
    	return client;
   },
 
-  getClass: function(){
+  getClass(){
   	return Profile;
   },
 
-  saveAs: function(id, title, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = id;
-      id = uuidv4();
-      title = newProfile.title;
-    } else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      title = id;
-      callback = title;
+  saveAs(id, title){
+    if(arguments.length == 0){
       id = uuidv4();
     }
-
-  	var newProfile = _.cloneDeep(this), opts = {};
-
-   	newProfile.title = title;
+  	let newProfile = _.cloneDeep(this), opts = {};
+   	newProfile.title = title || newProfile.title;
    	delete newProfile.id;
-
-	Profile.create(this.domainId, this.id, newProfile, opts, callback);
+	  return Profile.create(this.domainId, this.id, newProfile, opts);
   }
 
 });

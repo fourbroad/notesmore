@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import {inherits, uniqueId, makeError} from './utils';
-import jsonPatch from 'fast-json-patch';
+import {inherits, makeError} from './utils';
 import uuidv4 from 'uuid/v4';
 import Meta from './meta';
 import View from './view';
@@ -20,140 +19,83 @@ const
 
 let client;
 
-export default function Collection(domainId, colData, isNew) {
+export default function Collection(domainId, colData, isNew){
   Document.call(this, domainId, COLLECTIONS, colData, isNew);
 }
 
 _.assign(Collection, {
   
-  init: function(config) {
+  init(config) {
     client = config.client;
     return Collection;
   },
 
-  create: function(domainId, id, colRaw, options, callback){
+  create(domainId, id, colRaw, options){
     if(arguments.length == 2 && typeof arguments[1] == 'object'){
-      colRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-      callback = colRaw;
       colRaw = id;
       id = uuidv4();
     } else if(arguments.length == 3 && typeof arguments[1] == 'object' && typeof arguments[2] == 'object'){
       options = colRaw;
       colRaw = id;
       id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[1] == 'object' && typeof arguments[2] == 'function'){
-      callback = colRaw;
-      colRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[1] == 'object'){
-      callback = options;
-      options = colRaw;
-      colRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[1] == 'string' && typeof arguments[3] == 'function'){
-      callback = options
-      options = undefined;
     }
-
-    client.emit('createCollection', domainId, id, colRaw, options, function(err, colData) {
-      if(err) return callback ? callback(err) : console.error(err);
-
-      let collection = new Collection(domainId, colData);
-      callback ? callback(null, collection) : console.log(collection);
-    });    
+    return client.emit('createCollection', domainId, id, colRaw, options).then( colData => new Collection(domainId, colData));
   },
 
-  get: function(domainId, id, options, callback){
+  get(domainId, id, options){
   　if(arguments.length < 2){
-  　	let err = makeError(400, 'parameterError', 'Parameters is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-  　  callback = options;
-  　  options = undefined;
+      return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!'));
   　}
-
-    client.emit('getCollection', domainId, id, options, function(err, colData) {
-      if(err) return callback ? callback(err) : console.error(err);
-      
-      let collection = new Collection(domainId, colData);
-      callback ? callback(null, collection) : console.log(collection);
-    });
+    return client.emit('getCollection', domainId, id, options).then(colData => new Collection(domainId, colData));
   },
 
-  find: function(domainId, query, options, callback){
+  find(domainId, query, options){
     if(arguments.length < 1 || (arguments.length >= 1 && typeof arguments[0] != 'string')){
-      let err = makeError(400, 'argumentsError', 'Arguments is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-    } else if(arguments.length == 3 && typeof arguments[2]=='function'){
-  	  callback = options;
-  	  options = undefined;
-  	}
-
-    client.emit('findCollections', domainId, query, options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-       
-      data.collections = _.reduce(data.documents, function(r, v, k){
+      return Promise.reject(makeError(400, 'argumentsError', 'Arguments is incorrect!'));
+    }
+    return client.emit('findCollections', domainId, query, options).then( data => {
+      data.collections = _.reduce(data.documents, (r, v) => {
         let index = v._meta.index.split('~');
         r.push(new Collection(index[0], v));
         return r;
       },[]);
       delete data.documents;
-
-	  callback ? callback(null, data) : console.log(data);
-	});
+      return data;
+    });
   }
 
 });
 
 inherits(Collection, Document, {
 
-  _create: function(domainId, collectionId, colData){
+  _create(domainId, collectionId, colData){
     return new Collection(domainId, colData);
   },
 
-  getClient: function(){
+  getClient(){
    	return client;
   },
 
-  getClass: function(){
+  getClass(){
   	return Collection;  	
   },
 
-  delete: function(options, callback) {
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-  	let client = this.getClient();
-    client.emit('deleteCollection', this.domainId, this.id, options, function(err, result) {
-      if(err) return callback ? callback(err) : console.error(err);
-	  callback ? callback(null, result) : console.log(result);
-	});
+  delete(options) {
+    return this.getClient().emit('deleteCollection', this.domainId, this.id, options);
   },
 
-  saveAs: function(id, title, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = id;
-      id = uuidv4();
-      title = newCol.title;
-    } else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      title = id;
-      callback = title;
+  saveAs(id, title){
+    if(arguments.length == 0){
       id = uuidv4();
     }
 
   	let newCol = _.cloneDeep(this), opts = {};
-
-   	newCol.title = title;
-   	delete newCol.id;
-	
-	Collection.create(this.domainId, this.id, newCol, opts, callback);
+   	newCol.title = title||newCol.title;
+    delete newCol.id;
+    return Collection.create(this.domainId, id, newCol, opts);
   },
 
-  _buildDatetimeRange: function(searchColumn){
+  _buildDatetimeRange(searchColumn){
     let earliest, latest, range = searchColumn.range, rangeClause = {};
     switch(range && range.option){
       case 'overdue':
@@ -217,13 +159,13 @@ inherits(Collection, Document, {
     return rangeClause;
   },  
 
-  _buildQuery: function(options){
-    let _this = this, source, body = {body:{}}, bool = _.reduce(this.search.fields, function(bool, sf){
+  _buildQuery(options){
+    let _this = this, source, body = {body:{}}, bool = _.reduce(this.search.fields, (bool, sf)=>{
       switch(sf.type){
         case 'keywords':
           if(!_.isEmpty(sf.values)){
             bool.must = bool.must || [];
-            bool.must.push(_.reduce(sf.values, function(bool, value){
+            bool.must.push(_.reduce(sf.values, (bool, value)=>{
               let term = {};
               term[sf.name+'.keyword'] = value;
               bool.bool.should.push({term:term});
@@ -306,60 +248,56 @@ inherits(Collection, Document, {
     return body;
   },
 
-  _buildEntities: function(data){
-      data.documents = _.reduce(data.documents, function(r, v, k){
-        let indices = v._meta.index.split('~'), domainId = indices[0], collectionId = indices[1];
-        switch (collectionId) {
-        case '.domains':
-          r.push(new Domain(v));
-          break;
-        case '.metas':
-          r.push(new Meta(domainId, v));
-          break;
-        case '.collections':
-          r.push(new Collection(domainId, v));
-          break;
-        case '.views':
-          r.push(new View(domainId, v));
-          break;
-        case '.pages':
-          r.push(new Page(domainId, v));
-          break;
-        case '.actions':
-          r.push(new Action(domainId, v));
-          break;
-        case '.forms':
-          r.push(new Form(domainId, v));
-          break;
-        case '.roles':
-          r.push(new Role(domainId, v));
-          break;
-        case '.groups':
-          r.push(new Group(domainId, v));
-          break;
-        case '.profiles':
-          r.push(new Profile(domainId, v));
-          break;
-        case '.files':
-          r.push(new File(domainId, v));
-          break;
-        case '.users':
-          r.push(new User(v));
-          break;
-        default:
-          r.push(new Document(domainId, collectionId, v));
-        }
-        return r;
-      },[]);
+  _buildEntities(data){
+    data.documents = _.reduce(data.documents, (r, v) => {
+      let indices = v._meta.index.split('~'), domainId = indices[0], collectionId = indices[1];
+      switch (collectionId) {
+      case '.domains':
+        r.push(new Domain(v));
+        break;
+      case '.metas':
+        r.push(new Meta(domainId, v));
+        break;
+      case '.collections':
+        r.push(new Collection(domainId, v));
+        break;
+      case '.views':
+        r.push(new View(domainId, v));
+        break;
+      case '.pages':
+        r.push(new Page(domainId, v));
+        break;
+      case '.actions':
+        r.push(new Action(domainId, v));
+        break;
+      case '.forms':
+        r.push(new Form(domainId, v));
+        break;
+      case '.roles':
+        r.push(new Role(domainId, v));
+        break;
+      case '.groups':
+        r.push(new Group(domainId, v));
+        break;
+      case '.profiles':
+        r.push(new Profile(domainId, v));
+        break;
+      case '.files':
+        r.push(new File(domainId, v));
+        break;
+      case '.users':
+        r.push(new User(v));
+        break;
+      default:
+        r.push(new Document(domainId, collectionId, v));
+      }
+      return r;
+    },[]);
+    return data;
   },
 
-  findDocuments: function(options, callback) {
-  	if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-  	}
-
-    const domainId = this.domainId, _this = this, buildOpts = {}, viewId = this.id, client = this.getClient();
+  findDocuments(options) {
+    let buildOpts = {};
     if(options && options.source){
       buildOpts.source = options.source;
     }
@@ -375,157 +313,65 @@ inherits(Collection, Document, {
       options.sort = sort
     }
 
-    client.emit('findDocuments', domainId, viewId, this._buildQuery(buildOpts), options, function(err, data) {
-      if (err) return callback ? callback(err) : console.error(err);
-      _this._buildEntities(data);
-      callback ? callback(null, data) : console.log(data);
+    return this.getClient().emit('findDocuments', this.domainId, this.id, this._buildQuery(buildOpts), options).then( data => {
+      return this._buildEntities(data);
     });
   },
 
-  distinctQuery: function(field, options, callback) {
-  	if(arguments.length == 2 && typeof arguments[1] == 'function'){
-  		callback = options;
-  		options = undefined;
-  	}
-    this.getClient().emit('distinctQueryCollection', this.domainId, this.id, field, options, function(err, data) {
-      if (err) return callback ? callback(err) : console.error(err);
-      callback(null, data);      
-    });
+  distinctQuery(field, options) {
+    return this.getClient().emit('distinctQueryCollection', this.domainId, this.id, field, options);
   },
 
-  bulk: function(docs, options, callback){
-  	if(arguments.length == 2 && typeof arguments[1] == 'function'){
-  		callback = options;
-  		options = undefined;
-  	}
-
-    this.getClient().emit('bulk', this.domainId, this.id, docs, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, result) : console.log(result);
-    });
+  bulk(docs, options){
+    return this.getClient().emit('bulk', this.domainId, this.id, docs, options);
   },
 
-  createDocument: function(docId, docRaw, options, callback) {
+  createDocument(docId, docRaw, options) {
   	if(arguments.length == 1){
- 	  docRaw = docId;
-  	  docId = uuidv4();
-  	} else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      callback = docRaw;
-      docRaw = docId;
-      docId = uuidv4();
-  	} else if(arguments.length == 2 && typeof arguments[1] == 'object'){
-  	  options = docRaw;
+ 	    docRaw = docId;
   	  docId = uuidv4();
   	}
-  	Document.create(this.domainId, this.id, docId, docRaw, options, callback);
+  	return Document.create(this.domainId, this.id, docId, docRaw, options);
   },
 
-  getDocument: function(docId, options, callback) {
-  	let args = [this.domainId, this.id].concat(_.values(arguments));
-  	Document.get.apply(this, args);
+  getDocument(docId, options) {
+  	return Document.get.apply(this, [this.domainId, this.id].concat(_.values(arguments)));
   },
 
-  putSnapshotTemplate: function(template, options, callback){
-    if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    this.getClient().emit('putSnapshotTemplate', this.domainId, this.id, template, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, result) : console.log(result);
-    });
+  putSnapshotTemplate(template, options){
+    return this.getClient().emit('putSnapshotTemplate', this.domainId, this.id, template, options);
   },
 
-  getSnapshotTemplate: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    this.getClient().emit('getSnapshotTemplate', this.domainId, this.id, options, function(err, template){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, template) : console.log(template);
-    });
+  getSnapshotTemplate(options){
+    return this.getClient().emit('getSnapshotTemplate', this.domainId, this.id, options);
   },
 
-  putEventTemplate: function(template, options, callback){
-    if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    this.getClient().emit('putEventTemplate', this.domainId, this.id, template, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, result) : console.log(result);
-    });
+  putEventTemplate(template, options){
+    return this.getClient().emit('putEventTemplate', this.domainId, this.id, template, options);
   },
 
-  getEventTemplate: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    this.getClient().emit('getEventTemplate', this.domainId, this.id, options, function(err, template){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, template) : console.log(template);
-    });
+  getEventTemplate(options){
+    return this.getClient().emit('getEventTemplate', this.domainId, this.id, options);
   },
 
-  reindexSnapshots: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    this.getClient().emit('reindexSnapshots', this.domainId, this.id, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, result) : console.log(result);
-    });
+  reindexSnapshots(options){
+    return this.getClient().emit('reindexSnapshots', this.domainId, this.id, options);
   },
 
-  reindexEvents: function(options, callback) {
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    this.getClient().emit('reindexEvents', this.domainId, this.id, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, result) : console.log(result);
-    });
+  reindexEvents(options) {
+    return this.getClient().emit('reindexEvents', this.domainId, this.id, options);
   },
 
-  scroll: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    let _this = this;
-    client.emit('scroll', options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-      _this._buildEntities(data);
-	  callback ? callback(null, data) : console.log(data);
-    });
+  scroll(options){
+    this.getClient().emit('scroll', options).then( data => _this._buildEntities(data));
   },  
 
-  clearScroll: function(params, options, callback){
-  	Document.clearScroll.apply(this, arguments);
+  clearScroll(params, options){
+  	return Document.clearScroll.apply(this, arguments);
   },
 
-  refresh: function(options, callback) {
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-  	
-  	let client = this.getClient();
-    client.emit('refreshCollection', this.domainId, this.id, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, result) : console.log(result);
-	});
+  refresh(options) {
+    return this.getClient().emit('refreshCollection', this.domainId, this.id, options);
   }
 
 });

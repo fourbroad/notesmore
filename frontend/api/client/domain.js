@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import jsonPatch from 'fast-json-patch';
 import uuidv4 from 'uuid/v4';
 import Meta from './meta';
 import Collection from './collection';
@@ -13,7 +12,7 @@ import Role from './role';
 import File from './file';
 import User from './user';
 import Document from './document';
-import {inherits, uniqueId, makeError} from './utils';
+import {inherits, makeError} from './utils';
 
 const
   DOMAINS = '.domains',
@@ -60,235 +59,137 @@ _.assign(Domain, {
   
   ROOT: ROOT,
 
-  init: function(config) {
+  init(config) {
     client = config.client;
     return Domain;
   },
 
-  create: function(id, domainRaw, options, callback){
+  create(id, domainRaw, options){
     if(arguments.length == 1 && typeof arguments[0] == 'object'){
-      domainRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      callback = domainRaw;
       domainRaw = id;
       id = uuidv4();
     } else if(arguments.length == 2 && typeof arguments[0] == 'object' && typeof arguments[1] == 'object'){
       options = domainRaw;
       domainRaw = id;
       id = uuidv4();
-    } else if(arguments.length == 2 && typeof arguments[0] == 'object' && typeof arguments[1] == 'function'){
-      callback = domainRaw;
-      domainRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[0] == 'object'　&& typeof arguments[2] == 'function'){
-      callback = options;
-      options = domainRaw;
-      domainRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[0] == 'string'　&& typeof arguments[2] == 'function'){
-      callback = options;
-      options = undefined;
     }
-
-        
-    client.emit('createDomain', id, domainRaw, options, function(err, domainData) {
-      if(err) return callback ? callback(err) : console.error(err);
-
-      var domain = new Domain(domainData);
-      callback ? callback(null, domain) : console.log(domain);
-    });    
+    return client.emit('createDomain', id, domainRaw, options).then(domainData => new Domain(domainData));    
   },
 
-  get: function(id, options, callback){
+  get(id, options){
   　if(arguments.length < 1){
-  　	var err = makeError(400, 'parameterError', 'Parameters is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-  　  callback = options;
-  　  options = undefined;
+      Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!'));
   　}
-    
-    client.emit('getDomain', id, options, function(err, domainData) {
-      if(err) return callback ? callback(err) : console.error(err);
-      
-      var domain = new Domain(domainData);
-      callback ? callback(null, domain) : console.log(domain);
-    });
+    return client.emit('getDomain', id, options).then(domainData => new Domain(domainData));
   },
 
-  find: function(query, options, callback) {
-  	if(arguments.length == 2 && typeof arguments[1]=='function'){
-  	  callback = options;
-  	  options = undefined;
-  	}
-
-    client.emit('findDomains', query, options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-       
-      data.domains = _.reduce(data.documents, function(r, v, k){
+  find(query, options) {
+    return client.emit('findDomains', query, options).then( data => {
+      data.domains = _.reduce(data.documents, (r, v)=>{
         r.push(new Domain(v));
         return r;
       }, []);
-
       delete data.documents;
-
-	  callback ? callback(null, data) : console.log(data);
-	});
+      return data;
+  	});
   },
 
-  mgetDocuments: function(domainId, ids, options, callback){
+  mgetDocuments(domainId, ids, options){
   　if(arguments.length < 2){
-  　	var err = makeError(400, 'parameterError', 'Parameters is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-  　  callback = options;
-  　  options = undefined;
+      return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!'));
   　}
-
   　if(_.isEmpty(ids)){
-  　  return callback(null, {total:0, offset:0, documents:[]});
+  　  return Promise.resolve({total:0, offset:0, documents:[]});
   　}
-
-    client.emit('mgetDomainDocuments', domainId, ids, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      var docs = _.reduce(result.docs, function(r,v,k){
-        var ids = v._meta.index.split('~');
+    return client.emit('mgetDomainDocuments', domainId, ids, options).then( result => {
+      return _.reduce(result.docs, (r,v) => {
+        let ids = v._meta.index.split('~');
         r.push(makeDocument(ids[0], ids[1], v));
         return r;
       },[]);
-      callback ? callback(null, docs) : console.log(docs);
     });
   }
-  
 
 });
 
 inherits(Domain, Document, {
   
-  _create: function(domainId, collectionId, domainData){
+  _create(domainId, collectionId, domainData){
     return new Domain(domainData);
   },
 
-  getClient: function(){
+  getClient(){
    	return client;
   },
 
-  getClass: function(){
+  getClass(){
   	return Domain;  	
   },
 
-  copy: function(targetId, targetTitle, options, callback){
-    if(arguments.length == 3 && typeof arguments[2] == 'function'){
-      callback = options,
-      options = undefined;
-    }
-
+  copy(targetId, targetTitle, options){
     targetId = targetId || uuidv4();
-
-    this.getClient().emit('copyDomain', this.id, targetId, targetTitle, options, function(err, domainData){
-      if(err) return callback ? callback(err) : console.error(err);
-      var domain = new Domain(domainData);
-	  callback ? callback(null, domain) : console.log(domain);
-    });
+    this.getClient().emit('copyDomain', this.id, targetId, targetTitle, options).then(domainData => new Domain(domainData));
   },
 
-  delete: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    this.getClient().emit('deleteDomain', this.id, options, function(err, result) {
-      if(err) return callback ? callback(err) : console.error(err);
-	  callback ? callback(null, result) : console.log(result);
-	});    
+  delete(options){
+    return this.getClient().emit('deleteDomain', this.id, options);    
   },
 
-  createMeta: function(metaId, metaRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Meta.create.apply(Meta, args);
+  createMeta(metaId, metaRaw, options){
+    return Meta.create.apply(Meta, [this.id].concat(_.values(arguments)));
   },
 
-  getMeta: function(metaId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Meta.get.apply(Meta, args);
+  getMeta(metaId, options){
+    return Meta.get.apply(Meta, [this.id].concat(_.values(arguments)));
   },
 
-  findMetas: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Meta.find.apply(Meta, args);
+  findMetas(query, options){
+    return Meta.find.apply(Meta, [this.id].concat(_.values(arguments)));
   },
 
-  createDocument: function(colId, docId, docRaw, options, callback) {
-    var args = [this.id].concat(_.values(arguments));
-  	Document.create.apply(Document, args);
+  createDocument(colId, docId, docRaw, options) {
+  	return Document.create.apply(Document, [this.id].concat(_.values(arguments)));
   },
 
-  getDocument: function(collectionId, documentId, options, callback) {
-    if(arguments.length == 3 && typeof arguments[2]=='function'){
-      callback = options;
-      options = undefined;
-    }    
-    Document.get(this.id, collectionId, documentId, options, function(err, document){
-      if(err) return callback ? callback(err) : console.error(err);
-      var doc = makeDocument(domainId, collectionId, document);
-      callback ? callback(null, doc) : console.log(doc);
-    })
+  getDocument(collectionId, documentId, options) {
+    return Document.get(this.id, collectionId, documentId, options)
+                   .then(document => makeDocument(domainId, collectionId, document));
   },
 
-  mgetDocuments: function(ids, options, callback){
+  mgetDocuments(ids, options){
   　if(arguments.length < 1){
-  　	var err = makeError(400, 'parameterError', 'Parameters is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-  　  callback = options;
-  　  options = undefined;
+      return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!'));
   　}
-
   　if(_.isEmpty(ids)){
-  　  return callback(null, {total:0, offset:0, documents:[]});
+  　  return Promise.resolve({total:0, offset:0, documents:[]});
   　}
-
-    var client = this.getClient();
-    client.emit('mgetDomainDocuments', this.id, ids, options, function(err, result){
-      if(err) return callback ? callback(err) : console.error(err);
-      var docs = _.reduce(result.docs, function(r,v,k){
-        var ids = v._meta.index.split('~');
+    return this.getClient().emit('mgetDomainDocuments', this.id, ids, options).then(result => {
+      return _.reduce(result.docs, (r,v) => {
+        let ids = v._meta.index.split('~');
         r.push(makeDocument(ids[0], ids[1], v));
         return r;
       },[]);
-      callback ? callback(null, docs) : console.log(docs);
     });
   },
 
-  findDocuments: function(query, options, callback) {
-    var args = [this.id].concat(_.values(arguments));
-  	Document.find.apply(Document, args);
+  findDocuments(query, options) {
+  	return Document.find.apply(Document, [this.id].concat(_.values(arguments)));
   },
 
-  createCollection: function(collectionId, collectionRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Collection.create.apply(Collection, args);
+  createCollection(collectionId, collectionRaw, options){
+    return Collection.create.apply(Collection, [this.id].concat(_.values(arguments)));
   },
 
-  getCollection: function(collectionId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Collection.get.apply(Collection, args);
+  getCollection(collectionId, options){
+    return Collection.get.apply(Collection, [this.id].concat(_.values(arguments)));
   },
 
-  findCollections: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Collection.find.apply(Collection, args);
+  findCollections(query, options){
+    return Collection.find.apply(Collection, [this.id].concat(_.values(arguments)));
   },
 
-  distinctQueryCollections: function(field, wildcard, options, callback) {
-    if(arguments.length == 3 && arguments[2] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-
-    var query = {
+  distinctQueryCollections(field, wildcard, options) {
+    let query = {
       collapse: {
         field: field + '.keyword'
       },
@@ -298,7 +199,8 @@ inherits(Domain, Document, {
             field: field + '.keyword'
           }
         }
-      }//          _source:[field]
+      }
+      //          _source:[field]
     };
 
     if (wildcard) {
@@ -308,124 +210,95 @@ inherits(Domain, Document, {
       query.query.wildcard[field + ".keyword"] = wildcard;
     }
 
-   this.findCollections(query, options, callback);
+    return this.findCollections(query, options);
   },
 
-  createView: function(viewId, viewRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    View.create.apply(View, args);
+  createView(viewId, viewRaw, options){
+    return View.create.apply(View, [this.id].concat(_.values(arguments)));
   },
 
-  getView: function(viewId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    View.get.apply(View, args);
+  getView(viewId, options){
+    return View.get.apply(View, [this.id].concat(_.values(arguments)));
   },
 
-  findViews: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    View.find.apply(View, args);
+  findViews(query, options){
+    return View.find.apply(View, [this.id].concat(_.values(arguments)));
   },
 
-  createForm: function(formId, formRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Form.create.apply(Form, args);
+  createForm(formId, formRaw, options){
+    return Form.create.apply(Form, [this.id].concat(_.values(arguments)));
   },
 
-  getForm: function(formId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Form.get.apply(Form, args);
+  getForm(formId, options){
+    return Form.get.apply(Form, [this.id].concat(_.values(arguments)));
   },
 
-  findForms: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Form.find.apply(Form, args);
+  findForms(query, options){
+    return Form.find.apply(Form, [this.id].concat(_.values(arguments)));
   },
 
-  createPage: function(pageId, pageRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Page.create.apply(Page, args);
+  createPage(pageId, pageRaw, options){
+    return Page.create.apply(Page, [this.id].concat(_.values(arguments)));
   },
 
-  getPage: function(pageId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Page.get.apply(Page, args);
+  getPage(pageId, options){
+    return Page.get.apply(Page, [this.id].concat(_.values(arguments)));
   },
 
-  findPages: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Page.find.apply(Page, args);
+  findPages(query, options){
+    return Page.find.apply(Page, [this.id].concat(_.values(arguments)));
   },
 
-  createRole: function(roleId, roleRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Role.create.apply(Role, args);
+  createRole(roleId, roleRaw, options){
+    return Role.create.apply(Role, [this.id].concat(_.values(arguments)));
   },
 
-  getRole: function(roleId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Role.get(Role, args);
+  getRole(roleId, options){
+    return Role.get(Role, [this.id].concat(_.values(arguments)));
   },
 
-  findRoles: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Role.find.apply(Role, args);
+  findRoles(query, options){
+    return Role.find.apply(Role, [this.id].concat(_.values(arguments)));
   },
 
-  createGroup: function(groupId, groupRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Group.create.apply(Group, args);
+  createGroup(groupId, groupRaw, options){
+    return Group.create.apply(Group, [this.id].concat(_.values(arguments)));
   },
 
-  getGroup: function(groupId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Group.get.apply(Group, args);
+  getGroup(groupId, options){
+    return Group.get.apply(Group, [this.id].concat(_.values(arguments)));
   },
 
-  findGroups: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Group.find.apply(Group, args);
+  findGroups(query, options){
+    return Group.find.apply(Group, [this.id].concat(_.values(arguments)));
   },
 
-  createProfile: function(profileId, profileRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Profile.create.apply(Profile, args);
+  createProfile(profileId, profileRaw, options){
+    return Profile.create.apply(Profile, [this.id].concat(_.values(arguments)));
   },
 
-  getProfile: function(profileId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Profile.get.apply(Profile, args);
+  getProfile(profileId, options){
+    return Profile.get.apply(Profile, [this.id].concat(_.values(arguments)));
   },
 
-  findProfiles: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    Profile.find.apply(Profile, args);
+  findProfiles(query, options){
+    return Profile.find.apply(Profile, [this.id].concat(_.values(arguments)));
   },
 
-  createUser: function(userId, userRaw, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    User.create.apply(User, args);
+  createUser(userId, userRaw, options){
+    return User.create.apply(User, [this.id].concat(_.values(arguments)));
   },
 
-  getUser: function(userId, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    User.get.apply(User, args);
+  getUser(userId, options){
+    return User.get.apply(User, [this.id].concat(_.values(arguments)));
   },
 
-  findUsers: function(query, options, callback){
-    var args = [this.id].concat(_.values(arguments));
-    User.find.apply(User, args);
+  findUsers(query, options){
+    return User.find.apply(User, [this.id].concat(_.values(arguments)));
   },
 
-  refresh: function(options, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = options;
-      options = undefined;
-    }
-    var client = this.getClient();
-    client.emit('refreshDomain', this.id, options, function(err, result) {
-      if(err) return callback ? callback(err) : console.error(err);
-      callback ? callback(null, true) : console.log(true);
-    });
+  refresh(options){
+    this.getClient().emit('refreshDomain', this.id, options);
   }
 
 });

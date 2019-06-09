@@ -1,36 +1,46 @@
 import client from 'api/client'
 
+let {User, Profile, Domain, Meta, Action} = client;
+
 export default {
-  async FETCH_PROFILE({state, commit, rootState}) {
-    let {Profile, currentUser} = client;
-    return new Promise((resolve, reject) => {
-      Profile.get(state.currentDomainId, currentUser.id, {refresh: true}, (err, profile) => {
-        if(err) return reject(err);
-        commit('SET_PROFILE', profile);
-        resolve(profile);
-      });
+  async FETCH_CURRENTUSER({state, commit, rootState}) {
+    return User.get().then(user => {
+      commit('SET_CURRENTUSER', user);
+      return user;
     });
   },
 
+  async FETCH_PROFILE({state, dispatch, commit, rootState}) {
+    function fetchProfile(currentUser){
+      return Profile.get(state.currentDomainId, currentUser.id, {refresh: true}).then( profile => {
+        commit('SET_PROFILE', profile);
+        return profile;
+      });
+    }
+    if(state.currentUser){
+      return fetchProfile(state.currentUser);
+    } else {
+      return dispatch('FETCH_CURRENTUSER').then((currentUser)=>{
+        return fetchProfile(currentUser);
+      });
+    }
+  },
+
   async FETCH_FAVORITES({state, dispatch, commit, rootState}) {
-    let {Domain} = client;
     function fetchFavorites(ids){
-      return new Promise((resolve, reject)=>{
-        if(_.isEmpty(ids)){
-          commit('SET_FAVORITES', []);
-          return resolve([]);
-        }
-        Domain.mgetDocuments(state.currentDomainId, ids, (err, favorites)=>{
-          if(err) return reject(err);
-          commit('SET_FAVORITES', favorites);
-          resolve(favorites);
-        });
+      if(_.isEmpty(ids)){
+        commit('SET_FAVORITES',[]);
+        return Promise.resolve([]);
+      }
+      return Domain.mgetDocuments(state.currentDomainId, ids).then( favorites => {
+        commit('SET_FAVORITES', favorites);
+        return favorites;
       });
     }
     if(state.profile){
       return fetchFavorites(state.profile.favorites);
     }else{
-      return dispatch('FETCH_PROFILE').then((profile)=>{
+      return dispatch('FETCH_PROFILE').then(profile => {
         return fetchFavorites(profile.favorites);
       });
     }
@@ -62,33 +72,28 @@ export default {
         }]
       }];
     }
-    return new Promise((resolve, reject)=>{
-      profile.patch({ patch: patch }, (err, profile) => {
-        if (err) return reject(err);
-        commit('SET_PROFILE', profile);
-        dispatch('FETCH_FAVORITES');
-      });
+    return profile.patch({ patch: patch }).then(profile => {
+      commit('SET_PROFILE', profile);
+      return dispatch('FETCH_FAVORITES');
     });
   },
+
   async FETCH_METAS({state, commit, dispatch, rootState}) {
-    let {Meta, currentUser} = client, {profile, currentDomainId} = state;
+    let {profile, currentDomainId, currentUser} = state;
     function fetchMetas(profile){
-      return new Promise((resolve, reject) => {
-        Meta.find(currentDomainId, {size:1000}, (err, result) => {
-          if(err) return reject(err);
-          let metas = _.reduce(result.metas, (metas, meta) => {
-            let permissions = _.at(meta, 'acl.create')[0];
-            if (!permissions
-              || _.intersection(profile.roles, permissions.roles).length > 0 
-              || _.intersection(profile.groups, permissions.groups).length > 0 
-              || (permissions.users && permissions.users.indexOf(currentUser.id) >= 0)) {
-              metas.push(meta);
-            }
-            return metas;
-          },[]);
-          commit('SET_METAS', metas);
-          resolve(metas);
-        });
+      return Meta.find(currentDomainId, {size:1000}).then(result => {
+        let metas = _.reduce(result.metas, (metas, meta) => {
+          let permissions = _.at(meta, 'acl.create')[0];
+          if (!permissions
+            || _.intersection(profile.roles, permissions.roles).length > 0 
+            || _.intersection(profile.groups, permissions.groups).length > 0 
+            || (permissions.users && permissions.users.indexOf(currentUser.id) >= 0)) {
+            metas.push(meta);
+          }
+          return metas;
+        },[]);
+        commit('SET_METAS', metas);
+        return metas;
       });
     }
 
@@ -99,5 +104,15 @@ export default {
         return fetchMetas(profile);
       });
     }    
+  },
+
+  async FETCH_ACTIONS({state, commit, dispatch, rootState}, document){
+    let {domainId, _meta} = document;
+    if (_meta.actions) {
+      return Action.mget(domainId, actIds).then(result=>result.actions);
+    } else {
+      return Meta.get(domainId, _meta.metaId||'.meta').then(meta=>Action.mget(domainId, meta.actions).then(result=>result.actions));
+    }
   }
+
 }

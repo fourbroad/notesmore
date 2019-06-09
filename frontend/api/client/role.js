@@ -15,74 +15,35 @@ export default function Role(domainId, roleData, isNew) {
 
 _.assign(Role, {
   
-  init: function(config) {
+  init(config) {
     client = config.client;
     return Role;
   },
 
-  create: function(domainId, id, roleRaw, options, callback){
+  create(domainId, id, roleRaw, options){
     if(arguments.length == 2 && typeof arguments[1] == 'object'){
-      roleRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-      callback = roleRaw;
       roleRaw = id;
       id = uuidv4();
     } else if(arguments.length == 3 && typeof arguments[1] == 'object' && typeof arguments[2] == 'object'){
       options = roleRaw;
       roleRaw = id;
       id = uuidv4();
-    } else if(arguments.length == 3 && typeof arguments[1] == 'object' && typeof arguments[2] == 'function'){
-      callback = roleRaw;
-      roleRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[1] == 'object'){
-      callback = options;
-      options = roleRaw;
-      roleRaw = id;
-      id = uuidv4();
-    } else if(arguments.length == 4 && typeof arguments[1] == 'string' && typeof arguments[3] == 'function'){
-      callback = options
-      options = undefined;
     }
-  	
-    client.emit('createRole', domainId, id, roleRaw, options, function(err, roleData) {
-      if(err) return callback ? callback(err) : console.error(err);
-
-      var role = new Role(domainId, roleData);
-      callback ? callback(null, role) : console.log(role);
-    });    
+  	return client.emit('createRole', domainId, id, roleRaw, options).then(roleData => new Role(domainId, roleData));
   },
 
-  get: function(domainId, id, options, callback){
+  get(domainId, id, options){
   　if(arguments.length < 2){
-  　	var err = makeError(400, 'parameterError', 'Parameters is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-  　}else if(arguments.length == 3 && typeof arguments[2] == 'function'){
-  　  callback = options;
-  　  options = undefined;
+      return Promise.reject(makeError(400, 'parameterError', 'Parameters is incorrect!'))
   　}
-  	
-    client.emit('getRole', domainId, id, options, function(err, roleData) {
-      if(err) return callback ? callback(err) : console.error(err);
-      
-      var role = new Role(domainId, roleData);
-      callback ? callback(null, role) : console.log(role);
-    });
+    return client.emit('getRole', domainId, id, options).then(roleData => new Role(domainId, roleData));
   },
 
-  find: function(domainId, query, options, callback) {
+  find(domainId, query, options) {
     if(arguments.length < 1 || (arguments.length >= 1 && typeof arguments[0] != 'string')){
-      var err = makeError(400, 'argumentsError', 'Arguments is incorrect!');
-  　  return callback ? callback(err) : console.error(err); 
-    } else if(arguments.length == 3 && typeof arguments[2]=='function'){
-  	  callback = options;
-  	  options = undefined;
-  	}
-  	  	  	
-    client.emit('findRoles', domainId, query, options, function(err, data) {
-      if(err) return callback ? callback(err) : console.error(err);
-       
+      return Promise.reject(makeError(400, 'argumentsError', 'Arguments is incorrect!'));
+    }  	  	  	
+    return client.emit('findRoles', domainId, query, options).then( data => {
       data.roles = _.reduce(data.documents, function(r, v, k){
       	var index = v._meta.index.split('~');
       	r.push(new Role(index[0], v));
@@ -90,44 +51,34 @@ _.assign(Role, {
       }, []);
 
       delete data.documents;
-
-	  callback ? callback(null, data) : console.log(data);
-	});
+      return data;
+  	});
   }
 
 });
 
 inherits(Role, Document, {
 
-  _create: function(domainId, collectionId, roleData){
+  _create(domainId, collectionId, roleData){
     return new Role(domainId, roleData);
   },
 
-  getClient: function(){
+  getClient(){
    	return client;
   },
 
-  getClass: function(){
+  getClass(){
   	return Role;
   },
 
-  saveAs: function(id, title, callback){
-    if(arguments.length == 1 && typeof arguments[0] == 'function'){
-      callback = id;
-      id = uuidv4();
-      title = newRole.title;
-    } else if(arguments.length == 2 && typeof arguments[1] == 'function'){
-      title = id;
-      callback = title;
+  saveAs(id, title){
+    if(arguments.length == 0){
       id = uuidv4();
     }
-
-  	var newRole = _.cloneDeep(this), opts = {};
-
-   	newRole.title = title;
+  	let newRole = _.cloneDeep(this), opts = {};
+   	newRole.title = title||newRole.title;
    	delete newRole.id;
-	
-	Role.create(this.domainId, this.id, newRole, opts, callback);
+    return Role.create(this.domainId, this.id, newRole, opts);
   }
 
 });

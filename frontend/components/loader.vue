@@ -59,19 +59,13 @@ export default {
   methods: {
     _doLoadDocument(doc, actionId) {
       let domId = this.currentDomainId, metaId = _.at(doc, "_meta.metaId")[0] || ".meta", {Meta, Action} = this.$client
-      Meta.get(domId, metaId, (err, meta) => {
-        if (err) {
-          this.loading = false
-          return this.error = err.toString()
-        }
-
+      return Meta.get(domId, metaId).then(meta => {
         let actions, defaultAction, plugin, pluginName
         actions = _.union(doc._meta.actions, meta.actions)
         defaultAction = doc._meta.defaultAction || meta.defaultAction
         actionId = actionId || defaultAction || actions[0] || 'edit'
-        Action.get(domId, actionId, (err, action) => {
+        return Action.get(domId, actionId).then(action => {
           this.loading = false
-          if (err) return this.error = err.toString()
           this.component = components[actionId]
           this.actionId = actionId;
           this.document = doc
@@ -98,117 +92,34 @@ export default {
 
       switch (collectionId) {
         case ".metas":
-          Meta.get(domId, documentId, (err, meta) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(meta, actionId)
-          });
-          break
+          return Meta.get(domId, documentId).then(meta => this._doLoadDocument(meta, actionId));
         case ".domains":
-          Domain.get(documentId, (err, domain) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(domain, actionId)
-          })
-          break
+          return Domain.get(documentId).then(domain => this._doLoadDocument(domain, actionId));
         case ".collections":
-          Collection.get(domId, documentId, (err, col) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(col, actionId)
-          });
-          break
+          return Collection.get(domId, documentId).then(col => this._doLoadDocument(col, actionId));
         case ".views":
-          View.get(domId, documentId, (err, view) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(view, actionId)
-          })
-          break
+          return View.get(domId, documentId).then(view => this._doLoadDocument(view, actionId));
         case ".pages":
-          Page.get(domId, documentId, (err, page) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(page, actionId)
-          })
-          break
+          return Page.get(domId, documentId).then(page => this._doLoadDocument(page, actionId));
         case ".forms":
-          Form.get(domId, documentId, (err, form) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(form, actionId)
-          })
-          break
+          return Form.get(domId, documentId).then(form => this._doLoadDocument(form, actionId));
         case ".roles":
-          Role.get(domId, documentId, (err, role) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(role, actionId)
-          })
-          break
+          return Role.get(domId, documentId).then(role => this._doLoadDocument(role, actionId));
         case ".profiles":
-          Profile.get(domId, documentId, (err, profile) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(profile, actionId)
-          })
-          break
+          return Profile.get(domId, documentId).then(profile => this._doLoadDocument(profile, actionId));
         case ".groups":
-          Group.get(domId, documentId, (err, group) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(group, actionId)
-          })
-          break
+          return Group.get(domId, documentId).then(group => this._doLoadDocument(group, actionId));
         case ".users":
-          User.get(documentId, (err, user) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(user, actionId)
-          })
-          break
+          return User.get(documentId).then(user => this._doLoadDocument(user, actionId));
         case ".actions":
-          Action.get(domId, documentId, (err, action) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(action, actionId)
-          })
-          break
+          return Action.get(domId, documentId).then(action => this._doLoadDocument(action, actionId));
         default:
-          Document.get(domId, collectionId, documentId, (err, doc) => {
-            if (err) {
-              this.loading = false
-              return this.error = err.toString()
-            }
-            this._doLoadDocument(doc, actionId)
-          })
+          return Document.get(domId, collectionId, documentId).then(doc => this._doLoadDocument(doc, actionId));
       }
     },
     createDocument(domainId, metaId){
       let { Meta, Domain, Collection, View, Page, Form, Role, Profile, Group, User, Document, Action } = this.$client;
-      Meta.get(domainId, metaId, (err, meta)=>{
+      return Meta.get(domainId, metaId).then(meta => {
         let collectionId = meta.container.id, doc, docData = {};
         _.merge(docData, {_meta: {metaId: metaId, iconClass:meta._meta.iconClass}}, _.cloneDeep(meta.defaultValue));
         switch(collectionId){
@@ -249,13 +160,12 @@ export default {
             doc = new Document(domainId, collectionId, docData, true);
         }
 
-        Action.get(domainId, 'new', (err, action)=>{
-          if (err) return this.error = err.toString()
-          this.component = components[action.id]
-          this.document = doc
+        return Action.get(domainId, 'new').then(action => {
+          this.component = components[action.id];
+          this.document = doc;
           this.isNew = true;
-          this.loading = false
-          window.dispatchEvent(new Event('resize'))
+          this.loading = false;
+          window.dispatchEvent(new Event('resize'));
         });
       });
     }
