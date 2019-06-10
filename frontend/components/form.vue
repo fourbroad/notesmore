@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import validate from "validate.js";
 import jsonPatch from "fast-json-patch";
 import uuidv4 from "uuid/v4";
@@ -134,7 +134,7 @@ export default {
     }
   },
   created(){
-    this.fetchActions("FETCH_ACTIONS", this.document).then((actions)=>{
+    this.fetchActions(this.document).then((actions)=>{
       this.actions = actions;
     });
     this.checkPermission();
