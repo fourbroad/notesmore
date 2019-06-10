@@ -149,7 +149,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions} from "vuex"
+import { mapState, mapMutations, mapGetters, mapActions} from "vuex"
 
 import NewDialog from "components/new-dialog";
 import Toast from "components/toast";
@@ -192,7 +192,6 @@ export default {
       this.$refs.mainContainer.scrollTop = 0
       this.ps.update()
     })
-    this.$store.dispatch('FETCH_CURRENTUSER')
   },
   updated() {
     this.ps = new PerfectScrollbar(this.$refs.mainContainer, {suppressScrollX:true, wheelPropagation: true});
@@ -209,7 +208,7 @@ export default {
         return this.$store.state.favoritesOpened;
       },
       set(opened){
-        this.$store.commit('SET_FAVORITESOPENED', opened);
+        this.setFavoritesOpened(opened);
       }
     },
     ...mapState([
@@ -227,12 +226,8 @@ export default {
     ])
   },
   methods: {
-    toggleNavCollapse() {
-      this.$store.commit("toggleNavCollapse");
-    },
     getSidebarItems(items) {
-      let { Domain } = this.$client
-      Domain.mgetDocuments(this.currentDomainId, items).then(docs => {
+      this.fetchMultiDocument({domainId:this.currentDomainId, ids:items}).then(docs => {
         let sidebarItems = []
         _.each(docs, doc => {
           let item
@@ -251,18 +246,24 @@ export default {
       });
     },
     fetchData() {
-      let {Domain, Page, Profile, currentUser} = this.$client
       this.error = this.post = null;
       this.loading = true;
-      Page.get(this.currentDomainId, ".workbench").then(page => {
+      this.fetchPage({domainId:this.currentDomainId, pageId:".workbench"}).then(page => {
         this.loading = false;
         this.page = page;
         this.getSidebarItems(page.sidebarItems);
       });
-      this.$store.dispatch('FETCH_FAVORITES');
+      this.fetchFavorites();
     },
+    ...mapMutations({
+      setFavoritesOpened: 'SET_FAVORITESOPENED',
+      toggleNavCollapse: 'toggleNavCollapse'
+    }),
     ...mapActions({
-      logout: 'LOGOUT'
+      logout: 'LOGOUT',
+      fetchFavorites:'FETCH_FAVORITES',
+      fetchPage: 'FETCH_PAGE',
+      fetchMultiDocument:'FETCH_MULTI_DOCUMENT'
     })
   },
   components: {

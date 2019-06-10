@@ -262,7 +262,7 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
+import {mapState, mapMutations, mapActions} from "vuex";
 
 import Keywords from "./search/keywords";
 import ContainsText from "./search/contains-text";
@@ -432,7 +432,7 @@ export default {
     },
     onFavoriteClick() {
       let { domainId, collectionId, id } = this.document
-      this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
+      this.toggleFavorite('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
     },
     goToPage(pageNo) {
       if (pageNo < 1) pageNo = 1;
@@ -601,7 +601,7 @@ export default {
       this.replace(this.document, this.clone);
     },
     saveAs(id, title){
-      let {View} = this.$client, view = _.cloneDeep(this.document), i18n = view._i18n;
+      let view = _.cloneDeep(this.document), i18n = view._i18n;
       view.title = title;
       if(i18n){
         _.each(i18n, (value)=>{
@@ -612,7 +612,7 @@ export default {
       if (this.document.collectionId == '.collections') {
         view.collections = [this.document.id];
       }
-      return View.create(this.currentDomainId, id, view);
+      return this.createView({domainId:this.currentDomainId, viewId:id, viewData:view});
     },
     replace(source, target){
        // erase all current keys from data
@@ -635,17 +635,6 @@ export default {
     onColumnConfigurationItemClick(columnName){
       let col = this.getColumn(columnName), visible = col.visible == undefined || col.visible;
       this.$set(col, 'visible', !visible)
-    },
-    fetchActions(doc){
-      let {Meta, Action} = this.$client, {domainId, _meta} = doc;
-      function armItems(domainId, actIds) {
-        return Action.mget(domainId, actIds).then(result => result.actions);
-      }
-      if (_meta.actions) {
-        return Action.mget(domainId, _meta.actions).then(result => result.actions);
-      } else {
-        return Meta.get(domainId, _meta.metaId||'.meta').then(meta => Action.mget(domainId, meta.actions).then(result => result.actions));
-      }
     },
     checkPermission(){
       let doc = this.document;
@@ -681,15 +670,14 @@ export default {
     deleteSelf(){
       let { domainId, collectionId, id } = this.document;
       return this.document.delete().then(result => {
-        if(this.isFavorite) this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
+        if(this.isFavorite) this.toggleFavorite('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
         this.$router.go(-1);
         return result;
       });
     },
     deleteRow(doc){
-      let {Collection} = this.$client;
       return doc.delete()
-                .then(()=>Collection.get(doc.domainId, doc.collectionId))
+                .then(()=>this.fetchCollection(doc))
                 .then((collection)=>collection.refresh())
                 .then(()=>this.fetchDocuments());
     },
@@ -739,7 +727,7 @@ export default {
 
           if (data.documents.length > 0) {
             count = count + data.documents.length;
-            this.$store.commit('UPDATE_TOAST', {
+            this.updateToast({
               title: title,
               hint: `${moment.duration(moment()-start).asSeconds()}(s)`,
               nonce: nonce,
@@ -749,7 +737,7 @@ export default {
           } else {
             let blob = new Blob([`\uFEFF${rows.join('\n')}`], { type: "text/plain;charset=utf-8" });
             FileSaver.saveAs(blob, `${localeDoc.title}.csv`);
-            this.$store.commit('UPDATE_TOAST', {
+            this.updateToast({
               title: title,
               hint: `${moment.duration(moment()-start).asSeconds()}(s)`,
               nonce: nonce,
@@ -759,7 +747,7 @@ export default {
         });
       }
 
-      this.$store.commit('ADD_TOAST', {
+      this.addToast({
         title: title,
         hint: moment().format('HH:MM:SS'),
         nonce: nonce,
@@ -791,7 +779,17 @@ export default {
           return this.at(object[path[0]], _.drop(path));
         }
       }
-    }
+    },
+    ...mapMutations({
+      updateToast: 'UPDATE_TOAST',
+      addToast: 'ADD_TOAST'
+    }),    
+    ...mapActions({
+      createView: 'CREATE_VIEW',
+      fetchActions: 'FETCH_ACTIONS',
+      fetchCollection: 'FETCH_COLLECTION',
+      toggleFavorite: 'TOGGLE_FAVORITE'
+    })
   },
   components: {
     Keywords,

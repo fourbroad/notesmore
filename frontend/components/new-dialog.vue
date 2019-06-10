@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import {mapState, mapGetters} from "vuex";
+import {mapState, mapGetters, mapActions} from "vuex";
 
 import Masonry from 'masonry-layout';
 
@@ -71,22 +71,22 @@ export default {
     }
 
     this.$dialog.on('shown.bs.modal', (e) => {
-      this.$store.dispatch('FETCH_METAS').then(()=>{
-        this.masonry.reloadItems()
-        this.masonry.layout()
+      this.fetchMetas().then(()=>{
+        if(!this.masonry){
+          this.masonry = new Masonry(this.$refs.masonry, {
+            itemSelector: '.masonry-item',
+            columnWidth: '.masonry-sizer',
+            percentPosition: true,
+          });
+        }else{
+          this.masonry.reloadItems()
+          this.masonry.layout()
+        }
       })
     });
 
     this.$dialog.on('hidden.bs.modal', (e) => {
       this.$emit('update:opened', false);
-    });
-
-    this.$store.dispatch('FETCH_METAS').then(()=>{
-      this.masonry = new Masonry(this.$refs.masonry, {
-        itemSelector: '.masonry-item',
-        columnWidth: '.masonry-sizer',
-        percentPosition: true,
-      });
     });
   },
   computed: {
@@ -109,7 +109,10 @@ export default {
     onCreateClick(){
       this.$emit('update:opened', false);
       this.$router.push(`/${this.selectedMeta.collectionId}/${this.selectedMeta.id}/new`);
-    }
+    },
+    ...mapActions({
+      fetchMetas:'FETCH_METAS'
+    })
   }
 };
 </script>

@@ -134,7 +134,7 @@ export default {
     }
   },
   created(){
-    this.$store.dispatch("FETCH_ACTIONS", this.document).then((actions)=>{
+    this.fetchActions("FETCH_ACTIONS", this.document).then((actions)=>{
       this.actions = actions;
     });
     this.checkPermission();
@@ -209,7 +209,7 @@ export default {
   methods: {
     onFavoriteClick() {
       let { domainId, collectionId, id } = this.document;
-      this.$store.dispatch("TOGGLE_FAVORITE", {
+      this.toggleFavorite("TOGGLE_FAVORITE", {
         domainId: domainId,
         collectionId: collectionId,
         id: id
@@ -295,7 +295,7 @@ export default {
     deleteSelf(){
       let { domainId, collectionId, id } = this.document;
       this.document.delete().then(()=>{
-        if(this.isFavorite) this.$store.dispatch('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
+        if(this.isFavorite) this.toggleFavorite('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
         this.$router.go(-1);
       });
     },
@@ -316,7 +316,11 @@ export default {
           this.$set(source, entry[0], entry[1]);
         }
       });
-    }
+    },
+    ...mapActions({
+      fetchActions: 'FETCH_ACTIONS',
+      toggleFavorite: 'TOGGLE_FAVORITE'
+    })    
   },
   components: {}
 };

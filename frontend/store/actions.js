@@ -44,6 +44,22 @@ export default {
     }    
   },
 
+  async FETCH_MULTI_DOCUMENT({state, commit, dispatch}, {domainId, ids}){
+    return Domain.mgetDocuments(domainId, ids);
+  },
+
+  async FETCH_COLLECTION({state, commit, dispatch}, {domainId, collectionId}){
+    return Collection.get(domainId, collectionId);
+  },
+
+  async CREATE_VIEW({state, commit, dispatch}, {domainId, viewId, viewData}){
+    return View.create(domainId, viewId, viewData);
+  },
+
+  async FETCH_PAGE({state, commit, dispatch}, {domainId, pageId}){
+    return Page.get(domainId, pageId);
+  },
+  
   async NEW_DOCUMENT({state, commit, dispatch}, {domainId, metaId}){
     return Meta.get(domainId, metaId).then(meta => {
       let collectionId = meta.container.id, doc, docData = {};
@@ -94,7 +110,7 @@ export default {
     if(state.currentUser){
       return fetchProfile(state.currentUser);
     } else {
-      return dispatch('FETCH_CURRENTUSER').then((currentUser)=>{
+      return dispatch('FETCH_CURRENTUSER').then(currentUser => {
         return fetchProfile(currentUser);
       });
     }

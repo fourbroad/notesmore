@@ -50,6 +50,18 @@ export default {
     localStorage.setItem('currentDomainId', value)
   },
 
+  get favoritesOpened(){
+    return localStorage.getItem('favoritesOpened');
+  },
+
+  set favoritesOpened(opened){
+    if(!opened){
+      localStorage.removeItem('favoritesOpened');  
+    }else{
+      localStorage.setItem('favoritesOpened', true);
+    }
+  },
+
   get locale() {
     return localStorage.getItem('locale') || (navigator.language == 'zh-CN' ? 'cn': 'en')
   },
@@ -62,7 +74,6 @@ export default {
   },
   currentUser: null,
   favorites: [],
-  favoritesOpened: false,
   profile: null,
   metas:[],
   toasts: [],

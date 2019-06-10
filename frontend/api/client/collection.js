@@ -363,7 +363,7 @@ inherits(Collection, Document, {
   },
 
   scroll(options){
-    this.getClient().emit('scroll', options).then( data => _this._buildEntities(data));
+    return this.getClient().emit('scroll', options).then( data => this._buildEntities(data));
   },  
 
   clearScroll(params, options){

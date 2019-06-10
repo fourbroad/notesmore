@@ -1,7 +1,5 @@
 // __webpack_public_path__ = myRuntimePublicPath;
 
-import client from 'api/client'
-
 import Vue from 'vue'
 import App from 'components/app'
 import store from 'store/index'
@@ -48,7 +46,6 @@ Vue.filter('formatSize', function (size) {
 
 Vue.config.productionTip = false
 
-Vue.use(client)
 Vue.use(VueI18n)
 
 let url;

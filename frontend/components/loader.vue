@@ -58,7 +58,7 @@ export default {
   },
   methods: {
     _doLoadDocument(doc, actionId) {
-      let domainId = this.currentDomainId, metaId = _.at(doc, "_meta.metaId")[0] || ".meta", {Meta, Action} = this.$client
+      let domainId = this.currentDomainId, metaId = _.at(doc, "_meta.metaId")[0] || ".meta";
       return this.fetchMeta({domainId:domainId, metaId:metaId}).then(meta => {
         let actions, defaultAction, plugin, pluginName
         actions = _.union(doc._meta.actions, meta.actions)
@@ -78,8 +78,7 @@ export default {
         collectionId = params.collectionId || meta.collectionId,
         documentId = params.documentId || meta.documentId,
         actionId = params.actionId || meta.actionId,
-        domainId = this.currentDomainId,
-        { Meta, Domain, Collection, View, Page, Form, Role, Profile, Group, User, Document, Action } = this.$client
+        domainId = this.currentDomainId;
 
       this.loading = true
 

@@ -109,6 +109,7 @@ const client = {
         response.shift();
         resolve.apply(null, response);
       });
+      console.log(args);
       this.socket.emit.apply(this.socket, args);
     });
   },
@@ -132,7 +133,7 @@ const client = {
     var token = this.token, decodedToken, time = new Date().getTime()/1000, valid = false;
     try{
       decodedToken = jwtDecode(token);
-      valid = time >= decodedToken.exp;
+      valid = time < decodedToken.exp;
     } catch(e) {}
     return valid;
   },
@@ -189,9 +190,5 @@ _.assign(client, {
   Document: Document,
   Collection: Collection,
 });
-
-client.install = (Vue, options) => {
-  Vue.prototype.$client = client
-}
 
 export default client;

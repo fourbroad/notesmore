@@ -21,9 +21,12 @@ const store = new Vuex.Store({
   modules
 })
 
-console.log({url: store.state.acgUrl, token: store.state.token});
-
 client.connect({url: store.state.acgUrl, token: store.state.token});
+
+client.on('TokenExpiredError', ()=>{
+  store.commit('CLEAR_TOKEN')
+  window.location.reload() // 防止切换用户时时addRoutes重复添加路由导致出现警告
+})
 client.on('invalidToken', ()=>{
   store.commit('CLEAR_TOKEN')
   window.location.reload() // 防止切换用户时时addRoutes重复添加路由导致出现警告
