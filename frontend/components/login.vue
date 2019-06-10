@@ -46,6 +46,8 @@
 </template>
 
 <script>
+import {mapActions} from "vuex"
+
 import particles_config from "./particles_config.json";
 import validatejs from "validate.js";
 import "particles.js";
@@ -104,9 +106,9 @@ export default {
         return Promise.reject(false);
       }
       this.logging = true;
-      return this.$client.login(this.username, this.password).then(token => {
+      return this.doLogin({userId:this.username, password:this.password}).then(() => {
+      // return this.$store.dispatch('LOGIN',this.username, this.password).then(() => {
         _this.logging = false;
-        _this.$store.commit("LOGIN_IN", token);
         _this.$router.replace("/");
       }).catch(err=>{
         console.error(err);
@@ -124,7 +126,10 @@ export default {
     showError(name,error = []) {
       this.validate[name].errorText = error[0] || '';
       this.validate[name].isShow = !!error[0];
-    }
+    },
+    ...mapActions({
+      doLogin: 'LOGIN'
+    })
   }
 };
 </script>

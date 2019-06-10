@@ -1,11 +1,8 @@
 import Vue from 'vue'
 
 export default {
-  LOGIN_IN(state, token) {
+  SET_TOKEN(state, token){
     state.token = token
-  },
-  LOGIN_OUT(state) {
-    state.token = null
   },
   CLEAR_TOKEN(state){
     state.token = null

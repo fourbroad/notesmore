@@ -21,6 +21,8 @@ const store = new Vuex.Store({
   modules
 })
 
+console.log({url: store.state.acgUrl, token: store.state.token});
+
 client.connect({url: store.state.acgUrl, token: store.state.token});
 client.on('invalidToken', ()=>{
   store.commit('CLEAR_TOKEN')

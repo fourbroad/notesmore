@@ -123,7 +123,7 @@
                   </a>
                 </li>
                 <li role="separator" class="divider"></li>
-                <li class="sign-off" @click="loginOut">
+                <li class="sign-off" @click="logout">
                   <a href="javascript:void(0)" class="d-b td-n pY-5 text-dark">
                     <i class="fa fa-power-off mR-10"></i>
                     <span class="label">{{$t('logout')}}</span>
@@ -149,7 +149,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters} from "vuex"
+import { mapState, mapGetters, mapActions} from "vuex"
 
 import NewDialog from "components/new-dialog";
 import Toast from "components/toast";
@@ -230,10 +230,6 @@ export default {
     toggleNavCollapse() {
       this.$store.commit("toggleNavCollapse");
     },
-    loginOut() {
-      this.$store.commit("LOGIN_OUT");
-      window.location.reload(); // 防止切换用户时时addRoutes重复添加路由导致出现警告
-    },
     getSidebarItems(items) {
       let { Domain } = this.$client
       Domain.mgetDocuments(this.currentDomainId, items).then(docs => {
@@ -264,7 +260,10 @@ export default {
         this.getSidebarItems(page.sidebarItems);
       });
       this.$store.dispatch('FETCH_FAVORITES');
-    }
+    },
+    ...mapActions({
+      logout: 'LOGOUT'
+    })
   },
   components: {
     notification, NewDialog, Toast

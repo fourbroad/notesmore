@@ -3,14 +3,26 @@ import client from 'api/client'
 let {User, Profile, Domain, Meta, Action} = client;
 
 export default {
-  async FETCH_CURRENTUSER({state, commit, rootState}) {
+
+  async LOGIN({state, commit, dispatch}, {userId, password}){
+    return client.login(userId, password).then(token=>{
+      commit('SET_TOKEN', token);
+      return token;
+    });
+  },
+
+  async LOGOUT({state, commit, dispatch}, userId, password){
+    return client.logout().then(()=>commit('CLEAR_TOKEN'));
+  },
+
+  async FETCH_CURRENTUSER({state, commit}) {
     return User.get().then(user => {
       commit('SET_CURRENTUSER', user);
       return user;
     });
   },
 
-  async FETCH_PROFILE({state, dispatch, commit, rootState}) {
+  async FETCH_PROFILE({state, dispatch, commit}) {
     function fetchProfile(currentUser){
       return Profile.get(state.currentDomainId, currentUser.id, {refresh: true}).then( profile => {
         commit('SET_PROFILE', profile);
@@ -26,7 +38,7 @@ export default {
     }
   },
 
-  async FETCH_FAVORITES({state, dispatch, commit, rootState}) {
+  async FETCH_FAVORITES({state, dispatch, commit}) {
     function fetchFavorites(ids){
       if(_.isEmpty(ids)){
         commit('SET_FAVORITES',[]);
@@ -46,7 +58,7 @@ export default {
     }
   },
 
-  async TOGGLE_FAVORITE({state, commit, dispatch, rootState}, favorite) {
+  async TOGGLE_FAVORITE({state, commit, dispatch}, favorite) {
     let {profile} = state, patch, index = _.findIndex(profile.favorites, f => _.isEqual(f, favorite));
     if (index >= 0) {
       patch = [{
@@ -78,7 +90,7 @@ export default {
     });
   },
 
-  async FETCH_METAS({state, commit, dispatch, rootState}) {
+  async FETCH_METAS({state, commit, dispatch}) {
     let {profile, currentDomainId, currentUser} = state;
     function fetchMetas(profile){
       return Meta.find(currentDomainId, {size:1000}).then(result => {
@@ -106,7 +118,7 @@ export default {
     }    
   },
 
-  async FETCH_ACTIONS({state, commit, dispatch, rootState}, document){
+  async FETCH_ACTIONS({state, commit, dispatch}, document){
     let {domainId, _meta} = document;
     if (_meta.actions) {
       return Action.mget(domainId, actIds).then(result=>result.actions);
