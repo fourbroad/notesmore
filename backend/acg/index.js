@@ -18,6 +18,7 @@ initSocket = function(socket) {
         _.merge(socket.handshake.query, {visitorId: visitorId});
         next();
       }).catch(e => {
+        console.log(e);
         next(e);
         // setTimeout(()=>{socket.disconnect();}, 1000);
       });

@@ -73,8 +73,6 @@ if (localStorage.getItem("environment") == "development") {
   url = 'https://notesmore.com/domains';
 }
 
-// client.init({url:url});
-
 router.beforeEach((to, from, next) => {
   if (!store.state.token) {
     if (to.matched.length > 0 && !to.matched.some(record => record.meta.requiresAuth)) {
@@ -83,26 +81,16 @@ router.beforeEach((to, from, next) => {
       next({path: '/login'})
     }
   } else {
-    function doNext() {
-      if (!store.state.dynamicRoutes) {
-        router.addRoutes(dynamicRoutes);
-        store.state.dynamicRoutes = dynamicRoutes;
-        next({path: to.path})
-      } else {
-        if (to.path !== '/login') {
-          next()
-        } else {
-          next(from.fullPath)
-        }
-      }
-    }
-
-    if (client.isConnected()) {
-      doNext();
+    if (!store.state.dynamicRoutes) {
+      router.addRoutes(dynamicRoutes);
+      store.state.dynamicRoutes = dynamicRoutes;
+      next({path: to.path})
     } else {
-      client.connect({token:store.state.token})
-            .then(()=>doNext())
-            .catch(e=>next({ path: '/login' }));
+      if (to.path !== '/login') {
+        next()
+      } else {
+        next(from.fullPath)
+      }
     }
   }
 })

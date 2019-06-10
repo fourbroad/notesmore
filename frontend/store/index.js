@@ -22,7 +22,7 @@ const store = new Vuex.Store({
 })
 
 client.connect({url: store.state.acgUrl, token: store.state.token});
-client.on('InvalidTokenError', ()=>{
+client.on('invalidToken', ()=>{
   store.commit('CLEAR_TOKEN')
   window.location.reload() // 防止切换用户时时addRoutes重复添加路由导致出现警告
 })

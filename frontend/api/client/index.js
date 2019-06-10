@@ -70,11 +70,11 @@ const client = {
       }
   
       this.socket.on('TokenExpiredError', ()=>{
-        this.emitEvent('TokenExpiredError');
+        this.emitEvent('tokenExpired');
       });
 
       this.socket.on('InvalidTokenError', ()=>{
-        this.emitEvent('InvalidTokenError');
+        this.emitEvent('invalidToken');
       });
   
       this.socket.on('error', (err) => {
