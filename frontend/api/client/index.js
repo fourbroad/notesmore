@@ -78,7 +78,11 @@ const client = {
       });
   
       this.socket.on('error', (err) => {
-        this.emitEvent(err);
+        if(err == 'InvalidTokenError'){
+          this.emitEvent('invalidToken');
+        }else{
+          this.emitEvent(err);
+        }
       });
     });
   },
@@ -139,8 +143,8 @@ const client = {
 
   login(userId, password) {
     return this.emit('login', userId, password).then(token => {
-      _.merge(this.socket.io.opts.query, {token: token});
-      this.token = token;
+      _.set(this,'socket.io.opts.query.token', token);
+      _.set(this, 'token', token);
       this._checkExpired(token);
       return token;
     });
@@ -148,8 +152,8 @@ const client = {
 
   logout(){
     return this.emit('logout').then(()=>{
-      delete this.socket.io.opts.query.token;
-      delete this.token;
+      _.unset(this,'socket.io.opts.query.token');
+      _.unset(this,'token');
       this.emitEvent('loggedOut');
     });
   }

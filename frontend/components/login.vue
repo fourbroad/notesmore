@@ -108,12 +108,13 @@ export default {
       this.logging = true;
       return this.doLogin({userId:this.username, password:this.password}).then(() => {
       // return this.$store.dispatch('LOGIN',this.username, this.password).then(() => {
-        _this.logging = false;
-        _this.$router.replace("/");
+        this.$router.replace("/");
       }).catch(err=>{
         console.error(err);
         this.showError('password',[err]);
         return false;
+      }).finally(()=>{
+        this.logging = false;
       });
     },
 

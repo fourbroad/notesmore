@@ -28,5 +28,8 @@ client.on('invalidToken', ()=>{
   store.commit('CLEAR_TOKEN')
   window.location.reload() // 防止切换用户时时addRoutes重复添加路由导致出现警告
 })
+client.on('loggedOut',()=>{
+  window.location.reload()
+})
 
 export default store;
