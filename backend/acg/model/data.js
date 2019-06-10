@@ -783,7 +783,7 @@ const DEFAULT_ACL = {
 }]
   , METAS = [{
   id: '.meta',
-  title: 'Meta',
+  title: 'Template',
   defaultValue: {
     id: 'new-meta',
     title: 'New Meta',
@@ -807,7 +807,7 @@ const DEFAULT_ACL = {
   actions: ['edit'],
   _i18n: {
     cn: {
-      title: '元文档'
+      title: '模板'
     }
   },
   acl:{

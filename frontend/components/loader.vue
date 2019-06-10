@@ -93,8 +93,8 @@ export default {
       return this.fetchＤocument({domainId:domainId, collectionId:collectionId, documentId: documentId}).then(doc=>this._doLoadDocument(doc, actionId));
     },
     createDocument(domainId, metaId){
-      return this.newDocument(domainId, metaId).then(doc=>{
-        return this.fetchAction(domainId, 'new').then(action=>{
+      return this.newDocument({domainId:domainId, metaId:metaId}).then(doc=>{
+        return this.fetchAction({domainId:domainId, actionId:'new'}).then(action=>{
           this.component = components[action.id];
           this.document = doc;
           this.isNew = true;

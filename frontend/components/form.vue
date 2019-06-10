@@ -246,8 +246,13 @@ export default {
       });
     },
     saveAs(id, title){
-      let docInfo = _.cloneDeep(this.document), {domainId, collectionId} = this.document, params = [];
+      let docInfo = _.cloneDeep(this.document), {domainId, collectionId} = this.document, i18n = docInfo._i18n, params = [];
       docInfo.title = title;
+      if(i18n){
+        _.each(i18n, (value)=>{
+          _.set(value, 'title', title);
+        })
+      }
       switch(collectionId){
         case '.domains':
         case '.users':

@@ -601,14 +601,19 @@ export default {
       this.replace(this.document, this.clone);
     },
     saveAs(id, title){
-      let {View} = this.$client, view = _.cloneDeep(this.document);
+      let {View} = this.$client, view = _.cloneDeep(this.document), i18n = view._i18n;
       view.title = title;
+      if(i18n){
+        _.each(i18n, (value)=>{
+          _.set(value, 'title', title);
+        })      
+      }
       delete view._meta;
       if (this.document.collectionId == '.collections') {
         view.collections = [this.document.id];
       }
       return View.create(this.currentDomainId, id, view);
-    },    
+    },
     replace(source, target){
        // erase all current keys from data
        Object.keys(source).forEach(key => {
