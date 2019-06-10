@@ -1,6 +1,6 @@
 import client from 'api/client'
 
-let {User, Profile, Domain, Meta, Action} = client;
+let {Meta, Domain, Collection, View, Page, Form, Role, Profile, Group, User, Document, Action} = client;
 
 export default {
 
@@ -11,8 +11,70 @@ export default {
     });
   },
 
-  async LOGOUT({state, commit, dispatch}, userId, password){
+  async LOGOUT({state, commit, dispatch}){
     return client.logout().then(()=>commit('CLEAR_TOKEN'));
+  },
+
+  async FETCH_DOCUMENT({state, commit, dispatch}, {domainId, collectionId, documentId}){
+    switch (collectionId) {
+      case ".metas":
+        return Meta.get(domainId, documentId);
+      case ".domains":
+        return Domain.get(documentId);
+      case ".collections":
+        return Collection.get(domainId, documentId);
+      case ".views":
+        return View.get(domainId, documentId);
+      case ".pages":
+        return Page.get(domainId, documentId);
+      case ".forms":
+        return Form.get(domainId, documentId);
+      case ".roles":
+        return Role.get(domainId, documentId);
+      case ".profiles":
+        return Profile.get(domainId, documentId)
+      case ".groups":
+        return Group.get(domainId, documentId);
+      case ".users":
+        return User.get(documentId);
+      case ".actions":
+        return Action.get(domainId, documentId);
+      default:
+        return Document.get(domainId, collectionId, documentId);
+    }    
+  },
+
+  async NEW_DOCUMENT({state, commit, dispatch}, {domainId, metaId}){
+    return Meta.get(domainId, metaId).then(meta => {
+      let collectionId = meta.container.id, doc, docData = {};
+      _.merge(docData, {_meta: {metaId: metaId, iconClass:meta._meta.iconClass}}, _.cloneDeep(meta.defaultValue));
+      switch(collectionId){
+        case '.metas':
+          return new Meta(domainId, docData, true);
+        case '.domains':
+          return new Domain(docData, true);
+        case '.collections':
+          return new Collection(domainId, docData, true);
+        case '.views':
+          return new View(domainId, docData, true);
+        case '.pages':
+          return new Page(domainId, docData, true);
+        case '.forms':
+          return new Form(domainId, docData, true);
+        case '.roles':
+          return new Role(domainId, docData, true);
+        case '.profiles':
+          return new Profile(domainId, docData, true);
+        case '.groups':
+          return new Group(domainId, docData, true);
+        case '.users':
+          return new User(docData, true);
+        case '.actions':
+          return new Action(domainId, docData, true);
+        default:
+          return new Document(domainId, collectionId, docData, true);
+      }
+    });
   },
 
   async FETCH_CURRENTUSER({state, commit}) {
@@ -90,6 +152,10 @@ export default {
     });
   },
 
+  async FETCH_META({state, commit, dispatch},{domainId, metaId}) {
+    return Meta.get(domainId, metaId);
+  },
+
   async FETCH_METAS({state, commit, dispatch}) {
     let {profile, currentDomainId, currentUser} = state;
     function fetchMetas(profile){
@@ -116,6 +182,10 @@ export default {
         return fetchMetas(profile);
       });
     }    
+  },
+
+  async FETCH_ACTION({state, commit, dispatch}, {domainId, actionId}){
+    return Action.get(domainId, actionId);
   },
 
   async FETCH_ACTIONS({state, commit, dispatch}, document){
