@@ -849,6 +849,7 @@ export default {
   }
 
   .item-container {
+    font-size: 0.875rem;
     position: relative;
 
     li > i {
