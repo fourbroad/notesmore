@@ -48,10 +48,7 @@ Vue.config.productionTip = false
 
 Vue.use(VueI18n)
 
-let url;
 if (localStorage.getItem("environment") == "development") {
-  url = 'localhost:3000/domains';
-
   import( /* webpackChunkName: "moment" */ 'moment').then(({default: moment}) => {
     window.moment = moment;
   });
@@ -66,8 +63,6 @@ if (localStorage.getItem("environment") == "development") {
       log: 'trace'
     });
   });
-} else {
-  url = 'https://notesmore.com/domains';
 }
 
 router.beforeEach((to, from, next) => {

@@ -23,7 +23,7 @@
                 <li class="dropdown-item save-as" @click="onSaveAsClick">{{$t('saveAs')}}</li>
                 <div class="dropdown-divider" v-if="localeActions.length>0"></div>
                 <template v-for="act in localeActions">
-                  <li class="dropdown-item" v-if="act.id!=actionId" @click="onActionClick(act)" :key="act.collectionId+'~'+act.id">
+                  <li class="dropdown-item" @click="onActionClick(act)" :key="act.collectionId+'~'+act.id">
                     {{act.title}}
                   </li>
                 </template>
@@ -197,7 +197,9 @@ export default {
     },
     localeActions(){
       return _.reduce(this.actions, (acts, act)=>{
-        acts.push(act.get(this.locale));
+        if(act.id != this.actionId){
+          acts.push(act.get(this.locale));
+        }
         return acts;
       }, []);
     },
