@@ -27,6 +27,18 @@ export default {
     localStorage.setItem('acgUrl', url);
   },
 
+  get printApiMessage(){
+    return localStorage.getItem('printApiMessage');
+  },
+
+  set printApiMessage(show){
+    if(!show){
+      localStorage.removeItem('printApiMessage');  
+    }else{
+      localStorage.setItem('printApiMessage', true);
+    }
+  },
+
   get currentDomainId() {
     let domain = document.domain, currentDomainId, index
     index = domain.indexOf('.notesmore.com');

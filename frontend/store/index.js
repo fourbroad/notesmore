@@ -21,7 +21,11 @@ const store = new Vuex.Store({
   modules
 })
 
-client.connect({url: store.state.acgUrl, token: store.state.token});
+client.connect({
+  url: store.state.acgUrl, 
+  token: store.state.token,
+  printApiMessage: store.state.printApiMessage
+});
 
 client.on('tokenExpired', ()=>{
   store.commit('CLEAR_TOKEN')

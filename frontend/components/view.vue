@@ -342,7 +342,7 @@ export default {
   },  
   created() {
     this.fetchDocuments();
-    this.fetchActions(this.document).then((actions)=>{
+    this.fetchActions(this.document).then(actions=>{
       this.actions = actions;
     });
     this.checkPermission();
@@ -353,6 +353,9 @@ export default {
         this.fetchDocuments();
       },
       deep:true
+    },
+    $route(){
+      this.fetchDocuments();
     },
     columns:{
       handler(newValue, oldValue) {
@@ -615,13 +618,11 @@ export default {
       return this.createView({domainId:this.currentDomainId, viewId:id, viewData:view});
     },
     replace(source, target){
-       // erase all current keys from data
        Object.keys(source).forEach(key => {
          if(key != 'id'){
            source[key] = null
          }
       });
-       // set all properties from newdata into data
       Object.entries(_.cloneDeep(target)).forEach(entry => {
         if(entry[0] != 'id'){
           this.$set(source, entry[0], entry[1])

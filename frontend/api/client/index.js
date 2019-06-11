@@ -88,8 +88,9 @@ const client = {
   },
 
   emit() {
+    let o = this.options;
     if(this.isTokenValid()){
-      let o = this.options, token = this.token, decodedToken = jwtDecode(token), time = new Date().getTime()/1000;
+      let token = this.token, decodedToken = jwtDecode(token), time = new Date().getTime()/1000;
       if(o.updateToken && ((time - decodedToken.iat) > (decodedToken.exp-decodedToken.iat)*2/3)) {
         this.socket.emit('updateToken', (err, token) => {
           if(token){
@@ -109,7 +110,7 @@ const client = {
         response.shift();
         resolve.apply(null, response);
       });
-      console.log(args);
+      if(o.printApiMessage) console.log(args);
       this.socket.emit.apply(this.socket, args);
     });
   },
