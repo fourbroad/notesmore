@@ -7,7 +7,7 @@
             <i :class="document._meta.iconClass || 'fa fa-file-text-o'"></i>
           </span>
           <h4 class="c-grey-900 d-ib">{{i18n_title}}</h4>
-          <span class="favorite mL-10" @click="onFavoriteClick()">
+          <span class="favorite mL-10" @click="toggleFavorite(document)">
             <i class="fa fa-star-o" :class="{'c-red-500': isFavorite}"></i>
           </span>
           <div class="actions btn-group float-right">
@@ -433,10 +433,6 @@ export default {
       this.activeRow = doc;
       this.checkRowDeleteable(doc);
     },
-    onFavoriteClick() {
-      let { domainId, collectionId, id } = this.document
-      this.toggleFavorite('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
-    },
     goToPage(pageNo) {
       if (pageNo < 1) pageNo = 1;
       if (pageNo > this.totalPage) pageNo = this.totalPage;
@@ -669,9 +665,8 @@ export default {
       }
     },
     deleteSelf(){
-      let { domainId, collectionId, id } = this.document;
       return this.document.delete().then(result => {
-        if(this.isFavorite) this.toggleFavorite('TOGGLE_FAVORITE',{domainId:domainId, collectionId:collectionId, id: id});
+        if(this.isFavorite) this.toggleFavorite(this.document);
         this.$router.go(-1);
         return result;
       });

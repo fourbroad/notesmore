@@ -89,7 +89,7 @@ export default {
       this.error = this.post = null
       this.isNew = false;
 
-      return this.fetchＤocument({domainId:domainId, collectionId:collectionId, documentId: documentId}).then(doc=>this._doLoadDocument(doc, actionId));
+      return this.fetchＤocument({domainId:domainId, collectionId:collectionId, id: documentId}).then(doc=>this._doLoadDocument(doc, actionId));
     },
     createDocument(domainId, metaId){
       return this.newDocument({domainId:domainId, metaId:metaId}).then(doc=>{

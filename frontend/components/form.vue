@@ -210,12 +210,9 @@ export default {
   },
   methods: {
     onFavoriteClick() {
-      let { domainId, collectionId, id } = this.document;
-      this.toggleFavorite("TOGGLE_FAVORITE", {
-        domainId: domainId,
-        collectionId: collectionId,
-        id: id
-      });
+      this.toggleFavorite(this.document)
+          .then(()=>this.fetchDocument(this.document))
+          .then(document=>this.refresh(document));
     },
     onSaveClick() {
       if(this.isNew){
@@ -226,13 +223,13 @@ export default {
           this.$router.replace(`/${this.document.collectionId}/${id}`);
         });
       } else{
-        this.document.patch({ patch: this.patch }, (err, document) => {
-          if (err) return (this.error = err.toString());
-          this.replace(this.clone, document);
-          this.replace(this.document, document);
-          this.setJsonEditorValue();
-        });
+        this.document.patch({ patch: this.patch }).then(document=>this.refresh(document));
       }
+    },
+    refresh(document){
+      this.replace(this.clone, document);
+      this.replace(this.document, document);
+      this.setJsonEditorValue();
     },
     onSaveAsClick(){
       this.saveAsId = uuidv4();
@@ -321,7 +318,8 @@ export default {
     },
     ...mapActions({
       fetchActions: 'FETCH_ACTIONS',
-      toggleFavorite: 'TOGGLE_FAVORITE'
+      toggleFavorite: 'TOGGLE_FAVORITE',
+      fetchDocument: 'FETCH_DOCUMENT'
     })    
   },
   components: {}

@@ -15,32 +15,32 @@ export default {
     return client.logout().then(()=>commit('CLEAR_TOKEN'));
   },
 
-  async FETCH_DOCUMENT({state, commit, dispatch}, {domainId, collectionId, documentId}){
+  async FETCH_DOCUMENT({state, commit, dispatch}, {domainId, collectionId, id}){
     switch (collectionId) {
       case ".metas":
-        return Meta.get(domainId, documentId);
+        return Meta.get(domainId, id);
       case ".domains":
-        return Domain.get(documentId);
+        return Domain.get(id);
       case ".collections":
-        return Collection.get(domainId, documentId);
+        return Collection.get(domainId, id);
       case ".views":
-        return View.get(domainId, documentId);
+        return View.get(domainId, id);
       case ".pages":
-        return Page.get(domainId, documentId);
+        return Page.get(domainId, id);
       case ".forms":
-        return Form.get(domainId, documentId);
+        return Form.get(domainId, id);
       case ".roles":
-        return Role.get(domainId, documentId);
+        return Role.get(domainId, id);
       case ".profiles":
-        return Profile.get(domainId, documentId)
+        return Profile.get(domainId, id)
       case ".groups":
-        return Group.get(domainId, documentId);
+        return Group.get(domainId, id);
       case ".users":
-        return User.get(documentId);
+        return User.get(id);
       case ".actions":
-        return Action.get(domainId, documentId);
+        return Action.get(domainId, id);
       default:
-        return Document.get(domainId, collectionId, documentId);
+        return Document.get(domainId, collectionId, id);
     }    
   },
 
@@ -136,8 +136,9 @@ export default {
     }
   },
 
-  async TOGGLE_FAVORITE({state, commit, dispatch}, favorite) {
-    let {profile} = state, patch, index = _.findIndex(profile.favorites, f => _.isEqual(f, favorite));
+  async TOGGLE_FAVORITE({state, commit, dispatch}, {domainId, collectionId, id}) {
+    let {profile} = state, favorite = {domainId:domainId, collectionId:collectionId, id:id}, patch,
+        index = _.findIndex(profile.favorites, f => _.isEqual(f, favorite));
     if (index >= 0) {
       patch = [{
         op: 'remove',
@@ -147,19 +148,11 @@ export default {
       patch = [!_.isEmpty(profile.favorites) ? {
         op: 'add',
         path: '/favorites/-',
-        value: {
-          domainId: favorite.domainId,
-          collectionId: favorite.collectionId,
-          id: favorite.id
-        }
+        value: favorite
       } : {
         op: 'add',
         path: '/favorites',
-        value: [{
-          domainId: favorite.domainId,
-          collectionId: favorite.collectionId,
-          id: favorite.id
-        }]
+        value: [favorite]
       }];
     }
     return profile.patch({ patch: patch }).then(profile => {
