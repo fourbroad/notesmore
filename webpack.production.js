@@ -79,11 +79,7 @@ module.exports = merge(common, {
   },
   optimization: {
     minimizer: [
-//       new TerserPlugin()
-     new UglifyJsPlugin({
-       sourceMap: true,
-       uglifyOptions:{ie8: true}
-     })
+      new TerserPlugin()
    ]
   },  
   plugins: [
