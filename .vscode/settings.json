@@ -1,0 +1,41 @@
+{
+    // 控制已更新文件的自动保存。
+    // afterDelay: 当文件修改后的时间超过 #files.autoSaveDelay# 中配置的值时自动进行保存。
+    "files.autoSave": "afterDelay",
+    // 以像素为单位控制字体大小。
+    "editor.fontSize": 16,
+    // 一个制表符等于的空格数。在 #editor.detectIndentation# 启用时，根据文件内容，该设置可能会被覆盖。
+    "editor.tabSize": 4,
+    // 控制编辑器在空白字符上显示符号的方式。
+    "editor.renderWhitespace": "all",
+    // 控制折行的方式。
+    // on: 将在视区宽度处换行。
+    "editor.wordWrap": "on",
+    // 按住 Ctrl 键并滚动鼠标滚轮时对编辑器字体大小进行缩放。
+    "editor.mouseWheelZoom": true,
+    // 控制编辑器是否显示控制字符。
+    "editor.renderControlCharacters": true,
+    // 控制是否自动隐藏导航线上的折叠控件。
+    "editor.showFoldingControls": "always",
+    // 控制编辑器是否自动格式化粘贴的内容。格式化程序必须可用，并且能针对文档中的某一范围进行格式化。
+    "editor.formatOnPaste": true,
+    // 在保存时格式化文件。格式化程序必须可用，延迟后文件不能保存，并且编辑器不能关闭。
+    "editor.formatOnSave": true,
+    // 控制编辑器在键入一行后是否自动格式化该行。
+    "editor.formatOnType": true,
+    // 控制是否自动隐藏缩略图滑块。
+    "editor.minimap.showSlider": "always",
+    // 当再次打开命令面板时，控制是否恢复上一次输入的内容。
+    "workbench.commandPalette.preserveInput": true,
+    // 控制是否显示工作台底部状态栏中的 Twitter 反馈 (笑脸图标)。
+    "workbench.statusBar.feedback.visible": false,
+    // 控制编辑器选项卡的大小。
+    // shrink: 在不能同时显示所有选项卡时，允许选项卡缩小。
+    "workbench.editor.tabSizing": "shrink",
+    // 控制是否将终端中选定的文本复制到剪贴板。
+    "terminal.integrated.copyOnSelection": true,
+    // 控制终端光标是否闪烁。
+    "terminal.integrated.cursorBlinking": true,
+    // 控制终端保持在缓冲区的最大行数。
+    "terminal.integrated.scrollback": 5000
+}
