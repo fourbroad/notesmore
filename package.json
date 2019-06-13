@@ -39,6 +39,7 @@
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
     "cropperjs": "^1.5.1",
+    "d3": "^5.9.2",
     "easy-pie-chart": "^2.1.7",
     "elasticsearch": "^15.4.1",
     "elasticsearch-browser": "^15.4.1",

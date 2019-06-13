@@ -31,19 +31,29 @@ Vue.config.productionTip = false
 Vue.use(VueI18n)
 
 if (localStorage.getItem("environment") == "development") {
-    import( /* webpackChunkName: "moment" */ 'moment').then(({ default: moment }) => {
+    import( /* webpackChunkName: "moment" */ 'moment').then(({
+        default: moment
+    }) => {
         window.moment = moment;
     });
 
-    import( /* webpackChunkName: "jsonPatch" */ 'fast-json-patch').then(({ default: jsonPatch }) => {
+    import( /* webpackChunkName: "jsonPatch" */ 'fast-json-patch').then(({
+        default: jsonPatch
+    }) => {
         window.jsonPatch = jsonPatch;
     });
 
-    import( /* webpackChunkName: "elasticsearch" */ 'elasticsearch-browser').then(({ default: elasticsearch }) => {
+    import( /* webpackChunkName: "elasticsearch" */ 'elasticsearch-browser').then(({
+        default: elasticsearch
+    }) => {
         window.esc = new elasticsearch.Client({
             host: 'localhost:9200',
             log: 'trace'
         });
+    });
+
+    import( /* webpackChunkName: "d3" */ 'd3').then(d3 => {
+        window.d3 = d3;
     });
 }
 
@@ -52,13 +62,17 @@ router.beforeEach((to, from, next) => {
         if (to.matched.length > 0 && !to.matched.some(record => record.meta.requiresAuth)) {
             next()
         } else {
-            next({ path: '/login' })
+            next({
+                path: '/login'
+            })
         }
     } else {
         if (!store.state.dynamicRoutes) {
             router.addRoutes(dynamicRoutes);
             store.state.dynamicRoutes = dynamicRoutes;
-            next({ path: to.path })
+            next({
+                path: to.path
+            })
         } else {
             if (to.path !== '/login') {
                 next()
@@ -73,7 +87,9 @@ router.afterEach((to, from, next) => {
     // store.commit('permission/SET_CURRENT_MENU', to.name)
 })
 
-const i18n = new VueI18n({ locale: store.state.locale });
+const i18n = new VueI18n({
+    locale: store.state.locale
+});
 
 new Vue({
     el: '#app',
