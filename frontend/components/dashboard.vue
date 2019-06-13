@@ -707,9 +707,6 @@ import "bootstrap";
 
 import { COLORS } from "./constants/colors";
 
-import "jquery-ui/ui/widget";
-import "jquery-ui/ui/data";
-
 import "jquery-sparkline";
 import { debounce } from "lodash";
 import Masonry from "masonry-layout";

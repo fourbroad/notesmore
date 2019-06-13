@@ -212,12 +212,7 @@
 </template>
 
 <script>
-import * as $ from 'jquery';
 import 'bootstrap';
-import _ from 'lodash';
-
-import 'jquery-ui/ui/widget';
-import 'jquery-ui/ui/data';
 
 import 'fullcalendar/dist/fullcalendar.js';
 import 'fullcalendar/dist/fullcalendar.css';
