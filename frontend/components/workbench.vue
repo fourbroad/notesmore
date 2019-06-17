@@ -1,7 +1,5 @@
 <template>
-  <div 
-    class="workbench" 
-    :class="{'is-collapsed':isSidebarNavCollapse}">
+  <div class="workbench" :class="{'is-collapsed':isSidebarNavCollapse}">
     <div class="container" v-if="loading">
       <div class="row loading">
         <div class="spinner-grow m-auto" role="status">
@@ -12,7 +10,14 @@
     <div v-if="error" class="error">{{ error }}</div>
     <NewDialog :opened.sync="openNewDialog"></NewDialog>
     <div class="toast-container" style="position: absolute; left: 5px; bottom: 5px; z-index: 10000">
-      <Toast v-for="toast in toasts" :title="toast.title" :hint="toast.hint" :message="toast.message" :autohide="false" :key="toast.nonce"></Toast>
+      <Toast
+        v-for="toast in toasts"
+        :title="toast.title"
+        :hint="toast.hint"
+        :message="toast.message"
+        :autohide="false"
+        :key="toast.nonce"
+      ></Toast>
     </div>
     <div class="sidebar" v-if="page">
       <div class="sidebar-inner">
@@ -24,7 +29,13 @@
                   <div class="container h-100">
                     <div class="row h-100 align-items-center justify-content-center">
                       <div class="col align-items-center">
-                        <img class="mt-1" width="40px" height="40px" src="./images/logo.png" alt="Logo">
+                        <img
+                          class="mt-1"
+                          width="40px"
+                          height="40px"
+                          src="./images/logo.png"
+                          alt="Logo"
+                        >
                       </div>
                     </div>
                   </div>
@@ -51,7 +62,12 @@
           </div>
         </div>
         <ul class="sidebar-menu scrollable pT-30 pos-r">
-          <li class="nav-item" v-for="item in sidebarItems" :key="item.id" @click="$router.push(`/${item.collectionId}/${item.id}`)">
+          <li
+            class="nav-item"
+            v-for="item in sidebarItems"
+            :key="item.id"
+            @click="$router.push(`/${item.collectionId}/${item.id}`)"
+          >
             <a class="sidebar-link document">
               <span class="icon-holder">
                 <i :class="[item.iconClass, item.iconColor]"></i>
@@ -60,18 +76,30 @@
             </a>
           </li>
           <li class="favorites nav-item dropdown" :class="{open:favoritesOpened}">
-            <a class="dropdown-toggle sidebar-link document" @click="favoritesOpened = !favoritesOpened">
+            <a
+              class="dropdown-toggle sidebar-link document"
+              @click="favoritesOpened = !favoritesOpened"
+            >
               <span class="icon-holder">
                 <i class="c-red-500 fa fa-star-o"></i>
               </span>
-              <span class="title">{{(localePage.favorites&&localePage.favorites.title)||'Favorites'}}</span>
-              <span class="badge badge-pill badge-info mT-10">{{(localeFavorites && localeFavorites.length)||0}}</span>
+              <span
+                class="title"
+              >{{(localePage.favorites&&localePage.favorites.title)||'Favorites'}}</span>
+              <span
+                class="badge badge-pill badge-info mT-10"
+              >{{(localeFavorites && localeFavorites.length)||0}}</span>
               <span class="arrow">
                 <i class="fa fa-angle-right"></i>
               </span>
             </a>
             <ul class="favorite-item-container dropdown-menu">
-              <li class="nav-item" v-for="favorite in localeFavorites" :key="favorite.id" @click="$router.push(`/${favorite.collectionId}/${favorite.id}`)">
+              <li
+                class="nav-item"
+                v-for="favorite in localeFavorites"
+                :key="favorite.id"
+                @click="$router.push(`/${favorite.collectionId}/${favorite.id}`)"
+              >
                 <a class="sidebar-link document">
                   <span class="icon-holder">
                     <i :class="[favorite._meta.iconClass||'fa fa-file-text-o']"></i>
@@ -105,11 +133,20 @@
             </li>
           </ul>
           <ul class="nav-right mr-3">
-            <li is="notification"></li>
+            <!-- <li is="notification"></li> -->
             <li>
-              <a class="dropdown-toggle no-after peers fxw-nw ai-c lh-1 pr-1" data-toggle="dropdown">
+              <a
+                class="dropdown-toggle no-after peers fxw-nw ai-c lh-1 pr-1"
+                data-toggle="dropdown"
+              >
                 <div class="peer mR-10">
-                  <img class="avatar w-2r bdrs-50p" width="32px" height="32px" src="./images/run.png" alt>
+                  <img
+                    class="avatar w-2r bdrs-50p"
+                    width="32px"
+                    height="32px"
+                    src="./images/run.png"
+                    alt
+                  >
                 </div>
                 <div class="peer">
                   <span class="nickname fsz-sm">{{nickname}}</span>
@@ -117,7 +154,11 @@
               </a>
               <ul class="profile-menu dropdown-menu fsz-sm">
                 <li class="profile">
-                  <a href="javascript:void(0)" class="d-b td-n pY-5 text-dark" @click="$router.push(`/.profiles/${profile.id}`)">
+                  <a
+                    href="javascript:void(0)"
+                    class="d-b td-n pY-5 text-dark"
+                    @click="$router.push(`/.profiles/${profile.id}`)"
+                  >
                     <i class="fa fa-user-circle-o mR-10"></i>
                     <span class="label">{{$t('profile')}}</span>
                   </a>
@@ -149,17 +190,13 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapGetters, mapActions} from "vuex"
-
+import { mapState, mapMutations, mapGetters, mapActions } from "vuex";
 import NewDialog from "components/new-dialog";
 import Toast from "components/toast";
-
-import jsonPatch from "fast-json-patch"
-
-import "perfect-scrollbar/css/perfect-scrollbar.css"
-import PerfectScrollbar from "perfect-scrollbar"
-
-import notification from "components/notification"
+import jsonPatch from "fast-json-patch";
+import "perfect-scrollbar/css/perfect-scrollbar.css";
+import PerfectScrollbar from "perfect-scrollbar";
+import notification from "components/notification";
 
 export default {
   data() {
@@ -175,39 +212,44 @@ export default {
   i18n: {
     messages: {
       en: {
-        pleaseSignIn:"Please sign-in",
+        pleaseSignIn: "Please sign-in",
         profile: "Profile",
         logout: "Logout"
       },
       cn: {
-        pleaseSignIn:"请登录",
+        pleaseSignIn: "请登录",
         profile: "设置",
         logout: "退出登录"
       }
     }
-  },  
+  },
   created() {
     this.fetchData();
-    $(window).on('resize', () => {
-      this.$refs.mainContainer.scrollTop = 0
-      this.ps.update()
-    })
+    $(window).on("resize", () => {
+      this.$refs.mainContainer.scrollTop = 0;
+      this.ps.update();
+    });
   },
   updated() {
-    this.ps = new PerfectScrollbar(this.$refs.mainContainer, {suppressScrollX:true, wheelPropagation: true});
+    this.ps = new PerfectScrollbar(this.$refs.mainContainer, {
+      suppressScrollX: true,
+      wheelPropagation: true
+    });
   },
   computed: {
-    nickname(){
-      return this.localeCurrentUser ? (this.localeCurrentUser.title || this.localeCurrentUser.id) : this.$t('pleaseSignIn');
+    nickname() {
+      return this.localeCurrentUser
+        ? this.localeCurrentUser.title || this.localeCurrentUser.id
+        : this.$t("pleaseSignIn");
     },
-    localePage(){
+    localePage() {
       return this.page.get(this.locale);
     },
-    favoritesOpened:{
-      get(){
+    favoritesOpened: {
+      get() {
         return this.$store.state.favoritesOpened;
       },
-      set(opened){
+      set(opened) {
         this.setFavoritesOpened(opened);
       }
     },
@@ -220,35 +262,38 @@ export default {
       "isConnected",
       "currentUser"
     ]),
-    ...mapGetters([
-      "localeFavorites",
-      "localeCurrentUser"
-    ])
+    ...mapGetters(["localeFavorites", "localeCurrentUser"])
   },
   methods: {
     getSidebarItems(items) {
-      this.fetchMultiDocument({domainId:this.currentDomainId, ids:items}).then(docs => {
-        let sidebarItems = []
+      this.fetchMultiDocument({
+        domainId: this.currentDomainId,
+        ids: items
+      }).then(docs => {
+        let sidebarItems = [];
         _.each(docs, doc => {
-          let item
-          doc = doc.get(this.locale)
-          item = _.filter(items, (i) => {
+          let item;
+          doc = doc.get(this.locale);
+          item = _.filter(items, i => {
             return i.collectionId == doc.collectionId && i.id == doc.id;
-          })
+          });
           sidebarItems.push(
             _.merge(item[0], {
               iconClass: doc._meta.iconClass || "fa fa-file-text-o",
               title: doc.title
             })
-          )
-        })
-        this.sidebarItems = sidebarItems
+          );
+        });
+        this.sidebarItems = sidebarItems;
       });
     },
     fetchData() {
       this.error = this.post = null;
       this.loading = true;
-      this.fetchPage({domainId:this.currentDomainId, pageId:".workbench"}).then(page => {
+      this.fetchPage({
+        domainId: this.currentDomainId,
+        pageId: ".workbench"
+      }).then(page => {
         this.loading = false;
         this.page = page;
         this.getSidebarItems(page.sidebarItems);
@@ -256,34 +301,33 @@ export default {
       this.fetchFavorites();
     },
     ...mapMutations({
-      setFavoritesOpened: 'SET_FAVORITESOPENED',
-      toggleNavCollapse: 'toggleNavCollapse'
+      setFavoritesOpened: "SET_FAVORITESOPENED",
+      toggleNavCollapse: "toggleNavCollapse"
     }),
     ...mapActions({
-      logout: 'LOGOUT',
-      fetchFavorites:'FETCH_FAVORITES',
-      fetchPage: 'FETCH_PAGE',
-      fetchMultiDocument:'FETCH_MULTI_DOCUMENT'
+      logout: "LOGOUT",
+      fetchFavorites: "FETCH_FAVORITES",
+      fetchPage: "FETCH_PAGE",
+      fetchMultiDocument: "FETCH_MULTI_DOCUMENT"
     })
   },
   components: {
-    notification, NewDialog, Toast
+    notification,
+    NewDialog,
+    Toast
   }
 };
 </script>
 
 <style lang="scss">
-// <style lang="scss" scoped>
 @import "assets/scss/settings/index";
 @import "assets/scss/tools/mixins/index";
-
 @import "scss/sidebar";
 @import "scss/topbar";
 @import "scss/pageContainer";
 @import "scss/footer";
 
-.loading{
+.loading {
   height: 100vh;
 }
-
 </style>
