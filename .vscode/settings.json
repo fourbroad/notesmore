@@ -1,13 +1,15 @@
 {
-    // 控制已更新文件的自动保存。
-    // afterDelay: 当文件修改后的时间超过 #files.autoSaveDelay# 中配置的值时自动进行保存。
-    "files.autoSave": "afterDelay",
+    // 以像素为单位控制字体大小。
+    "editor.fontSize": 16,
+    // 控制编辑器在空白字符上显示符号的方式。
+    "editor.renderWhitespace": "all",
+    // 控制已更新文件的自动保存。onWindowChange: 窗口失去焦点时自动保存更新后的文件。
+    "files.autoSave": "onWindowChange",
     // 控制是否在打开文件时，基于文件内容自动检测 #editor.tabSize# 和 #editor.insertSpaces#。
     "editor.detectIndentation": false,
     // 一个制表符等于的空格数。在 #editor.detectIndentation# 启用时，根据文件内容，该设置可能会被覆盖。
     "editor.tabSize": 4,
-    // 控制折行的方式。
-    // on: 将在视区宽度处换行。
+    // 控制折行的方式。on: 将在视区宽度处换行。
     "editor.wordWrap": "on",
     // 按住 Ctrl 键并滚动鼠标滚轮时对编辑器字体大小进行缩放。
     "editor.mouseWheelZoom": true,
@@ -27,8 +29,7 @@
     "workbench.commandPalette.preserveInput": true,
     // 控制是否显示工作台底部状态栏中的 Twitter 反馈 (笑脸图标)。
     "workbench.statusBar.feedback.visible": false,
-    // 控制编辑器选项卡的大小。
-    // shrink: 在不能同时显示所有选项卡时，允许选项卡缩小。
+    // 控制编辑器选项卡的大小。shrink: 在不能同时显示所有选项卡时，允许选项卡缩小。
     "workbench.editor.tabSizing": "shrink",
     // 控制是否将终端中选定的文本复制到剪贴板。
     "terminal.integrated.copyOnSelection": true,
