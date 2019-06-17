@@ -113,7 +113,7 @@
             ></DatetimeDuedate>            
           </template>
           <FullTextSearch :keyword.sync="document.search.fulltext.keyword"></FullTextSearch>
-          <div class="search-item dropdown btn-group">
+          <div class="search-item dropdown btn-group position-absolute-right">
             <button type="button" class="btn btn-outline-secondary btn-sm btn-light" data-toggle="dropdown">
               <i class="fa fa-ellipsis-h"></i>
             </button>
@@ -853,6 +853,12 @@ export default {
       width: auto;
     }
   }  
+
+  &.position-absolute-right{
+      position: absolute;
+      top: 0px;
+      right: 13px;
+  }
 }
 
 
