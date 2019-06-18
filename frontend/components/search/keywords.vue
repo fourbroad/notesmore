@@ -8,19 +8,8 @@
       aria-expanded="false"
     >{{buttonText}}</button>
     <div class="dropdown-menu m-2 px-1" @click.stop>
-      <div class="input-group input-group-sm px-2 pb-1">
-        <input
-          type="text"
-          v-model.trim="filter"
-          class="form-control"
-          aria-label="Search"
-          aria-describedby="inputGroup-sizing-sm"
-        >
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-sm">
-            <i class="fa" :class="[filter==''?'fa-search':'fa-times']" @click="filter=''"></i>
-          </span>
-        </div>
+      <div class="search-box">
+        <FullTextSearch :keyword.sync="filter"></FullTextSearch>
       </div>
       <a
         href="javascript:void(0)"
@@ -61,6 +50,7 @@ import { mapState } from "vuex";
 import * as $ from "jquery";
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
+import FullTextSearch from "./full-text-search";
 
 export default {
   name: "Keywords",
@@ -130,7 +120,7 @@ export default {
           ""
         );
       } else {
-        label = `${this.title} : ${this.$t('all')}`;
+        label = `${this.title} : ${this.$t("all")}`;
       }
       return label;
     },
@@ -149,24 +139,36 @@ export default {
       this.fetchItems(this.name, filter).then(items => {
         this.loading = false;
         if (this.filter == "") {
-          let sis = _.reduce(this.selectedItems, (sis, si) => {
-            sis.push({ value: si, checked: true });
-            return sis;
-          },[]);
-          this.items = _.reduce(_.differenceWith(items, this.selectedItems, _.isEqual), (is, item) => {
-            is.push({ value: item });
-            return is;
-          },sis);
+          let sis = _.reduce(
+            this.selectedItems,
+            (sis, si) => {
+              sis.push({ value: si, checked: true });
+              return sis;
+            },
+            []
+          );
+          this.items = _.reduce(
+            _.differenceWith(items, this.selectedItems, _.isEqual),
+            (is, item) => {
+              is.push({ value: item });
+              return is;
+            },
+            sis
+          );
         } else {
           let selectedItems = this.selectedItems;
-          this.items = _.reduce(items, (is, item) => {
-            if (_.indexOf(selectedItems, item) >= 0) {
-              is.push({ value: item, checked: true });
-            } else {
-              is.push({ value: item });
-            }
-            return is;
-          },[]);
+          this.items = _.reduce(
+            items,
+            (is, item) => {
+              if (_.indexOf(selectedItems, item) >= 0) {
+                is.push({ value: item, checked: true });
+              } else {
+                is.push({ value: item });
+              }
+              return is;
+            },
+            []
+          );
         }
         this.ps.update();
       });
@@ -197,6 +199,9 @@ export default {
       this.$emit("update:selectedItems", []);
       this.fetchWords();
     }
+  },
+  components: {
+    FullTextSearch
   }
 };
 </script>
@@ -210,25 +215,33 @@ export default {
   white-space: nowrap;
 }
 
+.fa-li {
+  line-height: 1.35rem;
+  left: 12px;
+  width: auto;
+  top: 5px;
+}
+
 .dropdown-menu {
   font-size: 0.875rem;
   min-width: 220px;
-
-  input {
-    border-right-width: 0px;
-  }
 
   a.disabled {
     color: #c3c3c3;
   }
 
-  li {
-    cursor: default;
+  ul {
+    margin-left: 0px;
   }
 
-  .input-group-text {
-    border-left-width: 0px;
-    background-color: white;
+  li {
+    cursor: default;
+    padding: 3px 10px 3px 30px;
+  }
+  li:hover {
+    color: #16181b;
+    text-decoration: none;
+    background-color: #f8f9fa;
   }
 
   .item-container-wrapper {
@@ -239,6 +252,10 @@ export default {
     .item-container {
       margin-bottom: 0px;
     }
+  }
+
+  .search-box {
+    padding: 0px 10px 5px;
   }
 }
 </style>

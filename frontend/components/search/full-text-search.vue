@@ -1,17 +1,7 @@
 <template>
-  <div class="search-item input-group input-group-sm mr-1">
-    <input
-      type="text"
-      class="form-control"
-      v-model.trim="text"
-      aria-label="Search"
-      aria-describedby="inputGroup-sizing-sm"
-    >
-    <div class="input-group-prepend" @click="text=''">
-      <span class="input-group-text" id="inputGroup-sizing-sm">
-        <i class="fa" :class="[text==''?'fa-search':'fa-times']"></i>
-      </span>
-    </div>
+  <div class="full-text-search">
+    <input class="form-control" type="text" v-model.trim="text">
+    <i class="fa" :class="[text==''?'fa-search':'fa-times']" @click.stop="text=''"></i>
   </div>
 </template>
 
@@ -35,7 +25,7 @@ export default {
     }
   },
   mounted() {
-    this.debouncedUpdateKeyword = _.debounce(this.updateKeyword, 500);
+    this.debouncedUpdateKeyword = _.debounce(this.updateKeyword, 250);
   },
   computed: {
     ...mapState(["currentDomainId", "locale"])
@@ -44,8 +34,8 @@ export default {
     text(newText, oldText) {
       this.debouncedUpdateKeyword();
     },
-    keyword(){
-      this.text = this.keyword
+    keyword() {
+      this.text = this.keyword;
     }
   },
   methods: {
@@ -57,21 +47,26 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.input-group {
+.full-text-search {
   display: inline-flex;
   width: fit-content;
   vertical-align: middle;
   border-radius: 0.2rem;
+  position: relative;
+  font-size: inherit !important;
 
   input {
-    width: 80px;
-    border-right-width: 0px;
+    padding: 4px 8px;
+    padding-right: 1.7rem;
+    height: 100%;
+    font-size: inherit;
   }
-
-  .input-group-text {
-    border-left-width: 0px;
-    background-color: white;
+  i {
+    position: absolute;
+    top: 50%;
+    right: 0.6rem;
+    margin-top: -0.5rem;
+    color: #495057;
   }
 }
 </style>

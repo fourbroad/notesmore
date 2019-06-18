@@ -174,7 +174,9 @@
               :range.sync="getSearchField(sf.name).range"
             ></DatetimeDuedate>
           </template>
-          <FullTextSearch :keyword.sync="document.search.fulltext.keyword"></FullTextSearch>
+          <div class="full-search">
+            <FullTextSearch :keyword.sync="document.search.fulltext.keyword"></FullTextSearch>
+          </div>
           <div class="search-item dropdown btn-group position-absolute-right">
             <button
               type="button"
@@ -184,10 +186,13 @@
               <i class="fa fa-ellipsis-h"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right">
-              <ul class="item-container fa-ul mx-1 mb-0">
+              <div class="search-box">
+                <FullTextSearch :keyword.sync="filterSearchField"></FullTextSearch>
+              </div>
+              <ul class="item-container scrollbar fa-ul mx-1 mb-0">
                 <li
                   class="dropdown-item px-2"
-                  v-for="sf in i18n_searchFields"
+                  v-for="sf in filterSearchFieldSet"
                   :key="sf.name"
                   @click.stop.prevent="onSearchConfigurationItemClick(sf.name)"
                 >
@@ -230,7 +235,7 @@
                   </th>
                 </template>
                 <th class="text-center" width="46px">
-                  <div class="column-configuration">
+                  <div class="search-item dropdown btn-group">
                     <button
                       type="button"
                       class="btn btn-outline-secondary btn-sm btn-light"
@@ -239,10 +244,13 @@
                       <i class="fa fa-columns"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
-                      <ul class="item-container fa-ul mx-1 mb-0">
+                      <div class="search-box">
+                        <FullTextSearch :keyword.sync="filterTableField"></FullTextSearch>
+                      </div>
+                      <ul class="item-container scrollbar fa-ul mx-1 mb-0">
                         <li
                           class="dropdown-item px-2"
-                          v-for="col in i18n_columns"
+                          v-for="col in filterTableFieldSet"
                           :key="col.name"
                           @click.stop.prevent="onColumnConfigurationItemClick(col.name)"
                         >
@@ -415,7 +423,9 @@ export default {
       documents: [],
       previous: {},
       next: {},
-      pageBtns: []
+      pageBtns: [],
+      filterSearchField: "",
+      filterTableField: ""
     };
   },
   props: ["document", "actionId"],
@@ -523,11 +533,19 @@ export default {
     i18n_searchFields() {
       return this.localeDoc.search.fields;
     },
+    filterSearchFieldSet() {
+      let reg = new RegExp(this.filterSearchField, "i");
+      return this.i18n_searchFields.filter(v => reg.test(v.title));
+    },
     columns() {
       return this.document.columns;
     },
     i18n_columns() {
       return this.localeDoc.columns;
+    },
+    filterTableFieldSet() {
+      let reg = new RegExp(this.filterTableField, "i");
+      return this.i18n_columns.filter(v => reg.test(v.title));
     },
     i18n_title() {
       return this.localeDoc.title;
@@ -1015,6 +1033,10 @@ export default {
   }
 }
 
+.search-container {
+  padding-right: 30px;
+}
+
 .search-item {
   font-size: 0.7rem;
   padding-bottom: 5px;
@@ -1046,6 +1068,27 @@ export default {
     right: 13px;
   }
 }
+.full-search {
+  padding-bottom: 5px;
+  margin-right: 2px;
+  display: inline-flex;
+  vertical-align: middle;
+  height: 36px;
+}
+.search-box {
+  font-size: 14px;
+  padding: 4px 10px;
+  position: relative;
+}
+.input-icon {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+}
+ul.scrollbar {
+  max-height: 200px;
+  overflow-y: auto;
+}
 
 .view-table {
   th,
@@ -1057,6 +1100,7 @@ export default {
   }
 
   .column-configuration {
+    text-align: right;
     .btn.btn-outline-secondary {
       border-color: lightgray !important;
     }

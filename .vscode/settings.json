@@ -1,14 +1,14 @@
 {
     // 控制已更新文件的自动保存。
     // afterDelay: 当文件修改后的时间超过 #files.autoSaveDelay# 中配置的值时自动进行保存。
-    "files.autoSave": "afterDelay",
+    // "files.autoSave": "afterDelay",
     // 控制是否在打开文件时，基于文件内容自动检测 #editor.tabSize# 和 #editor.insertSpaces#。
     "editor.detectIndentation": false,
     // 一个制表符等于的空格数。在 #editor.detectIndentation# 启用时，根据文件内容，该设置可能会被覆盖。
     "editor.tabSize": 4,
     // 控制折行的方式。
     // on: 将在视区宽度处换行。
-    "editor.wordWrap": "on",
+    // "editor.wordWrap": "on",
     // 按住 Ctrl 键并滚动鼠标滚轮时对编辑器字体大小进行缩放。
     "editor.mouseWheelZoom": true,
     // 控制编辑器是否显示控制字符。
