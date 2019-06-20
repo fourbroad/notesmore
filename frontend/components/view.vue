@@ -235,7 +235,7 @@
                   </th>
                 </template>
                 <th class="text-center" width="46px">
-                  <div class="search-item dropdown btn-group">
+                  <div class="search-item dropdown btn-group position-static">
                     <button
                       type="button"
                       class="btn btn-outline-secondary btn-sm btn-light"
@@ -1021,6 +1021,7 @@ export default {
   .favorite {
     font-size: 16px;
     vertical-align: super;
+    cursor: pointer;
   }
 
   .dropdown-item {

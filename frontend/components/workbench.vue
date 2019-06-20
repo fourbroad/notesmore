@@ -60,6 +60,7 @@
               </div>
             </div>
           </div>
+          <div class="sidebar-logo-line"></div>
         </div>
         <ul class="sidebar-menu scrollable pT-30 pos-r">
           <li
