@@ -58,6 +58,7 @@ export default {
   input {
     padding: 4px 8px;
     padding-right: 1.7rem;
+    width: auto;
     height: 100%;
     font-size: inherit;
   }
