@@ -10,7 +10,6 @@ function buildRoute(routeData) {
 
     if (routeData.redirect) route.redirect = routeData.redirect;
     if (routeData.meta) route.meta = routeData.meta;
-
     if (routeData.id == 'workbench') {
         route.component = () => import('components/workbench');
     }
@@ -43,151 +42,161 @@ function buildRoutes(routeData) {
     return recursion(rootData, _.differenceWith(routeData, rootData, _.isEqual));
 }
 
-const routes = buildRoutes([
-    {
-        id: 'workbench',
-        path: '',
-        title: 'Workbench',
-        redirect: '.pages/.dashboard',
-        meta: {
-            collectionId: '.pages',
-            documentId: '.workbench'
+const routes = buildRoutes(
+    [
+        {
+            id: 'workbench',
+            path: '',
+            title: 'Workbench',
+            redirect: '.pages/.dashboard',
+            meta: {
+                collectionId: '.pages',
+                documentId: '.workbench'
+            },
+            _meta: {
+                iconClass: 'fa fa-tasks'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '工作台'
+                }
+            }
         },
-        _meta: {
-            iconClass: 'fa fa-tasks'
+        {
+            id: 'welcome',
+            path: 'welcome',
+            title: 'Welcome',
+            parent: 'workbench',
+            meta: {
+                collectionId: '.pages',
+                documentId: '.welcome'
+            },
+            _meta: {
+                iconClass: 'fa fa-tasks'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '欢迎'
+                }
+            }
         },
-        _i18n: {
-            'zh-CN': {
-                title: '工作台'
+        {
+            id: 'dashboard',
+            path: 'dashboard',
+            title: 'Dashboard',
+            parent: 'workbench',
+            meta: {
+                collectionId: '.pages',
+                documentId: '.dashboard'
+            },
+            _meta: {
+                iconClass: 'fa fa-tasks'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '仪表盘'
+                }
+            }
+        },
+        {
+            id: 'calendar',
+            path: '/calendar',
+            title: 'Calendar',
+            parent: 'workbench',
+            meta: {
+                collectionId: '.pages',
+                documentId: '.calendar'
+            },
+            _meta: {
+                iconClass: 'fa fa-tasks'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '日历'
+                }
+            }
+        },
+        {
+            id: 'im',
+            path: '/im',
+            title: 'IM',
+            parent: 'workbench',
+            meta: {
+                collectionId: '.pages',
+                documentId: '.im'
+            },
+            _meta: {
+                iconClass: 'fa fa-tasks'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '日历'
+                }
+            }
+        },
+        {
+            id: 'emails',
+            path: '/emails',
+            title: 'Emails',
+            parent: 'workbench',
+            meta: {
+                collectionId: '.pages',
+                documentId: '.emails'
+            },
+            _meta: {
+                iconClass: 'fa fa-tasks'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '电子邮箱'
+                }
+            }
+        },
+        {
+            id: 'loader',
+            path: '/:collectionId/:documentId/:actionId?',
+            title: 'Loader',
+            parent: 'workbench',
+            _meta: {
+                iconClass: 'fa fa-tasks'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '加载器'
+                }
+            }
+        },
+        {
+            id: '403',
+            path: '/403',
+            title: '403',
+            meta: {
+                collectionId: '.pages',
+                documentId: '.403',
+                actionId: 'forbidden'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '禁止访问'
+                }
+            }
+        },
+        {
+            id: 'all',
+            path: '*',
+            title: 'All',
+            meta: {
+                collectionId: '.pages',
+                documentId: '.notFound',
+                actionId: 'notFound'
+            },
+            _i18n: {
+                'zh-CN': {
+                    title: '访问页面不存在'
+                }
             }
         }
-    }, {
-        id: 'welcome',
-        path: 'welcome',
-        title: 'Welcome',
-        parent: 'workbench',
-        meta: {
-            collectionId: '.pages',
-            documentId: '.welcome'
-        },
-        _meta: {
-            iconClass: 'fa fa-tasks'
-        },
-        _i18n: {
-            'zh-CN': {
-                title: '欢迎'
-            }
-        }
-    }, {
-        id: 'dashboard',
-        path: 'dashboard',
-        title: 'Dashboard',
-        parent: 'workbench',
-        meta: {
-            collectionId: '.pages',
-            documentId: '.dashboard'
-        },
-        _meta: {
-            iconClass: 'fa fa-tasks'
-        },
-        _i18n: {
-            'zh-CN': {
-                title: '仪表盘'
-            }
-        }
-    }, {
-        id: 'calendar',
-        path: '/calendar',
-        title: 'Calendar',
-        parent: 'workbench',
-        meta: {
-            collectionId: '.pages',
-            documentId: '.calendar'
-        },
-        _meta: {
-            iconClass: 'fa fa-tasks'
-        },
-        _i18n: {
-            'zh-CN': {
-                title: '日历'
-            }
-        }
-    }, {
-        id: 'im',
-        path: '/im',
-        title: 'IM',
-        parent: 'workbench',
-        meta: {
-            collectionId: '.pages',
-            documentId: '.im'
-        },
-        _meta: {
-            iconClass: 'fa fa-tasks'
-        },
-        _i18n: {
-            'zh-CN': {
-                title: '日历'
-            }
-        }
-    }, {
-        id: 'emails',
-        path: '/emails',
-        title: 'Emails',
-        parent: 'workbench',
-        meta: {
-            collectionId: '.pages',
-            documentId: '.emails'
-        },
-        _meta: {
-            iconClass: 'fa fa-tasks'
-        },
-        _i18n: {
-            'zh-CN': {
-                title: '电子邮箱'
-            }
-        }
-    }, {
-        id: 'loader',
-        path: '/:collectionId/:documentId/:actionId?',
-        title: 'Loader',
-        parent: 'workbench',
-        _meta: {
-            iconClass: 'fa fa-tasks'
-        },
-        _i18n: {
-            'zh-CN': {
-                title: '加载器'
-            }
-        }
-    }, {
-        id: '403',
-        path: '/403',
-        title: '403',
-        meta: {
-            collectionId: '.pages',
-            documentId: '.403',
-            actionId: 'forbidden'
-        },
-        _i18n: {
-            'zh-CN': {
-                title: '禁止访问'
-            }
-        }
-    }, {
-        id: 'all',
-        path: '*',
-        title: 'All',
-        meta: {
-            collectionId: '.pages',
-            documentId: '.notFound',
-            actionId: 'notFound'
-        },
-        _i18n: {
-            'zh-CN': {
-                title: '访问页面不存在'
-            }
-        }
-    }]
+    ]
 );
 
 export default routes;
