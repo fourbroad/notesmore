@@ -388,16 +388,13 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from "vuex";
-
 import Keywords from "./search/keywords";
 import ContainsText from "./search/contains-text";
 import NumericRange from "./search/numeric-range";
 import DatetimeRange from "./search/datetime-range";
 import DatetimeDuedate from "./search/datetime-duedate";
 import FullTextSearch from "./search/full-text-search";
-
 import utils from "utils/utils";
-
 import jsonPatch from "fast-json-patch";
 import validate from "validate.js";
 import FileSaver from "file-saver";
@@ -1006,7 +1003,6 @@ export default {
 .view-container {
   padding: 30px;
 }
-
 .view-header {
   border-bottom: 1px solid lightgray;
 
@@ -1033,11 +1029,9 @@ export default {
     border-radius: 0.2rem;
   }
 }
-
 .search-container {
   padding-right: 30px;
 }
-
 .search-item {
   font-size: 0.7rem;
   padding-bottom: 5px;
@@ -1090,7 +1084,6 @@ ul.scrollbar {
   max-height: 200px;
   overflow-y: auto;
 }
-
 .view-table {
   th,
   td {
