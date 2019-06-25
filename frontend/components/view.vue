@@ -896,6 +896,11 @@ export default {
                 if (_.isArray(d)) {
                   d = '"' + d.toString() + '"';
                 }
+                if (c.type == "keyword") {
+                  if (new RegExp(/^[0-9]+$/).test(d) && d.length > 10) {
+                    d = d + "\t";
+                  }
+                }
                 r.push(d);
                 return r;
               },
