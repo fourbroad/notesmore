@@ -165,7 +165,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '数据仓库',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -197,7 +197,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '模板集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -226,7 +226,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '页面集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -255,7 +255,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '视图集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -287,7 +287,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '表单集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -316,7 +316,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '操作',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -348,7 +348,7 @@ const DEFAULT_ACL = {
             url: 'http://localhost:3000'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '文件集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -376,7 +376,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '角色集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -405,7 +405,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '组集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -434,7 +434,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '身份集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -464,7 +464,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '用户集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -493,7 +493,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '域集合',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -523,7 +523,7 @@ const DEFAULT_ACL = {
         },
         export: DEFAULT_EXPORT,
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '搜索文档',
                 columns: DEFAULT_I18N_COLUMNS,
                 search: {
@@ -554,7 +554,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/form/form.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '新建'
             }
         },
@@ -576,7 +576,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/form/form.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '编辑(Json)'
             }
         },
@@ -598,7 +598,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/view/view.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '表格'
             }
         },
@@ -620,7 +620,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/login/login.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '登录'
             }
         },
@@ -637,7 +637,7 @@ const DEFAULT_ACL = {
         title: 'Forbidden',
         plugin: {},
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '禁止访问'
             }
         },
@@ -649,7 +649,7 @@ const DEFAULT_ACL = {
         title: 'Not Found',
         plugin: {},
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '访问页面不存在'
             }
         },
@@ -666,7 +666,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/signup/signup.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '注册'
             }
         },
@@ -683,7 +683,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/workbench/workbench.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '工作台'
             }
         },
@@ -705,7 +705,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/dashboard/dashboard.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '仪表盘'
             }
         },
@@ -722,7 +722,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/calendar/calendar.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '日历'
             }
         },
@@ -739,7 +739,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/im/im.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '即时消息'
             }
         },
@@ -756,7 +756,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/email/email.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '电子邮箱'
             }
         },
@@ -773,7 +773,7 @@ const DEFAULT_ACL = {
             css: '@notesabc/upload-files/upload-files.bundle.css'
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '上传文件'
             }
         },
@@ -788,7 +788,7 @@ const DEFAULT_ACL = {
             id: 'new-meta',
             title: 'New Meta',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新模板'
                 }
             },
@@ -806,7 +806,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '模板'
             }
         },
@@ -841,7 +841,7 @@ const DEFAULT_ACL = {
             },
             export: DEFAULT_EXPORT,
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新文档集合',
                     columns: DEFAULT_I18N_COLUMNS,
                     search: {
@@ -869,7 +869,7 @@ const DEFAULT_ACL = {
         defaultAction: 'gridView',
         actions: ['gridView', 'edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '集合'
             }
         },
@@ -888,7 +888,7 @@ const DEFAULT_ACL = {
             id: 'new-page',
             title: 'New Page',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新页面'
                 }
             },
@@ -908,7 +908,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '页面'
             }
         },
@@ -939,7 +939,7 @@ const DEFAULT_ACL = {
             },
             export: DEFAULT_EXPORT,
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新视图',
                     columns: DEFAULT_I18N_COLUMNS,
                     search: {
@@ -969,7 +969,7 @@ const DEFAULT_ACL = {
             }
         },
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '视图'
             }
         },
@@ -988,7 +988,7 @@ const DEFAULT_ACL = {
             id: 'new-form',
             title: 'New Form',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新表单'
                 }
             },
@@ -1008,7 +1008,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '表单'
             }
         },
@@ -1022,7 +1022,7 @@ const DEFAULT_ACL = {
             id: 'new-action',
             title: 'New Action',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新操作'
                 }
             },
@@ -1042,7 +1042,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '操作'
             }
         },
@@ -1061,7 +1061,7 @@ const DEFAULT_ACL = {
             id: 'new-file',
             title: 'New File',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新文件'
                 }
             },
@@ -1081,7 +1081,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '文件'
             }
         },
@@ -1095,7 +1095,7 @@ const DEFAULT_ACL = {
             id: 'new-role',
             title: 'New Role',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新角色'
                 }
             },
@@ -1115,7 +1115,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '角色'
             }
         },
@@ -1129,7 +1129,7 @@ const DEFAULT_ACL = {
             id: 'new-group',
             title: 'New Group',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新组'
                 }
             },
@@ -1149,7 +1149,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '组'
             }
         },
@@ -1164,7 +1164,7 @@ const DEFAULT_ACL = {
             title: 'New Profile',
             roles: ['member'],
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新身份'
                 }
             },
@@ -1184,7 +1184,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '身份'
             }
         },
@@ -1204,7 +1204,7 @@ const DEFAULT_ACL = {
             password: 'password',
             title: 'New User',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新用户'
                 }
             },
@@ -1220,7 +1220,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '用户'
             }
         },
@@ -1243,7 +1243,7 @@ const DEFAULT_ACL = {
             id: 'new-domain',
             title: 'New Domain',
             _i18n: {
-                cn: {
+                'zh-CN': {
                     title: '新域'
                 }
             },
@@ -1262,7 +1262,7 @@ const DEFAULT_ACL = {
         },
         actions: ['edit'],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '域'
             }
         },
@@ -1279,7 +1279,7 @@ const DEFAULT_ACL = {
         id: '.login',
         title: 'Login',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '登录'
             }
         },
@@ -1296,7 +1296,7 @@ const DEFAULT_ACL = {
         id: '.403',
         title: 'Forbidden',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '禁止访问'
             }
         },
@@ -1308,7 +1308,7 @@ const DEFAULT_ACL = {
         id: '.notFound',
         title: 'Not Found',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '访问页面不存在'
             }
         },
@@ -1320,7 +1320,7 @@ const DEFAULT_ACL = {
         id: '.signup',
         title: 'Signup',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '注册'
             }
         },
@@ -1349,7 +1349,7 @@ const DEFAULT_ACL = {
             id: '.collections'
         }],
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '工作台',
                 slogan: '工作因协同而轻松!',
                 favorites: {
@@ -1370,7 +1370,7 @@ const DEFAULT_ACL = {
         id: '.dashboard',
         title: 'Dashboard',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '仪表盘'
             }
         },
@@ -1382,7 +1382,7 @@ const DEFAULT_ACL = {
         id: '.calendar',
         title: 'Calendar',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '日历'
             }
         },
@@ -1394,7 +1394,7 @@ const DEFAULT_ACL = {
         id: '.im',
         title: 'Instant message',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '即时消息'
             }
         },
@@ -1406,7 +1406,7 @@ const DEFAULT_ACL = {
         id: '.emails',
         title: 'Emails',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '电子邮箱'
             }
         },
@@ -1419,7 +1419,7 @@ const DEFAULT_ACL = {
         id: 'administrator',
         title: 'Administrator Role',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '管理员'
             }
         },
@@ -1430,7 +1430,7 @@ const DEFAULT_ACL = {
         id: 'member',
         title: 'Member Role',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '成员'
             }
         },
@@ -1441,7 +1441,7 @@ const DEFAULT_ACL = {
         id: 'developer',
         title: 'Developer',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '开发人员'
             }
         },
@@ -1452,7 +1452,7 @@ const DEFAULT_ACL = {
         id: 'anonymous',
         title: 'Anonymous Role',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '匿名角色'
             }
         },
@@ -1465,7 +1465,7 @@ const DEFAULT_ACL = {
         title: 'Administrator',
         password: '3c3f601a1960b8d7b347d376d52b6e59',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '管理员'
             }
         },
@@ -1478,7 +1478,7 @@ const DEFAULT_ACL = {
         title: 'Anonymous',
         password: 'a29b1ee7caefc17a3a73d6d137c8169b',
         _i18n: {
-            cn: {
+            'zh-CN': {
                 title: '匿名用户'
             }
         },
