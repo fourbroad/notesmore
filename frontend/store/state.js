@@ -80,7 +80,21 @@ export default {
     },
 
     get locale() {
-        return localStorage.getItem('locale') || (_.indexOf(['zh', 'zh-CN'], navigator.language) !== -1 ? 'zh-CN' : 'en')
+        if (localStorage.getItem('locale')) {
+            return localStorage.getItem('locale');
+        } else {
+            switch (navigator.language) {
+                case 'en':
+                case 'en-US':
+                    return 'en';
+                    break;
+                case 'zh':
+                case 'zh-CN':
+                default:
+                    return 'zh-CN';
+                    break;
+            }
+        }
     },
     set locale(value) {
         localStorage.setItem('locale', value)
