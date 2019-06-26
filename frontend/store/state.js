@@ -51,6 +51,11 @@ export default {
             currentDomainId = domain.slice(0, index);
         }
 
+        index = domain.indexOf('.notesmore.ins24.com');
+        if (index >= 0) {
+            currentDomainId = domain.slice(0, index);
+        }
+
         if (!currentDomainId || currentDomainId == 'www') {
             currentDomainId = localStorage.getItem("currentDomainId") || '.root';
         }
