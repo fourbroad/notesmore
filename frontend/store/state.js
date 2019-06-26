@@ -80,7 +80,7 @@ export default {
     },
 
     get locale() {
-        return localStorage.getItem('locale') || (navigator.language == 'zh-CN' ? 'cn' : 'en')
+        return localStorage.getItem('locale') || (_.indexOf(['zh', 'zh-CN'], navigator.language) !== -1 ? 'zh-CN' : 'en')
     },
     set locale(value) {
         localStorage.setItem('locale', value)
