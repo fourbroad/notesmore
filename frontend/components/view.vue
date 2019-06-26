@@ -445,7 +445,7 @@ export default {
         exportAllCSV: "Exports CSV (All Fields)",
         exportCurrentCSV: "Exports CSV (Current Fields)"
       },
-      cn: {
+      "zh-CN": {
         id: "唯一标识",
         title: "标题",
         save: "保存",

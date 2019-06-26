@@ -5,15 +5,21 @@
       type="button"
       data-toggle="dropdown"
       aria-haspopup="true"
-      aria-expanded="false">
-      {{buttonText}}
-    </button>
+      aria-expanded="false"
+    >{{buttonText}}</button>
     <div class="dropdown-menu px-1">
       <form class="px-2">
         <div class="form-row mb-3">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" :id="name+'-overdue'" class="custom-control-input" name="radio-stacked" value="overdue" v-model="option">
+              <input
+                type="radio"
+                :id="name+'-overdue'"
+                class="custom-control-input"
+                name="radio-stacked"
+                value="overdue"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-overdue'"></label>
             </div>
           </div>
@@ -24,28 +30,40 @@
         <div class="form-row mb-3">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" :id="name+'-overdue-more'" class="custom-control-input" name="radio-stacked" value="overdue_more" v-model="option">
+              <input
+                type="radio"
+                :id="name+'-overdue-more'"
+                class="custom-control-input"
+                name="radio-stacked"
+                value="overdue_more"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-overdue-more'"></label>
             </div>
           </div>
           <div class="col-auto pt-1 pl-0" @click="option='overdue_more'">
             <span class="overdueMore">{{$t('overdueMore')}}</span>
           </div>
-          <div class="input-group input-group-sm before col-auto px-0" @click="option='overdue_more'">
-            <input 
-              type="text" 
-              name="odMore" 
-              class="form-control" 
+          <div
+            class="input-group input-group-sm before col-auto px-0"
+            @click="option='overdue_more'"
+          >
+            <input
+              type="text"
+              name="odMore"
+              class="form-control"
               :class="{'is-invalid':errors.odMore&&errors.odMore.length > 0}"
               ref="odMore"
               style="max-width:50px"
               v-model="odMore"
-              :disabled="option!='overdue_more'">
+              :disabled="option!='overdue_more'"
+            >
             <div class="input-group-append">
-              <select 
-                class="o-unit custom-select custom-select-sm border-left-0 rounded-right" 
+              <select
+                class="o-unit custom-select custom-select-sm border-left-0 rounded-right"
                 v-model="oUnit"
-                :disabled="option!='overdue_more'">
+                :disabled="option!='overdue_more'"
+              >
                 <option value="minutes" selected>{{$t('minutes')}}</option>
                 <option value="hours">{{$t('hours')}}</option>
                 <option value="days">{{$t('days')}}</option>
@@ -61,7 +79,14 @@
         <div class="form-row mb-3">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input :id="name+'-expire-yn'" type="radio" class="custom-control-input" name="radio-stacked" value="expire_yn" v-model="option">
+              <input
+                :id="name+'-expire-yn'"
+                type="radio"
+                class="custom-control-input"
+                name="radio-stacked"
+                value="expire_yn"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-expire-yn'"></label>
             </div>
           </div>
@@ -69,20 +94,22 @@
             <span class="inNext">{{$t('inNext')}}</span>
           </div>
           <div class="input-group input-group-sm before col-auto px-0" @click="option='expire_yn'">
-            <input 
-              type="text" 
-              name="expireYn" 
-              class="form-control" 
+            <input
+              type="text"
+              name="expireYn"
+              class="form-control"
               :class="{'is-invalid':errors.expireYn&&errors.expireYn.length > 0}"
-              ref="expireYn" 
-              v-model="expireYn" 
-              style="max-width:50px" 
-              :disabled="option!='expire_yn'">
+              ref="expireYn"
+              v-model="expireYn"
+              style="max-width:50px"
+              :disabled="option!='expire_yn'"
+            >
             <div class="input-group-append">
-              <select 
+              <select
                 class="e-unit custom-select custom-select-sm border-left-0 rounded-right"
                 v-model="eUnit"
-                :disabled="option!='expire_yn'">
+                :disabled="option!='expire_yn'"
+              >
                 <option value="minutes" selected>{{$t('minutes')}}</option>
                 <option value="hours">{{$t('hours')}}</option>
                 <option value="days">{{$t('days')}}</option>
@@ -91,17 +118,18 @@
               </select>
             </div>
             <div class="invalid-feedback">
-              <span v-for="(error, index) in errors.expireYn" :key="index">{{error}}</span>              
+              <span v-for="(error, index) in errors.expireYn" :key="index">{{error}}</span>
             </div>
           </div>
           <div class="col-auto pt-1" v-if="locale=='zh-CN'">
             <span>之内</span>
           </div>
           <div class="col-auto">
-            <select 
+            <select
               class="will-yn custom-select custom-select-sm"
               v-model="willYn"
-              :disabled="option!='expire_yn'">
+              :disabled="option!='expire_yn'"
+            >
               <option value="yes" selected>{{$t('willBeOverdue')}}</option>
               <option value="no">{{$t('willNotBeOverdue')}}</option>
             </select>
@@ -133,7 +161,8 @@
               v-model="btEarliest"
               ref="btEarliest"
               autocomplete="off"
-              :disabled="option!='between'">
+              :disabled="option!='between'"
+            >
             <div class="input-group-append">
               <span class="input-group-text btEarliest-icon" @click="$refs.btEarliest.focus()">
                 <i class="fa fa-calendar"></i>
@@ -247,14 +276,14 @@ const isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0
   isoMessage = "^Date range must comply with ISO 8609 specifications";
 
 const constraints = {
-  odMore:{
+  odMore: {
     presence: false,
     numericality: {
       onlyInteger: true,
       greaterThan: 0
     }
   },
-  expireYn:{
+  expireYn: {
     presence: false,
     numericality: {
       onlyInteger: true,
@@ -304,7 +333,9 @@ export default {
       eUnit: this.range.unit || "minutes",
       odMore: this.range.latest || "",
       willYn: this.range.willYn || "yes",
-      expireYn: this.range.willYn ? (this.range.latest || "") : (this.range.earliest||""),
+      expireYn: this.range.willYn
+        ? this.range.latest || ""
+        : this.range.earliest || "",
       btEarliest: this.range.earliest || "",
       btLatest: this.range.latest || "",
       rEarliest: this.range.sEarliest || "",
@@ -343,7 +374,7 @@ export default {
           "P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond",
         clearAll: "Clear all options"
       },
-      cn: {
+      "zh-CN": {
         all: "全部",
         overdue: "已逾期",
         overdueMore: "逾期超过",
@@ -361,23 +392,23 @@ export default {
         months: "月",
         iso8601: "P:期间, Y:年, M:月, D:日, T:时间, H:小时, M:分钟, S:秒",
         constraints: {
-          odMore:{
-            numericality:{
+          odMore: {
+            numericality: {
               message: "^请输入大于0的整数"
             }
           },
-          expireYn:{
-            numericality:{
+          expireYn: {
+            numericality: {
               message: "^请输入大于0的整数"
             }
           },
-          rEarliest:{
-            format:{
+          rEarliest: {
+            format: {
               message: "^日期范围必须符合ISO 8609规范"
             }
           },
-          rLatest:{
-            format:{
+          rLatest: {
+            format: {
               message: "^日期范围必须符合ISO 8609规范"
             }
           }
@@ -429,32 +460,40 @@ export default {
         rEarliest = this.range.sEarliest,
         rLatest = this.range.sLatest;
       switch (option) {
-        case 'overdue':
+        case "overdue":
           label = `${this.title}${this.$t("overdue")}`;
           break;
-        case 'overdue_more':
-          if(latest){
-            label = `${this.title}${this.$t("overdueMore")}${latest}${this.$t(unit)}`;
+        case "overdue_more":
+          if (latest) {
+            label = `${this.title}${this.$t("overdueMore")}${latest}${this.$t(
+              unit
+            )}`;
           }
           break;
-        case 'expire_yn':
-          if(willYn == 'yes' && latest){
-            if(this.locale == 'zh-CN'){
+        case "expire_yn":
+          if (willYn == "yes" && latest) {
+            if (this.locale == "zh-CN") {
               label = `${this.title}将会在${latest}${this.$t(unit)}之内逾期`;
             } else {
-              label = `${this.title}${this.$t('willBeOverdue')}${latest}${this.$t(unit)}`;
+              label = `${this.title}${this.$t(
+                "willBeOverdue"
+              )}${latest}${this.$t(unit)}`;
             }
-          } else if(willYn == 'no' && earliest){
-            if(this.locale == 'zh-CN'){
+          } else if (willYn == "no" && earliest) {
+            if (this.locale == "zh-CN") {
               label = `${this.title}将会在${earliest}${this.$t(unit)}之后逾期`;
             } else {
-              label = `${this.title}${this.$t('willNotBeOverdue')}${earliest}${this.$t(unit)}`;
+              label = `${this.title}${this.$t(
+                "willNotBeOverdue"
+              )}${earliest}${this.$t(unit)}`;
             }
           }
           break;
         case "between":
           if (earliest && latest) {
-            label = `${this.title}:${moment(earliest).format("YYYY-MM-DD")}~${moment(latest).format("YYYY-MM-DD")}`;
+            label = `${this.title}:${moment(earliest).format(
+              "YYYY-MM-DD"
+            )}~${moment(latest).format("YYYY-MM-DD")}`;
           } else if (earliest) {
             label = `${this.title}>=${moment(earliest).format("YYYY-MM-DD")}`;
           } else if (latest) {
@@ -468,13 +507,25 @@ export default {
             let now = moment();
             if (rEarliest && rLatest) {
               let earliestTmp, latestTmp;
-              earliestTmp = now.clone().add(moment.duration(rEarliest)).format("YYYY-MM-DD");
-              latestTmp = now.clone().add(moment.duration(rLatest)).format("YYYY-MM-DD");
+              earliestTmp = now
+                .clone()
+                .add(moment.duration(rEarliest))
+                .format("YYYY-MM-DD");
+              latestTmp = now
+                .clone()
+                .add(moment.duration(rLatest))
+                .format("YYYY-MM-DD");
               label = `${this.title}:${earliestTmp}~${latestTmp}`;
             } else if (rEarliest) {
-              label = `${this.title}>=${now.clone().add(moment.duration(rEarliest)).format("YYYY-MM-DD")}`;
+              label = `${this.title}>=${now
+                .clone()
+                .add(moment.duration(rEarliest))
+                .format("YYYY-MM-DD")}`;
             } else if (rLatest) {
-              label = `${this.title}<=${now.clone().add(moment.duration(rLatest)).format("YYYY-MM-DD")}`;
+              label = `${this.title}<=${now
+                .clone()
+                .add(moment.duration(rLatest))
+                .format("YYYY-MM-DD")}`;
             }
           }
           break;
@@ -484,7 +535,9 @@ export default {
       return label;
     },
     constraints() {
-      return _.merge(_.cloneDeep(constraints),_.at(this.$i18n.getLocaleMessage(this.$i18n.locale), "constraints")[0]
+      return _.merge(
+        _.cloneDeep(constraints),
+        _.at(this.$i18n.getLocaleMessage(this.$i18n.locale), "constraints")[0]
       );
     },
     $form() {
@@ -533,41 +586,45 @@ export default {
   methods: {
     updateRange() {
       switch (this.option) {
-        case 'overdue':
-          this.$emit('update:range',{option: this.option});
+        case "overdue":
+          this.$emit("update:range", { option: this.option });
           break;
-        case 'overdue_more':
-          if(this.odMore != ""){
-            let data = {odMore: this.odMore};
-            this.errors = validate(data, this.constraints)||{};
-            if(_.isEmpty(this.errors)){
-              this.$emit('update:range',{
+        case "overdue_more":
+          if (this.odMore != "") {
+            let data = { odMore: this.odMore };
+            this.errors = validate(data, this.constraints) || {};
+            if (_.isEmpty(this.errors)) {
+              this.$emit("update:range", {
                 option: this.option,
                 unit: this.oUnit,
                 latest: this.odMore
               });
             }
-          }else{
+          } else {
             this.errors = {};
-            this.$emit('update:range',undefined);
+            this.$emit("update:range", undefined);
           }
           break;
-        case 'expire_yn':
-          if(this.expireYn!=""){
-            let data = {expireYn: this.expireYn};
-            this.errors = validate(data, this.constraints)||{};
-            if(_.isEmpty(this.errors)){
-              let range = {option: this.option, willYn: this.willYn, unit: this.eUnit}
-              if(this.willYn == 'yes'){
-                range.latest = this.expireYn
+        case "expire_yn":
+          if (this.expireYn != "") {
+            let data = { expireYn: this.expireYn };
+            this.errors = validate(data, this.constraints) || {};
+            if (_.isEmpty(this.errors)) {
+              let range = {
+                option: this.option,
+                willYn: this.willYn,
+                unit: this.eUnit
+              };
+              if (this.willYn == "yes") {
+                range.latest = this.expireYn;
               } else {
-                range.earliest = this.expireYn
+                range.earliest = this.expireYn;
               }
-              this.$emit('update:range', range)
+              this.$emit("update:range", range);
             }
-          }else{
+          } else {
             this.errors = {};
-            this.$emit('update:range',undefined);
+            this.$emit("update:range", undefined);
           }
           break;
         case "between":

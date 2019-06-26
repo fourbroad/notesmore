@@ -217,7 +217,7 @@ export default {
         profile: "Profile",
         logout: "Logout"
       },
-      cn: {
+      "zh-CN": {
         pleaseSignIn: "请登录",
         profile: "设置",
         logout: "退出登录"

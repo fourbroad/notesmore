@@ -78,7 +78,7 @@ export default {
         create: "Create",
         cancel: "Cancel"
       },
-      cn: {
+      "zh-CN": {
         selectMeta: "请选择文档模板",
         create: "创建",
         cancel: "取消"
