@@ -18,7 +18,8 @@
             :class="{'is-invalid':errors.lowestInput&&errors.lowestInput.length > 0}"
             name="lowestInput"
             v-model.trim.number="lowestInput"
-            :placeholder="$t('lowestPlaceholder')">
+            :placeholder="$t('lowestPlaceholder')"
+          >
           <div class="invalid-feedback">
             <span v-for="(error, index) in errors.lowestInput" :key="index">{{error}}</span>
           </div>
@@ -32,7 +33,8 @@
             :class="{'is-invalid':errors.highestInput&&errors.highestInput.length > 0}"
             name="highestInput"
             v-model.trim.number="highestInput"
-            :placeholder="$t('highestPlaceholder')">
+            :placeholder="$t('highestPlaceholder')"
+          >
           <div class="invalid-feedback">
             <span v-for="(error, index) in errors.highestInput" :key="index">{{error}}</span>
           </div>
@@ -56,13 +58,13 @@ import validate from "validate.js";
 const constraints = {
   lowestInput: {
     numericality(value, attributes, attributeName, options, constraints) {
-      if (!attributes.highestInput || value == '') return null;
+      if (!attributes.highestInput || value == "") return null;
       return { lessThanOrEqualTo: Number(attributes.highestInput) };
     }
   },
   highestInput: {
     numericality(value, attributes, attributeName, options, constraints) {
-      if (!attributes.lowestInput || value=='') return null;
+      if (!attributes.lowestInput || value == "") return null;
       return { greaterThanOrEqualTo: Number(attributes.lowestInput) };
     }
   }
@@ -73,17 +75,19 @@ export default {
   data() {
     return {
       errors: {},
-      lowestInput: this.range.lowestValue !=  undefined ? this.range.lowestValue : '',
-      highestInput: this.range.highestValue !=  undefined ? this.range.highestValue : ''
+      lowestInput:
+        this.range.lowestValue != undefined ? this.range.lowestValue : "",
+      highestInput:
+        this.range.highestValue != undefined ? this.range.highestValue : ""
     };
   },
   props: {
     name: String,
     title: String,
-    range:{
-      type:Object,
-      default(){
-        return {}
+    range: {
+      type: Object,
+      default() {
+        return {};
       }
     }
   },
@@ -97,7 +101,7 @@ export default {
         highestPlaceholder: "Highest value",
         clearAll: "Clear all values"
       },
-      cn: {
+      "zh-CN": {
         all: "全部",
         lowestLabel: "最小值",
         lowestPlaceholder: "最小值",
@@ -112,7 +116,9 @@ export default {
   },
   computed: {
     buttonText() {
-      var label = "", lowestValue = this.range.lowestValue, highestValue = this.range.highestValue;
+      var label = "",
+        lowestValue = this.range.lowestValue,
+        highestValue = this.range.highestValue;
       if (lowestValue && highestValue) {
         label = this.title + ":" + lowestValue + "-" + highestValue;
       } else if (lowestValue) {
@@ -144,30 +150,29 @@ export default {
     }
   },
   methods: {
-    updateRange(){
-      if(this.lowestInput != '' || this.highestInput != ''){
+    updateRange() {
+      if (this.lowestInput != "" || this.highestInput != "") {
         let range = {};
-        if(this.lowestInput != ''){
+        if (this.lowestInput != "") {
           range.lowestValue = this.lowestInput;
         }
-        if(this.highestInput != ''){
+        if (this.highestInput != "") {
           range.highestValue = this.highestInput;
         }
-        this.$emit('update:range', range);
+        this.$emit("update:range", range);
       } else {
-        this.$emit('update:range', undefined);
-      }     
+        this.$emit("update:range", undefined);
+      }
     },
     onClearClick() {
-      this.lowestInput = '';
-      this.highestInput = '';
+      this.lowestInput = "";
+      this.highestInput = "";
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-
 .btn {
   border-color: lightgray;
   max-width: 260px;

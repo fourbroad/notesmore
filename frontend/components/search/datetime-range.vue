@@ -12,7 +12,14 @@
         <div class="form-row mb-3 mt-2">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" :id="name+'-latest'" name="radio-stacked" value="latest" v-model="option">
+              <input
+                type="radio"
+                class="custom-control-input"
+                :id="name+'-latest'"
+                name="radio-stacked"
+                value="latest"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-latest'"></label>
             </div>
           </div>
@@ -28,12 +35,14 @@
               ref="lEarliest"
               style="max-width:50px"
               v-model="lEarliest"
-              :disabled="option!='latest'">
+              :disabled="option!='latest'"
+            >
             <div class="input-group-append">
               <select
                 class="l-unit custom-select custom-select-sm border-left-0 rounded-right"
                 v-model="lUnit"
-                :disabled="option!='latest'">
+                :disabled="option!='latest'"
+              >
                 <option value="minutes" selected>{{$t('minutes')}}</option>
                 <option value="hours">{{$t('hours')}}</option>
                 <option value="days">{{$t('days')}}</option>
@@ -49,7 +58,14 @@
         <div class="form-row mb-3">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" :id="name+'-before'" name="radio-stacked" value="before" v-model="option">
+              <input
+                type="radio"
+                class="custom-control-input"
+                :id="name+'-before'"
+                name="radio-stacked"
+                value="before"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-before'"></label>
             </div>
           </div>
@@ -57,20 +73,22 @@
             <span class="moreThan">{{$t('moreThan')}}</span>
           </div>
           <div class="input-group input-group-sm before col-auto px-0" @click="option='before'">
-            <input 
-              type="text" 
-              name="bfLatest" 
-              class="form-control" 
+            <input
+              type="text"
+              name="bfLatest"
+              class="form-control"
               :class="{'is-invalid':errors.bfLatest&&errors.bfLatest.length > 0}"
-              ref="bfLatest" 
-              v-model="bfLatest" 
-              style="max-width:50px" 
-              :disabled="option!='before'">
+              ref="bfLatest"
+              v-model="bfLatest"
+              style="max-width:50px"
+              :disabled="option!='before'"
+            >
             <div class="input-group-append">
               <select
                 class="bf-unit custom-select custom-select-sm border-left-0 rounded-right"
                 v-model="bfUnit"
-                :disabled="option!='before'">
+                :disabled="option!='before'"
+              >
                 <option value="minutes" selected>{{$t('minutes')}}</option>
                 <option value="hours">{{$t('hours')}}</option>
                 <option value="days">{{$t('days')}}</option>
@@ -79,7 +97,7 @@
               </select>
             </div>
             <div class="invalid-feedback">
-              <span v-for="(error, index) in errors.bfLatest" :key="index">{{error}}</span>              
+              <span v-for="(error, index) in errors.bfLatest" :key="index">{{error}}</span>
             </div>
           </div>
           <div class="col-auto pt-1" @click="option='before'">
@@ -89,7 +107,14 @@
         <div class="form-row mb-3">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" :id="name+'-between'" name="radio-stacked" value="between" v-model="option">
+              <input
+                type="radio"
+                class="custom-control-input"
+                :id="name+'-between'"
+                name="radio-stacked"
+                value="between"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-between'"></label>
             </div>
           </div>
@@ -97,15 +122,16 @@
             <span class="between">{{$t('between')}}</span>
           </div>
           <div class="input-group input-group-sm bt col-auto px-0" @click="option='between'">
-            <input 
-              type="text" 
-              name="btEarliest" 
-              class="form-control" 
+            <input
+              type="text"
+              name="btEarliest"
+              class="form-control"
               :class="{'is-invalid':errors.btEarliest&&errors.btEarliest.length > 0}"
-              v-model="btEarliest" 
-              ref="btEarliest" 
-              autocomplete="off" 
-              :disabled="option!='between'">
+              v-model="btEarliest"
+              ref="btEarliest"
+              autocomplete="off"
+              :disabled="option!='between'"
+            >
             <div class="input-group-append">
               <span class="input-group-text btEarliest-icon" @click="$refs.btEarliest.focus()">
                 <i class="fa fa-calendar"></i>
@@ -119,15 +145,16 @@
             <span class="and">{{$t('and')}}</span>
           </div>
           <div class="input-group input-group-sm bt col-auto" @click="option='between'">
-            <input 
-              type="text" 
-              name="btLatest" 
-              class="form-control" 
+            <input
+              type="text"
+              name="btLatest"
+              class="form-control"
               :class="{'is-invalid':errors.btLatest&&errors.btLatest.length > 0}"
-              ref="btLatest" 
-              v-model="btLatest" 
-              autocomplete="off" 
-              :disabled="option!='between'">
+              ref="btLatest"
+              v-model="btLatest"
+              autocomplete="off"
+              :disabled="option!='between'"
+            >
             <div class="input-group-append">
               <span class="input-group-text btLatest-icon" @click="$refs.btLatest.focus()">
                 <i class="fa fa-calendar"></i>
@@ -141,7 +168,14 @@
         <div class="form-row">
           <div class="col-auto pt-1 pr-0">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" :id="name+'-range'" name="radio-stacked" value="range" v-model="option">
+              <input
+                type="radio"
+                class="custom-control-input"
+                :id="name+'-range'"
+                name="radio-stacked"
+                value="range"
+                v-model="option"
+              >
               <label class="custom-control-label" :for="name+'-range'"></label>
             </div>
           </div>
@@ -158,7 +192,8 @@
               v-model.trim="rEarliest"
               placeholder="- P1Y2M3DT4H5M6S"
               style="max-width: 132px;"
-              :disabled="option!='range'">
+              :disabled="option!='range'"
+            >
             <div class="invalid-feedback" style="max-width: 132px;">
               <span v-for="(error, index) in errors.rEarliest" :key="index">{{error}}</span>
             </div>
@@ -263,23 +298,23 @@ export default {
     return {
       errors: {},
       option: this.range.option,
-      lUnit: this.range.unit||'minutes', 
-      bfUnit: this.range.unit||'minutes',
-      lEarliest: this.range.earliest||'',
-      bfLatest: this.range.latest||'',
-      btEarliest: this.range.earliest||'',
-      btLatest: this.range.latest||'',
-      rEarliest: this.range.sEarliest||'',
-      rLatest: this.range.sLatest||''
+      lUnit: this.range.unit || "minutes",
+      bfUnit: this.range.unit || "minutes",
+      lEarliest: this.range.earliest || "",
+      bfLatest: this.range.latest || "",
+      btEarliest: this.range.earliest || "",
+      btLatest: this.range.latest || "",
+      rEarliest: this.range.sEarliest || "",
+      rLatest: this.range.sLatest || ""
     };
   },
   props: {
     name: String,
     title: String,
     range: {
-      type:Object,
+      type: Object,
       default() {
-        return {}
+        return {};
       }
     }
   },
@@ -299,10 +334,11 @@ export default {
         days: "days",
         weeks: "weeks",
         months: "months",
-        iso8601: "P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond",
+        iso8601:
+          "P:Period, Y:Year, M:Month, D:Day, T:Time, H: Hour, M:Minute, S:Sencond",
         clearAll: "Clear all options"
       },
-      cn: {
+      "zh-CN": {
         all: "全部",
         withinLast: "最近",
         moreThan: "超过",
@@ -347,9 +383,9 @@ export default {
     this.debouncedUpdateRange = _.debounce(this.updateRange, 500);
 
     let vm = this;
-    $.datetimepicker.setDateFormatter('moment');
-    if(this.$i18n.locale == 'cn'){
-      $.datetimepicker.setLocale('ch');        
+    $.datetimepicker.setDateFormatter("moment");
+    if (this.$i18n.locale == "cn") {
+      $.datetimepicker.setLocale("ch");
     }
 
     this.$btEarliest.datetimepicker({
@@ -359,9 +395,9 @@ export default {
           maxDate: vm.$btLatest.val() ? vm.$btLatest.val() : false
         });
       },
-      onChangeDateTime(dp,$input){
+      onChangeDateTime(dp, $input) {
         vm.btEarliest = $input.val();
-      }      
+      }
     });
     this.$btLatest.datetimepicker({
       format: "YYYY-MM-DD HH:mm:ss",
@@ -370,30 +406,40 @@ export default {
           minDate: vm.$btEarliest.val() ? vm.$btEarliest.val() : false
         });
       },
-      onChangeDateTime(dp,$input){
+      onChangeDateTime(dp, $input) {
         vm.btLatest = $input.val();
-      }      
+      }
     });
   },
   computed: {
     buttonText() {
       let label = `${this.title}:${this.$t("all")}`;
-      let option = this.range.option, earliest = this.range.earliest, latest = this.range.latest, unit = this.range.unit,
-        rEarliest = this.range.sEarliest, rLatest = this.range.sLatest;
+      let option = this.range.option,
+        earliest = this.range.earliest,
+        latest = this.range.latest,
+        unit = this.range.unit,
+        rEarliest = this.range.sEarliest,
+        rLatest = this.range.sLatest;
       switch (option) {
         case "latest":
           if (earliest) {
-            label = `${this.title}${this.$t("withinLast")}${earliest}${this.$t(unit)}`;
+            label = `${this.title}${this.$t("withinLast")}${earliest}${this.$t(
+              unit
+            )}`;
           }
           break;
         case "before":
           if (latest) {
-            label = `${this.title}${this.$t("moreThan")}${latest}${this.$t(unit)}${this.$t("ago")}`;
+            label = `${this.title}${this.$t("moreThan")}${latest}${this.$t(
+              unit
+            )}${this.$t("ago")}`;
           }
           break;
         case "between":
           if (earliest && latest) {
-            label = `${this.title}:${moment(earliest).format("YYYY-MM-DD")}~${moment(latest).format("YYYY-MM-DD")}`;
+            label = `${this.title}:${moment(earliest).format(
+              "YYYY-MM-DD"
+            )}~${moment(latest).format("YYYY-MM-DD")}`;
           } else if (earliest) {
             label = `${this.title}>=${moment(earliest).format("YYYY-MM-DD")}`;
           } else if (latest) {
@@ -402,17 +448,30 @@ export default {
             label = `${this.title}:${this.$t("all")}`;
           }
           break;
-        case "range":{
+        case "range":
+          {
             let now = moment();
             if (rEarliest && rLatest) {
               let earliestTmp, latestTmp;
-              earliestTmp = now.clone().add(moment.duration(rEarliest)).format("YYYY-MM-DD");
-              latestTmp = now.clone().add(moment.duration(rLatest)).format("YYYY-MM-DD");
+              earliestTmp = now
+                .clone()
+                .add(moment.duration(rEarliest))
+                .format("YYYY-MM-DD");
+              latestTmp = now
+                .clone()
+                .add(moment.duration(rLatest))
+                .format("YYYY-MM-DD");
               label = `${this.title}:${earliestTmp}~${latestTmp}`;
             } else if (rEarliest) {
-              label = `${this.title}>=${now.clone().add(moment.duration(rEarliest)).format("YYYY-MM-DD")}`;
+              label = `${this.title}>=${now
+                .clone()
+                .add(moment.duration(rEarliest))
+                .format("YYYY-MM-DD")}`;
             } else if (rLatest) {
-              label = `${this.title}<=${now.clone().add(moment.duration(rLatest)).format("YYYY-MM-DD")}`;
+              label = `${this.title}<=${now
+                .clone()
+                .add(moment.duration(rLatest))
+                .format("YYYY-MM-DD")}`;
             }
           }
           break;
@@ -422,7 +481,10 @@ export default {
       return label;
     },
     constraints() {
-      return _.merge(_.cloneDeep(constraints), _.at(this.$i18n.getLocaleMessage(this.$i18n.locale),'constraints')[0]);
+      return _.merge(
+        _.cloneDeep(constraints),
+        _.at(this.$i18n.getLocaleMessage(this.$i18n.locale), "constraints")[0]
+      );
     },
     $form() {
       return $(this.$el).find("form");
@@ -466,61 +528,70 @@ export default {
   },
   methods: {
     updateRange() {
-      switch(this.option){
-        case 'latest':
-          if(this.lEarliest != ''){
-            let data = {lEarliest: this.lEarliest};
+      switch (this.option) {
+        case "latest":
+          if (this.lEarliest != "") {
+            let data = { lEarliest: this.lEarliest };
             this.errors = validate(data, this.constraints) || {};
             if (_.isEmpty(this.errors)) {
-              this.$emit("update:range", {option: this.option, unit: this.lUnit, earliest: this.lEarliest});
+              this.$emit("update:range", {
+                option: this.option,
+                unit: this.lUnit,
+                earliest: this.lEarliest
+              });
             }
-          }else{
+          } else {
             this.errors = {};
             this.$emit("update:range", undefined);
           }
           break;
-        case 'before':
-          if(this.bfLatest != ''){
-            let data = {bfLatest: this.bfLatest};
+        case "before":
+          if (this.bfLatest != "") {
+            let data = { bfLatest: this.bfLatest };
             this.errors = validate(data, this.constraints) || {};
             if (_.isEmpty(this.errors)) {
-              this.$emit("update:range", {option: this.option, unit: this.bfUnit, latest: this.bfLatest});
+              this.$emit("update:range", {
+                option: this.option,
+                unit: this.bfUnit,
+                latest: this.bfLatest
+              });
             }
-          }else{
+          } else {
             this.errors = {};
             this.$emit("update:range", undefined);
           }
           break;
-        case 'between':
-          if(this.btEarliest != '' || this.btLatest != ''){
+        case "between":
+          if (this.btEarliest != "" || this.btLatest != "") {
             let data = {};
-            if(this.btEarliest != '') data.btEarliest = this.btEarliest;
-            if(this.btLatest != '') data.btLatest = this.btLatest;
+            if (this.btEarliest != "") data.btEarliest = this.btEarliest;
+            if (this.btLatest != "") data.btLatest = this.btLatest;
             this.errors = validate(data, this.constraints) || {};
             if (_.isEmpty(this.errors)) {
-              let range = {option: this.option}
-              if(this.btEarliest != '') range.earliest = +moment(this.btEarliest);
-              if(this.btLatest != '') range.latest = +moment(this.btLatest);
-              this.$emit("update:range", range);
-              }
-          }else{
-            this.errors = {};
-            this.$emit("update:range", undefined);
-          }
-          break;
-        case 'range':
-          if(this.rEarliest != '' || this.rLatest != ''){
-            let data = {};
-            if(this.rEarliest != '') data.rEarliest = this.rEarliest;
-            if(this.rLatest != '') data.rLatest = this.rLatest;
-            this.errors = validate(data, this.constraints) || {};
-            if (_.isEmpty(this.errors)) {
-              let range = {option: this.option}
-              if(this.rEarliest != '') range.sEarliest = this.rEarliest;
-              if(this.rLatest != '') range.sLatest = this.rLatest;
+              let range = { option: this.option };
+              if (this.btEarliest != "")
+                range.earliest = +moment(this.btEarliest);
+              if (this.btLatest != "") range.latest = +moment(this.btLatest);
               this.$emit("update:range", range);
             }
-          }else{
+          } else {
+            this.errors = {};
+            this.$emit("update:range", undefined);
+          }
+          break;
+        case "range":
+          if (this.rEarliest != "" || this.rLatest != "") {
+            let data = {};
+            if (this.rEarliest != "") data.rEarliest = this.rEarliest;
+            if (this.rLatest != "") data.rLatest = this.rLatest;
+            this.errors = validate(data, this.constraints) || {};
+            if (_.isEmpty(this.errors)) {
+              let range = { option: this.option };
+              if (this.rEarliest != "") range.sEarliest = this.rEarliest;
+              if (this.rLatest != "") range.sLatest = this.rLatest;
+              this.$emit("update:range", range);
+            }
+          } else {
             this.errors = {};
             this.$emit("update:range", undefined);
           }
@@ -532,19 +603,18 @@ export default {
     },
     onClearClick() {
       this.option = undefined;
-      this.lEarliest = '';
-      this.bfLatest = '';
-      this.btEarliest = '';
-      this.btLatest = '';
-      this.rEarliest = '';
-      this.rLatest = '';
+      this.lEarliest = "";
+      this.bfLatest = "";
+      this.btEarliest = "";
+      this.btLatest = "";
+      this.rEarliest = "";
+      this.rLatest = "";
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-
 .btn {
   border-color: lightgray;
   max-width: 260px;
@@ -599,11 +669,10 @@ export default {
         }
       }
     }
-    
+
     a.disabled {
       color: #c3c3c3;
     }
-
   }
 }
 

@@ -1,5 +1,12 @@
 <template>
-  <div class="modal fade" id="save-as" tabindex="-1" role="dialog" aria-labelledby="save-as" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="save-as"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="save-as"
+    aria-hidden="true"
+  >
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -28,7 +35,8 @@
           <button
             type="button"
             class="submit btn btn-primary"
-            data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Please wait...">Submit</button>
+            data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Please wait..."
+          >Submit</button>
         </div>
       </div>
     </div>
@@ -58,31 +66,31 @@ export default {
       en: {
         modelTitle: "Save",
         id: "ID",
-        title:　"Title",
+        title: "Title",
         save: "Save",
-        cancel:　"Cancel"
+        cancel: "Cancel"
       },
-      cn: {
+      "zh-CN": {
         modelTitle: "保存",
         id: "唯一标识",
-        title:　"标题",
+        title: "标题",
         save: "保存",
-        cancel:　"取消"
+        cancel: "取消"
       }
     }
   },
   mounted() {
-    $(this.$el).appendTo('body').modal({show:false});
+    $(this.$el)
+      .appendTo("body")
+      .modal({ show: false });
   },
   computed: {
-    buttonText() {
-
-    },
+    buttonText() {},
     ...mapState(["currentDomainId", "locale"])
   },
   methods: {
     submit() {
-      this.$emit("save", {id:this.id, title:this.title});
+      this.$emit("save", { id: this.id, title: this.title });
     }
   }
 };

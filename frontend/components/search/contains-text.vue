@@ -59,7 +59,7 @@ export default {
         containsTextPlaceholder: "contains text",
         clearContainsText: "Clear contains text"
       },
-      cn: {
+      "zh-CN": {
         all: "全部",
         contains: "包含",
         containsTextPlaceholder: "包含文本",

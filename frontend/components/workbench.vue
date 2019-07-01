@@ -60,6 +60,7 @@
               </div>
             </div>
           </div>
+          <div class="sidebar-logo-line"></div>
         </div>
         <ul class="sidebar-menu scrollable pT-30 pos-r">
           <li
@@ -216,7 +217,7 @@ export default {
         profile: "Profile",
         logout: "Logout"
       },
-      cn: {
+      "zh-CN": {
         pleaseSignIn: "请登录",
         profile: "设置",
         logout: "退出登录"
