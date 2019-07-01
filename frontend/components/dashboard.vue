@@ -259,6 +259,50 @@
       </div>
     </div>
     <div class="masonry-item col-md-6">
+      <div class="bd bgc-white">
+        <div class="layers">
+          <div class="layer w-100 pX-20 pT-20">
+            <h6 class="lh-1">D3 Chart</h6>
+          </div>
+          <div class="layer w-100 p-20">
+            <D3Chart :data="chartData" :scales="scales" :metrics="metrics"></D3Chart>
+          </div>
+          <div class="layer bdT p-20 w-100">
+            <div class="peers ai-c jc-c gapX-20">
+              <div class="peer">
+                <span class="fsz-def fw-600 mR-10 c-grey-800">
+                  10%
+                  <i class="fa fa-level-up c-green-500"></i>
+                </span>
+                <small class="c-grey-500 fw-600">APPL</small>
+              </div>
+              <div class="peer fw-600">
+                <span class="fsz-def fw-600 mR-10 c-grey-800">
+                  2%
+                  <i class="fa fa-level-down c-red-500"></i>
+                </span>
+                <small class="c-grey-500 fw-600">Average</small>
+              </div>
+              <div class="peer fw-600">
+                <span class="fsz-def fw-600 mR-10 c-grey-800">
+                  15%
+                  <i class="fa fa-level-up c-green-500"></i>
+                </span>
+                <small class="c-grey-500 fw-600">Sales</small>
+              </div>
+              <div class="peer fw-600">
+                <span class="fsz-def fw-600 mR-10 c-grey-800">
+                  8%
+                  <i class="fa fa-level-down c-red-500"></i>
+                </span>
+                <small class="c-grey-500 fw-600">Profit</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="masonry-item col-md-6">
       <!-- #Todo ==================== -->
       <div class="bd bgc-white p-20">
         <div class="layers">
@@ -269,7 +313,7 @@
             <ul class="list-task list-group" data-role="tasklist">
               <li class="list-group-item bdw-0" data-role="task">
                 <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-                  <input type="checkbox" id="inputCall1" name="inputCheckboxesCall" class="peer">
+                  <input type="checkbox" id="inputCall1" name="inputCheckboxesCall" class="peer" />
                   <label for="inputCall1" class="peers peer-greed js-sb ai-c">
                     <span class="peer peer-greed">Call John for Dinner</span>
                   </label>
@@ -277,7 +321,7 @@
               </li>
               <li class="list-group-item bdw-0" data-role="task">
                 <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-                  <input type="checkbox" id="inputCall2" name="inputCheckboxesCall" class="peer">
+                  <input type="checkbox" id="inputCall2" name="inputCheckboxesCall" class="peer" />
                   <label for="inputCall2" class="peers peer-greed js-sb ai-c">
                     <span class="peer peer-greed">Book Boss Flight</span>
                     <span class="peer">
@@ -288,7 +332,7 @@
               </li>
               <li class="list-group-item bdw-0" data-role="task">
                 <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-                  <input type="checkbox" id="inputCall3" name="inputCheckboxesCall" class="peer">
+                  <input type="checkbox" id="inputCall3" name="inputCheckboxesCall" class="peer" />
                   <label for="inputCall3" class="peers peer-greed js-sb ai-c">
                     <span class="peer peer-greed">Hit the Gym</span>
                     <span class="peer">
@@ -299,7 +343,7 @@
               </li>
               <li class="list-group-item bdw-0" data-role="task">
                 <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-                  <input type="checkbox" id="inputCall4" name="inputCheckboxesCall" class="peer">
+                  <input type="checkbox" id="inputCall4" name="inputCheckboxesCall" class="peer" />
                   <label for="inputCall4" class="peers peer-greed js-sb ai-c">
                     <span class="peer peer-greed">Give Purchase Report</span>
                     <span class="peer">
@@ -310,7 +354,7 @@
               </li>
               <li class="list-group-item bdw-0" data-role="task">
                 <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-                  <input type="checkbox" id="inputCall5" name="inputCheckboxesCall" class="peer">
+                  <input type="checkbox" id="inputCall5" name="inputCheckboxesCall" class="peer" />
                   <label for="inputCall5" class="peers peer-greed js-sb ai-c">
                     <span class="peer peer-greed">Watch Game of Thrones Episode</span>
                     <span class="peer">
@@ -321,7 +365,7 @@
               </li>
               <li class="list-group-item bdw-0" data-role="task">
                 <div class="checkbox checkbox-circle checkbox-info peers ai-c">
-                  <input type="checkbox" id="inputCall6" name="inputCheckboxesCall" class="peer">
+                  <input type="checkbox" id="inputCall6" name="inputCheckboxesCall" class="peer" />
                   <label for="inputCall6" class="peers peer-greed js-sb ai-c">
                     <span class="peer peer-greed">Give Purchase report</span>
                     <span class="peer">
@@ -610,7 +654,7 @@
                     class="w-2r bdrs-50p"
                     src="https://randomuser.me/api/portraits/men/11.jpg"
                     alt
-                  >
+                  />
                 </div>
                 <div class="peer peer-greed">
                   <div class="layers ai-fs gapY-5">
@@ -654,7 +698,7 @@
                     class="w-2r bdrs-50p"
                     src="https://randomuser.me/api/portraits/men/12.jpg"
                     alt
-                  >
+                  />
                 </div>
                 <div class="peer peer-greed ord-0">
                   <div class="layers ai-fe gapY-10">
@@ -689,55 +733,10 @@
                   type="text"
                   class="form-control bdrs-10em m-0"
                   placeholder="Say something..."
-                >
+                />
                 <button type="button" class="btn btn-primary bdrs-50p w-2r p-0 h-2r pos-a r-1 t-1">
                   <i class="fa fa-paper-plane-o"></i>
                 </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="masonry-item col-md-6">
-      <!-- #Monthly Stats ==================== -->
-      <div class="bd bgc-white">
-        <div class="layers">
-          <div class="layer w-100 pX-20 pT-20">
-            <h6 class="lh-1">Monthly Stats</h6>
-          </div>
-          <div class="layer w-100 p-20">
-            <D3Chart :layout="layout" :chart-data="chartData" :axes="axes"></D3Chart>
-          </div>
-          <div class="layer bdT p-20 w-100">
-            <div class="peers ai-c jc-c gapX-20">
-              <div class="peer">
-                <span class="fsz-def fw-600 mR-10 c-grey-800">
-                  10%
-                  <i class="fa fa-level-up c-green-500"></i>
-                </span>
-                <small class="c-grey-500 fw-600">APPL</small>
-              </div>
-              <div class="peer fw-600">
-                <span class="fsz-def fw-600 mR-10 c-grey-800">
-                  2%
-                  <i class="fa fa-level-down c-red-500"></i>
-                </span>
-                <small class="c-grey-500 fw-600">Average</small>
-              </div>
-              <div class="peer fw-600">
-                <span class="fsz-def fw-600 mR-10 c-grey-800">
-                  15%
-                  <i class="fa fa-level-up c-green-500"></i>
-                </span>
-                <small class="c-grey-500 fw-600">Sales</small>
-              </div>
-              <div class="peer fw-600">
-                <span class="fsz-def fw-600 mR-10 c-grey-800">
-                  8%
-                  <i class="fa fa-level-down c-red-500"></i>
-                </span>
-                <small class="c-grey-500 fw-600">Profit</small>
               </div>
             </div>
           </div>
@@ -788,19 +787,88 @@ export default {
         marginBottom: 50,
         marginLeft: 50
       },
-      axes: ["left", "bottom"]
+      axes: ["left", "bottom"],
+      metrics: [
+        {
+          label: "A系列",
+          type: "bar",
+          metric: {
+            scale: "left",
+            map: d => d.y
+          },
+          dimension: {
+            scale: "bottom",
+            map: d => d.x
+          }
+        },
+        {
+          label: "B系列",
+          type: "bar",
+          metric: {
+            scale: "left",
+            map: d => d.y
+          },
+          dimension: {
+            scale: "bottom",
+            map: d => d.x
+          }
+        },
+        {
+          label: "C系列",
+          //   type: "bar",
+          metric: {
+            scale: "left",
+            map: d => d.y
+          },
+          dimension: {
+            scale: "bottom",
+            map: d => d.x
+          }
+        },
+        {
+          label: "D系列",
+          //   type: "bar",
+          metric: {
+            scale: "left",
+            map: d => d.y
+          },
+          dimension: {
+            scale: "bottom",
+            map: d => d.x
+          }
+        }
+      ],
+      scales: {
+        left: {
+          name: "scaleLinear",
+          label: "Quantity",
+          domain: data => [0, 10]
+        },
+        bottom: {
+          name: "scaleLinear",
+          label: "Dimension",
+          domain: data => [0, 11]
+        }
+      }
     };
   },
   computed: {
     chartData() {
-      return this.rawData.map(d => {
-        return {
-          timestamp: d3
-            .utcParse("%Y-%m-%dT%H:%M:%S")(d[0])
-            .setHours(0, 0, 0, 0),
-          value: d[1]
-        };
-      });
+      let numberOfSeries = 4,
+        numberOfDataPoint = 10,
+        data = [];
+
+      for (var i = 0; i < numberOfSeries; ++i) {
+        data.push(
+          d3.range(numberOfDataPoint).map(i => {
+            return {
+              x: i + 1, //new Date(this.rawData[i][0]),
+              y: Math.random() * 9
+            };
+          })
+        );
+      }
+      return data;
     }
   },
   mounted: function() {
@@ -1299,4 +1367,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.progress {
+  height: 5px;
+}
 </style>
